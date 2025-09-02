@@ -19,6 +19,10 @@ type BigDec struct {
 	i *big.Int
 }
 
+func (d BigDec) Power(dec BigDec) any {
+	panic("unimplemented")
+}
+
 const (
 	// number of decimal places
 	BigDecPrecision = 36

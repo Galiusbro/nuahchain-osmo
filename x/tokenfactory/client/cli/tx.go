@@ -1,12 +1,17 @@
 package cli
 
 import (
+	"encoding/json"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	// "github.com/cosmos/cosmos-sdk/client/flags"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
 	"github.com/osmosis-labs/osmosis/osmoutils/osmocli"
 	"github.com/osmosis-labs/osmosis/v30/x/tokenfactory/types"
 )
@@ -29,9 +34,23 @@ func GetTxCmd() *cobra.Command {
 
 func NewMsgSetDenomMetadata() *cobra.Command {
 	return osmocli.BuildTxCli[*types.MsgSetDenomMetadata](&osmocli.TxCliDesc{
-		Use:   "set-denom-metadata",
-		Short: "overwriting of the denom metadata in the bank module.",
+		Use:     "set-denom-metadata",
+		Short:   "overwriting of the denom metadata in the bank module.",
+		NumArgs: 1,
+		CustomFieldParsers: map[string]osmocli.CustomFieldParserFn{
+			"Metadata": parseMetadataField,
+		},
 	})
+}
+
+// parseMetadataField parses the metadata field from JSON string to banktypes.Metadata
+func parseMetadataField(arg string, _ *pflag.FlagSet) (any, bool, error) {
+	var metadata banktypes.Metadata
+	err := json.Unmarshal([]byte(arg), &metadata)
+	if err != nil {
+		return nil, true, err
+	}
+	return metadata, true, nil
 }
 
 func NewCreateDenomCmd() *cobra.Command {

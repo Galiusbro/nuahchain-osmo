@@ -1,0 +1,11 @@
+{
+  "description": "Roma Token",
+  "denom_units": [
+    { "denom": "factory/osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue/roma", "exponent": 0, "aliases": ["uroma"] },
+    { "denom": "roma", "exponent": 6 }
+  ],
+  "base": "factory/osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue/roma",
+  "display": "roma",
+  "name": "Roma Token",
+  "symbol": "ROMA"
+}
