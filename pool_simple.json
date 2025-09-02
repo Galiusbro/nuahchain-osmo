@@ -1,0 +1,5 @@
+{
+  "weights": "1stake,1factory/osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue/roma",
+  "initial-deposit": "1000000stake,1000000factory/osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue/roma",
+  "swap-fee": "0.01"
+}

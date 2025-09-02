@@ -1,0 +1,5 @@
+{
+  "weights": "1uosmo,1stake",
+  "initial-deposit": "1000000uosmo,1000000stake",
+  "swap-fee": "0.01"
+}

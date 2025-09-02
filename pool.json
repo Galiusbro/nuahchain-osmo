@@ -1,0 +1,7 @@
+{
+  "weights": "1unuah,1factory/REPLACE_CREATOR/roma",
+  "initial-deposit": "250000000unuah,100000000factory/REPLACE_CREATOR/roma",
+  "swap-fee": "0.003",
+  "exit-fee": "0.000",
+  "future-governor": "168h"
+}

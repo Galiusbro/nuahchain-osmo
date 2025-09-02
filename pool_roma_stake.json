@@ -1,0 +1,7 @@
+{
+  "weights": "1stake,1factory/osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue/roma",
+  "initial-deposit": "100000000stake,100000000factory/osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue/roma",
+  "swap-fee": "0.01",
+  "exit-fee": "0.000",
+  "future-governor": "168h"
+}

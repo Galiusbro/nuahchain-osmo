@@ -1,0 +1,7 @@
+{
+  "weights": "4uatom,4osmo,2uakt",
+  "initial-deposit": "4uatom,4osmo,2uakt",
+  "swap-fee": "0.01",
+  "exit-fee": "0.01",
+  "future-governor": "168h"
+}
