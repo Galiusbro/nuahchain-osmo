@@ -237,7 +237,7 @@ func TestIncentivesInitGenesis(t *testing.T) {
 	os.RemoveAll(dirName)
 }
 
-func createAllGaugeTypes(t *testing.T, app *osmoapp.OsmosisApp, ctx sdk.Context, addr sdk.AccAddress, coins sdk.Coins, startTime time.Time) {
+func createAllGaugeTypes(t *testing.T, app *osmoapp.NUAHApp, ctx sdk.Context, addr sdk.AccAddress, coins sdk.Coins, startTime time.Time) {
 	for _, coin := range coins {
 		app.ProtoRevKeeper.SetPoolForDenomPair(ctx, appparams.BaseCoinUnit, coin.Denom, 9999)
 	}

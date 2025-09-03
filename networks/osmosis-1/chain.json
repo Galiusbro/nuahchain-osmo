@@ -1,7 +1,7 @@
 {
     "status": "upcoming",
     "network_type": "mainnet",
-    "chain_id": "osmosis-1",
+    "chain_id": "nuahchain-1",
     "genesis_url": "",
     "bech32_prefix": "osmo",
     "codebase": {

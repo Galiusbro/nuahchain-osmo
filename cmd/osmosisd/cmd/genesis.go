@@ -46,9 +46,9 @@ Examples include:
 	- Setting module initial params
 	- Setting denom metadata
 Example:
-	osmosisd prepare-genesis mainnet osmosis-1
+	nuahd prepare-genesis mainnet nuahchain-1
 	- Check input genesis:
-		file is at ~/.osmosisd/config/genesis.json
+		file is at ~/.nuahd/config/genesis.json
 `,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {

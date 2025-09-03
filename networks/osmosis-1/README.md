@@ -31,8 +31,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v3.1.0/osmosisd-3.1.0-linux-amd64?checksum=sha256:6a73d75e9c75ea402c13edc8c5c4ed08e26c5d8e517d540a9ca8b7e7afa67f79",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v3.1.0/osmosisd-3.1.0-linux-arm64?checksum=sha256:893f8a9786ae76d4217260201cd94ab67010f68d98b9676a9b31c0a5e68d1eae"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v3.1.0/nuahd-3.1.0-linux-amd64?checksum=sha256:6a73d75e9c75ea402c13edc8c5c4ed08e26c5d8e517d540a9ca8b7e7afa67f79",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v3.1.0/nuahd-3.1.0-linux-arm64?checksum=sha256:893f8a9786ae76d4217260201cd94ab67010f68d98b9676a9b31c0a5e68d1eae"
   }
 }
 ```
@@ -42,8 +42,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v4.2.0/osmosisd-4.2.0-linux-amd64?checksum=sha256:a11c61a737983d176f23ce83fa5ff985000ce8d5107d738ee6fa7d59b8dd3053",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v4.2.0/osmosisd-4.2.0-linux-arm64?checksum=sha256:41260be15e874fbc6cc49757d9fe3d4e459634729e2b745923e508e9cb26f837"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v4.2.0/nuahd-4.2.0-linux-amd64?checksum=sha256:a11c61a737983d176f23ce83fa5ff985000ce8d5107d738ee6fa7d59b8dd3053",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v4.2.0/nuahd-4.2.0-linux-arm64?checksum=sha256:41260be15e874fbc6cc49757d9fe3d4e459634729e2b745923e508e9cb26f837"
   }
 }
 ```
@@ -53,8 +53,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v6.4.0/osmosisd-6.4.0-linux-amd64?checksum=sha256:e4017da5d1a0a3b37b4f6936ba7ef16f39972ae25f95feae43e506f14933cf94",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v6.4.0/osmosisd-6.4.0-linux-arm64?checksum=sha256:a101bb3feb0419293a3ecee17d732a312bf9e864a829905ed509c65b5944040b"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v6.4.0/nuahd-6.4.0-linux-amd64?checksum=sha256:e4017da5d1a0a3b37b4f6936ba7ef16f39972ae25f95feae43e506f14933cf94",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v6.4.0/nuahd-6.4.0-linux-arm64?checksum=sha256:a101bb3feb0419293a3ecee17d732a312bf9e864a829905ed509c65b5944040b"
   }
 }
 ```
@@ -64,7 +64,7 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v8.0.0/osmosisd-8.0.0-linux-amd64?checksum=sha256:4559ffe7d1e83b1519c2d45a709d35a89b51f8b35f8bba3b58aef92e667e254c"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v8.0.0/nuahd-8.0.0-linux-amd64?checksum=sha256:4559ffe7d1e83b1519c2d45a709d35a89b51f8b35f8bba3b58aef92e667e254c"
   }
 }
 ```
@@ -74,8 +74,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v10.1.1/osmosisd-10.1.1-linux-amd64?checksum=sha256:aeae58f8b0be86d5e6e3aec1a8774eab4947207c88c7d4f309c46da98f6694e8",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v10.1.1/osmosisd-10.1.1-linux-arm64?checksum=sha256:d2c672ffa9782687f91d8d03bd23fdf8bd2fbe8b79c9cfcf8e9d302a1238a12c"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v10.1.1/nuahd-10.1.1-linux-amd64?checksum=sha256:aeae58f8b0be86d5e6e3aec1a8774eab4947207c88c7d4f309c46da98f6694e8",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v10.1.1/nuahd-10.1.1-linux-arm64?checksum=sha256:d2c672ffa9782687f91d8d03bd23fdf8bd2fbe8b79c9cfcf8e9d302a1238a12c"
   }
 }
 ```
@@ -85,8 +85,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v11.0.1/osmosisd-11.0.1-linux-amd64?checksum=sha256:41b8fd2345a5e5b77ee5ed9b9ec5370d94bd1b1aa0d4ac2ac0ab02ee98ddd0d8",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v11.0.1/osmosisd-11.0.1-linux-arm64?checksum=sha256:267776170495ecaa831238ea8994f8790a379663c9ae47a2e93e5beceafd8e1d"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v11.0.1/nuahd-11.0.1-linux-amd64?checksum=sha256:41b8fd2345a5e5b77ee5ed9b9ec5370d94bd1b1aa0d4ac2ac0ab02ee98ddd0d8",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v11.0.1/nuahd-11.0.1-linux-arm64?checksum=sha256:267776170495ecaa831238ea8994f8790a379663c9ae47a2e93e5beceafd8e1d"
   }
 }
 ```
@@ -96,8 +96,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v12.3.0/osmosisd-12.3.0-linux-amd64?checksum=sha256:958210c919d13c281896fa9773c323c5534f0fa46d74807154f737609a00db70",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v12.3.0/osmosisd-12.3.0-linux-arm64?checksum=sha256:a931618c8a839c30e5cecfd2a88055cda1d68cc68557fe3303fe14e2de3bef8f"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v12.3.0/nuahd-12.3.0-linux-amd64?checksum=sha256:958210c919d13c281896fa9773c323c5534f0fa46d74807154f737609a00db70",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v12.3.0/nuahd-12.3.0-linux-arm64?checksum=sha256:a931618c8a839c30e5cecfd2a88055cda1d68cc68557fe3303fe14e2de3bef8f"
   }
 }
 ```
@@ -107,8 +107,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v13.1.2/osmosisd-13.1.2-linux-amd64?checksum=sha256:67ed53046667c72ec6bfe962bcb4d6b122610876b3adf75fb7820ce52c34872d",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v13.1.2/osmosisd-13.1.2-linux-arm64?checksum=sha256:ad35c2a8d55852fa28187a55bdeb983494c07923f2a8a9f4479fb044d8d62bd9"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v13.1.2/nuahd-13.1.2-linux-amd64?checksum=sha256:67ed53046667c72ec6bfe962bcb4d6b122610876b3adf75fb7820ce52c34872d",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v13.1.2/nuahd-13.1.2-linux-arm64?checksum=sha256:ad35c2a8d55852fa28187a55bdeb983494c07923f2a8a9f4479fb044d8d62bd9"
   }
 }
 ```
@@ -118,8 +118,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v14.0.1/osmosisd-14.0.1-linux-amd64?checksum=sha256:2cc4172bcf000f0f06b30b16864d875a8de2ee12df994a593dfd52a506851bce",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v14.0.1/osmosisd-14.0.1-linux-arm64?checksum=sha256:9a44c17d239c8d9afd19d0ff0bd14ca883fb9e9fbf69aff18c2607ffa6bff378"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v14.0.1/nuahd-14.0.1-linux-amd64?checksum=sha256:2cc4172bcf000f0f06b30b16864d875a8de2ee12df994a593dfd52a506851bce",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v14.0.1/nuahd-14.0.1-linux-arm64?checksum=sha256:9a44c17d239c8d9afd19d0ff0bd14ca883fb9e9fbf69aff18c2607ffa6bff378"
   }
 }
 ```
@@ -129,8 +129,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v15.2.0/osmosisd-15.2.0-linux-amd64?checksum=sha256:3aab2f2668cb5a713d5770e46a777ef01c433753378702d9ae941aa2d1ee5618",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v15.2.0/osmosisd-15.2.0-linux-arm64?checksum=sha256:e158d30707a0ea51482237f99676223e81ce5a353966a5c83791d2662a930f35"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v15.2.0/nuahd-15.2.0-linux-amd64?checksum=sha256:3aab2f2668cb5a713d5770e46a777ef01c433753378702d9ae941aa2d1ee5618",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v15.2.0/nuahd-15.2.0-linux-arm64?checksum=sha256:e158d30707a0ea51482237f99676223e81ce5a353966a5c83791d2662a930f35"
   }
 }
 ```
@@ -140,8 +140,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v16.1.1/osmosisd-16.1.1-linux-amd64?checksum=sha256:0ec66e32584fff24b6d62fc9938c69ff1a1bbdd8641d2ec9e0fd084aaa767ed3",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v16.1.1/osmosisd-16.1.1-linux-arm64?checksum=sha256:e2ccc743dd66da91d1df1ae4ecf92b36d658575f4ff507d5056eb640804e0401",
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v16.1.1/nuahd-16.1.1-linux-amd64?checksum=sha256:0ec66e32584fff24b6d62fc9938c69ff1a1bbdd8641d2ec9e0fd084aaa767ed3",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v16.1.1/nuahd-16.1.1-linux-arm64?checksum=sha256:e2ccc743dd66da91d1df1ae4ecf92b36d658575f4ff507d5056eb640804e0401",
   }
 }
 ```
@@ -151,8 +151,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v17.0.0/osmosisd-17.0.0-linux-arm64?checksum=sha256:d5eeab6a15e2acd7e24e7caf4fe3336c35367ff376da6299d404defd09ce52f9",
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v17.0.0/osmosisd-17.0.0-linux-amd64?checksum=sha256:d7fe62ae33cf2f0b48a17eb8b02644dadd9924f15861ed622cd90cb1a038135b"
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v17.0.0/nuahd-17.0.0-linux-arm64?checksum=sha256:d5eeab6a15e2acd7e24e7caf4fe3336c35367ff376da6299d404defd09ce52f9",
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v17.0.0/nuahd-17.0.0-linux-amd64?checksum=sha256:d7fe62ae33cf2f0b48a17eb8b02644dadd9924f15861ed622cd90cb1a038135b"
   }
 }
 ```
@@ -162,8 +162,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v18.0.0/osmosisd-18.0.0-linux-arm64?checksum=sha256:6d02ac17c720c2b7e01d364a3303b8a04c81b9e52038e0f81e1806d0d254d96e",
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v18.0.0/osmosisd-18.0.0-linux-amd64?checksum=sha256:d83b4122e3ff9c428c8d6dcfe89718f5229f80e9976dbab2deefeb68dceb0f38"
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v18.0.0/nuahd-18.0.0-linux-arm64?checksum=sha256:6d02ac17c720c2b7e01d364a3303b8a04c81b9e52038e0f81e1806d0d254d96e",
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v18.0.0/nuahd-18.0.0-linux-amd64?checksum=sha256:d83b4122e3ff9c428c8d6dcfe89718f5229f80e9976dbab2deefeb68dceb0f38"
   }
 }
 ```
@@ -173,8 +173,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v19.2.0/osmosisd-19.2.0-linux-amd64?checksum=sha256:723ff1c5349eb3c039c3dc5f55895bbde2e1499fe7c0a96960cc6fadeec814c4",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v19.2.0/osmosisd-19.2.0-linux-arm64?checksum=sha256:d933b893d537422164a25bf161d7f269a59ea26d37f398cdb7dd575a9ec33ed2"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v19.2.0/nuahd-19.2.0-linux-amd64?checksum=sha256:723ff1c5349eb3c039c3dc5f55895bbde2e1499fe7c0a96960cc6fadeec814c4",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v19.2.0/nuahd-19.2.0-linux-arm64?checksum=sha256:d933b893d537422164a25bf161d7f269a59ea26d37f398cdb7dd575a9ec33ed2"
   }
 }
 ```
@@ -184,8 +184,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v20.2.1/osmosisd-20.2.1-linux-amd64?checksum=sha256:4e60a870861ca17819fbcb49fff981b5731ec1121d7cbab43987c5f04ff099fa",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v20.2.1/osmosisd-20.2.1-linux-arm64?checksum=sha256:4e7fe2cc369a9eef28a8083414c2d7e0a8cb5eb5b75e913ded06ee457dff62bb"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v20.2.1/nuahd-20.2.1-linux-amd64?checksum=sha256:4e60a870861ca17819fbcb49fff981b5731ec1121d7cbab43987c5f04ff099fa",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v20.2.1/nuahd-20.2.1-linux-arm64?checksum=sha256:4e7fe2cc369a9eef28a8083414c2d7e0a8cb5eb5b75e913ded06ee457dff62bb"
   }
 }
 ```
@@ -195,8 +195,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v21.1.4/osmosisd-21.1.4-linux-amd64?checksum=sha256:518fd61873622d505640ab08edb788e307e6beb4f52476fab77661dd96860416",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v21.1.4/osmosisd-21.1.4-linux-arm64?checksum=sha256:cdbc163f4f045718e1464a82ada4d9d2511dc8c6c3fea11044cb8e675b6f86f7"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v21.1.4/nuahd-21.1.4-linux-amd64?checksum=sha256:518fd61873622d505640ab08edb788e307e6beb4f52476fab77661dd96860416",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v21.1.4/nuahd-21.1.4-linux-arm64?checksum=sha256:cdbc163f4f045718e1464a82ada4d9d2511dc8c6c3fea11044cb8e675b6f86f7"
   }
 }
 ```
@@ -206,8 +206,8 @@ Each version is identified by a specific id, name, tag, block height and softwar
 ```json
 {
   "binaries": {
-    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v22.0.1/osmosisd-22.0.1-linux-amd64?checksum=sha256:427588cbdd82752e6b31383493637029358f4550fcc71b81182334de2a54a20c",
-    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v22.0.1/osmosisd-22.0.1-linux-arm64?checksum=sha256:3f50785becdd9e180cbe41b3eb97f8e6d16d0d4329c69a31cab5e0e1b5901c35"
+    "linux/amd64": "https://github.com/osmosis-labs/osmosis/releases/download/v22.0.1/nuahd-22.0.1-linux-amd64?checksum=sha256:427588cbdd82752e6b31383493637029358f4550fcc71b81182334de2a54a20c",
+    "linux/arm64": "https://github.com/osmosis-labs/osmosis/releases/download/v22.0.1/nuahd-22.0.1-linux-arm64?checksum=sha256:3f50785becdd9e180cbe41b3eb97f8e6d16d0d4329c69a31cab5e0e1b5901c35"
   }
 }
 ```
@@ -232,77 +232,77 @@ Alternatively, you can download the appropriate binary for your platform from ou
 <COSMOVISOR_HOME>
    ├── genesis
    │   └── bin
-   │       └── osmosisd
+   │       └── nuahd
    └── upgrades
        ├── v11
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        ├── v12
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        ├── v13
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        ├── v14
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        ├── v15
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        ├── v16
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        ├── v17
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        ├── v18
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        ├── v19
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        ├── v20
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        ├── v4
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        ├── v5
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        ├── v7
        │   └── bin
-       │       └── osmosisd
+       │       └── nuahd
        └── v9
            └── bin
-               └── osmosisd
+               └── nuahd
 ```
 
 You can utilize the provided script to download the required binaries and initialize the Cosmovisor directory:
 
 ```bash
 # Define osmosis home
-osmosis_home="$HOME/.osmosisd"
+osmosis_home="$HOME/.nuahd"
 
 # List of versions and their URLs
 versions_info=(
-    "v3:https://github.com/osmosis-labs/osmosis/releases/download/v3.1.0/osmosisd-3.1.0-linux-amd64?checksum=sha256:6a73d75e9c75ea402c13edc8c5c4ed08e26c5d8e517d540a9ca8b7e7afa67f79"
-    "v4:https://github.com/osmosis-labs/osmosis/releases/download/v4.2.0/osmosisd-4.2.0-linux-amd64?checksum=sha256:a11c61a737983d176f23ce83fa5ff985000ce8d5107d738ee6fa7d59b8dd3053"
-    "v5:https://github.com/osmosis-labs/osmosis/releases/download/v6.4.0/osmosisd-6.4.0-linux-amd64?checksum=sha256:e4017da5d1a0a3b37b4f6936ba7ef16f39972ae25f95feae43e506f14933cf94"
-    "v7:https://github.com/osmosis-labs/osmosis/releases/download/v8.0.0/osmosisd-8.0.0-linux-amd64?checksum=sha256:4559ffe7d1e83b1519c2d45a709d35a89b51f8b35f8bba3b58aef92e667e254c"
-    "v9:https://github.com/osmosis-labs/osmosis/releases/download/v10.1.1/osmosisd-10.1.1-linux-amd64?checksum=sha256:aeae58f8b0be86d5e6e3aec1a8774eab4947207c88c7d4f309c46da98f6694e8"
-    "v11:https://github.com/osmosis-labs/osmosis/releases/download/v11.0.1/osmosisd-11.0.1-linux-amd64?checksum=sha256:41b8fd2345a5e5b77ee5ed9b9ec5370d94bd1b1aa0d4ac2ac0ab02ee98ddd0d8"
-    "v12:https://github.com/osmosis-labs/osmosis/releases/download/v12.3.0/osmosisd-12.3.0-linux-amd64?checksum=sha256:958210c919d13c281896fa9773c323c5534f0fa46d74807154f737609a00db70"
-    "v13:https://github.com/osmosis-labs/osmosis/releases/download/v13.1.2/osmosisd-13.1.2-linux-amd64?checksum=sha256:67ed53046667c72ec6bfe962bcb4d6b122610876b3adf75fb7820ce52c34872d"
-    "v14:https://github.com/osmosis-labs/osmosis/releases/download/v14.0.1/osmosisd-14.0.1-linux-amd64?checksum=sha256:2cc4172bcf000f0f06b30b16864d875a8de2ee12df994a593dfd52a506851bce"
-    "v15:https://github.com/osmosis-labs/osmosis/releases/download/v15.2.0/osmosisd-15.2.0-linux-amd64?checksum=sha256:3aab2f2668cb5a713d5770e46a777ef01c433753378702d9ae941aa2d1ee5618"
-    "v16:https://github.com/osmosis-labs/osmosis/releases/download/v16.1.1/osmosisd-16.1.1-linux-amd64?checksum=sha256:f838618633c1d42f593dc33d26b25842f5900961e987fc08570bb81a062e311d"
-    "v17:https://github.com/osmosis-labs/osmosis/releases/download/v17.0.0/osmosisd-17.0.0-linux-amd64?checksum=sha256:d7fe62ae33cf2f0b48a17eb8b02644dadd9924f15861ed622cd90cb1a038135b"
-    "v18:https://github.com/osmosis-labs/osmosis/releases/download/v18.0.0/osmosisd-18.0.0-linux-amd64?checksum=sha256:d83b4122e3ff9c428c8d6dcfe89718f5229f80e9976dbab2deefeb68dceb0f38"
-    "v19:https://github.com/osmosis-labs/osmosis/releases/download/v19.2.0/osmosisd-19.2.0-linux-arm64?checksum=sha256:d933b893d537422164a25bf161d7f269a59ea26d37f398cdb7dd575a9ec33ed2"
-    "v20:https://github.com/osmosis-labs/osmosis/releases/download/v20.2.1/osmosisd-20.2.1-linux-amd64?checksum=sha256:4e60a870861ca17819fbcb49fff981b5731ec1121d7cbab43987c5f04ff099fa"
-    "v21:https://github.com/osmosis-labs/osmosis/releases/download/v21.1.4/osmosisd-21.1.4-linux-amd64?checksum=sha256:518fd61873622d505640ab08edb788e307e6beb4f52476fab77661dd96860416"
-    "v22:https://github.com/osmosis-labs/osmosis/releases/download/v22.0.1/osmosisd-22.0.1-linux-amd64?checksum=sha256:427588cbdd82752e6b31383493637029358f4550fcc71b81182334de2a54a20c"
+    "v3:https://github.com/osmosis-labs/osmosis/releases/download/v3.1.0/nuahd-3.1.0-linux-amd64?checksum=sha256:6a73d75e9c75ea402c13edc8c5c4ed08e26c5d8e517d540a9ca8b7e7afa67f79"
+    "v4:https://github.com/osmosis-labs/osmosis/releases/download/v4.2.0/nuahd-4.2.0-linux-amd64?checksum=sha256:a11c61a737983d176f23ce83fa5ff985000ce8d5107d738ee6fa7d59b8dd3053"
+    "v5:https://github.com/osmosis-labs/osmosis/releases/download/v6.4.0/nuahd-6.4.0-linux-amd64?checksum=sha256:e4017da5d1a0a3b37b4f6936ba7ef16f39972ae25f95feae43e506f14933cf94"
+    "v7:https://github.com/osmosis-labs/osmosis/releases/download/v8.0.0/nuahd-8.0.0-linux-amd64?checksum=sha256:4559ffe7d1e83b1519c2d45a709d35a89b51f8b35f8bba3b58aef92e667e254c"
+    "v9:https://github.com/osmosis-labs/osmosis/releases/download/v10.1.1/nuahd-10.1.1-linux-amd64?checksum=sha256:aeae58f8b0be86d5e6e3aec1a8774eab4947207c88c7d4f309c46da98f6694e8"
+    "v11:https://github.com/osmosis-labs/osmosis/releases/download/v11.0.1/nuahd-11.0.1-linux-amd64?checksum=sha256:41b8fd2345a5e5b77ee5ed9b9ec5370d94bd1b1aa0d4ac2ac0ab02ee98ddd0d8"
+    "v12:https://github.com/osmosis-labs/osmosis/releases/download/v12.3.0/nuahd-12.3.0-linux-amd64?checksum=sha256:958210c919d13c281896fa9773c323c5534f0fa46d74807154f737609a00db70"
+    "v13:https://github.com/osmosis-labs/osmosis/releases/download/v13.1.2/nuahd-13.1.2-linux-amd64?checksum=sha256:67ed53046667c72ec6bfe962bcb4d6b122610876b3adf75fb7820ce52c34872d"
+    "v14:https://github.com/osmosis-labs/osmosis/releases/download/v14.0.1/nuahd-14.0.1-linux-amd64?checksum=sha256:2cc4172bcf000f0f06b30b16864d875a8de2ee12df994a593dfd52a506851bce"
+    "v15:https://github.com/osmosis-labs/osmosis/releases/download/v15.2.0/nuahd-15.2.0-linux-amd64?checksum=sha256:3aab2f2668cb5a713d5770e46a777ef01c433753378702d9ae941aa2d1ee5618"
+    "v16:https://github.com/osmosis-labs/osmosis/releases/download/v16.1.1/nuahd-16.1.1-linux-amd64?checksum=sha256:f838618633c1d42f593dc33d26b25842f5900961e987fc08570bb81a062e311d"
+    "v17:https://github.com/osmosis-labs/osmosis/releases/download/v17.0.0/nuahd-17.0.0-linux-amd64?checksum=sha256:d7fe62ae33cf2f0b48a17eb8b02644dadd9924f15861ed622cd90cb1a038135b"
+    "v18:https://github.com/osmosis-labs/osmosis/releases/download/v18.0.0/nuahd-18.0.0-linux-amd64?checksum=sha256:d83b4122e3ff9c428c8d6dcfe89718f5229f80e9976dbab2deefeb68dceb0f38"
+    "v19:https://github.com/osmosis-labs/osmosis/releases/download/v19.2.0/nuahd-19.2.0-linux-arm64?checksum=sha256:d933b893d537422164a25bf161d7f269a59ea26d37f398cdb7dd575a9ec33ed2"
+    "v20:https://github.com/osmosis-labs/osmosis/releases/download/v20.2.1/nuahd-20.2.1-linux-amd64?checksum=sha256:4e60a870861ca17819fbcb49fff981b5731ec1121d7cbab43987c5f04ff099fa"
+    "v21:https://github.com/osmosis-labs/osmosis/releases/download/v21.1.4/nuahd-21.1.4-linux-amd64?checksum=sha256:518fd61873622d505640ab08edb788e307e6beb4f52476fab77661dd96860416"
+    "v22:https://github.com/osmosis-labs/osmosis/releases/download/v22.0.1/nuahd-22.0.1-linux-amd64?checksum=sha256:427588cbdd82752e6b31383493637029358f4550fcc71b81182334de2a54a20c"
 )
 
 # Create the cosmovisor directory
@@ -313,8 +313,8 @@ mkdir -p "${osmosis_home}/cosmovisor"
 echo "📁 Creating the genesis directory: ${osmosis_home}/cosmovisor/genesis/bin"
 mkdir -p "${osmosis_home}/cosmovisor/genesis/bin"
 
-echo "⬇️ Downloading v3 binary to: ${osmosis_home}/cosmovisor/genesis/bin/osmosisd"
-wget -q -O "${osmosis_home}/cosmovisor/genesis/bin/osmosisd" "$(echo ${versions_info[0]} | cut -d: -f2)"
+echo "⬇️ Downloading v3 binary to: ${osmosis_home}/cosmovisor/genesis/bin/nuahd"
+wget -q -O "${osmosis_home}/cosmovisor/genesis/bin/nuahd" "$(echo ${versions_info[0]} | cut -d: -f2)"
 
 # Create the upgrades directories for each version and download the binaries
 for version_info in "${versions_info[@]:1}"; do
@@ -323,8 +323,8 @@ for version_info in "${versions_info[@]:1}"; do
     echo
     echo "📁 Creating ${version} directory: ${osmosis_home}/cosmovisor/upgrades/${version}/bin"
     mkdir -p "${osmosis_home}/cosmovisor/upgrades/${version}/bin"
-    echo "⬇️  Downloading ${version} binary to: ${osmosis_home}/cosmovisor/upgrades/${version}/bin/osmosisd"
-    wget -q -O "${osmosis_home}/cosmovisor/upgrades/${version}/bin/osmosisd" "$binary_url"
+    echo "⬇️  Downloading ${version} binary to: ${osmosis_home}/cosmovisor/upgrades/${version}/bin/nuahd"
+    wget -q -O "${osmosis_home}/cosmovisor/upgrades/${version}/bin/nuahd" "$binary_url"
 done
 ```
 

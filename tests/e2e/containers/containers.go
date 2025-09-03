@@ -326,9 +326,9 @@ func (m *Manager) ExecQueryTxHash(t *testing.T, containerName, txHash string, re
 
 	var command []string
 	if returnAsJson {
-		command = []string{"osmosisd", "query", "tx", txHash, "-o=json"}
+		command = []string{"nuahd", "query", "tx", txHash, "-o=json"}
 	} else {
-		command = []string{"osmosisd", "query", "tx", txHash}
+		command = []string{"nuahd", "query", "tx", txHash}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
@@ -459,7 +459,7 @@ func (m *Manager) RunNodeResource(chainId string, containerName, valCondifDir st
 		User:       "root:root",
 		Cmd:        cmd,
 		Mounts: []string{
-			fmt.Sprintf("%s/:/osmosis/.osmosisd", valCondifDir),
+			fmt.Sprintf("%s/:/osmosis/.nuahd", valCondifDir),
 			fmt.Sprintf("%s/scripts:/osmosis", pwd),
 		},
 	}

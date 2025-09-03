@@ -29,7 +29,7 @@ func NewCmdSubmitUpdateFeeTokenProposal() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "update-fee-token [flags]",
 		Args:    cobra.ExactArgs(0),
-		Example: "update-fee-token --fee-tokens uosmo,1,uion,2,ufoo,0 --from val --chain-id osmosis-1",
+		Example: "update-fee-token --fee-tokens uosmo,1,uion,2,ufoo,0 --from val --chain-id nuahchain-1",
 		Short:   "Submit a update fee token record proposal",
 		Long: strings.TrimSpace(`Submit a update fee token record proposal.
 

@@ -200,7 +200,7 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij,vscode,macos,windows
 
-/osmosisd
+/nuahd
 /.idea/
 /artifacts/
 /.vscode/
@@ -208,7 +208,7 @@ $RECYCLE.BIN/
 /scripts/local/
 /x/incentives/keeper/osmosis_testing/
 tools-stamp
-/tests/localosmosis/.osmosisd/*
+/tests/localnuah/.nuahd/*
 *.save
 *.save.*
 
@@ -246,7 +246,7 @@ blocks.db
 **/venv/*
 **/*.pyc
 
-# Ignore binary created from localosmosis scripts
+# Ignore binary created from localnuah scripts
 tests/cl-genesis-positions/script
 tests/cl-genesis-positions/*.json
 

@@ -29,7 +29,7 @@ var (
 
 // CreateLanes walks through the process of creating the lanes for the block sdk. In this function
 // we create three separate lanes - MEV, Free, and Default - and then return them.
-func CreateLanes(app *OsmosisApp, txConfig client.TxConfig) (*mevlane.MEVLane, *base.BaseLane) {
+func CreateLanes(app *NUAHApp, txConfig client.TxConfig) (*mevlane.MEVLane, *base.BaseLane) {
 	// Create the signer extractor. This is used to extract the expected signers from
 	// a transaction. Each lane can have a different signer extractor if needed.
 	signerAdapter := signerextraction.NewDefaultAdapter()

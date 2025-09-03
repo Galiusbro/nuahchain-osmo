@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  osmosisd:
+  nuahd:
     image: local:osmosis
     build:
       context: ../../
@@ -17,7 +17,7 @@ services:
       - ./scripts/nativeDenomThreeAssetPool.json:/osmosis/nativeDenomThreeAssetPool.json
       - ./scripts/setup.sh:/osmosis/setup.sh
       - ../cl-genesis-positions:/osmosis/cl-genesis-positions
-      - $HOME/.osmosisd-local/:/osmosis/.osmosisd/
+      - $HOME/.nuahd-local/:/osmosis/.nuahd/
     entrypoint:
       - /osmosis/setup.sh
     command:

@@ -34,7 +34,7 @@ func (s *SigVerifyAuthenticationSuite) SetupTest() {
 	s.SetupKeys()
 
 	s.EncodingConfig = app.MakeEncodingConfig()
-	ak := s.OsmosisApp.AccountKeeper
+	ak := s.NUAHApp.AccountKeeper
 
 	// Create a new Secp256k1SignatureAuthenticator for testing
 	s.SigVerificationAuthenticator = authenticator.NewSignatureVerification(
@@ -261,7 +261,7 @@ func (s *SigVerifyAuthenticationSuite) TestSignatureAuthenticator() {
 				tc.TestData.Signers,
 				tc.TestData.Signatures,
 			)
-			ak := s.OsmosisApp.AccountKeeper
+			ak := s.NUAHApp.AccountKeeper
 			sigModeHandler := s.EncodingConfig.TxConfig.SignModeHandler()
 
 			// Only the first message is tested for authenticate
@@ -269,7 +269,7 @@ func (s *SigVerifyAuthenticationSuite) TestSignatureAuthenticator() {
 
 			if tc.TestData.ShouldSucceedGettingData {
 				// request for the first message
-				request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.OsmosisApp.AppCodec(), ak, sigModeHandler, addr, addr, nil, sdk.NewCoins(), tc.TestData.Msgs[0], tx, 0, false, authenticator.SequenceMatch)
+				request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.NUAHApp.AppCodec(), ak, sigModeHandler, addr, addr, nil, sdk.NewCoins(), tc.TestData.Msgs[0], tx, 0, false, authenticator.SequenceMatch)
 				s.Require().NoError(err)
 
 				// Test Authenticate method
@@ -283,7 +283,7 @@ func (s *SigVerifyAuthenticationSuite) TestSignatureAuthenticator() {
 					s.Require().Error(err)
 				}
 			} else {
-				_, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.OsmosisApp.AppCodec(), ak, sigModeHandler, addr, addr, nil, sdk.NewCoins(), tc.TestData.Msgs[0], tx, 0, false, authenticator.SequenceMatch)
+				_, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.NUAHApp.AppCodec(), ak, sigModeHandler, addr, addr, nil, sdk.NewCoins(), tc.TestData.Msgs[0], tx, 0, false, authenticator.SequenceMatch)
 				s.Require().Error(err)
 			}
 		})
@@ -314,7 +314,7 @@ func (s *SigVerifyAuthenticationSuite) TestSignatureAuthenticator() {
 //
 //	accAddress := sdk.AccAddress(multisigKey1.Address())
 //	account := authtypes.NewBaseAccount(accAddress, multisigKey1, 0, 0)
-//	s.OsmosisApp.AccountKeeper.SetAccount(s.Ctx, account)
+//	s.NUAHApp.AccountKeeper.SetAccount(s.Ctx, account)
 //
 //	coins := sdk.Coins{sdk.NewInt64Coin(osmoToken, 2500)}
 //	msg := &banktypes.MsgSend{

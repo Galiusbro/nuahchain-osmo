@@ -1356,7 +1356,7 @@ func (s *KeeperTestSuite) TestConvertGammSharesToOsmoAndStake() {
 		},
 		"error: invalid val address": {
 			useInvalidValAddr: true,
-			expectedError:     "invalid Bech32 prefix; expected osmovaloper, got osmo",
+			expectedError:     "invalid Bech32 prefix; expected nuahvaloper, got osmo",
 		},
 		"error: min amount to stake exceeds actual amount staking": {
 			useMinAmtToStake: true,

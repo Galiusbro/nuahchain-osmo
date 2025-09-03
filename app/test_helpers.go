@@ -28,7 +28,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
-func GenesisStateWithValSet(app *OsmosisApp) GenesisState {
+func GenesisStateWithValSet(app *NUAHApp) GenesisState {
 	privVal := mock.NewPV()
 	pubKey, _ := privVal.GetPubKey()
 	validator := tmtypes.NewValidator(pubKey, 1)
@@ -119,9 +119,9 @@ func GenesisStateWithValSet(app *OsmosisApp) GenesisState {
 
 var defaultGenesisStatebytes = []byte{}
 
-// SetupWithCustomHome initializes a new OsmosisApp with a custom home directory
-func SetupWithCustomHome(isCheckTx bool, dir string, t ...*testing.T) *OsmosisApp {
-	return SetupWithCustomHomeAndChainId(isCheckTx, dir, "osmosis-1", t...)
+// SetupWithCustomHome initializes a new NUAHApp with a custom home directory
+func SetupWithCustomHome(isCheckTx bool, dir string, t ...*testing.T) *NUAHApp {
+	return SetupWithCustomHomeAndChainId(isCheckTx, dir, "nuahchain-1", t...)
 }
 
 // DebugAppOptions is a stub implementing AppOptions
@@ -139,7 +139,7 @@ func IsDebugLogEnabled() bool {
 	return os.Getenv("OSMO_KEEPER_DEBUG") != ""
 }
 
-func SetupWithCustomHomeAndChainId(isCheckTx bool, dir, chainId string, t ...*testing.T) *OsmosisApp {
+func SetupWithCustomHomeAndChainId(isCheckTx bool, dir, chainId string, t ...*testing.T) *NUAHApp {
 	db := cosmosdb.NewMemDB()
 	var (
 		l       log.Logger
@@ -157,7 +157,7 @@ func SetupWithCustomHomeAndChainId(isCheckTx bool, dir, chainId string, t ...*te
 	} else {
 		l = log.NewNopLogger()
 	}
-	app := NewOsmosisApp(
+	app := NewNUAHApp(
 		l,
 		db,
 		nil,
@@ -195,14 +195,14 @@ func SetupWithCustomHomeAndChainId(isCheckTx bool, dir, chainId string, t ...*te
 	return app
 }
 
-// Setup initializes a new OsmosisApp.
-func Setup(isCheckTx bool) *OsmosisApp {
+// Setup initializes a new NUAHApp.
+func Setup(isCheckTx bool) *NUAHApp {
 	return SetupWithCustomHome(isCheckTx, DefaultNodeHome)
 }
 
-// SetupTestingAppWithLevelDb initializes a new OsmosisApp intended for testing,
+// SetupTestingAppWithLevelDb initializes a new NUAHApp intended for testing,
 // with LevelDB as a db.
-func SetupTestingAppWithLevelDb(isCheckTx bool) (app *OsmosisApp, cleanupFn func()) {
+func SetupTestingAppWithLevelDb(isCheckTx bool) (app *NUAHApp, cleanupFn func()) {
 	dir, err := os.MkdirTemp(os.TempDir(), "osmosis_leveldb_testing")
 	if err != nil {
 		panic(err)
@@ -212,7 +212,7 @@ func SetupTestingAppWithLevelDb(isCheckTx bool) (app *OsmosisApp, cleanupFn func
 		panic(err)
 	}
 
-	app = NewOsmosisApp(log.NewNopLogger(), db, nil, true, map[int64]bool{}, DefaultNodeHome, 5, sims.EmptyAppOptions{}, EmptyWasmOpts, baseapp.SetChainID("osmosis-1"))
+	app = NewNUAHApp(log.NewNopLogger(), db, nil, true, map[int64]bool{}, DefaultNodeHome, 5, sims.EmptyAppOptions{}, EmptyWasmOpts, baseapp.SetChainID("nuahchain-1"))
 	if !isCheckTx {
 		genesisState := GenesisStateWithValSet(app)
 		stateBytes, err := json.MarshalIndent(genesisState, "", " ")
@@ -225,7 +225,7 @@ func SetupTestingAppWithLevelDb(isCheckTx bool) (app *OsmosisApp, cleanupFn func
 				Validators:      []abci.ValidatorUpdate{},
 				ConsensusParams: sims.DefaultConsensusParams,
 				AppStateBytes:   stateBytes,
-				ChainId:         "osmosis-1",
+				ChainId:         "nuahchain-1",
 			},
 		)
 		if err != nil {

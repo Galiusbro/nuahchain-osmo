@@ -53,23 +53,23 @@ go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@v1.0.0
 ```
 
 After this, you must make the necessary folders for cosmosvisor in your
-daemon home directory (\~/.osmosisd).
+daemon home directory (\~/.nuahd).
 
 ``` {.sh}
-mkdir -p ~/.osmosisd
-mkdir -p ~/.osmosisd/cosmovisor
-mkdir -p ~/.osmosisd/cosmovisor/genesis
-mkdir -p ~/.osmosisd/cosmovisor/genesis/bin
-mkdir -p ~/.osmosisd/cosmovisor/upgrades
+mkdir -p ~/.nuahd
+mkdir -p ~/.nuahd/cosmovisor
+mkdir -p ~/.nuahd/cosmovisor/genesis
+mkdir -p ~/.nuahd/cosmovisor/genesis/bin
+mkdir -p ~/.nuahd/cosmovisor/upgrades
 ```
 
-Copy the current v12 osmosisd binary into the
+Copy the current v12 nuahd binary into the
 cosmovisor/genesis folder and v12 folder.
 
 ```{.sh}
-cp $GOPATH/bin/osmosisd ~/.osmosisd/cosmovisor/genesis/bin
-mkdir -p ~/.osmosisd/cosmovisor/upgrades/v12/bin
-cp $GOPATH/bin/osmosisd ~/.osmosisd/cosmovisor/upgrades/v12/bin
+cp $GOPATH/bin/nuahd ~/.nuahd/cosmovisor/genesis/bin
+mkdir -p ~/.nuahd/cosmovisor/upgrades/v12/bin
+cp $GOPATH/bin/nuahd ~/.nuahd/cosmovisor/upgrades/v12/bin
 ```
 
 Cosmovisor is now ready to be set up for v13.
@@ -78,8 +78,8 @@ Set these environment variables:
 
 ```{.sh}
 echo "# Setup Cosmovisor" >> ~/.profile
-echo "export DAEMON_NAME=osmosisd" >> ~/.profile
-echo "export DAEMON_HOME=$HOME/.osmosisd" >> ~/.profile
+echo "export DAEMON_NAME=nuahd" >> ~/.profile
+echo "export DAEMON_HOME=$HOME/.nuahd" >> ~/.profile
 echo "export DAEMON_ALLOW_DOWNLOAD_BINARIES=false" >> ~/.profile
 echo "export DAEMON_LOG_BUFFER_SIZE=512" >> ~/.profile
 echo "export DAEMON_RESTART_AFTER_UPGRADE=true" >> ~/.profile
@@ -92,12 +92,12 @@ source ~/.profile
 Create the v13 folder, make the build, and copy the daemon over to that folder
 
 ```{.sh}
-mkdir -p ~/.osmosisd/cosmovisor/upgrades/v13/bin
+mkdir -p ~/.nuahd/cosmovisor/upgrades/v13/bin
 cd $HOME/osmosis
 git pull
 git checkout v13.0.0-rc3
 make build
-cp build/osmosisd ~/.osmosisd/cosmovisor/upgrades/v13/bin
+cp build/nuahd ~/.nuahd/cosmovisor/upgrades/v13/bin
 ```
 
 Now, at the upgrade height, Cosmovisor will upgrade to the v13 binary

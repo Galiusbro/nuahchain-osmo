@@ -1,7 +1,7 @@
 # This workflow checks that a specific commit / branch / tag is state compatible
 # with the latest osmosis version by:
 
-# - building the new `osmosisd` binary with the latest changes
+# - building the new `nuahd` binary with the latest changes
 # - replaying a configurable number of previous blocks from chain history
 
 # Currently, the node starts from a snapshot taken some blocks before the last epoch
@@ -34,7 +34,7 @@ on:
       - "v[0-9]+.x"
 
 env:
-  GENESIS_URL: https://osmosis.fra1.cdn.digitaloceanspaces.com/osmosis-1/genesis.json
+  GENESIS_URL: https://osmosis.fra1.cdn.digitaloceanspaces.com/nuahchain-1/genesis.json
   ADDRBOOK_URL: https://rpc.osmosis.zone/addrbook
   SNAPSHOT_BUCKET: https://snapshots.osmosis.zone
   RPC_ENDPOINT: https://rpc.osmosis.zone
@@ -95,13 +95,13 @@ jobs:
         uses: buildjet/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: 🔨 Build the osmosisd binary
+      - name: 🔨 Build the nuahd binary
         run: |
           make build
-          build/osmosisd version
+          build/nuahd version
       - name: 🧪 Initialize Osmosis Node
         run: |
-          build/osmosisd init runner -o --home ${{ runner.temp }}/.osmosisd/
+          build/nuahd init runner -o --home ${{ runner.temp }}/.nuahd/
       - name: ⏬ Download last pre-epoch snapshot
         run: |
           REPO_MAJOR_VERSION=$(echo ${{ github.base_ref }} | sed 's/\.x//')
@@ -114,10 +114,10 @@ jobs:
 
           # Download snapshot
           sudo apt install lz4 -y
-          wget -q -O - $SNAPSHOT_URL | lz4 -d | tar -C ${{ runner.temp }}/.osmosisd/ -xvf -
+          wget -q -O - $SNAPSHOT_URL | lz4 -d | tar -C ${{ runner.temp }}/.nuahd/ -xvf -
       - name: ⏬ Download genesis and addrbook
         run: |
-          CONFIG_FOLDER=${{ runner.temp }}/.osmosisd/config
+          CONFIG_FOLDER=${{ runner.temp }}/.nuahd/config
 
           # Download genesis
           wget -O $CONFIG_FOLDER/genesis.json ${{ env.GENESIS_URL }}
@@ -126,7 +126,7 @@ jobs:
           wget -O $CONFIG_FOLDER/addrbook.json ${{ env.ADDRBOOK_URL }}
       - name: 🧪 Configure Osmosis Node
         run: |
-          CONFIG_FOLDER=${{ runner.temp }}/.osmosisd/config
+          CONFIG_FOLDER=${{ runner.temp }}/.nuahd/config
           REPO_MAJOR_VERSION=$(echo ${{ github.base_ref }} | tr -dc '0-9')
 
           if [ $REPO_MAJOR_VERSION == $MAINNET_MAJOR_VERSION ]; then
@@ -161,8 +161,8 @@ jobs:
         run: |
           mkdir ${{ runner.temp }}/logs
 
-          build/osmosisd start \
-            --home ${{ runner.temp }}/.osmosisd > ${{ runner.temp }}/logs/osmosis.log 2>&1 &
+          build/nuahd start \
+            --home ${{ runner.temp }}/.nuahd > ${{ runner.temp }}/logs/osmosis.log 2>&1 &
           echo $! > ${{ runner.temp }}/osmosis_pid.txt
       - name: ⏳ Wait for Chain to start
         run: |

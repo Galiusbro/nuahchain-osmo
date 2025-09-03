@@ -1,28 +1,28 @@
 {
-  "chain_name": "osmosis",
+  "chain_name": "nuahchain-1",
   "assets": [
     {
-      "description": "The native token of Osmosis",
+      "description": "The native token of Nuah",
       "denom_units": [
         {
-          "denom": "uosmo",
+          "denom": "unuah",
           "exponent": 0
         },
         {
-          "denom": "osmo",
+          "denom": "nuah",
           "exponent": 6
         }
       ],
-      "base": "uosmo",
-      "name": "Osmosis",
-      "display": "osmo",
-      "symbol": "OSMO",
+      "base": "unuah",
+      "name": "Nuah",
+      "display": "nuah",
+      "symbol": "NUAH",
       "traces": [],
       "logo_URIs": {
         "png": "https://raw.githubusercontent.com/cosmos/chain-registry/master/osmosis/images/osmo.png",
         "svg": "https://raw.githubusercontent.com/cosmos/chain-registry/master/osmosis/images/osmo.svg"
       },
-      "coingecko_id": "osmosis",
+      "coingecko_id": "nuah-temp",
       "keywords": [
         "dex",
         "staking",
@@ -5591,7 +5591,7 @@
           "type": "liquid-stake",
           "counterparty": {
             "chain_name": "osmosis",
-            "base_denom": "uosmo"
+            "base_denom": "unuah"
           },
           "provider": "Stride"
         },
@@ -7634,7 +7634,7 @@
           "type": "liquid-stake",
           "counterparty": {
             "chain_name": "osmosis",
-            "base_denom": "uosmo"
+            "base_denom": "unuah"
           },
           "provider": "Quicksilver"
         },
@@ -12252,7 +12252,7 @@
           "type": "liquid-stake",
           "counterparty": {
             "chain_name": "osmosis",
-            "base_denom": "uosmo"
+            "base_denom": "unuah"
           },
           "provider": "pSTAKE"
         },

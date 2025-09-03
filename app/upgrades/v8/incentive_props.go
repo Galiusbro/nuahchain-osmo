@@ -32,7 +32,7 @@ func applyPoolIncentivesUpdate(ctx sdk.Context, poolincentiveskeeper *poolincent
 // Apply prop 222 change
 func ApplyProp222Change(ctx sdk.Context, poolincentiveskeeper *poolincentiveskeeper.Keeper) {
 	// Pool records obtained right off proposal
-	// osmosisd q gov proposal 222
+	// nuahd q gov proposal 222
 	// records:
 	// - gauge_id: "1718"
 	//   weight: "9138119"
@@ -63,7 +63,7 @@ func ApplyProp222Change(ctx sdk.Context, poolincentiveskeeper *poolincentiveskee
 // Apply prop 223 change
 func ApplyProp223Change(ctx sdk.Context, poolincentiveskeeper *poolincentiveskeeper.Keeper) {
 	// Pool records obtained right off proposal
-	// osmosisd q gov proposal 223
+	// nuahd q gov proposal 223
 	// records:
 	// 	- gauge_id: "1721"
 	//     weight: "2831977"
@@ -95,7 +95,7 @@ func ApplyProp223Change(ctx sdk.Context, poolincentiveskeeper *poolincentiveskee
 // Apply prop 224 change
 func ApplyProp224Change(ctx sdk.Context, poolincentiveskeeper *poolincentiveskeeper.Keeper) {
 	// Pool records obtained right off proposal
-	// osmosisd q gov proposal 224
+	// nuahd q gov proposal 224
 	// records:
 	// - gauge_id: "1724"
 	//   weight: "1881159"

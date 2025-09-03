@@ -65,7 +65,7 @@ type KeeperTestHelper struct {
 	// this is not always enabled, because some tests may take a painful performance hit due to CacheKv.
 	withCaching bool
 
-	App         *app.OsmosisApp
+	App         *app.NUAHApp
 	Ctx         sdk.Context
 	QueryHelper *baseapp.QueryServiceTestHelper
 	TestAccs    []sdk.AccAddress
@@ -104,7 +104,7 @@ func init() {
 // preserves the caching enabled/disabled state.
 func (s *KeeperTestHelper) Setup() {
 	s.T().Log("Setting up KeeperTestHelper")
-	dir, err := os.MkdirTemp("", "osmosisd-test-home")
+	dir, err := os.MkdirTemp("", "nuahd-test-home")
 	if err != nil {
 		panic(fmt.Sprintf("failed creating temporary directory: %v", err))
 	}
@@ -138,7 +138,7 @@ func (s *KeeperTestHelper) Setup() {
 }
 
 func (s *KeeperTestHelper) SetupWithCustomChainId(chainId string) {
-	dir, err := os.MkdirTemp("", "osmosisd-test-home")
+	dir, err := os.MkdirTemp("", "nuahd-test-home")
 	if err != nil {
 		panic(fmt.Sprintf("failed creating temporary directory: %v", err))
 	}
@@ -238,7 +238,7 @@ func (s *KeeperTestHelper) SetupWithLevelDb() func() {
 }
 
 func (s *KeeperTestHelper) setupGeneral() {
-	s.setupGeneralCustomChainId("osmosis-1")
+	s.setupGeneralCustomChainId("nuahchain-1")
 }
 
 func (s *KeeperTestHelper) setupGeneralCustomChainId(chainId string) {

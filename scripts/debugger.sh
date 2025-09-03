@@ -12,7 +12,7 @@ fi
 # Make sure that the binary is already running
 osmosis_pid=$(pgrep osmosis)
 if [ -z "${osmosis_pid}" ]; then
-    echo "osmosisd is not running, cannot find its process ID"
+    echo "nuahd is not running, cannot find its process ID"
     exit 1
 fi
 

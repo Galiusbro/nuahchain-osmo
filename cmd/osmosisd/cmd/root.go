@@ -163,9 +163,9 @@ var (
 )
 
 var (
-	//go:embed "osmosis-1-assetlist.json" "osmo-test-5-assetlist.json"
+	//go:embed "nuahchain-1-assetlist.json" "osmo-test-5-assetlist.json"
 	assetFS   embed.FS
-	mainnetId = "osmosis-1"
+	mainnetId = "nuahchain-1"
 	testnetId = "osmo-test-5"
 )
 
@@ -177,7 +177,7 @@ func loadAssetList(initClientCtx client.Context, cmd *cobra.Command, basedenomTo
 
 	fileName := ""
 	if chainId == mainnetId || chainId == "" {
-		fileName = filepath.Join(homeDir, "config", "osmosis-1-assetlist-manual.json")
+		fileName = filepath.Join(homeDir, "config", "nuahchain-1-assetlist-manual.json")
 	} else if chainId == testnetId {
 		fileName = filepath.Join(homeDir, "config", "osmo-test-5-assetlist-manual.json")
 	} else {
@@ -191,7 +191,7 @@ func loadAssetList(initClientCtx client.Context, cmd *cobra.Command, basedenomTo
 	if err != nil {
 		// If we can't open the local file, fall back to the embedded file.
 		if chainId == mainnetId || chainId == "" {
-			fileName = "osmosis-1-assetlist.json"
+			fileName = "nuahchain-1-assetlist.json"
 		} else if chainId == testnetId {
 			fileName = "osmo-test-5-assetlist.json"
 		} else {
@@ -358,7 +358,7 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		WithViper("OSMOSIS")
 
 	tempDir := tempDir()
-	tempApp := osmosis.NewOsmosisApp(log.NewNopLogger(), cosmosdb.NewMemDB(), nil, true, map[int64]bool{}, tempDir, 5, sims.EmptyAppOptions{}, osmosis.EmptyWasmOpts, baseapp.SetChainID("osmosis-1"))
+	tempApp := osmosis.NewNUAHApp(log.NewNopLogger(), cosmosdb.NewMemDB(), nil, true, map[int64]bool{}, tempDir, 5, sims.EmptyAppOptions{}, osmosis.EmptyWasmOpts, baseapp.SetChainID("nuahchain-1"))
 	defer func() {
 		if err := tempApp.Close(); err != nil {
 			panic(err)
@@ -374,7 +374,7 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 	humanReadableDenomsInput, humanReadableDenomsOutput := GetHumanReadableDenomEnvVariables()
 
 	rootCmd := &cobra.Command{
-		Use:   "osmosisd",
+		Use:   "nuahd",
 		Short: "Start osmosis app",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// If not calling the set-env command, this is a no-op.
@@ -507,7 +507,7 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 
 // tempDir create a temporary directory to initialize the command line client
 func tempDir() string {
-	dir, err := os.MkdirTemp("", "osmosisd")
+	dir, err := os.MkdirTemp("", "nuahd")
 	if err != nil {
 		panic(fmt.Sprintf("failed creating temp directory: %s", err.Error()))
 	}
@@ -705,9 +705,9 @@ func initAppConfig() (string, interface{}) {
 
 	wasmCfg := wasmtypes.DefaultWasmConfig()
 
-	OsmosisAppCfg := CustomAppConfig{Config: *srvCfg, OsmosisMempoolConfig: memCfg, SidecarQueryServerConfig: sqsCfg, IndexerConfig: indexCfg, WasmConfig: wasmCfg}
+	NUAHAppCfg := CustomAppConfig{Config: *srvCfg, OsmosisMempoolConfig: memCfg, SidecarQueryServerConfig: sqsCfg, IndexerConfig: indexCfg, WasmConfig: wasmCfg}
 
-	OsmosisAppTemplate := serverconfig.DefaultConfigTemplate + `
+	NUAHAppTemplate := serverconfig.DefaultConfigTemplate + `
 ###############################################################################
 ###                      Osmosis Mempool Configuration                      ###
 ###############################################################################
@@ -792,11 +792,11 @@ service-name = "{{ .OTELConfig.ServiceName }}"
 ###############################################################################
 ` + wasmtypes.DefaultConfigTemplate()
 
-	return OsmosisAppTemplate, OsmosisAppCfg
+	return NUAHAppTemplate, NUAHAppCfg
 }
 
 // initRootCmd initializes root commands when creating a new root command for simd.
-func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig, tempApp *osmosis.OsmosisApp) {
+func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig, tempApp *osmosis.NUAHApp) {
 	cfg := sdk.GetConfig()
 	cfg.Seal()
 
@@ -829,7 +829,7 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig, t
 		pruning.Cmd(newApp, osmosis.DefaultNodeHome),
 	)
 
-	server.AddCommands(rootCmd, osmosis.DefaultNodeHome, newApp, createOsmosisAppAndExport, addModuleInitFlags)
+	server.AddCommands(rootCmd, osmosis.DefaultNodeHome, newApp, createNUAHAppAndExport, addModuleInitFlags)
 	server.AddTestnetCreatorCommand(rootCmd, newTestnetApp, addModuleInitFlags)
 
 	for i, cmd := range rootCmd.Commands() {
@@ -1050,7 +1050,7 @@ func newApp(logger log.Logger, db cosmosdb.DB, traceStore io.Writer, appOpts ser
 		baseAppOptions = append(baseAppOptions, baseapp.SetStoreLoader(upgradetypes.UpgradeStoreLoader(version, &v23.Upgrade.StoreUpgrades)))
 	}
 
-	return osmosis.NewOsmosisApp(
+	return osmosis.NewNUAHApp(
 		logger, db, traceStore, true, skipUpgradeHeights,
 		cast.ToString(appOpts.Get(flags.FlagHome)),
 		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
@@ -1063,11 +1063,11 @@ func newApp(logger log.Logger, db cosmosdb.DB, traceStore io.Writer, appOpts ser
 // newTestnetApp starts by running the normal newApp method. From there, the app interface returned is modified in order
 // for a testnet to be created from the provided app.
 func newTestnetApp(logger log.Logger, db cosmosdb.DB, traceStore io.Writer, appOpts servertypes.AppOptions) servertypes.Application {
-	// Create an app and type cast to an OsmosisApp
+	// Create an app and type cast to an NUAHApp
 	app := newApp(logger, db, traceStore, appOpts)
-	osmosisApp, ok := app.(*osmosis.OsmosisApp)
+	NUAHApp, ok := app.(*osmosis.NUAHApp)
 	if !ok {
-		panic("app created from newApp is not of type osmosisApp")
+		panic("app created from newApp is not of type NUAHApp")
 	}
 
 	newValAddr, ok := appOpts.Get(server.KeyNewValAddr).(bytes.HexBytes)
@@ -1087,12 +1087,12 @@ func newTestnetApp(logger log.Logger, db cosmosdb.DB, traceStore io.Writer, appO
 		panic("upgradeToTrigger is not of type string")
 	}
 
-	// Make modifications to the normal OsmosisApp required to run the network locally
-	return osmosis.InitOsmosisAppForTestnet(osmosisApp, newValAddr, newValPubKey, newOperatorAddress, upgradeToTrigger)
+	// Make modifications to the normal NUAHApp required to run the network locally
+	return osmosis.InitNUAHAppForTestnet(NUAHApp, newValAddr, newValPubKey, newOperatorAddress, upgradeToTrigger)
 }
 
-// createOsmosisAppAndExport creates and exports the new Osmosis app, returns the state of the new Osmosis app for a genesis file.
-func createOsmosisAppAndExport(
+// createNUAHAppAndExport creates and exports the new Osmosis app, returns the state of the new Osmosis app for a genesis file.
+func createNUAHAppAndExport(
 	logger log.Logger, db cosmosdb.DB, traceStore io.Writer, height int64, forZeroHeight bool, jailWhiteList []string,
 	appOpts servertypes.AppOptions, modulesToExport []string,
 ) (servertypes.ExportedApp, error) {
@@ -1100,7 +1100,7 @@ func createOsmosisAppAndExport(
 	encCfg.Marshaler = codec.NewProtoCodec(encCfg.InterfaceRegistry)
 	loadLatest := height == -1
 	homeDir := cast.ToString(appOpts.Get(flags.FlagHome))
-	app := osmosis.NewOsmosisApp(logger, db, traceStore, loadLatest, map[int64]bool{}, homeDir, 0, appOpts, osmosis.EmptyWasmOpts)
+	app := osmosis.NewNUAHApp(logger, db, traceStore, loadLatest, map[int64]bool{}, homeDir, 0, appOpts, osmosis.EmptyWasmOpts)
 
 	if !loadLatest {
 		if err := app.LoadHeight(height); err != nil {
@@ -1117,7 +1117,7 @@ func UpdateAssetListCmd(defaultNodeHome string, mbm module.BasicManager) *cobra.
 		Short: "Updates asset list used by the CLI to replace ibc denoms with human readable names",
 		Long: `Updates asset list used by the CLI to replace ibc denoms with human readable names.
 Outputs:
-	- osmosisdHomeDir + /config/osmosis-1-assetlist-manual.json for osmosis-1
+	- osmosisdHomeDir + /config/nuahchain-1-assetlist-manual.json for nuahchain-1
 	- osmosisdHomeDir + /config/osmo-test-5-assetlist-manual.json for osmo-test-5
 `,
 		Args: cobra.MaximumNArgs(1),
@@ -1137,8 +1137,8 @@ Outputs:
 			}
 
 			if chainID == mainnetId {
-				assetListURL = "https://raw.githubusercontent.com/osmosis-labs/assetlists/main/osmosis-1/osmosis-1.assetlist.json"
-				fileName = filepath.Join(homeDir, "config", "osmosis-1-assetlist-manual.json")
+				assetListURL = "https://raw.githubusercontent.com/osmosis-labs/assetlists/main/nuahchain-1/nuahchain-1.assetlist.json"
+				fileName = filepath.Join(homeDir, "config", "nuahchain-1-assetlist-manual.json")
 			} else if chainID == testnetId {
 				assetListURL = "https://raw.githubusercontent.com/osmosis-labs/assetlists/main/osmo-test-5/osmo-test-5.assetlist.json"
 				fileName = filepath.Join(homeDir, "config", "osmo-test-5-assetlist-manual.json")
@@ -1178,11 +1178,11 @@ func genAutoCompleteCmd(rootCmd *cobra.Command) {
 		Long: `To configure your shell to load completions for each session, add to your profile:
 
 # bash example
-echo '. <(osmosisd enable-cli-autocomplete bash)' >> ~/.bash_profile
+echo '. <(nuahd enable-cli-autocomplete bash)' >> ~/.bash_profile
 source ~/.bash_profile
 
 # zsh example
-echo '. <(osmosisd enable-cli-autocomplete zsh)' >> ~/.zshrc
+echo '. <(nuahd enable-cli-autocomplete zsh)' >> ~/.zshrc
 source ~/.zshrc
 `,
 		DisableFlagsInUseLine: true,
@@ -1311,7 +1311,7 @@ func OverwriteWithCustomConfig(configFilePath string, sectionKeyValues []Section
 	return nil
 }
 
-func autoCliOpts(initClientCtx client.Context, tempApp *osmosis.OsmosisApp) autocli.AppOptions {
+func autoCliOpts(initClientCtx client.Context, tempApp *osmosis.NUAHApp) autocli.AppOptions {
 	modules := make(map[string]appmodule.AppModule, 0)
 	for _, m := range tempApp.ModuleManager().Modules {
 		if moduleWithName, ok := m.(module.HasName); ok {

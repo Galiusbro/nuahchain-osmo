@@ -101,7 +101,7 @@ func BuildTxCli[M sdk.Msg](desc *TxCliDesc) *cobra.Command {
 ### 1. Получение адреса создателя
 
 ```bash
-CREATOR=$(./build/osmosisd keys show alice -a --keyring-backend test)
+CREATOR=$(./build/nuahd keys show alice -a --keyring-backend test)
 echo "CREATOR: $CREATOR"
 ```
 
@@ -140,10 +140,10 @@ cat metadata.json
 ### 5. Выполнение команды
 
 ```bash
-./build/osmosisd tx tokenfactory set-denom-metadata "$(cat metadata.json)" \
+./build/nuahd tx tokenfactory set-denom-metadata "$(cat metadata.json)" \
   --from alice \
   --keyring-backend test \
-  --chain-id localosmosis \
+  --chain-id localnuah \
   --gas auto \
   --gas-adjustment 1.5 \
   --fees 2500stake \
@@ -155,19 +155,19 @@ cat metadata.json
 ### 1. Проверка метаданных
 
 ```bash
-./build/osmosisd query bank denom-metadata factory/creator_address/roma --chain-id localosmosis
+./build/nuahd query bank denom-metadata factory/creator_address/roma --chain-id localnuah
 ```
 
 ### 2. Проверка списка токенов создателя
 
 ```bash
-./build/osmosisd query tokenfactory denoms-from-creator creator_address --chain-id localosmosis
+./build/nuahd query tokenfactory denoms-from-creator creator_address --chain-id localnuah
 ```
 
 ### 3. Проверка баланса
 
 ```bash
-./build/osmosisd query bank balances creator_address --chain-id localosmosis
+./build/nuahd query bank balances creator_address --chain-id localnuah
 ```
 
 ## Пример успешного выполнения
@@ -191,7 +191,7 @@ txhash: 50039A56998D63BCA190D85BD2CEBFBEC98702F7AC810D737F48A9D5603B5FA2
 
 ## Важные замечания
 
-1. **Fee токены**: Используйте правильный fee токен для вашего чейна (например, `stake` для localosmosis)
+1. **Fee токены**: Используйте правильный fee токен для вашего чейна (например, `stake` для localnuah)
 2. **Chain ID**: Всегда указывайте правильный `--chain-id`
 3. **Права доступа**: Только администратор токена может изменять его метаданные
 4. **Формат JSON**: Метаданные должны быть в валидном JSON формате

@@ -8,17 +8,17 @@
 
 ### 1. Настройка окружения
 ```bash
-export CHAIN_ID=localosmosis
+export CHAIN_ID=localnuah
 ```
 
 ### 2. Проверка доступных ключей
 ```bash
-./build/osmosisd keys list --keyring-backend=test
+./build/nuahd keys list --keyring-backend=test
 ```
 
 ### 3. Убедиться, что у Алисы достаточно токенов
 ```bash
-./build/osmosisd q bank balances osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue --chain-id $CHAIN_ID
+./build/nuahd q bank balances osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue --chain-id $CHAIN_ID
 ```
 
 ## Создание пула
@@ -45,7 +45,7 @@ export CHAIN_ID=localosmosis
 ### 2. Команда создания пула
 
 ```bash
-./build/osmosisd tx gamm create-pool \
+./build/nuahd tx gamm create-pool \
   --pool-type stableswap \
   --pool-file pool_stableswap_roma_stake.json \
   --from alice \
@@ -68,7 +68,7 @@ export CHAIN_ID=localosmosis
 sleep 5
 
 # Проверить список пулов
-./build/osmosisd q gamm pools --chain-id $CHAIN_ID
+./build/nuahd q gamm pools --chain-id $CHAIN_ID
 ```
 
 ## Результат
@@ -109,17 +109,17 @@ sleep 5
 
 ### Проверка баланса
 ```bash
-./build/osmosisd q bank balances osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue --chain-id $CHAIN_ID
+./build/nuahd q bank balances osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue --chain-id $CHAIN_ID
 ```
 
 ### Информация о пуле
 ```bash
-./build/osmosisd q gamm pool 1 --chain-id $CHAIN_ID
+./build/nuahd q gamm pool 1 --chain-id $CHAIN_ID
 ```
 
 ### Выполнение swap
 ```bash
-./build/osmosisd tx gamm swap-exact-amount-in \
+./build/nuahd tx gamm swap-exact-amount-in \
   --pool-id 1 \
   --token-in 1000stake \
   --token-out-min-amount 900 \

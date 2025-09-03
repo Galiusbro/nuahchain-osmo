@@ -20,7 +20,7 @@ import (
 
 const (
 	// Most values here are taken from mainnet genesis to mimic real-world behavior:
-	// https://github.com/osmosis-labs/networks/raw/main/osmosis-1/genesis.json
+	// https://github.com/osmosis-labs/networks/raw/main/nuahchain-1/genesis.json
 	defaultGenesisEpochProvisions = "821917808219.178082191780821917"
 	defaultEpochIdentifier        = "day"
 	// actual value taken from mainnet for sanity checking calculations.

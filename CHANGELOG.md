@@ -295,7 +295,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Config
 
 * [#8431](https://github.com/osmosis-labs/osmosis/pull/8431) Fix osmosis-indexer config bug that read osmosis-sqs value
-* [#8436](https://github.com/osmosis-labs/osmosis/pull/8436) Added default indexer config on `osmosisd init`
+* [#8436](https://github.com/osmosis-labs/osmosis/pull/8436) Added default indexer config on `nuahd init`
 
 ## v25.1.2
 
@@ -671,7 +671,7 @@ Epoch optimizations are in this release, see a subset of PR links in v21.1.3 sec
 
 ### Fix Localosmosis docker-compose with state.
 
-* Updated the docker-compose for localosmosis with state to be inline with Operations updated process.
+* Updated the docker-compose for localnuah with state to be inline with Operations updated process.
 
 ### State Breaks
 
@@ -1000,7 +1000,7 @@ and control over token transfers.
   * [#5375](https://github.com/osmosis-labs/osmosis/pull/5373) Add query and cli for lock reward receiver
   * [#4757](https://github.com/osmosis-labs/osmosis/pull/4752) Pagination for all intermediary accounts
   * [#5066](https://github.com/osmosis-labs/osmosis/pull/5066) Fixed bad stargate query declaration
-  * [#4868](https://github.com/osmosis-labs/osmosis/pull/4868) Remove wasmEnabledProposals []wasm.ProposalType from NewOsmosisApp
+  * [#4868](https://github.com/osmosis-labs/osmosis/pull/4868) Remove wasmEnabledProposals []wasm.ProposalType from NewNUAHApp
   * [#4791](https://github.com/osmosis-labs/osmosis/pull/4791) feat(osmoutils): cosmwasm query and message wrappers
   * [#4549](https://github.com/osmosis-labs/osmosis/pull/4549) added single pool query
   * [#4659](https://github.com/osmosis-labs/osmosis/pull/4659) feat: implement AllPools query in x/poolmanager
@@ -1037,8 +1037,8 @@ and control over token transfers.
   * [#5065](https://github.com/osmosis-labs/osmosis/pull/5065) Use cosmossdk.io/errors
   * [#4549](https://github.com/osmosis-labs/osmosis/pull/4549) Add single pool price estimate queries
   * [#4767](https://github.com/osmosis-labs/osmosis/pull/4767) Disable create pool with non-zero exit fee
-  * [#4847](https://github.com/osmosis-labs/osmosis/pull/4847) Update `make build` command to build only `osmosisd` binary
-  * [#4891](https://github.com/osmosis-labs/osmosis/pull/4891) Enable CORS by default on localosmosis
+  * [#4847](https://github.com/osmosis-labs/osmosis/pull/4847) Update `make build` command to build only `nuahd` binary
+  * [#4891](https://github.com/osmosis-labs/osmosis/pull/4891) Enable CORS by default on localnuah
   * [#4892](https://github.com/osmosis-labs/osmosis/pull/4847) Update Golang to 1.20
   * [#4893](https://github.com/osmosis-labs/osmosis/pull/4893) Update alpine docker base image to `alpine:3.17`
   * [#4907](https://github.com/osmosis-labs/osmosis/pull/4847) Add migrate-position cli
@@ -1199,7 +1199,7 @@ Additionally, the swagger files for v13 have been updated to improve compatibili
 * [#3634](https://github.com/osmosis-labs/osmosis/pull/3634) (Makefile) Ensure correct golang version in make build and make install. (Thank you @jhernandezb )
 * [#3712](https://github.com/osmosis-labs/osmosis/pull/3712) replace `osmomath.BigDec` `Power` with `PowerInteger`
 * [#3711](https://github.com/osmosis-labs/osmosis/pull/3711) Use Dec instead of Int for additive `ErrTolerace` in `osmoutils`.
-* [3647](https://github.com/osmosis-labs/osmosis/pull/3647), [3942](https://github.com/osmosis-labs/osmosis/pull/3942) (CLI) re-order the command line arguments for `osmosisd tx gamm join-swap-share-amount-out`
+* [3647](https://github.com/osmosis-labs/osmosis/pull/3647), [3942](https://github.com/osmosis-labs/osmosis/pull/3942) (CLI) re-order the command line arguments for `nuahd tx gamm join-swap-share-amount-out`
 
 ## v13.0.0
 
@@ -1306,7 +1306,7 @@ which acts as a fuzz testing tool tailored for the SDK state machine.
 * [#2390](https://github.com/osmosis-labs/osmosis/pull/2390) x/mint remove unused mintCoins parameter from AfterDistributeMintedCoin
 * [#2418](https://github.com/osmosis-labs/osmosis/pull/2418) x/mint remove SetInitialSupplyOffsetDuringMigration from keeper
 * [#2417](https://github.com/osmosis-labs/osmosis/pull/2417) x/mint unexport keeper `SetLastReductionEpochNum`, `getLastReductionEpochNum`, `CreateDeveloperVestingModuleAccount`, and `MintCoins`
-* [#2587](https://github.com/osmosis-labs/osmosis/pull/2587) remove encoding config argument from NewOsmosisApp
+* [#2587](https://github.com/osmosis-labs/osmosis/pull/2587) remove encoding config argument from NewNUAHApp
 x
 
 ### Features
@@ -1438,7 +1438,7 @@ Upgrade from wasmd v0.23.x to [v0.27.0](https://github.com/CosmWasm/wasmd/releas
 The TokenFactory module is added to the chain, making it possible for users and contracts to make new native tokens.
 Cosmwasm bindings have been added, to make swapping and creating these new tokens easier within the contract ecosystem.
 
-* [#1640](https://github.com/osmosis-labs/osmosis/pull/1640) fix: localosmosis to work for testing cosmwasm contracts
+* [#1640](https://github.com/osmosis-labs/osmosis/pull/1640) fix: localnuah to work for testing cosmwasm contracts
 
 ### Other Features
 
@@ -1588,7 +1588,7 @@ The large features include:
 * Local mempool filters to charge higher gas for arbitrage txs
 * Allow partial unlocking of non-superfluid'd locks
 
-Upgrade instructions for node operators can be found [here](https://github.com/osmosis-labs/osmosis/blob/main/networks/osmosis-1/upgrades/v7/guide.md)
+Upgrade instructions for node operators can be found [here](https://github.com/osmosis-labs/osmosis/blob/main/networks/nuahchain-1/upgrades/v7/guide.md)
 
 The v7 release introduces Superfluid Staking! This allows governance-approved LP shares to be staked to help secure the network.
 
@@ -1699,7 +1699,7 @@ The v7 release introduces Superfluid Staking! This allows governance-approved LP
 
 * [#722](https://github.com/osmosis-labs/osmosis/issues/722) reuse code for parsing integer slices from string
 * [#704](https://github.com/osmosis-labs/osmosis/pull/704) fix rocksdb
-* [#666](https://github.com/osmosis-labs/osmosis/pull/666) Fix the `--log-level` and `--log-format` commands on `osmosisd start`
+* [#666](https://github.com/osmosis-labs/osmosis/pull/666) Fix the `--log-level` and `--log-format` commands on `nuahd start`
 * [#655](https://github.com/osmosis-labs/osmosis/pull/655) Make the default genesis for pool-incentives work by default
 * [97ac2a8](https://github.com/osmosis-labs/osmosis/commit/97ac2a86303fc8966a4c169107e0945775107e67) Fix InitGenesis bug for gauges
 
@@ -1735,7 +1735,7 @@ Notable features include:
 * Blocking the OFAC banned Ethereum addresses.
 * Several (linear factor) epoch time improvements. (Most were present in v4.2.0)
 
-Upgrade instructions for node operators can be found [here](https://github.com/osmosis-labs/osmosis/blob/v5.x/networks/osmosis-1/upgrades/v5/guide.md)
+Upgrade instructions for node operators can be found [here](https://github.com/osmosis-labs/osmosis/blob/v5.x/networks/nuahchain-1/upgrades/v5/guide.md)
 
 ## Features
 
@@ -1795,7 +1795,7 @@ This release improves the CLI UX of creating and querying gauges.
 
 ## [v1.0.1](https://github.com/osmosis-labs/osmosis/releases/tag/v1.0.1) - 2021-06-17
 
-This release fixes a bug in `osmosisd version` always displaying 0.0.1.
+This release fixes a bug in `nuahd version` always displaying 0.0.1.
 
 ## [v1.0.0](https://github.com/osmosis-labs/osmosis/releases/tag/v1.0.0-rc0) - 2021-06-16
 

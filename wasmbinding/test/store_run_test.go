@@ -38,7 +38,7 @@ func TestNoStorageWithoutProposal(t *testing.T) {
 	require.Error(t, err)
 }
 
-func storeCodeViaProposal(t *testing.T, ctx sdk.Context, osmosis *app.OsmosisApp, addr sdk.AccAddress) {
+func storeCodeViaProposal(t *testing.T, ctx sdk.Context, osmosis *app.NUAHApp, addr sdk.AccAddress) {
 	t.Helper()
 	govKeeper := osmosis.GovKeeper
 	wasmCode, err := os.ReadFile("../testdata/hackatom.wasm")

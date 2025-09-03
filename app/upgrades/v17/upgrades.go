@@ -37,7 +37,7 @@ type clPoolCreationInfo struct {
 }
 
 const (
-	mainnetChainID = "osmosis-1"
+	mainnetChainID = "nuahchain-1"
 	e2eChainA      = "osmo-test-a"
 	e2eChainB      = "osmo-test-b"
 )

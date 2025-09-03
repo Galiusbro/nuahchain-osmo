@@ -65,7 +65,7 @@ func (s *AggregatedAuthenticatorsTest) SetupTest() {
 		Confirm:        testutils.Always,
 	}
 	s.spyAuth = testutils.NewSpyAuthenticator(
-		s.OsmosisApp.GetKVStoreKey()[smartaccounttypes.StoreKey],
+		s.NUAHApp.GetKVStoreKey()[smartaccounttypes.StoreKey],
 	)
 
 	am.RegisterAuthenticator(s.AnyOfAuth)
@@ -201,14 +201,14 @@ func (s *AggregatedAuthenticatorsTest) TestAnyOf() {
 				s.Require().NoError(err)
 
 				// Generate authentication request
-				ak := s.OsmosisApp.AccountKeeper
+				ak := s.NUAHApp.AccountKeeper
 				sigModeHandler := s.EncodingConfig.TxConfig.SignModeHandler()
 				// sample msg
 				msg := &bank.MsgSend{FromAddress: s.TestAccAddress[0].String(), ToAddress: "to", Amount: sdk.NewCoins(sdk.NewInt64Coin("foo", 1))}
 				// sample tx
 				tx, err := s.GenSimpleTx([]sdk.Msg{msg}, []cryptotypes.PrivKey{s.TestPrivKeys[0]})
 				s.Require().NoError(err)
-				request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.OsmosisApp.AppCodec(), ak, sigModeHandler, s.TestAccAddress[0], s.TestAccAddress[0], nil, sdk.NewCoins(), msg, tx, 0, false, authenticator.SequenceMatch)
+				request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.NUAHApp.AppCodec(), ak, sigModeHandler, s.TestAccAddress[0], s.TestAccAddress[0], nil, sdk.NewCoins(), msg, tx, 0, false, authenticator.SequenceMatch)
 				s.Require().NoError(err)
 
 				// Attempt to authenticate using initialized authenticator
@@ -343,7 +343,7 @@ func (s *AggregatedAuthenticatorsTest) TestAllOf() {
 				s.Require().NoError(err)
 
 				// Generate authentication request
-				ak := s.OsmosisApp.AccountKeeper
+				ak := s.NUAHApp.AccountKeeper
 				sigModeHandler := s.EncodingConfig.TxConfig.SignModeHandler()
 
 				// sample msg
@@ -351,7 +351,7 @@ func (s *AggregatedAuthenticatorsTest) TestAllOf() {
 				// sample tx
 				tx, err := s.GenSimpleTx([]sdk.Msg{msg}, []cryptotypes.PrivKey{s.TestPrivKeys[0]})
 				s.Require().NoError(err)
-				cdc := s.OsmosisApp.AppCodec()
+				cdc := s.NUAHApp.AppCodec()
 				request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, cdc, ak, sigModeHandler, s.TestAccAddress[0], s.TestAccAddress[0], nil, sdk.NewCoins(), msg, tx, 0, false, authenticator.SequenceMatch)
 				s.Require().NoError(err)
 
@@ -441,14 +441,14 @@ func (s *AggregatedAuthenticatorsTest) TestComposedAuthenticator() {
 			s.Require().NoError(err)
 
 			// Generate authentication request
-			ak := s.OsmosisApp.AccountKeeper
+			ak := s.NUAHApp.AccountKeeper
 			sigModeHandler := s.EncodingConfig.TxConfig.SignModeHandler()
 			// sample msg
 			msg := &bank.MsgSend{FromAddress: s.TestAccAddress[0].String(), ToAddress: "to", Amount: sdk.NewCoins(sdk.NewInt64Coin("foo", 1))}
 			// sample tx
 			tx, err := s.GenSimpleTx([]sdk.Msg{msg}, []cryptotypes.PrivKey{s.TestPrivKeys[0]})
 			s.Require().NoError(err)
-			request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.OsmosisApp.AppCodec(), ak, sigModeHandler, s.TestAccAddress[0], s.TestAccAddress[0], nil, sdk.NewCoins(), msg, tx, 0, false, authenticator.SequenceMatch)
+			request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.NUAHApp.AppCodec(), ak, sigModeHandler, s.TestAccAddress[0], s.TestAccAddress[0], nil, sdk.NewCoins(), msg, tx, 0, false, authenticator.SequenceMatch)
 			s.Require().NoError(err)
 
 			err = initializedTop.Authenticate(s.Ctx, request)

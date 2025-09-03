@@ -59,11 +59,11 @@ def checksums_to_binaries_json(checksums):
     for line in checksums.splitlines():
         checksum, filename = line.split('  ')
 
-        if not filename.endswith('.tar.gz') and filename.startswith('osmosisd'):
+        if not filename.endswith('.tar.gz') and filename.startswith('nuahd'):
             try:
                 _, tag, platform, arch = filename.split('-')
             except ValueError:
-                print(f"Error: Expected binary name in the form: osmosisd-X.Y.Z-platform-architecture, but got {filename}")
+                print(f"Error: Expected binary name in the form: nuahd-X.Y.Z-platform-architecture, but got {filename}")
                 sys.exit(1)
             _, tag, platform, arch,  = filename.split('-')
             # exclude universal binaries and windows binaries

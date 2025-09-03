@@ -2,49 +2,49 @@
 set -e
 
 # always returns true so set -e doesn't exit if it is not running.
-killall osmosisd || true
-rm -rf $HOME/.osmosisd/
+killall nuahd || true
+rm -rf $HOME/.nuahd/
 
-# make four osmosis directories
-mkdir $HOME/.osmosisd
-mkdir $HOME/.osmosisd/validator1
-mkdir $HOME/.osmosisd/validator2
-mkdir $HOME/.osmosisd/validator3
-mkdir $HOME/.osmosisd/validator4
+# make four nuah directories
+mkdir $HOME/.nuahd
+mkdir $HOME/.nuahd/validator1
+mkdir $HOME/.nuahd/validator2
+mkdir $HOME/.nuahd/validator3
+mkdir $HOME/.nuahd/validator4
 
 # init all four validators
-osmosisd init --chain-id=testing validator1 --home=$HOME/.osmosisd/validator1
-osmosisd init --chain-id=testing validator2 --home=$HOME/.osmosisd/validator2
-osmosisd init --chain-id=testing validator3 --home=$HOME/.osmosisd/validator3
-osmosisd init --chain-id=testing validator4 --home=$HOME/.osmosisd/validator4
+nuahd init --chain-id=testing validator1 --home=$HOME/.nuahd/validator1
+nuahd init --chain-id=testing validator2 --home=$HOME/.nuahd/validator2
+nuahd init --chain-id=testing validator3 --home=$HOME/.nuahd/validator3
+nuahd init --chain-id=testing validator4 --home=$HOME/.nuahd/validator4
 # create keys for all four validators
-osmosisd keys add validator1 --keyring-backend=test --home=$HOME/.osmosisd/validator1
-osmosisd keys add validator2 --keyring-backend=test --home=$HOME/.osmosisd/validator2
-osmosisd keys add validator3 --keyring-backend=test --home=$HOME/.osmosisd/validator3
-osmosisd keys add validator4 --keyring-backend=test --home=$HOME/.osmosisd/validator4
+nuahd keys add validator1 --keyring-backend=test --home=$HOME/.nuahd/validator1
+nuahd keys add validator2 --keyring-backend=test --home=$HOME/.nuahd/validator2
+nuahd keys add validator3 --keyring-backend=test --home=$HOME/.nuahd/validator3
+nuahd keys add validator4 --keyring-backend=test --home=$HOME/.nuahd/validator4
 
 update_genesis () {    
-    cat $HOME/.osmosisd/validator1/config/genesis.json | jq "$1" > $HOME/.osmosisd/validator1/config/tmp_genesis.json && mv $HOME/.osmosisd/validator1/config/tmp_genesis.json $HOME/.osmosisd/validator1/config/genesis.json
+    cat $HOME/.nuahd/validator1/config/genesis.json | jq "$1" > $HOME/.nuahd/validator1/config/tmp_genesis.json && mv $HOME/.nuahd/validator1/config/tmp_genesis.json $HOME/.nuahd/validator1/config/genesis.json
 }
 
-# change staking denom to uosmo
-update_genesis '.app_state["staking"]["params"]["bond_denom"]="uosmo"'
+# change staking denom to unuah
+update_genesis '.app_state["staking"]["params"]["bond_denom"]="unuah"'
 
 # create validator node with tokens to transfer to the four other nodes
-osmosisd add-genesis-account $(osmosisd keys show validator1 -a --keyring-backend=test --home=$HOME/.osmosisd/validator1) 100000000000uosmo,10000000000000000000stake --home=$HOME/.osmosisd/validator1
-osmosisd gentx validator1 500000000uosmo --keyring-backend=test --home=$HOME/.osmosisd/validator1 --chain-id=testing
-osmosisd collect-gentxs --home=$HOME/.osmosisd/validator1
+nuahd add-genesis-account $(nuahd keys show validator1 -a --keyring-backend=test --home=$HOME/.nuahd/validator1) 100000000000unuah,10000000000000000000stake --home=$HOME/.nuahd/validator1
+nuahd gentx validator1 500000000unuah --keyring-backend=test --home=$HOME/.nuahd/validator1 --chain-id=testing
+nuahd collect-gentxs --home=$HOME/.nuahd/validator1
 
 
 # update staking genesis
 update_genesis '.app_state["staking"]["params"]["unbonding_time"]="240s"'
 
-# update crisis variable to uosmo
-update_genesis '.app_state["crisis"]["constant_fee"]["denom"]="uosmo"'
+# update crisis variable to unuah
+update_genesis '.app_state["crisis"]["constant_fee"]["denom"]="unuah"'
 
 # update gov genesis
 update_genesis '.app_state["gov"]["voting_params"]["voting_period"]="60s"'
-update_genesis '.app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="uosmo"'
+update_genesis '.app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="unuah"'
 
 # update epochs genesis
 update_genesis '.app_state["epochs"]["epochs"][1]["duration"]="60s"'
@@ -53,7 +53,7 @@ update_genesis '.app_state["epochs"]["epochs"][1]["duration"]="60s"'
 update_genesis '.app_state["poolincentives"]["lockable_durations"][0]="120s"'
 update_genesis '.app_state["poolincentives"]["lockable_durations"][1]="180s"'
 update_genesis '.app_state["poolincentives"]["lockable_durations"][2]="240s"'
-update_genesis '.app_state["poolincentives"]["params"]["minted_denom"]="uosmo"'
+update_genesis '.app_state["poolincentives"]["params"]["minted_denom"]="unuah"'
 
 # update incentives genesis
 update_genesis '.app_state["incentives"]["lockable_durations"][0]="1s"'
@@ -63,11 +63,11 @@ update_genesis '.app_state["incentives"]["lockable_durations"][3]="240s"'
 update_genesis '.app_state["incentives"]["params"]["distr_epoch_identifier"]="day"'
 
 # update mint genesis
-update_genesis '.app_state["mint"]["params"]["mint_denom"]="uosmo"'
+update_genesis '.app_state["mint"]["params"]["mint_denom"]="unuah"'
 update_genesis '.app_state["mint"]["params"]["epoch_identifier"]="day"'
 
 # update gamm genesis
-update_genesis '.app_state["gamm"]["params"]["pool_creation_fee"][0]["denom"]="uosmo"'
+update_genesis '.app_state["gamm"]["params"]["pool_creation_fee"][0]["denom"]="unuah"'
 
 # update cl genesis
 update_genesis '.app_state["concentratedliquidity"]["params"]["is_permissionless_pool_creation_enabled"]=true'
@@ -81,10 +81,10 @@ update_genesis '.app_state["concentratedliquidity"]["params"]["is_permissionless
 
 
 # change app.toml values
-VALIDATOR1_APP_TOML=$HOME/.osmosisd/validator1/config/app.toml
-VALIDATOR2_APP_TOML=$HOME/.osmosisd/validator2/config/app.toml
-VALIDATOR3_APP_TOML=$HOME/.osmosisd/validator3/config/app.toml
-VALIDATOR4_APP_TOML=$HOME/.osmosisd/validator4/config/app.toml
+VALIDATOR1_APP_TOML=$HOME/.nuahd/validator1/config/app.toml
+VALIDATOR2_APP_TOML=$HOME/.nuahd/validator2/config/app.toml
+VALIDATOR3_APP_TOML=$HOME/.nuahd/validator3/config/app.toml
+VALIDATOR4_APP_TOML=$HOME/.nuahd/validator4/config/app.toml
 
 # validator1
 sed -i -E 's|0.0.0.0:9090|0.0.0.0:9050|g' $VALIDATOR1_APP_TOML
@@ -108,10 +108,10 @@ sed -i -E 's|adaptive-fee-enabled = "false"|adaptive-fee-enabled = "true"|g' $VA
 
 
 # change config.toml values
-VALIDATOR1_CONFIG=$HOME/.osmosisd/validator1/config/config.toml
-VALIDATOR2_CONFIG=$HOME/.osmosisd/validator2/config/config.toml
-VALIDATOR3_CONFIG=$HOME/.osmosisd/validator3/config/config.toml
-VALIDATOR4_CONFIG=$HOME/.osmosisd/validator4/config/config.toml
+VALIDATOR1_CONFIG=$HOME/.nuahd/validator1/config/config.toml
+VALIDATOR2_CONFIG=$HOME/.nuahd/validator2/config/config.toml
+VALIDATOR3_CONFIG=$HOME/.nuahd/validator3/config/config.toml
+VALIDATOR4_CONFIG=$HOME/.nuahd/validator4/config/config.toml
 
 # validator1
 sed -i -E 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $VALIDATOR1_CONFIG
@@ -144,33 +144,33 @@ sed -i -E 's|prometheus_listen_addr = ":26660"|prometheus_listen_addr = ":26610"
 
 
 # copy validator1 genesis file to validator2-4
-cp $HOME/.osmosisd/validator1/config/genesis.json $HOME/.osmosisd/validator2/config/genesis.json
-cp $HOME/.osmosisd/validator1/config/genesis.json $HOME/.osmosisd/validator3/config/genesis.json
-cp $HOME/.osmosisd/validator1/config/genesis.json $HOME/.osmosisd/validator4/config/genesis.json
+cp $HOME/.nuahd/validator1/config/genesis.json $HOME/.nuahd/validator2/config/genesis.json
+cp $HOME/.nuahd/validator1/config/genesis.json $HOME/.nuahd/validator3/config/genesis.json
+cp $HOME/.nuahd/validator1/config/genesis.json $HOME/.nuahd/validator4/config/genesis.json
 
 
 # copy tendermint node id of validator1 to persistent peers of validator2-4
-sed -i -E "s|persistent_peers = \"\"|persistent_peers = \"$(osmosisd tendermint show-node-id --home=$HOME/.osmosisd/validator1)@localhost:26656\"|g" $HOME/.osmosisd/validator2/config/config.toml
-sed -i -E "s|persistent_peers = \"\"|persistent_peers = \"$(osmosisd tendermint show-node-id --home=$HOME/.osmosisd/validator1)@localhost:26656\"|g" $HOME/.osmosisd/validator3/config/config.toml
-sed -i -E "s|persistent_peers = \"\"|persistent_peers = \"$(osmosisd tendermint show-node-id --home=$HOME/.osmosisd/validator1)@localhost:26656\"|g" $HOME/.osmosisd/validator4/config/config.toml
+sed -i -E "s|persistent_peers = \"\"|persistent_peers = \"$(nuahd tendermint show-node-id --home=$HOME/.nuahd/validator1)@localhost:26656\"|g" $HOME/.nuahd/validator2/config/config.toml
+sed -i -E "s|persistent_peers = \"\"|persistent_peers = \"$(nuahd tendermint show-node-id --home=$HOME/.nuahd/validator1)@localhost:26656\"|g" $HOME/.nuahd/validator3/config/config.toml
+sed -i -E "s|persistent_peers = \"\"|persistent_peers = \"$(nuahd tendermint show-node-id --home=$HOME/.nuahd/validator1)@localhost:26656\"|g" $HOME/.nuahd/validator4/config/config.toml
 
 # start all four validators
-tmux new -s validator1 -d osmosisd start --home=$HOME/.osmosisd/validator1
-tmux new -s validator2 -d osmosisd start --home=$HOME/.osmosisd/validator2
-tmux new -s validator3 -d osmosisd start --home=$HOME/.osmosisd/validator3
-tmux new -s validator4 -d osmosisd start --home=$HOME/.osmosisd/validator4
+tmux new -s validator1 -d nuahd start --home=$HOME/.nuahd/validator1
+tmux new -s validator2 -d nuahd start --home=$HOME/.nuahd/validator2
+tmux new -s validator3 -d nuahd start --home=$HOME/.nuahd/validator3
+tmux new -s validator4 -d nuahd start --home=$HOME/.nuahd/validator4
 
 
-# send uosmo from first validator to second validator
+# send unuah from first validator to second validator
 echo "Waiting 7 seconds to send funds to validators 2, 3, and 4..."
 sleep 7
-osmosisd tx bank send validator1 $(osmosisd keys show validator2 -a --keyring-backend=test --home=$HOME/.osmosisd/validator2) 500000000uosmo,50000000000stake --keyring-backend=test --home=$HOME/.osmosisd/validator1 --chain-id=testing --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
-osmosisd tx bank send validator1 $(osmosisd keys show validator3 -a --keyring-backend=test --home=$HOME/.osmosisd/validator3) 400000000uosmo,500000000stake --keyring-backend=test --home=$HOME/.osmosisd/validator1 --chain-id=testing --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
-osmosisd tx bank send validator1 $(osmosisd keys show validator4 -a --keyring-backend=test --home=$HOME/.osmosisd/validator4) 400000000uosmo,500000000stake --keyring-backend=test --home=$HOME/.osmosisd/validator1 --chain-id=testing --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
+nuahd tx bank send validator1 $(nuahd keys show validator2 -a --keyring-backend=test --home=$HOME/.nuahd/validator2) 500000000unuah,50000000000stake --keyring-backend=test --home=$HOME/.nuahd/validator1 --chain-id=testing --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
+nuahd tx bank send validator1 $(nuahd keys show validator3 -a --keyring-backend=test --home=$HOME/.nuahd/validator3) 400000000unuah,500000000stake --keyring-backend=test --home=$HOME/.nuahd/validator1 --chain-id=testing --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
+nuahd tx bank send validator1 $(nuahd keys show validator4 -a --keyring-backend=test --home=$HOME/.nuahd/validator4) 400000000unuah,500000000stake --keyring-backend=test --home=$HOME/.nuahd/validator1 --chain-id=testing --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
 
 # create second, third and fourth validator
-osmosisd tx staking create-validator --amount=500000000uosmo --from=validator2 --pubkey=$(osmosisd tendermint show-validator --home=$HOME/.osmosisd/validator2) --moniker="validator2" --chain-id="testing" --commission-rate="0.1" --commission-max-rate="0.2" --commission-max-change-rate="0.05" --min-self-delegation="500000000" --keyring-backend=test --home=$HOME/.osmosisd/validator2 --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
-osmosisd tx staking create-validator --amount=400000000uosmo --from=validator3 --pubkey=$(osmosisd tendermint show-validator --home=$HOME/.osmosisd/validator3) --moniker="validator3" --chain-id="testing" --commission-rate="0.1" --commission-max-rate="0.2" --commission-max-change-rate="0.05" --min-self-delegation="400000000" --keyring-backend=test --home=$HOME/.osmosisd/validator3 --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
-osmosisd tx staking create-validator --amount=400000000uosmo --from=validator4 --pubkey=$(osmosisd tendermint show-validator --home=$HOME/.osmosisd/validator4) --moniker="validator4" --chain-id="testing" --commission-rate="0.1" --commission-max-rate="0.2" --commission-max-change-rate="0.05" --min-self-delegation="400000000" --keyring-backend=test --home=$HOME/.osmosisd/validator4 --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
+nuahd tx staking create-validator --amount=500000000unuah --from=validator2 --pubkey=$(nuahd tendermint show-validator --home=$HOME/.nuahd/validator2) --moniker="validator2" --chain-id="testing" --commission-rate="0.1" --commission-max-rate="0.2" --commission-max-change-rate="0.05" --min-self-delegation="500000000" --keyring-backend=test --home=$HOME/.nuahd/validator2 --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
+nuahd tx staking create-validator --amount=400000000unuah --from=validator3 --pubkey=$(nuahd tendermint show-validator --home=$HOME/.nuahd/validator3) --moniker="validator3" --chain-id="testing" --commission-rate="0.1" --commission-max-rate="0.2" --commission-max-change-rate="0.05" --min-self-delegation="400000000" --keyring-backend=test --home=$HOME/.nuahd/validator3 --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
+nuahd tx staking create-validator --amount=400000000unuah --from=validator4 --pubkey=$(nuahd tendermint show-validator --home=$HOME/.nuahd/validator4) --moniker="validator4" --chain-id="testing" --commission-rate="0.1" --commission-max-rate="0.2" --commission-max-change-rate="0.05" --min-self-delegation="400000000" --keyring-backend=test --home=$HOME/.nuahd/validator4 --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
 
 echo "All 4 Validators are up and running!"

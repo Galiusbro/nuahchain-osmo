@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	mainnetChainID = "osmosis-1"
+	mainnetChainID = "nuahchain-1"
 	// Edgenet is to function exactly the samas mainnet, and expected
 	// to be state-exported from mainnet state.
 	edgenetChainID = "edgenet"

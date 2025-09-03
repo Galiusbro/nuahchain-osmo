@@ -39,7 +39,7 @@ var testGenesis = types.GenesisState{
 	IntermediaryAccounts: []types.SuperfluidIntermediaryAccount{
 		{
 			Denom:   DefaultGammAsset,
-			ValAddr: "osmovaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n",
+			ValAddr: "nuahvaloper1cyw4vw20el8e7ez8080md0r8psg25n0cq98a9n",
 			GaugeId: 1,
 		},
 	},

@@ -44,9 +44,9 @@ var TestingDirectories []string
 func SetupTestingApp() (ibctesting.TestingApp, map[string]json.RawMessage) {
 	// TODO: find a better way to do this, the likely hood that this will collide is small but not 0
 	dirName := fmt.Sprintf("%d", rand.Int())
-	osmosisApp := app.SetupWithCustomHome(false, dirName)
+	NUAHApp := app.SetupWithCustomHome(false, dirName)
 	TestingDirectories = append(TestingDirectories, dirName)
-	return osmosisApp, app.NewDefaultGenesisState()
+	return NUAHApp, app.NewDefaultGenesisState()
 }
 
 // Copied from ibctesting because it's private
@@ -127,7 +127,7 @@ func (chain *TestChain) SendMsgsFromPrivKeys(privKeys []cryptotypes.PrivKey, msg
 		}
 		signer := signers[0]
 		signerAcc := sdk.AccAddress(signer)
-		account := chain.GetOsmosisApp().AccountKeeper.GetAccount(chain.GetContext(), signerAcc)
+		account := chain.GetNUAHApp().AccountKeeper.GetAccount(chain.GetContext(), signerAcc)
 		accountNumbers[i] = account.GetAccountNumber()
 		if sequence, ok := seenSequence[signerAcc.String()]; ok {
 			accountSequences[i] = sequence + 1
@@ -151,7 +151,7 @@ func (chain *TestChain) SendMsgsFromPrivKeys(privKeys []cryptotypes.PrivKey, msg
 			return nil, err
 		}
 		signer := signers[0]
-		account := chain.GetOsmosisApp().AccountKeeper.GetAccount(chain.GetContext(), signer)
+		account := chain.GetNUAHApp().AccountKeeper.GetAccount(chain.GetContext(), signer)
 		err = account.SetSequence(account.GetSequence() + 1)
 		if err != nil {
 			return nil, err
@@ -221,7 +221,7 @@ func SignAndDeliver(
 
 // Move epochs to the future to avoid issues with minting
 func (chain *TestChain) MoveEpochsToTheFuture() error {
-	epochsKeeper := chain.GetOsmosisApp().EpochsKeeper
+	epochsKeeper := chain.GetNUAHApp().EpochsKeeper
 	ctx := chain.GetContext()
 	for _, epoch := range epochsKeeper.AllEpochInfos(ctx) {
 		epoch.StartTime = ctx.BlockTime().Add(time.Hour * 24 * 30)
@@ -234,9 +234,9 @@ func (chain *TestChain) MoveEpochsToTheFuture() error {
 	return nil
 }
 
-// GetOsmosisApp returns the current chain's app as an OsmosisApp
-func (chain *TestChain) GetOsmosisApp() *app.OsmosisApp {
-	v, _ := chain.App.(*app.OsmosisApp)
+// GetNUAHApp returns the current chain's app as an NUAHApp
+func (chain *TestChain) GetNUAHApp() *app.NUAHApp {
+	v, _ := chain.App.(*app.NUAHApp)
 	return v
 }
 
@@ -260,7 +260,7 @@ func (chain *TestChain) SendMsgsFromPrivKeysWithAuthenticator(
 		}
 		signer := signersFromMsg[0]
 		signerAcc := sdk.AccAddress(signer)
-		account := chain.GetOsmosisApp().AccountKeeper.GetAccount(chain.GetContext(), signerAcc)
+		account := chain.GetNUAHApp().AccountKeeper.GetAccount(chain.GetContext(), signerAcc)
 		accountNumbers[i] = account.GetAccountNumber()
 		if sequence, ok := seenSequence[signerAcc.String()]; ok {
 			accountSequences[i] = sequence + 1
@@ -305,7 +305,7 @@ func (chain *TestChain) SendMsgsFromPrivKeysWithAuthenticator(
 			return nil, err
 		}
 		signer := signers[0]
-		account := chain.GetOsmosisApp().AccountKeeper.GetAccount(chain.GetContext(), signer)
+		account := chain.GetNUAHApp().AccountKeeper.GetAccount(chain.GetContext(), signer)
 		err = account.SetSequence(account.GetSequence() + 1)
 		if err != nil {
 			return nil, err
@@ -477,7 +477,7 @@ func (chain *TestChain) SendMsgsFromPrivKeysWithAuthenticatorAndCompoundSigs(
 		}
 		signer := signers[0]
 		signerAcc := sdk.AccAddress(signer)
-		account := chain.GetOsmosisApp().AccountKeeper.GetAccount(chain.GetContext(), signerAcc)
+		account := chain.GetNUAHApp().AccountKeeper.GetAccount(chain.GetContext(), signerAcc)
 		accountNumbers[i] = account.GetAccountNumber()
 		if sequence, ok := seenSequence[signerAcc.String()]; ok {
 			accountSequences[i] = sequence + 1
@@ -522,7 +522,7 @@ func (chain *TestChain) SendMsgsFromPrivKeysWithAuthenticatorAndCompoundSigs(
 			return nil, err
 		}
 		signer := signers[0]
-		account := chain.GetOsmosisApp().AccountKeeper.GetAccount(chain.GetContext(), signer)
+		account := chain.GetNUAHApp().AccountKeeper.GetAccount(chain.GetContext(), signer)
 		err = account.SetSequence(account.GetSequence() + 1)
 		if err != nil {
 			return nil, err

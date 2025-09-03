@@ -47,7 +47,7 @@ func DebugProtoMarshalledBytes() *cobra.Command {
 Especially useful when debugging proto marshalled bytes or debugging stargate queries
 
 Example:
-	osmosisd debug proto-marshalled-bytes "/cosmos.bank.v1beta1.Query/Balance" bank QueryBalanceRequest "osmo1t7egva48prqmzl59x5ngv4zx0dtrwewc9m7z44" stake
+	nuahd debug proto-marshalled-bytes "/cosmos.bank.v1beta1.Query/Balance" bank QueryBalanceRequest "osmo1t7egva48prqmzl59x5ngv4zx0dtrwewc9m7z44" stake
 	`,
 		Args: cobra.MinimumNArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {

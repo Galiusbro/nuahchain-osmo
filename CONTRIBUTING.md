@@ -345,7 +345,7 @@ You can also feel free to do `make format` if you're getting errors related to `
 
 There are several steps that go into a major release
 
-- The GitHub release is created in our private repo via this [GitHub workflow](https://github.com/osmosis-labs/osmosis-ci/blob/main/.github/workflows/create-release.yaml). The workflow is manually triggered from the [osmosis-ci repository](https://github.com/osmosis-labs/osmosis-ci). The workflow uses the `make build-reproducible` command to create the `osmosisd` binaries using the default [Makefile](https://github.com/osmosis-labs/osmosis/blob/main/Makefile#L99).
+- The GitHub release is created in our private repo via this [GitHub workflow](https://github.com/osmosis-labs/osmosis-ci/blob/main/.github/workflows/create-release.yaml). The workflow is manually triggered from the [osmosis-ci repository](https://github.com/osmosis-labs/osmosis-ci). The workflow uses the `make build-reproducible` command to create the `nuahd` binaries using the default [Makefile](https://github.com/osmosis-labs/osmosis/blob/main/Makefile#L99).
 
 - Make a PR to main, with a cosmovisor config, generated in tandem with the binaries from tool.
 
@@ -668,7 +668,7 @@ A much less obvious example of a panic trigger is running `SendCoins` on arbitra
 
 2. Start Osmosis node with the binary from step 1.
 
-3. Run "Attach to running osmosisd process" VS Code debug configuration
+3. Run "Attach to running nuahd process" VS Code debug configuration
 
 What it does:
 
@@ -677,5 +677,5 @@ What it does:
 
 FAQ
 
-- Can this be used with localosmosis or inside Docker?
+- Can this be used with localnuah or inside Docker?
   - Not currently but possible. Would need to run the delve server inside the container and expose the debug port

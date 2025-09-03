@@ -18,8 +18,8 @@ func (suite *HooksTestSuite) SetupAndTestPFM(chainBId Chain, chainBName string, 
 	reverseDirection := suite.GetDirection(chainBId, ChainA)
 	sender, receiver := suite.GetEndpoints(suite.GetDirection(ChainA, chainBId))
 
-	osmosisApp := suite.chainA.GetOsmosisApp()
-	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(osmosisApp.WasmKeeper)
+	NUAHApp := suite.chainA.GetNUAHApp()
+	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(NUAHApp.WasmKeeper)
 
 	pfm_msg := fmt.Sprintf(`{"has_packet_forwarding": {"chain": "%s"}}`, chainBName)
 	forwarding := suite.chainA.QueryContractJson(&suite.Suite, registryAddr, []byte(pfm_msg))
@@ -28,7 +28,7 @@ func (suite *HooksTestSuite) SetupAndTestPFM(chainBId Chain, chainBName string, 
 	transferMsg := NewMsgTransfer(sdk.NewCoin("token0", osmomath.NewInt(2000)), targetChain.SenderAccount.GetAddress().String(), sendFrom.String(), suite.GetSenderChannel(chainBId, ChainA), "")
 	suite.FullSend(transferMsg, reverseDirection)
 	tokenBA := suite.GetIBCDenom(chainBId, ChainA, "token0")
-	balance := osmosisApp.BankKeeper.GetBalance(suite.chainA.GetContext(), sendFrom, tokenBA)
+	balance := NUAHApp.BankKeeper.GetBalance(suite.chainA.GetContext(), sendFrom, tokenBA)
 
 	ctx := suite.chainA.GetContext()
 
@@ -37,7 +37,7 @@ func (suite *HooksTestSuite) SetupAndTestPFM(chainBId Chain, chainBName string, 
 	suite.Require().NoError(err)
 
 	// Check that the funds were sent to the contract
-	intermediateBalance := osmosisApp.BankKeeper.GetBalance(suite.chainA.GetContext(), sendFrom, tokenBA)
+	intermediateBalance := NUAHApp.BankKeeper.GetBalance(suite.chainA.GetContext(), sendFrom, tokenBA)
 	suite.Require().Equal(balance.Amount, intermediateBalance.Amount.Add(osmomath.NewInt(1)))
 
 	forwarding = suite.chainA.QueryContractJson(&suite.Suite, registryAddr, []byte(pfm_msg))
@@ -83,7 +83,7 @@ func (suite *HooksTestSuite) SetupAndTestPFM(chainBId Chain, chainBName string, 
 	forwarding = suite.chainA.QueryContractJson(&suite.Suite, registryAddr, []byte(pfm_msg))
 	suite.Require().True(forwarding.Bool())
 
-	newBalance := osmosisApp.BankKeeper.GetBalance(suite.chainA.GetContext(), sendFrom, tokenBA)
+	newBalance := NUAHApp.BankKeeper.GetBalance(suite.chainA.GetContext(), sendFrom, tokenBA)
 	// Ensure that the funds have been returned to the user
 	suite.Require().Equal(balance, newBalance)
 }
@@ -93,8 +93,8 @@ func (suite *HooksTestSuite) TestPathValidation() {
 	registryAddr, _, _, _ := suite.SetupCrosschainRegistry(ChainA)
 	suite.setChainChannelLinks(registryAddr, ChainA)
 
-	osmosisApp := suite.chainA.GetOsmosisApp()
-	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(osmosisApp.WasmKeeper)
+	NUAHApp := suite.chainA.GetNUAHApp()
+	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(NUAHApp.WasmKeeper)
 
 	msg := fmt.Sprintf(`{
 		"modify_bech32_prefixes": {

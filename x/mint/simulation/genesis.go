@@ -25,7 +25,7 @@ const (
 )
 
 var (
-	// Taken from: // https://github.com/osmosis-labs/networks/raw/main/osmosis-1/genesis.json
+	// Taken from: // https://github.com/osmosis-labs/networks/raw/main/nuahchain-1/genesis.json
 	distributionProportions = types.DistributionProportions{
 		Staking:          osmomath.NewDecWithPrec(25, 2),
 		PoolIncentives:   osmomath.NewDecWithPrec(45, 2),

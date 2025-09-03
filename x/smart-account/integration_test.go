@@ -37,7 +37,7 @@ type AuthenticatorSuite struct {
 	coordinator *ibctesting.Coordinator
 
 	chainA         *osmosisibctesting.TestChain
-	app            *app.OsmosisApp
+	app            *app.NUAHApp
 	EncodingConfig params.EncodingConfig
 
 	PrivKeys []cryptotypes.PrivKey
@@ -62,7 +62,7 @@ func (s *AuthenticatorSuite) SetupTest() {
 	s.chainA = &osmosisibctesting.TestChain{
 		TestChain: s.coordinator.GetChain(ibctesting.GetChainID(1)),
 	}
-	s.app = s.chainA.GetOsmosisApp()
+	s.app = s.chainA.GetNUAHApp()
 	s.EncodingConfig = app.MakeEncodingConfig()
 
 	// Initialize two private keys for testing

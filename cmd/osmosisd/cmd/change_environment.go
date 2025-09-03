@@ -28,10 +28,10 @@ func ChangeEnvironmentCmd() *cobra.Command {
 		Short: "Set home environment variables for commands",
 		Long: `Set home environment variables for commands
 Example:
-	osmosisd set-env mainnet
-	osmosisd set-env testnet
-	osmosisd set-env localnet [optional-chain-id]
-	osmosisd set-env $HOME/.custom-dir
+	nuahd set-env mainnet
+	nuahd set-env testnet
+	nuahd set-env localnet [optional-chain-id]
+	nuahd set-env $HOME/.custom-dir
 `,
 		Args: customArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -57,12 +57,12 @@ func PrintEnvironmentCmd() *cobra.Command {
 		Short: "Prints the current environment",
 		Long: `Prints the current environment
 Example:
-	osmosisd get-env'
+	nuahd get-env'
 
 	Returns one of:
-	- mainnet implying $HOME/.osmosisd
-	- testnet implying $HOME/.osmosisd-test
-	- localosmosis implying $HOME/.osmosisd-local
+	- mainnet implying $HOME/.nuahd
+	- testnet implying $HOME/.nuahd-test
+	- localnuah implying $HOME/.nuahd-local
 	- custom path`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			environment := getHomeEnvironment()
@@ -89,9 +89,9 @@ func environmentNameToPath(environmentName string) (string, error) {
 	case EnvMainnet:
 		return app.DefaultNodeHome, nil
 	case EnvTestnet:
-		return filepath.Join(userHomeDir, ".osmosisd-test/"), nil
+		return filepath.Join(userHomeDir, ".nuahd-test/"), nil
 	case EnvLocalnet:
-		return filepath.Join(userHomeDir, ".osmosisd-local/"), nil
+		return filepath.Join(userHomeDir, ".nuahd-local/"), nil
 	default:
 		_, err := os.Stat(environmentName)
 		if os.IsNotExist(err) {
@@ -109,7 +109,7 @@ func environmentNameToPath(environmentName string) (string, error) {
 func clientSettingsFromEnv(cmd *cobra.Command, environmentName, chainId string) error {
 	envConfigs := map[string]map[string]string{
 		EnvMainnet: {
-			flags.FlagChainID:       "osmosis-1",
+			flags.FlagChainID:       "nuahchain-1",
 			flags.FlagNode:          "https://rpc.osmosis.zone:443",
 			flags.FlagBroadcastMode: "block",
 		},
@@ -119,7 +119,7 @@ func clientSettingsFromEnv(cmd *cobra.Command, environmentName, chainId string) 
 			flags.FlagBroadcastMode: "block",
 		},
 		EnvLocalnet: {
-			flags.FlagChainID:       "localosmosis",
+			flags.FlagChainID:       "localnuah",
 			flags.FlagBroadcastMode: "block",
 		},
 	}
@@ -167,7 +167,7 @@ func changeEnvironment(args []string) error {
 }
 
 // createHomeDirIfNotExist creates the home directory if it does not exist and writes a blank
-// .env file. This is used for the first time setup of the osmosisd home directory.
+// .env file. This is used for the first time setup of the nuahd home directory.
 func createHomeDirIfNotExist(homeDir string) error {
 	if _, err := os.Stat(homeDir); os.IsNotExist(err) {
 		err := os.MkdirAll(homeDir, 0755)
@@ -233,7 +233,7 @@ func PrintAllEnvironmentCmd() *cobra.Command {
 		Short: "listing all available environments.",
 		Long: `listing all available environments.
 Example:
-	osmosisd list-env'
+	nuahd list-env'
 	Returns all EnvironmentCmd`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// mainnet

@@ -12,7 +12,7 @@ spread_factor = "0.001"
 wallet_name = "validator1"
 chain_id = "testing"
 node = "http://localhost:26657"
-home = "/root/.osmosisd/validator1"
+home = "/root/.nuahd/validator1"
 
 
 def parse_sequence_from_error(error_message):
@@ -36,7 +36,7 @@ def check_pool_creation(output):
 
 def run_osmosis_cmd(denom0, denom1, tick_spacing, spread_factor):
         cmd = [
-            "osmosisd",
+            "nuahd",
             "tx",
             "concentratedliquidity",
             "create-pool",

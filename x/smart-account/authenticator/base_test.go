@@ -29,7 +29,7 @@ import (
 
 type BaseAuthenticatorSuite struct {
 	suite.Suite
-	OsmosisApp                   *app.OsmosisApp
+	NUAHApp                      *app.NUAHApp
 	Ctx                          sdk.Context
 	EncodingConfig               params.EncodingConfig
 	SigVerificationAuthenticator authenticator.SignatureVerification
@@ -47,10 +47,10 @@ func (s *BaseAuthenticatorSuite) SetupKeys() {
 		"49006a359803f0602a7ec521df88bf5527579da79112bb71f285dd3e7d438033",
 	}
 	s.HomeDir = fmt.Sprintf("%d", rand.Int())
-	s.OsmosisApp = app.SetupWithCustomHome(false, s.HomeDir)
+	s.NUAHApp = app.SetupWithCustomHome(false, s.HomeDir)
 	s.EncodingConfig = app.MakeEncodingConfig()
 
-	s.Ctx = s.OsmosisApp.NewContextLegacy(false, tmproto.Header{})
+	s.Ctx = s.NUAHApp.NewContextLegacy(false, tmproto.Header{})
 	s.Ctx = s.Ctx.WithGasMeter(storetypes.NewGasMeter(1_000_000))
 
 	// Set up test accounts
@@ -75,7 +75,7 @@ func (s *BaseAuthenticatorSuite) GenSimpleTx(msgs []sdk.Msg, signers []cryptotyp
 	var accNums []uint64
 	var accSeqs []uint64
 
-	ak := s.OsmosisApp.AccountKeeper
+	ak := s.NUAHApp.AccountKeeper
 
 	for _, signer := range signers {
 		var account sdk.AccountI
@@ -113,7 +113,7 @@ func (s *BaseAuthenticatorSuite) GenSimpleTxWithSelectedAuthenticators(msgs []sd
 	var accNums []uint64
 	var accSeqs []uint64
 
-	ak := s.OsmosisApp.AccountKeeper
+	ak := s.NUAHApp.AccountKeeper
 
 	for _, signer := range signers {
 		account := ak.GetAccount(s.Ctx, sdk.AccAddress(signer.PubKey().Address()))
@@ -157,6 +157,6 @@ func (s *BaseAuthenticatorSuite) GenSimpleTxWithSelectedAuthenticators(msgs []sd
 
 // FundAcc funds target address with specified amount.
 func (s *BaseAuthenticatorSuite) FundAcc(acc sdk.AccAddress, amounts sdk.Coins) {
-	err := testutil.FundAccount(s.Ctx, s.OsmosisApp.BankKeeper, acc, amounts)
+	err := testutil.FundAccount(s.Ctx, s.NUAHApp.BankKeeper, acc, amounts)
 	s.Require().NoError(err)
 }

@@ -1,7 +1,7 @@
 #!/bin/sh
-OSMOSIS_HOME="/tmp/osmosisd$(date +%s)"
+OSMOSIS_HOME="/tmp/nuahd$(date +%s)"
 RANDOM_KEY="randomosmosisvalidatorkey"
-CHAIN_ID=osmosis-1
+CHAIN_ID=nuahchain-1
 DENOM=uosmo
 MAXBOND=50000000000000 # 500 Million OSMO
 
@@ -52,11 +52,11 @@ else
     cd osmosis
     git checkout gentx-launch
     make build
-    chmod +x ./build/osmosisd
+    chmod +x ./build/nuahd
 
-    ./build/osmosisd keys add $RANDOM_KEY --keyring-backend test --home $OSMOSIS_HOME
+    ./build/nuahd keys add $RANDOM_KEY --keyring-backend test --home $OSMOSIS_HOME
 
-    ./build/osmosisd init --chain-id $CHAIN_ID validator --home $OSMOSIS_HOME
+    ./build/nuahd init --chain-id $CHAIN_ID validator --home $OSMOSIS_HOME
 
     echo "..........Fetching genesis......."
     rm -rf $OSMOSIS_HOME/config/genesis.json
@@ -86,30 +86,30 @@ else
         exit 1
     fi
 
-    ./build/osmosisd add-genesis-account $RANDOM_KEY 100000000000000$DENOM --home $OSMOSIS_HOME \
+    ./build/nuahd add-genesis-account $RANDOM_KEY 100000000000000$DENOM --home $OSMOSIS_HOME \
         --keyring-backend test
 
-    ./build/osmosisd gentx $RANDOM_KEY 90000000000000$DENOM --home $OSMOSIS_HOME \
+    ./build/nuahd gentx $RANDOM_KEY 90000000000000$DENOM --home $OSMOSIS_HOME \
         --keyring-backend test --chain-id $CHAIN_ID
 
     cp ../$GENTX_FILE $OSMOSIS_HOME/config/gentx/
 
     echo "..........Collecting gentxs......."
-    ./build/osmosisd collect-gentxs --home $OSMOSIS_HOME
+    ./build/nuahd collect-gentxs --home $OSMOSIS_HOME
     sed -i '/persistent_peers =/c\persistent_peers = ""' $OSMOSIS_HOME/config/config.toml
 
-    ./build/osmosisd validate-genesis --home $OSMOSIS_HOME
+    ./build/nuahd validate-genesis --home $OSMOSIS_HOME
 
     echo "..........Starting node......."
-    ./build/osmosisd start --home $OSMOSIS_HOME &
+    ./build/nuahd start --home $OSMOSIS_HOME &
 
     sleep 1800s
 
     echo "...checking network status.."
 
-    ./build/osmosisd status --node http://localhost:26657
+    ./build/nuahd status --node http://localhost:26657
 
     echo "...Cleaning the stuff..."
-    killall osmosisd >/dev/null 2>&1
+    killall nuahd >/dev/null 2>&1
     rm -rf $OSMOSIS_HOME >/dev/null 2>&1
 fi

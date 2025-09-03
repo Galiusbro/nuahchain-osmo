@@ -87,30 +87,30 @@ const UUSDC = "ibc/498A0751C798A0D9A389AA3691123DADA57DAA4FE165D5C75894505B876BA
 func (s *SpendLimitAuthenticatorTest) SetupTest() {
 	s.SetupKeys()
 
-	s.OsmosisApp = app.Setup(false)
-	s.Ctx = s.OsmosisApp.NewContextLegacy(false, tmproto.Header{})
+	s.NUAHApp = app.Setup(false)
+	s.Ctx = s.NUAHApp.NewContextLegacy(false, tmproto.Header{})
 	s.Ctx = s.Ctx.WithGasMeter(storetypes.NewGasMeter(10_000_000))
 	s.Ctx = s.Ctx.WithBlockTime(time.Now())
 	s.EncodingConfig = app.MakeEncodingConfig()
 
-	s.CosmwasmAuth = authenticator.NewCosmwasmAuthenticator(s.OsmosisApp.ContractKeeper, s.OsmosisApp.AccountKeeper, s.OsmosisApp.AppCodec())
+	s.CosmwasmAuth = authenticator.NewCosmwasmAuthenticator(s.NUAHApp.ContractKeeper, s.NUAHApp.AccountKeeper, s.NUAHApp.AppCodec())
 
 	s.AlwaysPassAuth = testutils.TestingAuthenticator{Approve: testutils.Always, Confirm: testutils.Always, GasConsumption: 0}
-	s.OsmosisApp.SmartAccountKeeper.AuthenticatorManager.RegisterAuthenticator(s.AlwaysPassAuth)
+	s.NUAHApp.SmartAccountKeeper.AuthenticatorManager.RegisterAuthenticator(s.AlwaysPassAuth)
 
-	deductFeeDecorator := txfeeskeeper.NewDeductFeeDecorator(*s.OsmosisApp.TxFeesKeeper, s.OsmosisApp.AccountKeeper, s.OsmosisApp.BankKeeper, nil)
+	deductFeeDecorator := txfeeskeeper.NewDeductFeeDecorator(*s.NUAHApp.TxFeesKeeper, s.NUAHApp.AccountKeeper, s.NUAHApp.BankKeeper, nil)
 	s.AuthenticatorAnteDecorator = ante.NewAuthenticatorDecorator(
-		s.OsmosisApp.AppCodec(),
-		s.OsmosisApp.SmartAccountKeeper,
-		s.OsmosisApp.AccountKeeper,
+		s.NUAHApp.AppCodec(),
+		s.NUAHApp.SmartAccountKeeper,
+		s.NUAHApp.AccountKeeper,
 		s.EncodingConfig.TxConfig.SignModeHandler(),
 		deductFeeDecorator,
 	)
 
 	s.AuthenticatorPostDecorator = post.NewAuthenticatorPostDecorator(
-		s.OsmosisApp.AppCodec(),
-		s.OsmosisApp.SmartAccountKeeper,
-		s.OsmosisApp.AccountKeeper,
+		s.NUAHApp.AppCodec(),
+		s.NUAHApp.SmartAccountKeeper,
+		s.NUAHApp.AccountKeeper,
 		s.EncodingConfig.TxConfig.SignModeHandler(),
 		// Add an empty handler here to enable a circuit breaker pattern
 		sdk.ChainPostDecorators(sdk.Terminator{}), //nolint
@@ -171,7 +171,7 @@ func (s *SpendLimitAuthenticatorTest) TestSpendLimit() {
 	contractAddr := s.InstantiateContract(string(bz), codeId)
 
 	// add new authenticator
-	ak := s.OsmosisApp.AppKeepers.SmartAccountKeeper
+	ak := s.NUAHApp.AppKeepers.SmartAccountKeeper
 
 	authAcc := s.TestAccAddress[1]
 	authAccPriv := s.TestPrivKeys[1]
@@ -234,7 +234,7 @@ func (s *SpendLimitAuthenticatorTest) TestSpendLimit() {
 	s.Require().NoError(err)
 
 	// swap
-	_, err = s.OsmosisApp.MsgServiceRouter().Handler(&swapMsg)(s.Ctx, &swapMsg)
+	_, err = s.NUAHApp.MsgServiceRouter().Handler(&swapMsg)(s.Ctx, &swapMsg)
 	s.Require().NoError(err)
 
 	// post
@@ -258,7 +258,7 @@ func (s *SpendLimitAuthenticatorTest) TestSpendLimit() {
 	s.Require().NoError(err)
 
 	// swap
-	_, err = s.OsmosisApp.MsgServiceRouter().Handler(&swapMsg)(s.Ctx, &swapMsg)
+	_, err = s.NUAHApp.MsgServiceRouter().Handler(&swapMsg)(s.Ctx, &swapMsg)
 	s.Require().NoError(err)
 
 	// post
@@ -274,7 +274,7 @@ func (s *SpendLimitAuthenticatorTest) TestSpendLimit() {
 	s.Require().NoError(err)
 
 	// swap
-	_, err = s.OsmosisApp.MsgServiceRouter().Handler(&swapMsg)(s.Ctx, &swapMsg)
+	_, err = s.NUAHApp.MsgServiceRouter().Handler(&swapMsg)(s.Ctx, &swapMsg)
 	s.Require().NoError(err)
 
 	// post
@@ -303,9 +303,9 @@ func (s *SpendLimitAuthenticatorTest) TestSpendLimit() {
 }
 
 func (s *SpendLimitAuthenticatorTest) StoreContractCode(path string) uint64 {
-	osmosisApp := s.OsmosisApp
-	govKeeper := wasmkeeper.NewGovPermissionKeeper(osmosisApp.WasmKeeper)
-	creator := osmosisApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
+	NUAHApp := s.NUAHApp
+	govKeeper := wasmkeeper.NewGovPermissionKeeper(NUAHApp.WasmKeeper)
+	creator := NUAHApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
 
 	wasmCode, err := os.ReadFile(path)
 	s.Require().NoError(err)
@@ -316,9 +316,9 @@ func (s *SpendLimitAuthenticatorTest) StoreContractCode(path string) uint64 {
 }
 
 func (s *SpendLimitAuthenticatorTest) InstantiateContract(msg string, codeID uint64) sdk.AccAddress {
-	osmosisApp := s.OsmosisApp
-	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(osmosisApp.WasmKeeper)
-	creator := osmosisApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
+	NUAHApp := s.NUAHApp
+	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(NUAHApp.WasmKeeper)
+	creator := NUAHApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
 	addr, _, err := contractKeeper.Instantiate(s.Ctx, codeID, creator, creator, []byte(msg), "contract", nil)
 	s.Require().NoError(err)
 	return addr
@@ -329,7 +329,7 @@ func (s *SpendLimitAuthenticatorTest) preparePool(
 ) uint64 {
 	poolCreator := s.TestAccAddress[0]
 
-	s.FundAcc(poolCreator, s.OsmosisApp.PoolManagerKeeper.GetParams(s.Ctx).PoolCreationFee)
+	s.FundAcc(poolCreator, s.NUAHApp.PoolManagerKeeper.GetParams(s.Ctx).PoolCreationFee)
 
 	for _, asset := range poolAssets {
 		s.FundAcc(poolCreator, sdk.NewCoins(asset.Token))
@@ -340,7 +340,7 @@ func (s *SpendLimitAuthenticatorTest) preparePool(
 		ExitFee: osmomath.ZeroDec(),
 	}
 
-	poolID, err := s.OsmosisApp.PoolManagerKeeper.CreatePool(
+	poolID, err := s.NUAHApp.PoolManagerKeeper.CreatePool(
 		s.Ctx,
 		balancer.NewMsgCreateBalancerPool(poolCreator, poolParams, poolAssets, ""),
 	)

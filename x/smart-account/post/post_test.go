@@ -33,7 +33,7 @@ import (
 
 type AuthenticatorPostSuite struct {
 	suite.Suite
-	OsmosisApp                 *app.OsmosisApp
+	NUAHApp                    *app.NUAHApp
 	Ctx                        sdk.Context
 	EncodingConfig             params.EncodingConfig
 	AuthenticatorPostDecorator post.AuthenticatorPostDecorator
@@ -57,9 +57,9 @@ func (s *AuthenticatorPostSuite) SetupTest() {
 	s.EncodingConfig = app.MakeEncodingConfig()
 
 	s.HomeDir = fmt.Sprintf("%d", rand.Int())
-	s.OsmosisApp = app.SetupWithCustomHome(false, s.HomeDir)
+	s.NUAHApp = app.SetupWithCustomHome(false, s.HomeDir)
 
-	s.Ctx = s.OsmosisApp.NewContextLegacy(false, tmproto.Header{})
+	s.Ctx = s.NUAHApp.NewContextLegacy(false, tmproto.Header{})
 
 	// Set up test accounts
 	for _, key := range TestKeys {
@@ -77,9 +77,9 @@ func (s *AuthenticatorPostSuite) SetupTest() {
 	}
 
 	s.AuthenticatorPostDecorator = post.NewAuthenticatorPostDecorator(
-		s.OsmosisApp.AppCodec(),
-		s.OsmosisApp.SmartAccountKeeper,
-		s.OsmosisApp.AccountKeeper,
+		s.NUAHApp.AppCodec(),
+		s.NUAHApp.SmartAccountKeeper,
+		s.NUAHApp.AccountKeeper,
 		s.EncodingConfig.TxConfig.SignModeHandler(),
 		// Add an empty handler here to enable a circuit breaker pattern
 		sdk.ChainPostDecorators(sdk.Terminator{}), //nolint
@@ -110,7 +110,7 @@ func (s *AuthenticatorPostSuite) TestAuthenticatorPostHandlerSuccess() {
 	feeCoins := sdk.Coins{sdk.NewInt64Coin(osmoToken, 2500)}
 
 	// Add the authenticators for the accounts
-	id, err := s.OsmosisApp.SmartAccountKeeper.AddAuthenticator(
+	id, err := s.NUAHApp.SmartAccountKeeper.AddAuthenticator(
 		s.Ctx,
 		s.TestAccAddress[0],
 		"SignatureVerification",
@@ -119,7 +119,7 @@ func (s *AuthenticatorPostSuite) TestAuthenticatorPostHandlerSuccess() {
 	s.Require().NoError(err)
 	s.Require().Equal(id, uint64(1), "Adding authenticator returning incorrect id")
 
-	id, err = s.OsmosisApp.SmartAccountKeeper.AddAuthenticator(
+	id, err = s.NUAHApp.SmartAccountKeeper.AddAuthenticator(
 		s.Ctx,
 		s.TestAccAddress[1],
 		"SignatureVerification",
@@ -183,8 +183,8 @@ func (s *AuthenticatorPostSuite) TestAuthenticatorPostHandlerFailConfirmExecutio
 		GasConsumption: 10,
 		Confirm:        testutils.Never,
 	}
-	s.OsmosisApp.AuthenticatorManager.RegisterAuthenticator(approveAndBlock)
-	approveAndBlockId, err := s.OsmosisApp.SmartAccountKeeper.AddAuthenticator(s.Ctx, s.TestAccAddress[0], approveAndBlock.Type(), []byte{})
+	s.NUAHApp.AuthenticatorManager.RegisterAuthenticator(approveAndBlock)
+	approveAndBlockId, err := s.NUAHApp.SmartAccountKeeper.AddAuthenticator(s.Ctx, s.TestAccAddress[0], approveAndBlock.Type(), []byte{})
 	s.Require().NoError(err, "Should have been able to add an authenticator")
 
 	// Create a test messages for signing

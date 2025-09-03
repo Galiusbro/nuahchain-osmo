@@ -1,7 +1,0 @@
-{
-  "weights": "1unuah,1factory/osmo1phaxpevm5mql3h2whsqkmzary49mswqfgt07e8/roma",
-  "initial-deposit": "250000000unuah,100000000factory/osmo1phaxpevm5mql3h2whsqkmzary49mswqfgt07e8/roma",
-  "swap-fee": "0.003",
-  "exit-fee": "0.000",
-  "future-governor": "168h"
-}

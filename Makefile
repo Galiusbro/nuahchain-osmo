@@ -19,13 +19,13 @@ help:
 	@echo "Usage:"
 	@echo "    make [command]"
 	@echo ""
-	@echo "  make build                 Build osmosisd binary"
+	@echo "  make build                 Build nuahd binary"
 	@echo "  make build-help            Show available build commands"
 	@echo "  make deps                  Show available deps commands"
 	@echo "  make docker                Show available docker commands"
 	@echo "  make e2e                   Show available e2e commands"
 	@echo "  make go-mock-update        Generate mock files"
-	@echo "  make install               Install osmosisd binary"
+	@echo "  make install               Install nuahd binary"
 	@echo "  make lint                  Show available lint commands"
 	@echo "  make localnet              Show available localnet commands"
 	@echo "  make proto                 Show available proto commands"
@@ -104,7 +104,7 @@ build_tags_comma_sep := $(subst $(whitespace),$(comma),$(build_tags))
 # process linker flags
 
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=osmosis \
-		  -X github.com/cosmos/cosmos-sdk/version.AppName=osmosisd \
+		  -X github.com/cosmos/cosmos-sdk/version.AppName=nuahd \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)"
@@ -169,7 +169,7 @@ build: build-check-version go.sum
 		$(MAKE) update-deps; \
 	fi
 	mkdir -p $(BUILDDIR)/
-	GOWORK=off go build -mod=readonly $(BUILD_FLAGS) -o $(BUILDDIR)/ $(GO_MODULE)/cmd/osmosisd
+	GOWORK=off go build -mod=readonly $(BUILD_FLAGS) -o $(BUILDDIR)/nuahd $(GO_MODULE)/cmd/osmosisd
 	@if [ -n "$(SDK_HASH)" ] || [ -n "$(COMET_HASH)" ]; then \
 		mv go.mod.backup go.mod; \
 		mv go.sum.backup go.sum; \
@@ -231,8 +231,8 @@ release:
 		-e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
 		-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v `pwd`:/go/src/osmosisd \
-		-w /go/src/osmosisd \
+		-v `pwd`:/go/src/nuahd \
+		-w /go/src/nuahd \
 		$(GORELEASER_IMAGE) \
 		release \
 		--clean
@@ -263,8 +263,8 @@ release-test:
 		--rm \
 		-e COSMWASM_VERSION=$(COSMWASM_VERSION) \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v `pwd`:/go/src/osmosisd \
-		-w /go/src/osmosisd \
+		-v `pwd`:/go/src/nuahd \
+		-w /go/src/nuahd \
 		$(GORELEASER_IMAGE) \
 		release \
 		--snapshot --clean

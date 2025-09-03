@@ -58,4 +58,4 @@ to use the SDK fork, and how to make / test updates to SDK branches.
 ## LocalOsmosis
 
 LocalOsmosis is a containerized local Osmosis testnet used for trying out new features locally. 
-LocalOsmosis documentation can be found [here](https://github.com/osmosis-labs/osmosis/tree/main/tests/localosmosis)
+LocalOsmosis documentation can be found [here](https://github.com/osmosis-labs/osmosis/tree/main/tests/localnuah)

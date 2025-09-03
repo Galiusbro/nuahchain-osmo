@@ -9,7 +9,7 @@ The relevant instructions can be found in
 Further instructions will be added after June 10, the final day to
 submit gentxs.
 
-osmosis-1 genesis.json is available on ipfs at
+nuahchain-1 genesis.json is available on ipfs at
 [QmXRvBT3hgoXwwPqbK6a2sXUuArGM8wPyo1ybskyyUwUxs](https://cloudflare-ipfs.com/ipfs/QmXRvBT3hgoXwwPqbK6a2sXUuArGM8wPyo1ybskyyUwUxs).
 
 ```{=html}

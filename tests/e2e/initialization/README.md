@@ -106,7 +106,7 @@ osmo-test-a  osmo-test-a-encode
 $:/tmp/osmosis-e2e-testnet-1167397304/osmo-test-a $ cd  osmo-test-a
 
 $:/tmp/osmosis-e2e-testnet-1167397304/osmo-test-a $ ls
-osmo-test-a-osmosis-00  osmo-test-a-osmosis-11  osmo-test-a-osmosis-22  osmo-test-a-osmosis-33
+osmo-test-a-osmosis-00  osmo-test-a-nuahchain-11  osmo-test-a-osmosis-22  osmo-test-a-osmosis-33
 
 $:/tmp/osmosis-e2e-testnet-1167397304/osmo-test-a $ cd  osmo-test-a-osmosis-00
 

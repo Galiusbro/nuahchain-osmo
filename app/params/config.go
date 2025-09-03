@@ -11,14 +11,14 @@ import (
 )
 
 const (
-	HumanCoinUnit = "osmo"
-	BaseCoinUnit  = "uosmo"
+	HumanCoinUnit = "nuah"
+	BaseCoinUnit  = "unuah"
 	OsmoExponent  = 6
 
 	DefaultBondDenom = BaseCoinUnit
 
 	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address.
-	Bech32PrefixAccAddr = "osmo"
+	Bech32PrefixAccAddr = "nuah"
 )
 
 var (

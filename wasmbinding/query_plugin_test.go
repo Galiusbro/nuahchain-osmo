@@ -37,14 +37,14 @@ type StargateTestSuite struct {
 	suite.Suite
 
 	ctx     sdk.Context
-	app     *app.OsmosisApp
+	app     *app.NUAHApp
 	HomeDir string
 }
 
 func (suite *StargateTestSuite) SetupTestInternal() {
 	suite.HomeDir = fmt.Sprintf("%d", rand.Int())
 	suite.app = app.SetupWithCustomHome(false, suite.HomeDir)
-	suite.ctx = suite.app.BaseApp.NewContextLegacy(false, tmproto.Header{Height: 1, ChainID: "osmosis-1", Time: time.Now().UTC()})
+	suite.ctx = suite.app.BaseApp.NewContextLegacy(false, tmproto.Header{Height: 1, ChainID: "nuahchain-1", Time: time.Now().UTC()})
 }
 
 func (suite *StargateTestSuite) TearDownTestInternal() {

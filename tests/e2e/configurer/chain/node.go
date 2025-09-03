@@ -170,13 +170,13 @@ func (n *NodeConfig) extractOperatorAddressIfValidator() error {
 		return nil
 	}
 
-	cmd := []string{"osmosisd", "debug", "addr", n.PublicKey}
+	cmd := []string{"nuahd", "debug", "addr", n.PublicKey}
 	n.t.Logf("extracting validator operator addresses for validator: %s", n.Name)
 	_, errBuf, err := n.containerManager.ExecCmd(n.t, n.Name, cmd, "", false, false)
 	if err != nil {
 		return err
 	}
-	re := regexp.MustCompile("osmovaloper(.{39})")
+	re := regexp.MustCompile("nuahvaloper(.{39})")
 	operAddr := fmt.Sprintf("%s\n", re.FindString(errBuf.String()))
 	n.OperatorAddress = strings.TrimSuffix(operAddr, "\n")
 	return nil

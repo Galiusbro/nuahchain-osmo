@@ -28,9 +28,9 @@ func (chain *TestChain) InstantiateRLContract(suite *suite.Suite, quotas string)
 }
 
 func (chain *TestChain) InstantiateRLContractRaw(codeId uint64, suite *suite.Suite, quotas string) sdk.AccAddress {
-	osmosisApp := chain.GetOsmosisApp()
-	transferModule := osmosisApp.AccountKeeper.GetModuleAddress(transfertypes.ModuleName)
-	govModule := osmosisApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
+	NUAHApp := chain.GetNUAHApp()
+	transferModule := NUAHApp.AccountKeeper.GetModuleAddress(transfertypes.ModuleName)
+	govModule := NUAHApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
 
 	initMsgBz := []byte(fmt.Sprintf(`{
            "gov_module":  "%s",
@@ -39,17 +39,17 @@ func (chain *TestChain) InstantiateRLContractRaw(codeId uint64, suite *suite.Sui
         }`,
 		govModule, transferModule, quotas))
 
-	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(osmosisApp.WasmKeeper)
-	creator := osmosisApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
+	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(NUAHApp.WasmKeeper)
+	creator := NUAHApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
 	addr, _, err := contractKeeper.Instantiate(chain.GetContext(), codeId, creator, creator, initMsgBz, "rate limiting contract", nil)
 	suite.Require().NoError(err)
 	return addr
 }
 
 func (chain *TestChain) StoreContractCodeDirect(suite *suite.Suite, path string) uint64 {
-	osmosisApp := chain.GetOsmosisApp()
-	govKeeper := wasmkeeper.NewGovPermissionKeeper(osmosisApp.WasmKeeper)
-	creator := osmosisApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
+	NUAHApp := chain.GetNUAHApp()
+	govKeeper := wasmkeeper.NewGovPermissionKeeper(NUAHApp.WasmKeeper)
+	creator := NUAHApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
 
 	wasmCode, err := os.ReadFile(path)
 	suite.Require().NoError(err)
@@ -60,24 +60,24 @@ func (chain *TestChain) StoreContractCodeDirect(suite *suite.Suite, path string)
 }
 
 func (chain *TestChain) InstantiateContract(suite *suite.Suite, msg string, codeID uint64) sdk.AccAddress {
-	osmosisApp := chain.GetOsmosisApp()
-	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(osmosisApp.WasmKeeper)
-	creator := osmosisApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
+	NUAHApp := chain.GetNUAHApp()
+	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(NUAHApp.WasmKeeper)
+	creator := NUAHApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
 	addr, _, err := contractKeeper.Instantiate(chain.GetContext(), codeID, creator, creator, []byte(msg), "contract", nil)
 	suite.Require().NoError(err)
 	return addr
 }
 
 func (chain *TestChain) QueryContract(suite *suite.Suite, contract sdk.AccAddress, key []byte) string {
-	osmosisApp := chain.GetOsmosisApp()
-	state, err := osmosisApp.WasmKeeper.QuerySmart(chain.GetContext(), contract, key)
+	NUAHApp := chain.GetNUAHApp()
+	state, err := NUAHApp.WasmKeeper.QuerySmart(chain.GetContext(), contract, key)
 	suite.Require().NoError(err)
 	return string(state)
 }
 
 func (chain *TestChain) QueryContractJson(suite *suite.Suite, contract sdk.AccAddress, key []byte) gjson.Result {
-	osmosisApp := chain.GetOsmosisApp()
-	state, err := osmosisApp.WasmKeeper.QuerySmart(chain.GetContext(), contract, key)
+	NUAHApp := chain.GetNUAHApp()
+	state, err := NUAHApp.WasmKeeper.QuerySmart(chain.GetContext(), contract, key)
 	suite.Require().NoError(err)
 	suite.Require().True(gjson.Valid(string(state)))
 	json := gjson.Parse(string(state))
@@ -86,14 +86,14 @@ func (chain *TestChain) QueryContractJson(suite *suite.Suite, contract sdk.AccAd
 }
 
 func (chain *TestChain) ExecuteContract(contract, sender sdk.AccAddress, msg []byte, funds sdk.Coins) ([]byte, error) {
-	osmosisApp := chain.GetOsmosisApp()
-	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(osmosisApp.WasmKeeper)
+	NUAHApp := chain.GetNUAHApp()
+	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(NUAHApp.WasmKeeper)
 	return contractKeeper.Execute(chain.GetContext(), contract, sender, msg, funds)
 }
 
 func (chain *TestChain) MigrateContract(contract, sender sdk.AccAddress, newCodeId uint64, msg []byte) ([]byte, error) {
-	osmosisApp := chain.GetOsmosisApp()
-	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(osmosisApp.WasmKeeper)
+	NUAHApp := chain.GetNUAHApp()
+	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(NUAHApp.WasmKeeper)
 	return contractKeeper.Migrate(chain.GetContext(), contract, sender, newCodeId, msg)
 }
 
@@ -102,8 +102,8 @@ func (chain *TestChain) RegisterRateLimitingContract(addr []byte) {
 	require.NoError(chain.TB, err)
 	params, err := types.NewParams(addrStr)
 	require.NoError(chain.TB, err)
-	osmosisApp := chain.GetOsmosisApp()
-	paramSpace, ok := osmosisApp.AppKeepers.ParamsKeeper.GetSubspace(types.ModuleName)
+	NUAHApp := chain.GetNUAHApp()
+	paramSpace, ok := NUAHApp.AppKeepers.ParamsKeeper.GetSubspace(types.ModuleName)
 	require.True(chain.TB, ok)
 	paramSpace.SetParamSet(chain.GetContext(), &params)
 }

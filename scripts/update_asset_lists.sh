@@ -30,8 +30,8 @@ function http_get() {
 
 # Download mainnet asset list
 http_get \
-	"https://raw.githubusercontent.com/osmosis-labs/assetlists/main/osmosis-1/osmosis-1.assetlist.json" \
-	./cmd/osmosisd/cmd/osmosis-1-assetlist.json
+	"https://raw.githubusercontent.com/osmosis-labs/assetlists/main/nuahchain-1/nuahchain-1.assetlist.json" \
+	./cmd/osmosisd/cmd/nuahchain-1-assetlist.json
 
 # Download testnet asset list
 http_get \
