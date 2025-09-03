@@ -148,11 +148,11 @@ func InitCmd(mbm module.BasicManager, defaultNodeHome string) *cobra.Command {
 			}
 
 			var toPrint printInfo
-			isMainnet := chainID == "" || chainID == "osmosis-1"
+			isMainnet := chainID == "" || chainID == "nuahchain-1"
 			genesisFileDownloadFailed := false
 
 			if isMainnet {
-				// If the chainID is blank or osmosis-1, prep this as a mainnet node
+				// If the chainID is blank or nuahchain-1, prep this as a mainnet node
 
 				// Attempt to download the genesis file from the Osmosis GitHub repository
 				// If fail, generate a new genesis file
@@ -163,8 +163,8 @@ func InitCmd(mbm module.BasicManager, defaultNodeHome string) *cobra.Command {
 					genesisFileDownloadFailed = true
 					chainID = fmt.Sprintf("test-chain-%v", tmrand.Str(6))
 				} else {
-					// Set chainID to osmosis-1 in the case of a blank chainID
-					chainID = "osmosis-1"
+					// Set chainID to nuahchain-1 in the case of a blank chainID
+					chainID = "nuahchain-1"
 
 					// We dont print the app state for mainnet nodes because it's massive
 					fmt.Println("Not printing app state for mainnet node due to verbosity")
@@ -237,12 +237,12 @@ func InitCmd(mbm module.BasicManager, defaultNodeHome string) *cobra.Command {
 }
 
 func CreateEnvFile(cmd *cobra.Command) error {
-	// Check if .env file was created in /.osmosisd
+	// Check if .env file was created in /.nuahd
 	envPath := filepath.Join(app.DefaultNodeHome, ".env")
 	if _, err := os.Stat(envPath); err != nil {
 		// If not exist, we create a new .env file with node dir passed
 		if os.IsNotExist(err) {
-			// Create ./osmosisd if not exist
+			// Create ./nuahd if not exist
 			if _, err = os.Stat(app.DefaultNodeHome); err != nil {
 				if os.IsNotExist(err) {
 					err = os.MkdirAll(app.DefaultNodeHome, 0777)
@@ -284,7 +284,7 @@ func CreateEnvFile(cmd *cobra.Command) error {
 // - An error if the download or file writing fails, otherwise nil.
 func downloadGenesis(config *tmcfg.Config) error {
 	// URL of the genesis file to download
-	genesisURL := "https://github.com/osmosis-labs/osmosis/raw/main/networks/osmosis-1/genesis.json?download"
+	genesisURL := "https://github.com/osmosis-labs/osmosis/raw/main/networks/nuahchain-1/genesis.json?download"
 
 	// Determine the destination path for the genesis file
 	genFilePath := config.GenesisFile()

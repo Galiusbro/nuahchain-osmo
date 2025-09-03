@@ -438,7 +438,7 @@ Despite code upload being permissioned by governance on Osmosis, it is allowed t
 set of addresses:
 
 ```bash
-osmosisd q wasm params
+nuahd q wasm params
 code_upload_access:
   address: ""
   addresses:

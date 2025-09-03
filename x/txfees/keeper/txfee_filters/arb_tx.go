@@ -131,7 +131,7 @@ func isArbTxLooseAuthz(msg sdk.Msg, swapInDenom string, lpTypesSeen map[gammtype
 
 	// Detects the affiliate swap message from the CosmWasm contract
 	// See an example here:
-	// // https://celatone.osmosis.zone/osmosis-1/txs/315EB6284778EBB5BAC0F94CC740F5D7E35DDA5BBE4EC9EC79F012548589C6E5
+	// // https://celatone.osmosis.zone/nuahchain-1/txs/315EB6284778EBB5BAC0F94CC740F5D7E35DDA5BBE4EC9EC79F012548589C6E5
 	if msgExecuteContract, ok := msg.(*wasmtypes.MsgExecuteContract); ok {
 		// Grab token in from the funds sent to the contract
 		tokensIn := msgExecuteContract.GetFunds()
@@ -259,7 +259,7 @@ func isAffiliateSwapMsg(msg []byte) bool {
 	return true
 }
 
-// check if this: https://celatone.osmosis.zone/osmosis-1/txs/8D20755D4E009CB72C763963A76886BCCCC5C2EBFC3F57266332710216A0D10D
+// check if this: https://celatone.osmosis.zone/nuahchain-1/txs/8D20755D4E009CB72C763963A76886BCCCC5C2EBFC3F57266332710216A0D10D
 func isContractSwapContractMsg(msg []byte) bool {
 	// Check that the contract message is a valid JSON object
 	jsonObject := make(map[string]interface{})

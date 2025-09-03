@@ -60,7 +60,7 @@ func NewAppConstructor(chainId string) network.AppConstructor {
 		valCtx := val.GetCtx()
 		appConfig := val.GetAppConfig()
 
-		return NewOsmosisApp(
+		return NewNUAHApp(
 			valCtx.Logger, dbm.NewMemDB(), nil, true, make(map[int64]bool), valCtx.Config.RootDir, 0,
 			sims.EmptyAppOptions{},
 			EmptyWasmOpts,

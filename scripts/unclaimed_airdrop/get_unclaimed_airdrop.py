@@ -5,7 +5,7 @@
 import json
 
 # path to file output by 
-# osmosisd export-derive-balances [state export] [output-filepath]
+# nuahd export-derive-balances [state export] [output-filepath]
 filepath = "balances_breakdown.json"
 # read file
 with open(filepath, 'r') as myfile:

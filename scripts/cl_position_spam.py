@@ -21,7 +21,7 @@ wallet_name = "validator1"
 position_max_coins = "1000uosmo,100000000stake"
 chain_id = "testing"
 node = "http://localhost:26657"
-home = "/root/.osmosisd/validator1"
+home = "/root/.nuahd/validator1"
 retry_limit = 50
 pool_id = "1"
 
@@ -70,7 +70,7 @@ def run_osmosis_cmd(start_tick, end_tick, tick_width, tick_gap, sequence, retry_
             end_tick_str = str(end_tick)
         
         cmd = [
-            "osmosisd",
+            "nuahd",
             "tx",
             "concentratedliquidity",
             "create-position",

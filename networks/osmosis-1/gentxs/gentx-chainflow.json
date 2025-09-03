@@ -17,7 +17,7 @@
                 },
                 "min_self_delegation": "1",
                 "delegator_address": "osmo1j0vaeh27t4rll7zhmarwcuq8xtrmvqhuqv0av9",
-                "validator_address": "osmovaloper1j0vaeh27t4rll7zhmarwcuq8xtrmvqhu6m87mz",
+                "validator_address": "nuahvaloper1j0vaeh27t4rll7zhmarwcuq8xtrmvqhu6m87mz",
                 "pubkey": {
                     "@type": "/cosmos.crypto.ed25519.PubKey",
                     "key": "EvMa6sPpEJQz8bqalGMESOvDKq2YYXPo9+ib3qq+mz8="

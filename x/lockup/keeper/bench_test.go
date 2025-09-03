@@ -39,7 +39,7 @@ func benchmarkResetLogic(b *testing.B, numLockups int) {
 
 	blockStartTime := time.Now().UTC()
 	app := app.Setup(false)
-	ctx := app.BaseApp.NewContextLegacy(false, tmproto.Header{Height: 1, ChainID: "osmosis-1", Time: blockStartTime})
+	ctx := app.BaseApp.NewContextLegacy(false, tmproto.Header{Height: 1, ChainID: "nuahchain-1", Time: blockStartTime})
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	numAccts := 100

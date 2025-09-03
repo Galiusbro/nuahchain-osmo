@@ -127,7 +127,7 @@ This package directly depends on the Osmosis codebase.
 In addition, there is a Dockerfile `init-e2e.Dockerfile`.
 When executed, its container produces all files necessary for starting up a new chain. These
 resulting files can be mounted on a volume and propagated to our
-production osmosis container to start the `osmosisd` service.
+production osmosis container to start the `nuahd` service.
 
 ## `containers` Package
 
@@ -280,7 +280,7 @@ This section contains information about debugging osmosis's `e2e` tests.
     ```
 
     This will execute the specified command and print the response to standard output. 
-    Example: `docker exec osmo-test-a-node-prune-nothing-snapshot osmosisd status` will print a node status of `osmo-test-a-node-prune-nothing-snapshot` container. 
+    Example: `docker exec osmo-test-a-node-prune-nothing-snapshot nuahd status` will print a node status of `osmo-test-a-node-prune-nothing-snapshot` container. 
 
 2. Viewing docker container logs
 

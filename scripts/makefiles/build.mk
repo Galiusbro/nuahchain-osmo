@@ -54,8 +54,8 @@ build-install-with-autocomplete: build-check-version go.sum
 	GOWORK=off go install -mod=readonly $(BUILD_FLAGS) $(GO_MODULE)/cmd/osmosisd
 	@PARENT_SHELL=$$(ps -o ppid= -p $$PPID | xargs ps -o comm= -p); \
 	if echo "$$PARENT_SHELL" | grep -q "zsh"; then \
-		if ! grep -q ". <(osmosisd enable-cli-autocomplete zsh)" ~/.zshrc; then \
-			echo ". <(osmosisd enable-cli-autocomplete zsh)" >> ~/.zshrc; \
+		if ! grep -q ". <(nuahd enable-cli-autocomplete zsh)" ~/.zshrc; then \
+			echo ". <(nuahd enable-cli-autocomplete zsh)" >> ~/.zshrc; \
 			echo; \
 			echo "Autocomplete enabled. Run 'source ~/.zshrc' to complete installation."; \
 		else \
@@ -63,10 +63,10 @@ build-install-with-autocomplete: build-check-version go.sum
 			echo "Autocomplete already enabled in ~/.zshrc"; \
 		fi \
 	elif echo "$$PARENT_SHELL" | grep -q "bash" && [ "$$(uname)" = "Darwin" ]; then \
-		if ! grep -q -e "\. <(osmosisd enable-cli-autocomplete bash)" -e '\[\[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" \]\] && \. "/opt/homebrew/etc/profile.d/bash_completion.sh"' ~/.bash_profile; then \
+		if ! grep -q -e "\. <(nuahd enable-cli-autocomplete bash)" -e '\[\[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" \]\] && \. "/opt/homebrew/etc/profile.d/bash_completion.sh"' ~/.bash_profile; then \
 			brew install bash-completion; \
 			echo '[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ] && . "/opt/homebrew/etc/profile.d/bash_completion.sh"' >> ~/.bash_profile; \
-			echo ". <(osmosisd enable-cli-autocomplete bash)" >> ~/.bash_profile; \
+			echo ". <(nuahd enable-cli-autocomplete bash)" >> ~/.bash_profile; \
 			echo; \
 			echo; \
 			echo "Autocomplete enabled. Run 'source ~/.bash_profile' to complete installation."; \
@@ -74,10 +74,10 @@ build-install-with-autocomplete: build-check-version go.sum
 			echo "Autocomplete already enabled in ~/.bash_profile"; \
 		fi \
 	elif echo "$$PARENT_SHELL" | grep -q "bash" && [ "$$(uname)" = "Linux" ]; then \
-		if ! grep -q ". <(osmosisd enable-cli-autocomplete bash)" ~/.bash_profile; then \
+		if ! grep -q ". <(nuahd enable-cli-autocomplete bash)" ~/.bash_profile; then \
 			sudo apt-get install -y bash-completion; \
 			echo '[ -r "/etc/bash_completion" ] && . "/etc/bash_completion"' >> ~/.bash_profile; \
-			echo ". <(osmosisd enable-cli-autocomplete bash)" >> ~/.bash_profile; \
+			echo ". <(nuahd enable-cli-autocomplete bash)" >> ~/.bash_profile; \
 			echo; \
 			echo "Autocomplete enabled. Run 'source ~/.bash_profile' to complete installation."; \
 		else \
@@ -110,7 +110,7 @@ build-reproducible-amd64: go.sum
 		-f Dockerfile .
 	$(DOCKER) rm -f osmobinary || true
 	$(DOCKER) create -ti --name osmobinary osmosis:local-amd64
-	$(DOCKER) cp osmobinary:/bin/osmosisd $(BUILDDIR)/osmosisd-linux-amd64
+	$(DOCKER) cp osmobinary:/bin/nuahd $(BUILDDIR)/nuahd-linux-amd64
 	$(DOCKER) rm -f osmobinary
 
 build-reproducible-arm64: go.sum
@@ -128,7 +128,7 @@ build-reproducible-arm64: go.sum
 		-f Dockerfile .
 	$(DOCKER) rm -f osmobinary || true
 	$(DOCKER) create -ti --name osmobinary osmosis:local-arm64
-	$(DOCKER) cp osmobinary:/bin/osmosisd $(BUILDDIR)/osmosisd-linux-arm64
+	$(DOCKER) cp osmobinary:/bin/nuahd $(BUILDDIR)/nuahd-linux-arm64
 	$(DOCKER) rm -f osmobinary
 
 build-linux: go.sum

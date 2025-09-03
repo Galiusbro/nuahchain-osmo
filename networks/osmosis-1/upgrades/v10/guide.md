@@ -35,8 +35,8 @@ Set these environment variables:
 
 ```{.sh}
 echo "# Setup Cosmovisor" >> ~/.profile
-echo "export DAEMON_NAME=osmosisd" >> ~/.profile
-echo "export DAEMON_HOME=$HOME/.osmosisd" >> ~/.profile
+echo "export DAEMON_NAME=nuahd" >> ~/.profile
+echo "export DAEMON_HOME=$HOME/.nuahd" >> ~/.profile
 echo "export DAEMON_ALLOW_DOWNLOAD_BINARIES=false" >> ~/.profile
 echo "export DAEMON_LOG_BUFFER_SIZE=512" >> ~/.profile
 echo "export DAEMON_RESTART_AFTER_UPGRADE=true" >> ~/.profile
@@ -47,12 +47,12 @@ source ~/.profile
 Now, create the required folder, make the build, and copy the daemon over to that folder. **NOTE**, you must put the v10 binary in the v9 folder as shown below since this is a fork.
 
 ```{.sh}
-mkdir -p ~/.osmosisd/cosmovisor/upgrades/v9/bin
+mkdir -p ~/.nuahd/cosmovisor/upgrades/v9/bin
 cd $HOME/osmosis
 git pull
 git checkout v10.0.0
 make build
-cp build/osmosisd ~/.osmosisd/cosmovisor/upgrades/v9/bin
+cp build/nuahd ~/.nuahd/cosmovisor/upgrades/v9/bin
 ```
 
 ## Completely Manual Option

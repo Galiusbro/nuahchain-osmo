@@ -26,7 +26,7 @@
 ### Команда создания
 
 ```bash
-./build/osmosisd keys add charlie --keyring-backend test
+./build/nuahd keys add charlie --keyring-backend test
 ```
 
 ### Результат
@@ -51,12 +51,12 @@
 #### Команда передачи
 
 ```bash
-./build/osmosisd tx bank send osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue \
+./build/nuahd tx bank send osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue \
   osmo1n923kpm70la27k9jx3a4khkydka2kuwyygyy49 \
   1000000factory/osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue/roma \
   --from alice \
   --keyring-backend test \
-  --chain-id localosmosis \
+  --chain-id localnuah \
   --gas auto \
   --gas-adjustment 1.5 \
   --fees 2500stake \
@@ -69,7 +69,7 @@
 - **К**: Боб (`osmo1n923kpm70la27k9jx3a4khkydka2kuwyygyy49`)
 - **Количество**: 1,000,000 базовых единиц (1.0 Roma)
 - **Fee**: 2,500 stake
-- **Chain ID**: localosmosis
+- **Chain ID**: localnuah
 
 #### Результат
 
@@ -95,12 +95,12 @@ txhash: 2C7AC1E4F9980EEE0103A50332E40181F6B5011AEBC8E20E64A749944D0C9879
 #### Команда передачи
 
 ```bash
-./build/osmosisd tx bank send osmo1n923kpm70la27k9jx3a4khkydka2kuwyygyy49 \
+./build/nuahd tx bank send osmo1n923kpm70la27k9jx3a4khkydka2kuwyygyy49 \
   osmo1xsq06704l7p0zd44dntx2npsyx8rjjp9z5cznd \
   500000factory/osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue/roma \
   --from bob \
   --keyring-backend test \
-  --chain-id localosmosis \
+  --chain-id localnuah \
   --gas auto \
   --gas-adjustment 1.5 \
   --fees 2500stake \
@@ -113,7 +113,7 @@ txhash: 2C7AC1E4F9980EEE0103A50332E40181F6B5011AEBC8E20E64A749944D0C9879
 - **К**: Чарли (`osmo1xsq06704l7p0zd44dntx2npsyx8rjjp9z5cznd`)
 - **Количество**: 500,000 базовых единиц (0.5 Roma)
 - **Fee**: 2,500 stake
-- **Chain ID**: localosmosis
+- **Chain ID**: localnuah
 
 #### Результат
 
@@ -147,12 +147,12 @@ txhash: B566FA0A0AAAA7C54306E5C48D9C9D813A03F6F90CE8EA1C3B2C3C10AC45869A
 #### Команда
 
 ```bash
-./build/osmosisd tx bank send osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue \
+./build/nuahd tx bank send osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue \
   osmo1xsq06704l7p0zd44dntx2npsyx8rjjp9z5cznd \
   10000stake \
   --from alice \
   --keyring-backend test \
-  --chain-id localosmosis \
+  --chain-id localnuah \
   --gas auto \
   --gas-adjustment 1.5 \
   --fees 2500stake \
@@ -173,12 +173,12 @@ txhash: AC2664C851F7C8F49556F4F91F8C9A3891620415762F03816B6B8EDC48918B06
 #### Команда передачи
 
 ```bash
-./build/osmosisd tx bank send osmo1xsq06704l7p0zd44dntx2npsyx8rjjp9z5cznd \
+./build/nuahd tx bank send osmo1xsq06704l7p0zd44dntx2npsyx8rjjp9z5cznd \
   osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue \
   250000factory/osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue/roma \
   --from charlie \
   --keyring-backend test \
-  --chain-id localosmosis \
+  --chain-id localnuah \
   --gas auto \
   --gas-adjustment 1.5 \
   --fees 2500stake \
@@ -191,7 +191,7 @@ txhash: AC2664C851F7C8F49556F4F91F8C9A3891620415762F03816B6B8EDC48918B06
 - **К**: Алиса (`osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue`)
 - **Количество**: 250,000 базовых единиц (0.25 Roma)
 - **Fee**: 2,500 stake
-- **Chain ID**: localosmosis
+- **Chain ID**: localnuah
 
 #### Результат
 
@@ -223,38 +223,38 @@ txhash: 8C23CEEFC7366561D355A65F9A5E17C40D69535732244D864BD9CB879E13DDE8
 ### Проверка баланса конкретного аккаунта
 
 ```bash
-./build/osmosisd query bank balances <адрес_аккаунта> --chain-id localosmosis
+./build/nuahd query bank balances <адрес_аккаунта> --chain-id localnuah
 ```
 
 ### Примеры
 
 ```bash
 # Проверка баланса Алисы
-./build/osmosisd query bank balances osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue --chain-id localosmosis
+./build/nuahd query bank balances osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue --chain-id localnuah
 
 # Проверка баланса Боба
-./build/osmosisd query bank balances osmo1n923kpm70la27k9jx3a4khkydka2kuwyygyy49 --chain-id localosmosis
+./build/nuahd query bank balances osmo1n923kpm70la27k9jx3a4khkydka2kuwyygyy49 --chain-id localnuah
 
 # Проверка баланса Чарли
-./build/osmosisd query bank balances osmo1xsq06704l7p0zd44dntx2npsyx8rjjp9z5cznd --chain-id localosmosis
+./build/nuahd query bank balances osmo1xsq06704l7p0zd44dntx2npsyx8rjjp9z5cznd --chain-id localnuah
 ```
 
 ## Важные замечания
 
 ### Fee токены
 
-- **localosmosis**: используйте `stake` токены для fee
+- **localnuah**: используйте `stake` токены для fee
 - **mainnet**: используйте `uosmo` токены для fee
 - Всегда проверяйте доступные fee токены командой:
   ```bash
-  ./build/osmosisd query txfees base-denom --chain-id <chain_id>
+  ./build/nuahd query txfees base-denom --chain-id <chain_id>
   ```
 
 ### Chain ID
 
 - Всегда указывайте правильный `--chain-id`
-- Для локального тестирования: `localosmosis`
-- Для mainnet: `osmosis-1`
+- Для локального тестирования: `localnuah`
+- Для mainnet: `nuahchain-1`
 
 ### Права доступа
 

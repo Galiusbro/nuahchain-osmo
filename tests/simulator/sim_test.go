@@ -59,7 +59,7 @@ func fullAppSimulation(tb testing.TB, is_testing bool) {
 	_, _, simErr := osmosim.SimulateFromSeed(
 		tb,
 		os.Stdout,
-		OsmosisAppCreator(logger, db),
+		NUAHAppCreator(logger, db),
 		OsmosisInitFns,
 		config,
 	)
@@ -117,7 +117,7 @@ func fullAppSimulation(tb testing.TB, is_testing bool) {
 // 			lastCommitId, _, simErr := osmosim.SimulateFromSeed(
 // 				t,
 // 				os.Stdout,
-// 				OsmosisAppCreator(logger, db),
+// 				NUAHAppCreator(logger, db),
 // 				OsmosisInitFns,
 // 				config,
 // 			)

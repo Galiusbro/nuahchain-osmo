@@ -27,7 +27,7 @@ redis-stop:
 
 sqs-start:
 	./scripts/debug_builder.sh
-	build/osmosisd start
+	build/nuahd start
 
 sqs-load-test-ui:
 	docker compose -f ingest/sqs/locust/docker-compose.yml up --scale worker=4

@@ -8,17 +8,17 @@
 
 ### 1. Настройка окружения
 ```bash
-export CHAIN_ID=localosmosis
+export CHAIN_ID=localnuah
 ```
 
 ### 2. Проверка состояния пула
 ```bash
-./build/osmosisd q gamm pool 1 --chain-id $CHAIN_ID
+./build/nuahd q gamm pool 1 --chain-id $CHAIN_ID
 ```
 
 ### 3. Проверка доступных ключей
 ```bash
-./build/osmosisd keys list --keyring-backend=test
+./build/nuahd keys list --keyring-backend=test
 ```
 
 ## Выполнение Swap
@@ -28,7 +28,7 @@ export CHAIN_ID=localosmosis
 Перед выполнением swap рекомендуется проверить текущую spot price:
 
 ```bash
-./build/osmosisd q gamm spot-price 1 stake factory/osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue/roma true --chain-id $CHAIN_ID
+./build/nuahd q gamm spot-price 1 stake factory/osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue/roma true --chain-id $CHAIN_ID
 ```
 
 **Результат:**
@@ -42,7 +42,7 @@ spot_price: "1.000000000000000000"
 
 #### Swap Exact Amount In
 ```bash
-./build/osmosisd tx gamm swap-exact-amount-in \
+./build/nuahd tx gamm swap-exact-amount-in \
   <token-in> \
   <token-out-min-amount> \
   --swap-route-pool-ids=<pool-id> \
@@ -56,7 +56,7 @@ spot_price: "1.000000000000000000"
 
 #### Пример успешного swap
 ```bash
-./build/osmosisd tx gamm swap-exact-amount-in 1000stake 900 \
+./build/nuahd tx gamm swap-exact-amount-in 1000stake 900 \
   --swap-route-pool-ids=1 \
   --swap-route-denoms=factory/osmo137m5vcnusv4mmps0yna9hg5kypwayj6e2tjjue/roma \
   --from alice \
@@ -140,22 +140,22 @@ txhash: 7ED429C68516B875462E67EDE1929E143945CA660248F4A6CBAF1F07F24D705C
 
 ### Проверка баланса пользователя
 ```bash
-./build/osmosisd q bank balances <address> --chain-id $CHAIN_ID
+./build/nuahd q bank balances <address> --chain-id $CHAIN_ID
 ```
 
 ### Проверка состояния пула
 ```bash
-./build/osmosisd q gamm pool <pool-id> --chain-id $CHAIN_ID
+./build/nuahd q gamm pool <pool-id> --chain-id $CHAIN_ID
 ```
 
 ### Проверка spot price
 ```bash
-./build/osmosisd q gamm spot-price <pool-id> <base-denom> <quote-denom> <with-swap-fee> --chain-id $CHAIN_ID
+./build/nuahd q gamm spot-price <pool-id> <base-denom> <quote-denom> <with-swap-fee> --chain-id $CHAIN_ID
 ```
 
 ### Детали транзакции
 ```bash
-./build/osmosisd q tx <txhash> --chain-id $CHAIN_ID
+./build/nuahd q tx <txhash> --chain-id $CHAIN_ID
 ```
 
 ## Заключение

@@ -9,7 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/osmomath"
-	osmosisapp "github.com/osmosis-labs/osmosis/v30/app"
+	NUAHApp "github.com/osmosis-labs/osmosis/v30/app"
 
 	"github.com/osmosis-labs/osmosis/v30/app/apptesting"
 	appparams "github.com/osmosis-labs/osmosis/v30/app/params"
@@ -32,7 +32,7 @@ func (s *KeeperTestSuite) SetupTest(isCheckTx bool) {
 	s.Setup()
 	s.queryClient = types.NewQueryClient(s.QueryHelper)
 
-	encodingConfig := osmosisapp.MakeEncodingConfig()
+	encodingConfig := NUAHApp.MakeEncodingConfig()
 	s.clientCtx = client.Context{}.
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
 		WithTxConfig(encodingConfig.TxConfig).

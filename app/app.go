@@ -166,7 +166,7 @@ import (
 	txfeesclient "github.com/osmosis-labs/osmosis/v30/x/txfees/client"
 )
 
-const appName = "OsmosisApp"
+const appName = "NUAHApp"
 
 var (
 	// DefaultNodeHome default home directories for the application daemon
@@ -194,7 +194,7 @@ var (
 	// EmptyWasmOpts defines a type alias for a list of wasm options.
 	EmptyWasmOpts []wasmkeeper.Option
 
-	_ runtime.AppI = (*OsmosisApp)(nil)
+	_ runtime.AppI = (*NUAHApp)(nil)
 
 	Upgrades = []upgrades.Upgrade{v4.Upgrade, v5.Upgrade, v7.Upgrade, v9.Upgrade, v11.Upgrade, v12.Upgrade, v13.Upgrade, v14.Upgrade, v15.Upgrade, v16.Upgrade, v17.Upgrade, v18.Upgrade, v19.Upgrade, v20.Upgrade, v21.Upgrade, v22.Upgrade, v23.Upgrade, v24.Upgrade, v25.Upgrade, v26.Upgrade, v27.Upgrade, v28.Upgrade, v29.Upgrade, v30.Upgrade}
 	Forks    = []upgrades.Fork{v3.Fork, v6.Fork, v8.Fork, v10.Fork}
@@ -203,10 +203,10 @@ var (
 	rpcAddressConfigName = "rpc.laddr"
 )
 
-// OsmosisApp extends an ABCI application, but with most of its parameters exported.
+// NUAHApp extends an ABCI application, but with most of its parameters exported.
 // They are exported for convenience in creating helper functions, as object
 // capabilities aren't needed for testing.
-type OsmosisApp struct {
+type NUAHApp struct {
 	*baseapp.BaseApp
 	keepers.AppKeepers
 
@@ -224,14 +224,14 @@ type OsmosisApp struct {
 	checkTxHandler checktx.CheckTx
 }
 
-// init sets DefaultNodeHome to default osmosisd install location.
+// init sets DefaultNodeHome to default nuahd install location.
 func init() {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
 
-	DefaultNodeHome = filepath.Join(userHomeDir, ".osmosisd")
+	DefaultNodeHome = filepath.Join(userHomeDir, ".nuahd")
 }
 
 // initReusablePackageInjections injects data available within osmosis into the reusable packages.
@@ -252,8 +252,8 @@ func overrideWasmVariables() {
 	wasmtypes.MaxProposalWasmSize = wasmtypes.MaxWasmSize
 }
 
-// NewOsmosisApp returns a reference to an initialized Osmosis.
-func NewOsmosisApp(
+// NewNUAHApp returns a reference to an initialized Osmosis.
+func NewNUAHApp(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
@@ -264,7 +264,7 @@ func NewOsmosisApp(
 	appOpts servertypes.AppOptions,
 	wasmOpts []wasmkeeper.Option,
 	baseAppOptions ...func(*baseapp.BaseApp),
-) *OsmosisApp {
+) *NUAHApp {
 	// Handler OTEL configuration.
 	OTELConfig := NewOTELConfigFromOptions(appOpts)
 	if OTELConfig.Enabled {
@@ -297,7 +297,7 @@ func NewOsmosisApp(
 	bApp.SetVersion(version.Version)
 	bApp.SetInterfaceRegistry(interfaceRegistry)
 
-	app := &OsmosisApp{
+	app := &NUAHApp{
 		AppKeepers:        keepers.AppKeepers{},
 		BaseApp:           bApp,
 		cdc:               cdc,
@@ -704,7 +704,7 @@ func NewOsmosisApp(
 }
 
 // getSQSServiceWriteListeners returns the write listeners for the app that are specific to the SQS service.
-func getSQSServiceWriteListeners(app *OsmosisApp, appCodec codec.Codec, blockPoolUpdateTracker domain.BlockPoolUpdateTracker, wasmkeeper *wasmkeeper.Keeper) (map[storetypes.StoreKey][]commondomain.WriteListener, map[string]storetypes.StoreKey) {
+func getSQSServiceWriteListeners(app *NUAHApp, appCodec codec.Codec, blockPoolUpdateTracker domain.BlockPoolUpdateTracker, wasmkeeper *wasmkeeper.Keeper) (map[storetypes.StoreKey][]commondomain.WriteListener, map[string]storetypes.StoreKey) {
 	writeListeners, storeKeyMap := getPoolWriteListeners(app, appCodec, blockPoolUpdateTracker, wasmkeeper)
 
 	// Register all applicable keys as listeners
@@ -714,7 +714,7 @@ func getSQSServiceWriteListeners(app *OsmosisApp, appCodec codec.Codec, blockPoo
 }
 
 // getIndexerServiceWriteListeners returns the write listeners for the app that are specific to the indexer service.
-func getIndexerServiceWriteListeners(ctx context.Context, app *OsmosisApp, appCodec codec.Codec, blockPoolUpdateTracker domain.BlockPoolUpdateTracker, wasmkeeper *wasmkeeper.Keeper, client indexerdomain.Publisher, blockProcessStrategyManager commondomain.BlockProcessStrategyManager) (map[storetypes.StoreKey][]commondomain.WriteListener, map[string]storetypes.StoreKey) {
+func getIndexerServiceWriteListeners(ctx context.Context, app *NUAHApp, appCodec codec.Codec, blockPoolUpdateTracker domain.BlockPoolUpdateTracker, wasmkeeper *wasmkeeper.Keeper, client indexerdomain.Publisher, blockProcessStrategyManager commondomain.BlockProcessStrategyManager) (map[storetypes.StoreKey][]commondomain.WriteListener, map[string]storetypes.StoreKey) {
 	writeListeners, storeKeyMap := getPoolWriteListeners(app, appCodec, blockPoolUpdateTracker, wasmkeeper)
 
 	// Add write listeners for the bank module.
@@ -731,7 +731,7 @@ func getIndexerServiceWriteListeners(ctx context.Context, app *OsmosisApp, appCo
 }
 
 // getPoolWriteListeners returns the write listeners for the app that are specific to monitoring the pools.
-func getPoolWriteListeners(app *OsmosisApp, appCodec codec.Codec, blockPoolUpdateTracker domain.BlockPoolUpdateTracker, wasmkeeper *wasmkeeper.Keeper) (map[storetypes.StoreKey][]commondomain.WriteListener, map[string]storetypes.StoreKey) {
+func getPoolWriteListeners(app *NUAHApp, appCodec codec.Codec, blockPoolUpdateTracker domain.BlockPoolUpdateTracker, wasmkeeper *wasmkeeper.Keeper) (map[storetypes.StoreKey][]commondomain.WriteListener, map[string]storetypes.StoreKey) {
 	writeListeners := make(map[storetypes.StoreKey][]commondomain.WriteListener)
 	storeKeyMap := make(map[string]storetypes.StoreKey)
 
@@ -759,7 +759,7 @@ func getPoolWriteListeners(app *OsmosisApp, appCodec codec.Codec, blockPoolUpdat
 // registerStoreKeys register the store keys from the given store key map
 // on the app's commit multi store so that the change sets from these stores are propagated
 // in ListenCommit().
-func registerStoreKeys(app *OsmosisApp, storeKeyMap map[string]storetypes.StoreKey) {
+func registerStoreKeys(app *NUAHApp, storeKeyMap map[string]storetypes.StoreKey) {
 	// Register all applicable keys as listeners
 	storeKeys := make([]storetypes.StoreKey, 0)
 	for _, storeKey := range storeKeyMap {
@@ -783,10 +783,10 @@ func getReflectionService() *runtimeservices.ReflectionService {
 	return reflectionSvc
 }
 
-// InitOsmosisAppForTestnet is broken down into two sections:
+// InitNUAHAppForTestnet is broken down into two sections:
 // Required Changes: Changes that, if not made, will cause the testnet to halt or panic
 // Optional Changes: Changes to customize the testnet to one's liking (lower vote times, fund accounts, etc)
-func InitOsmosisAppForTestnet(app *OsmosisApp, newValAddr bytes.HexBytes, newValPubKey crypto.PubKey, newOperatorAddress, upgradeToTrigger string) *OsmosisApp {
+func InitNUAHAppForTestnet(app *NUAHApp, newValAddr bytes.HexBytes, newValPubKey crypto.PubKey, newOperatorAddress, upgradeToTrigger string) *NUAHApp {
 	//
 	// Required Changes:
 	//
@@ -806,7 +806,7 @@ func InitOsmosisAppForTestnet(app *OsmosisApp, newValAddr bytes.HexBytes, newVal
 	if err != nil {
 		tmos.Exit(err.Error())
 	}
-	bech32Addr, err := bech32.ConvertAndEncode("osmovaloper", bz)
+	bech32Addr, err := bech32.ConvertAndEncode("nuahvaloper", bz)
 	if err != nil {
 		tmos.Exit(err.Error())
 	}
@@ -991,7 +991,7 @@ func InitOsmosisAppForTestnet(app *OsmosisApp, newValAddr bytes.HexBytes, newVal
 		sdk.NewInt64Coin(appparams.BaseCoinUnit, 1000000000000),
 		sdk.NewInt64Coin("uion", 1000000000))
 
-	localOsmosisAccounts := []sdk.AccAddress{
+	localNuahAccounts := []sdk.AccAddress{
 		sdk.MustAccAddressFromBech32("osmo12smx2wdlyttvyzvzg54y2vnqwq2qjateuf7thj"),
 		sdk.MustAccAddressFromBech32("osmo1cyyzpxplxdzkeea7kwsydadg87357qnahakaks"),
 		sdk.MustAccAddressFromBech32("osmo18s5lynnmx37hq4wlrw9gdn68sg2uxp5rgk26vv"),
@@ -1006,8 +1006,8 @@ func InitOsmosisAppForTestnet(app *OsmosisApp, newValAddr bytes.HexBytes, newVal
 		sdk.MustAccAddressFromBech32("osmo1jllfytsz4dryxhz5tl7u73v29exsf80vz52ucc"),
 	}
 
-	// Fund localosmosis accounts
-	for _, account := range localOsmosisAccounts {
+	// Fund localnuah accounts
+	for _, account := range localNuahAccounts {
 		err := app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, defaultCoins)
 		if err != nil {
 			tmos.Exit(err.Error())
@@ -1071,12 +1071,12 @@ func InitOsmosisAppForTestnet(app *OsmosisApp, newValAddr bytes.HexBytes, newVal
 // handler so that we can verify bid transactions before they are inserted into the mempool.
 // With the BlockSDK CheckTx, we can verify the bid transaction and all of the bundled transactions
 // before inserting the bid transaction into the mempool.
-func (app *OsmosisApp) CheckTx(req *abci.RequestCheckTx) (*abci.ResponseCheckTx, error) {
+func (app *NUAHApp) CheckTx(req *abci.RequestCheckTx) (*abci.ResponseCheckTx, error) {
 	return app.checkTxHandler(req)
 }
 
 // SetCheckTx sets the checkTxHandler for the app.
-func (app *OsmosisApp) SetCheckTx(handler checktx.CheckTx) {
+func (app *NUAHApp) SetCheckTx(handler checktx.CheckTx) {
 	app.checkTxHandler = handler
 }
 
@@ -1086,15 +1086,15 @@ func MakeCodecs() (codec.Codec, *codec.LegacyAmino) {
 	return config.Marshaler, config.Amino
 }
 
-func (app *OsmosisApp) GetBaseApp() *baseapp.BaseApp {
+func (app *NUAHApp) GetBaseApp() *baseapp.BaseApp {
 	return app.BaseApp
 }
 
 // Name returns the name of the App.
-func (app *OsmosisApp) Name() string { return app.BaseApp.Name() }
+func (app *NUAHApp) Name() string { return app.BaseApp.Name() }
 
 // PreBlocker application updates before each begin block.
-func (app *OsmosisApp) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
+func (app *NUAHApp) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
 	// Set gas meter to the free gas meter.
 	// This is because there is currently non-deterministic gas usage in the
 	// pre-blocker, e.g. due to hydration of in-memory data structures.
@@ -1107,25 +1107,25 @@ func (app *OsmosisApp) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock)
 }
 
 // BeginBlocker application updates every begin block.
-func (app *OsmosisApp) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
+func (app *NUAHApp) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
 	BeginBlockForks(ctx, app)
 	return app.mm.BeginBlock(ctx)
 }
 
 // EndBlocker application updates every end block.
-func (app *OsmosisApp) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
+func (app *NUAHApp) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
 	return app.mm.EndBlock(ctx)
 }
 
 // Precommitter application updates before the commital of a block after all transactions have been delivered.
-func (app *OsmosisApp) Precommitter(ctx sdk.Context) {
+func (app *NUAHApp) Precommitter(ctx sdk.Context) {
 	mm := app.ModuleManager()
 	if err := mm.Precommit(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (app *OsmosisApp) PrepareCheckStater(ctx sdk.Context) {
+func (app *NUAHApp) PrepareCheckStater(ctx sdk.Context) {
 	mm := app.ModuleManager()
 	if err := mm.PrepareCheckState(ctx); err != nil {
 		panic(err)
@@ -1133,7 +1133,7 @@ func (app *OsmosisApp) PrepareCheckStater(ctx sdk.Context) {
 }
 
 // InitChainer application update at chain initialization.
-func (app *OsmosisApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*abci.ResponseInitChain, error) {
+func (app *NUAHApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*abci.ResponseInitChain, error) {
 	var genesisState GenesisState
 	if err := tmjson.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
 		panic(err)
@@ -1148,7 +1148,7 @@ func (app *OsmosisApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) 
 }
 
 // LoadHeight loads a particular height.
-func (app *OsmosisApp) LoadHeight(height int64) error {
+func (app *NUAHApp) LoadHeight(height int64) error {
 	return app.LoadVersion(height)
 }
 
@@ -1156,7 +1156,7 @@ func (app *OsmosisApp) LoadHeight(height int64) error {
 //
 // NOTE: This is solely to be used for testing purposes as it may be desirable
 // for modules to register their own custom testing types.
-func (app *OsmosisApp) LegacyAmino() *codec.LegacyAmino {
+func (app *NUAHApp) LegacyAmino() *codec.LegacyAmino {
 	return app.cdc
 }
 
@@ -1164,22 +1164,22 @@ func (app *OsmosisApp) LegacyAmino() *codec.LegacyAmino {
 //
 // NOTE: This is solely to be used for testing purposes as it may be desirable
 // for modules to register their own custom testing types.
-func (app *OsmosisApp) AppCodec() codec.Codec {
+func (app *NUAHApp) AppCodec() codec.Codec {
 	return app.appCodec
 }
 
 // InterfaceRegistry returns Osmosis' InterfaceRegistry.
-func (app *OsmosisApp) InterfaceRegistry() types.InterfaceRegistry {
+func (app *NUAHApp) InterfaceRegistry() types.InterfaceRegistry {
 	return app.interfaceRegistry
 }
 
-func (app *OsmosisApp) ModuleManager() module.Manager {
+func (app *NUAHApp) ModuleManager() module.Manager {
 	return *app.mm
 }
 
 // RegisterAPIRoutes registers all application module routes with the provided
 // API server.
-func (app *OsmosisApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
+func (app *NUAHApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
 	clientCtx := apiSvr.ClientCtx
 	// Register new tx routes from grpc-gateway.
 	authtx.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
@@ -1202,12 +1202,12 @@ func (app *OsmosisApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.AP
 }
 
 // RegisterTxService implements the Application.RegisterTxService method.
-func (app *OsmosisApp) RegisterTxService(clientCtx client.Context) {
+func (app *NUAHApp) RegisterTxService(clientCtx client.Context) {
 	authtx.RegisterTxService(app.BaseApp.GRPCQueryRouter(), clientCtx, app.BaseApp.Simulate, app.interfaceRegistry)
 }
 
 // RegisterTendermintService implements the Application.RegisterTendermintService method.
-func (app *OsmosisApp) RegisterTendermintService(clientCtx client.Context) {
+func (app *NUAHApp) RegisterTendermintService(clientCtx client.Context) {
 	cmtservice.RegisterTendermintService(
 		clientCtx,
 		app.BaseApp.GRPCQueryRouter(),
@@ -1217,24 +1217,24 @@ func (app *OsmosisApp) RegisterTendermintService(clientCtx client.Context) {
 }
 
 // RegisterNodeService registers the node gRPC Query service.
-func (app *OsmosisApp) RegisterNodeService(clientCtx client.Context, cfg config.Config) {
+func (app *NUAHApp) RegisterNodeService(clientCtx client.Context, cfg config.Config) {
 	nodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter(), cfg)
 }
 
 // SimulationManager implements the SimulationApp interface
-func (app *OsmosisApp) SimulationManager() *module.SimulationManager {
+func (app *NUAHApp) SimulationManager() *module.SimulationManager {
 	return app.sm
 }
 
 // ChainID gets chainID from private fields of BaseApp
 // Should be removed once SDK 0.50.x will be adopted
-func (app *OsmosisApp) ChainID() string {
+func (app *NUAHApp) ChainID() string {
 	field := reflect.ValueOf(app.BaseApp).Elem().FieldByName("chainID")
 	return field.String()
 }
 
 // configure store loader that checks if version == upgradeHeight and applies store upgrades
-func (app *OsmosisApp) setupUpgradeStoreLoaders() {
+func (app *NUAHApp) setupUpgradeStoreLoaders() {
 	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
 		panic(fmt.Sprintf("failed to read upgrade info from disk %s", err))
@@ -1258,7 +1258,7 @@ func (app *OsmosisApp) setupUpgradeStoreLoaders() {
 	}
 }
 
-func (app *OsmosisApp) customPreUpgradeHandler(upgradeInfo upgradetypes.Plan) {
+func (app *NUAHApp) customPreUpgradeHandler(upgradeInfo upgradetypes.Plan) {
 	switch upgradeInfo.Name {
 	case "v16":
 		// v16 upgrade handler
@@ -1270,7 +1270,7 @@ func (app *OsmosisApp) customPreUpgradeHandler(upgradeInfo upgradetypes.Plan) {
 	}
 }
 
-func (app *OsmosisApp) setupUpgradeHandlers() {
+func (app *NUAHApp) setupUpgradeHandlers() {
 	for _, upgrade := range Upgrades {
 		app.UpgradeKeeper.SetUpgradeHandler(
 			upgrade.UpgradeName,

@@ -54,14 +54,14 @@ To install Cosmovisor:
     cd $HOME
 
 After this, you must make the necessary folders for cosmosvisor in your
-daemon home directory (\~/.osmosisd).
+daemon home directory (\~/.nuahd).
 
 ``` {.sh}
-mkdir -p ~/.osmosisd
-mkdir -p ~/.osmosisd/cosmovisor
-mkdir -p ~/.osmosisd/cosmovisor/genesis
-mkdir -p ~/.osmosisd/cosmovisor/genesis/bin
-mkdir -p ~/.osmosisd/cosmovisor/upgrades
+mkdir -p ~/.nuahd
+mkdir -p ~/.nuahd/cosmovisor
+mkdir -p ~/.nuahd/cosmovisor/genesis
+mkdir -p ~/.nuahd/cosmovisor/genesis/bin
+mkdir -p ~/.nuahd/cosmovisor/upgrades
 ```
 
 Cosmovisor requires some ENVIRONMENT VARIABLES be set in order to
@@ -80,8 +80,8 @@ For validators we recommend setting
 ```
 
     echo "# Setup Cosmovisor" >> ~/.profile
-    echo "export DAEMON_NAME=osmosisd" >> ~/.profile
-    echo "export DAEMON_HOME=$HOME/.osmosisd" >> ~/.profile
+    echo "export DAEMON_NAME=nuahd" >> ~/.profile
+    echo "export DAEMON_HOME=$HOME/.nuahd" >> ~/.profile
     echo "export DAEMON_ALLOW_DOWNLOAD_BINARIES=false" >> ~/.profile
     echo "export DAEMON_LOG_BUFFER_SIZE=512" >> ~/.profile
     echo "export DAEMON_RESTART_AFTER_UPGRADE=true" >> ~/.profile
@@ -91,22 +91,22 @@ For validators we recommend setting
 You may leave out `UNSAFE_SKIP_BACKUP=true`, however the backup takes a
 decent amount of time and public snapshots of old states are available.
 
-Finally, you should copy the current osmosisd binary into the
+Finally, you should copy the current nuahd binary into the
 cosmovisor/genesis folder.
 
-    cp $GOPATH/bin/osmosisd ~/.osmosisd/cosmovisor/genesis/bin
+    cp $GOPATH/bin/nuahd ~/.nuahd/cosmovisor/genesis/bin
 
 ## Prepare for upgrade (v5)
 
 To prepare for the upgrade, you need to create some folders, and build
 and install the new binary.
 
-    mkdir -p ~/.osmosisd/cosmovisor/upgrades/v5/bin
+    mkdir -p ~/.nuahd/cosmovisor/upgrades/v5/bin
     git clone https://github.com/osmosis-labs/osmosis
     cd osmosis
     git checkout v5.0.0
     make build
-    cp build/osmosisd ~/.osmosisd/cosmovisor/upgrades/v5/bin
+    cp build/nuahd ~/.nuahd/cosmovisor/upgrades/v5/bin
 
 Now cosmovisor will run with the current binary, and will automatically
 upgrade to this new binary at the appropriate height if run with:
@@ -114,5 +114,5 @@ upgrade to this new binary at the appropriate height if run with:
     cosmovisor start
 
 Please note, this does not automatically update your
-`$GOPATH/bin/osmosisd` binary, to do that after the upgrade, please run
+`$GOPATH/bin/nuahd` binary, to do that after the upgrade, please run
 `make install` in the osmosis source folder.

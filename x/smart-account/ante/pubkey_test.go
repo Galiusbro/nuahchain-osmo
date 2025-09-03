@@ -24,7 +24,7 @@ import (
 // AuthenticatorSetPubKeyAnteSuite is a test suite for the authenticator and SetPubKey AnteDecorator.
 type AuthenticatorSetPubKeyAnteSuite struct {
 	suite.Suite
-	OsmosisApp             *app.OsmosisApp
+	NUAHApp                *app.NUAHApp
 	Ctx                    sdk.Context
 	EncodingConfig         params.EncodingConfig
 	AuthenticatorDecorator ante.AuthenticatorDecorator
@@ -53,9 +53,9 @@ func (s *AuthenticatorSetPubKeyAnteSuite) SetupTest() {
 
 	// Initialize the Osmosis application
 	s.HomeDir = fmt.Sprintf("%d", rand.Int())
-	s.OsmosisApp = app.SetupWithCustomHome(false, s.HomeDir)
+	s.NUAHApp = app.SetupWithCustomHome(false, s.HomeDir)
 
-	s.Ctx = s.OsmosisApp.NewContextLegacy(false, tmproto.Header{})
+	s.Ctx = s.NUAHApp.NewContextLegacy(false, tmproto.Header{})
 
 	// Set up test accounts
 	for _, key := range TestKeys {
@@ -111,7 +111,7 @@ func (s *AuthenticatorSetPubKeyAnteSuite) TestSetPubKeyAnte() {
 	}, []uint64{})
 
 	// Create a SetPubKey AnteDecorator
-	spkd := ante.NewEmitPubKeyDecoratorEvents(s.OsmosisApp.AccountKeeper)
+	spkd := ante.NewEmitPubKeyDecoratorEvents(s.NUAHApp.AccountKeeper)
 	antehandler := sdk.ChainAnteDecorators(spkd)
 
 	// Run the AnteDecorator on the transaction
@@ -142,7 +142,7 @@ func (s *AuthenticatorSetPubKeyAnteSuite) TestSetPubKeyAnteWithSenderNotSigner()
 	}, []uint64{})
 
 	// Create a SetPubKey AnteDecorator
-	spkd := ante.NewEmitPubKeyDecoratorEvents(s.OsmosisApp.AccountKeeper)
+	spkd := ante.NewEmitPubKeyDecoratorEvents(s.NUAHApp.AccountKeeper)
 	antehandler := sdk.ChainAnteDecorators(spkd)
 
 	// Run the AnteDecorator on the transaction
@@ -150,6 +150,6 @@ func (s *AuthenticatorSetPubKeyAnteSuite) TestSetPubKeyAnteWithSenderNotSigner()
 	s.Require().NoError(err)
 
 	// Ensure that the public key has not been set for a non-signer sender
-	pk, err := s.OsmosisApp.AccountKeeper.GetPubKey(ctx, s.TestAccAddress[4])
+	pk, err := s.NUAHApp.AccountKeeper.GetPubKey(ctx, s.TestAccAddress[4])
 	s.Require().Equal(pk, nil, "Public Key has not been set")
 }

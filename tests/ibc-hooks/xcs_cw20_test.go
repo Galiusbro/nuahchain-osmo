@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+
 	abci "github.com/cometbft/cometbft/abci/types"
 
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
@@ -37,8 +38,8 @@ func (suite *HooksTestSuite) SetupCW20(chainName Chain) (sdk.AccAddress, sdk.Acc
 func (suite *HooksTestSuite) TransferCW20Tokens(path *ibctesting.Path, cw20Addr, cw20ics20Addr, receiver sdk.AccAddress, amount, memo string) (*abci.ExecTxResult, []byte) {
 	chainB := suite.GetChain(ChainB)
 
-	osmosisApp := chainB.GetOsmosisApp()
-	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(osmosisApp.WasmKeeper)
+	NUAHApp := chainB.GetNUAHApp()
+	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(NUAHApp.WasmKeeper)
 
 	if len(memo) == 0 {
 		memo = "\"\""
@@ -76,13 +77,13 @@ func (suite *HooksTestSuite) TransferCW20Tokens(path *ibctesting.Path, cw20Addr,
 }
 
 func (suite *HooksTestSuite) setupCW20PoolAndRoutes(chain *osmosisibctesting.TestChain, swaprouterAddr sdk.AccAddress, cw20IbcDenom string, amount osmomath.Int) {
-	osmosisAppA := chain.GetOsmosisApp()
+	NUAHAppA := chain.GetNUAHApp()
 	poolId := suite.CreateIBCPoolOnChain(ChainA, cw20IbcDenom, sdk.DefaultBondDenom, amount)
 
 	// create a swap route for that token / poolId in both directions
 	msg := fmt.Sprintf(`{"set_route":{"input_denom":"%s","output_denom":"%s","pool_route":[{"pool_id":"%v","token_out_denom":"%s"}]}}`,
 		cw20IbcDenom, sdk.DefaultBondDenom, poolId, sdk.DefaultBondDenom)
-	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(osmosisAppA.WasmKeeper)
+	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(NUAHAppA.WasmKeeper)
 	_, err := contractKeeper.Execute(chain.GetContext(), swaprouterAddr, chain.SenderAccount.GetAddress(), []byte(msg), sdk.NewCoins())
 	suite.Require().NoError(err)
 	msg = fmt.Sprintf(`{"set_route":{"input_denom":"%s","output_denom":"%s","pool_route":[{"pool_id":"%v","token_out_denom":"%s"}]}}`,
@@ -122,7 +123,7 @@ func (suite *HooksTestSuite) TestCW20ICS20() {
 
 	suite.coordinator.Setup(path)
 
-	osmosisAppB := chainB.GetOsmosisApp()
+	NUAHAppB := chainB.GetNUAHApp()
 
 	// Send some cwtoken tokens from B to A via the new path
 	amount := osmomath.NewInt(defaultPoolAmount)
@@ -133,7 +134,7 @@ func (suite *HooksTestSuite) TestCW20ICS20() {
 
 	// Check that the receiver doesn't have any sdk.DefaultBondDenom
 	stakeAB := suite.GetIBCDenom(ChainA, ChainB, sdk.DefaultBondDenom) // IBC denom for stake in B
-	balanceStakeReceiver := osmosisAppB.BankKeeper.GetBalance(suite.chainB.GetContext(), suite.chainB.SenderAccount.GetAddress(), stakeAB)
+	balanceStakeReceiver := NUAHAppB.BankKeeper.GetBalance(suite.chainB.GetContext(), suite.chainB.SenderAccount.GetAddress(), stakeAB)
 	suite.Require().Equal(int64(0), balanceStakeReceiver.Amount.Int64())
 
 	// Transfer the tokens with a memo for XCS
@@ -152,7 +153,7 @@ func (suite *HooksTestSuite) TestCW20ICS20() {
 	suite.Require().NoError(err)
 	suite.RelayPacket(packet, AtoB)
 
-	balanceStakeReceiver = osmosisAppB.BankKeeper.GetBalance(suite.chainB.GetContext(), suite.chainB.SenderAccount.GetAddress(), stakeAB)
+	balanceStakeReceiver = NUAHAppB.BankKeeper.GetBalance(suite.chainB.GetContext(), suite.chainB.SenderAccount.GetAddress(), stakeAB)
 	suite.Require().Greater(balanceStakeReceiver.Amount.Int64(), int64(0))
 
 	// Now swap on the other direction
@@ -173,7 +174,7 @@ func (suite *HooksTestSuite) TestCW20ICS20() {
 	suite.RelayPacket(packet, AtoCW20)
 
 	// Check that the receiver has 10 less ibc'd stake than before
-	balanceStakeReceiver2 := osmosisAppB.BankKeeper.GetBalance(suite.chainB.GetContext(), suite.chainB.SenderAccount.GetAddress(), stakeAB)
+	balanceStakeReceiver2 := NUAHAppB.BankKeeper.GetBalance(suite.chainB.GetContext(), suite.chainB.SenderAccount.GetAddress(), stakeAB)
 	suite.Require().Equal(int64(10), balanceStakeReceiver.Amount.Sub(balanceStakeReceiver2.Amount).Int64())
 
 	// Check that the receiver has more cw20 tokens than before

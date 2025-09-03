@@ -30,9 +30,9 @@ git checkout v3.x
 go mod edit -replace github.com/cometbft/cometbft-db=github.com/notional-labs/tm-db@136c7b6
 go mod tidy
 go install -ldflags '-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=pebbledb' -tags pebbledb ./...
-osmosisd init speedrun
-wget -O ~/.osmosisd/config/genesis.json https://github.com/osmosis-labs/networks/raw/main/osmosis-1/genesis.json
-osmosisd start --db_backend pebbledb
+nuahd init speedrun
+wget -O ~/.nuahd/config/genesis.json https://github.com/osmosis-labs/networks/raw/main/nuahchain-1/genesis.json
+nuahd start --db_backend pebbledb
 git reset --hard
 
 # VERSION FOUR
@@ -41,7 +41,7 @@ git checkout v4.x
 go mod edit -replace github.com/cometbft/cometbft-db=github.com/notional-labs/tm-db@136c7b6
 go mod tidy
 go install -ldflags '-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=pebbledb' -tags pebbledb ./...
-osmosisd start --db_backend pebbledb
+nuahd start --db_backend pebbledb
 git reset --hard
 
 
@@ -51,7 +51,7 @@ git checkout v6.x
 go mod edit -replace github.com/cometbft/cometbft-db=github.com/notional-labs/tm-db@136c7b6
 go mod tidy
 go install -ldflags '-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=pebbledb' -tags pebbledb ./...
-osmosisd start --db_backend pebbledb
+nuahd start --db_backend pebbledb
 git reset --hard
 
 
@@ -62,7 +62,7 @@ git checkout v7.x
 go mod edit -replace github.com/cometbft/cometbft-db=github.com/notional-labs/tm-db@136c7b6
 go mod tidy
 go install -ldflags '-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=pebbledb' -tags pebbledb ./...
-osmosisd start --db_backend pebbledb
+nuahd start --db_backend pebbledb
 git reset --hard
 
 
@@ -73,7 +73,7 @@ git checkout v8.x
 go mod edit -replace github.com/cometbft/cometbft-db=github.com/notional-labs/tm-db@136c7b6
 go mod tidy
 go install -ldflags '-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=pebbledb' -tags pebbledb ./...
-osmosisd start --db_backend pebbledb
+nuahd start --db_backend pebbledb
 git reset --hard
 
 
@@ -82,8 +82,8 @@ echo "v9 took" >> howlong
 git checkout v9.x
 go mod edit -replace github.com/cometbft/cometbft-db=github.com/notional-labs/tm-db@136c7b6
 go mod tidy
-go install -ldflags '-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=pebbledb' -tags pebbledb ./...time osmosisd start --db_backend pebbledb
-osmosisd start --db_backend pebbledb
+go install -ldflags '-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=pebbledb' -tags pebbledb ./...time nuahd start --db_backend pebbledb
+nuahd start --db_backend pebbledb
 git reset --hard
 
 
@@ -93,5 +93,5 @@ git checkout v10.x
 go mod edit -replace github.com/cometbft/cometbft-db=github.com/notional-labs/tm-db@136c7b6
 go mod tidy
 go install -ldflags '-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=pebbledb' -tags pebbledb ./...
-osmosisd start --db_backend pebbledb
+nuahd start --db_backend pebbledb
 

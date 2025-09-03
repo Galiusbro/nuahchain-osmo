@@ -8,14 +8,14 @@
 set -o errexit -o nounset -o pipefail -o xtrace
 shopt -s expand_aliases
 
-alias chainA="osmosisd --node http://localhost:26657 --chain-id localosmosis-a"
-alias chainB="osmosisd --node http://localhost:36657 --chain-id localosmosis-b"
+alias chainA="nuahd --node http://localhost:26657 --chain-id localnuah-a"
+alias chainB="nuahd --node http://localhost:36657 --chain-id localnuah-b"
 
 # setup the keys
-echo "bottom loan skill merry east cradle onion journey palm apology verb edit desert impose absurd oil bubble sweet glove shallow size build burst effort" | osmosisd --keyring-backend test keys add validator --recover || echo "key exists"
-echo "increase bread alpha rigid glide amused approve oblige print asset idea enact lawn proof unfold jeans rabbit audit return chuckle valve rather cactus great" | osmosisd --keyring-backend test  keys add faucet --recover || echo "key exists"
+echo "bottom loan skill merry east cradle onion journey palm apology verb edit desert impose absurd oil bubble sweet glove shallow size build burst effort" | nuahd --keyring-backend test keys add validator --recover || echo "key exists"
+echo "increase bread alpha rigid glide amused approve oblige print asset idea enact lawn proof unfold jeans rabbit audit return chuckle valve rather cactus great" | nuahd --keyring-backend test  keys add faucet --recover || echo "key exists"
 
-VALIDATOR=$(osmosisd keys show validator -a)
+VALIDATOR=$(nuahd keys show validator -a)
 
 args="--keyring-backend test --gas auto --gas-prices 0.1uosmo --gas-adjustment 1.3 --broadcast-mode block --yes"
 TX_FLAGS=($args)

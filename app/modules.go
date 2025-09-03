@@ -146,7 +146,7 @@ var moduleAccountPermissions = map[string][]string{
 
 // appModules return modules to initialize module manager.
 func appModules(
-	app *OsmosisApp,
+	app *NUAHApp,
 	encodingConfig appparams.EncodingConfig,
 	skipGenesisInvariants bool,
 ) []module.AppModule {
@@ -316,34 +316,34 @@ func ModuleAccountAddrs() map[string]bool {
 	return modAccAddrs
 }
 
-func (app *OsmosisApp) GetAccountKeeper() simtypes.AccountKeeper {
+func (app *NUAHApp) GetAccountKeeper() simtypes.AccountKeeper {
 	return app.AppKeepers.AccountKeeper
 }
 
-func (app *OsmosisApp) GetBankKeeper() simtypes.BankKeeper {
+func (app *NUAHApp) GetBankKeeper() simtypes.BankKeeper {
 	return app.AppKeepers.BankKeeper
 }
 
 // Required for ibctesting
-func (app *OsmosisApp) GetStakingKeeper() ibctestingtypes.StakingKeeper {
+func (app *NUAHApp) GetStakingKeeper() ibctestingtypes.StakingKeeper {
 	return *app.AppKeepers.StakingKeeper // Dereferencing the pointer
 }
-func (app *OsmosisApp) GetSDKStakingKeeper() stakingkeeper.Keeper {
+func (app *NUAHApp) GetSDKStakingKeeper() stakingkeeper.Keeper {
 	return *app.AppKeepers.StakingKeeper // Dereferencing the pointer
 }
 
-func (app *OsmosisApp) GetIBCKeeper() *ibckeeper.Keeper {
+func (app *NUAHApp) GetIBCKeeper() *ibckeeper.Keeper {
 	return app.AppKeepers.IBCKeeper // This is a *ibckeeper.Keeper
 }
 
-func (app *OsmosisApp) GetScopedIBCKeeper() capabilitykeeper.ScopedKeeper {
+func (app *NUAHApp) GetScopedIBCKeeper() capabilitykeeper.ScopedKeeper {
 	return app.AppKeepers.ScopedIBCKeeper
 }
 
-func (app *OsmosisApp) GetPoolManagerKeeper() simtypes.PoolManagerKeeper {
+func (app *NUAHApp) GetPoolManagerKeeper() simtypes.PoolManagerKeeper {
 	return app.AppKeepers.PoolManagerKeeper
 }
 
-func (app *OsmosisApp) GetTxConfig() client.TxConfig {
+func (app *NUAHApp) GetTxConfig() client.TxConfig {
 	return GetEncodingConfig().TxConfig
 }

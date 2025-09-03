@@ -11,7 +11,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/app/apptesting"
 	appParams "github.com/osmosis-labs/osmosis/v30/app/params"
 
-	osmosisapp "github.com/osmosis-labs/osmosis/v30/app"
+	NUAHApp "github.com/osmosis-labs/osmosis/v30/app"
 	clmod "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/clmodule"
 	"github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/model"
 	"github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/types"
@@ -44,7 +44,7 @@ func runValidateBasicTest(t *testing.T, name string, msg extMsg, expectPass bool
 		require.NoError(t, msg.ValidateBasic(), "test: %v", name)
 		require.Equal(t, msg.Route(), types.RouterKey)
 		require.Equal(t, msg.Type(), expType)
-		encCfg := osmosisapp.GetEncodingConfig().Marshaler
+		encCfg := NUAHApp.GetEncodingConfig().Marshaler
 		signers, _, err := encCfg.GetMsgV1Signers(msg)
 		require.NoError(t, err)
 		require.Equal(t, len(signers), 1)

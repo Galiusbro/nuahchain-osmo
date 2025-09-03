@@ -20,14 +20,14 @@ import (
 	appparams "github.com/osmosis-labs/osmosis/v30/app/params"
 )
 
-func CreateTestInput() (*app.OsmosisApp, sdk.Context, string) {
+func CreateTestInput() (*app.NUAHApp, sdk.Context, string) {
 	homeDir := fmt.Sprintf("%d", rand.Int())
 	osmosis := app.SetupWithCustomHome(false, homeDir)
-	ctx := osmosis.BaseApp.NewContextLegacy(false, tmproto.Header{Height: 1, ChainID: "osmosis-1", Time: time.Now().UTC()})
+	ctx := osmosis.BaseApp.NewContextLegacy(false, tmproto.Header{Height: 1, ChainID: "nuahchain-1", Time: time.Now().UTC()})
 	return osmosis, ctx, homeDir
 }
 
-func FundAccount(t *testing.T, ctx sdk.Context, osmosis *app.OsmosisApp, acct sdk.AccAddress) {
+func FundAccount(t *testing.T, ctx sdk.Context, osmosis *app.NUAHApp, acct sdk.AccAddress) {
 	t.Helper()
 	err := testutil.FundAccount(ctx, osmosis.BankKeeper, acct, sdk.NewCoins(
 		sdk.NewCoin(appparams.BaseCoinUnit, osmomath.NewInt(10000000000)),

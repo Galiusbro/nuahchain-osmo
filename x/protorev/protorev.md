@@ -611,10 +611,10 @@ The `Enabled` parameters toggles all state transitions in the module. When the p
 
 ## CLI
 
-Find below a lost of `osmosisd` commands added with the `x/protorev` module. A CLI command can look like this:
+Find below a lost of `nuahd` commands added with the `x/protorev` module. A CLI command can look like this:
 
 ```bash
-osmosisd query protorev params
+nuahd query protorev params
 ```
 
 ### Queries

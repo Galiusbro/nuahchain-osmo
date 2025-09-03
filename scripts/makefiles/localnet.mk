@@ -2,7 +2,7 @@
 ###                                Localnet                                 ###
 ###############################################################################
 #
-# Please refer to https://github.com/osmosis-labs/osmosis/blob/main/tests/localosmosis/README.md for detailed
+# Please refer to https://github.com/osmosis-labs/osmosis/blob/main/tests/localnuah/README.md for detailed
 # usage of localnet.
 
 localnet-help:
@@ -38,35 +38,35 @@ localnet-help:
 localnet: localnet-help
 
 localnet-keys:
-	. tests/localosmosis/scripts/add_keys.sh
+	. tests/localnuah/scripts/add_keys.sh
 
 localnet-init: localnet-clean localnet-build
 
 localnet-build:
-	@DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose -f tests/localosmosis/docker-compose.yml build
+	@DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 docker compose -f tests/localnuah/docker-compose.yml build
 
 localnet-start:
-	@STATE="" docker compose -f tests/localosmosis/docker-compose.yml up
+	@STATE="" docker compose -f tests/localnuah/docker-compose.yml up
 
 localnet-startd:
-	@STATE="" docker compose -f tests/localosmosis/docker-compose.yml up -d
+	@STATE="" docker compose -f tests/localnuah/docker-compose.yml up -d
 
 localnet-stop:
-	@STATE="" docker compose -f tests/localosmosis/docker-compose.yml down
+	@STATE="" docker compose -f tests/localnuah/docker-compose.yml down
 
 localnet-clean:
-	@rm -rfI $(HOME)/.osmosisd-local/
+	@rm -rfI $(HOME)/.nuahd-local/
 
-# create 100 concentrated-liquidity positions in localosmosis at pool id 1
+# create 100 concentrated-liquidity positions in localnuah at pool id 1
 localnet-cl-create-positions:
 	go run tests/cl-go-client/main.go --operation 0
 
-# does 100 small randomized swaps in localosmosis at pool id 1
+# does 100 small randomized swaps in localnuah at pool id 1
 localnet-cl-small-swap:
 	go run tests/cl-go-client/main.go --operation 1
 
 # does 100 large swaps where the output of the previous swap is swapped back at the
-# next swap. localosmosis at pool id 1
+# next swap. localnuah at pool id 1
 localnet-cl-large-swap:
 	go run tests/cl-go-client/main.go --operation 2
 
@@ -107,7 +107,7 @@ localnet-cl-positions-large-swaps: localnet-cl-create-positions localnet-cl-larg
 # This script retrieves Uniswap v3 Ethereum position data
 # from subgraph. It uses WETH / USDC pool. This is helpful
 # for setting up somewhat realistic positions for testing
-# in localosmosis. It writes the file under
+# in localnuah. It writes the file under
 # tests/cl-genesis-positions/subgraph_positions.json
 localnet-cl-refresh-subgraph-positions:
 	go run ./tests/cl-genesis-positions --operation 0

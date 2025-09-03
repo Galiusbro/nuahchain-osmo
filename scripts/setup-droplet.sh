@@ -2,8 +2,8 @@
 
 export REPO=https://github.com/osmosis-labs/osmosis.git
 export BRANCH=main
-export NODE=osmosisd
-export CLI=osmosisd
+export NODE=nuahd
+export CLI=nuahd
 export MONIKER=testnet_node_moniker
 # export GENESIS=https://raw.githubusercontent.com/cosmos/launch/master/genesis.json
 # Thanatos - first ransomware to accept payment in bitcoin cash!
@@ -31,7 +31,7 @@ git clone $REPO
 echo $(basename $REPO .git)
 
 make LEDGER_ENABLED=false build
-cp ./build/osmosisd /root/go/bin/
+cp ./build/nuahd /root/go/bin/
 
 # install docker (https://docs.docker.com/engine/install/ubuntu/)
 

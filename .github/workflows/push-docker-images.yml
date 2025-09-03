@@ -12,7 +12,7 @@
 # osmolabs/osmosis-e2e-init-chain:X.Y.0    # is pushed
 # osmolabs/osmosis-e2e-init-chain:X.Y      # is updated to X.Y.0
 # osmolabs/osmosis-e2e-init-chain:X        # is updated to X.Y.0
-# The same osmosisd binary is copied in different base runner images:
+# The same nuahd binary is copied in different base runner images:
 #
 # - `osmolabs/osmosis:X.Y.Z`             uses `gcr.io/distroless/static-debian11`
 # - `osmolabs/osmosis:X.Y.Z-distroless`  uses `gcr.io/distroless/static-debian11`

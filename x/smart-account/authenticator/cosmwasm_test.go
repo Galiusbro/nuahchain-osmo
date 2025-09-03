@@ -33,7 +33,7 @@ import (
 type CosmwasmAuthenticatorTest struct {
 	suite.Suite
 	Ctx            sdk.Context
-	OsmosisApp     *app.OsmosisApp
+	NUAHApp        *app.NUAHApp
 	Store          prefix.Store
 	EncodingConfig params.EncodingConfig
 	CosmwasmAuth   authenticator.CosmwasmAuthenticator
@@ -46,12 +46,12 @@ func TestCosmwasmAuthenticatorTest(t *testing.T) {
 
 func (s *CosmwasmAuthenticatorTest) SetupTest() {
 	s.HomeDir = fmt.Sprintf("%d", rand.Int())
-	s.OsmosisApp = app.SetupWithCustomHome(false, s.HomeDir)
-	s.Ctx = s.OsmosisApp.NewContextLegacy(false, tmproto.Header{})
+	s.NUAHApp = app.SetupWithCustomHome(false, s.HomeDir)
+	s.Ctx = s.NUAHApp.NewContextLegacy(false, tmproto.Header{})
 	s.Ctx = s.Ctx.WithGasMeter(storetypes.NewGasMeter(10_000_000))
 	s.EncodingConfig = app.MakeEncodingConfig()
 
-	s.CosmwasmAuth = authenticator.NewCosmwasmAuthenticator(s.OsmosisApp.ContractKeeper, s.OsmosisApp.AccountKeeper, s.OsmosisApp.AppCodec())
+	s.CosmwasmAuth = authenticator.NewCosmwasmAuthenticator(s.NUAHApp.ContractKeeper, s.NUAHApp.AccountKeeper, s.NUAHApp.AppCodec())
 }
 
 func (s *CosmwasmAuthenticatorTest) TearDownTest() {
@@ -245,9 +245,9 @@ func (s *CosmwasmAuthenticatorTest) TestGeneral() {
 	accounts := apptesting.CreateRandomAccounts(2)
 	for _, acc := range accounts {
 		someCoins := sdk.NewCoins(sdk.NewInt64Coin(sdk.DefaultBondDenom, 1000000))
-		err := s.OsmosisApp.BankKeeper.MintCoins(s.Ctx, minttypes.ModuleName, someCoins)
+		err := s.NUAHApp.BankKeeper.MintCoins(s.Ctx, minttypes.ModuleName, someCoins)
 		s.Require().NoError(err)
-		err = s.OsmosisApp.BankKeeper.SendCoinsFromModuleToAccount(s.Ctx, minttypes.ModuleName, acc, someCoins)
+		err = s.NUAHApp.BankKeeper.SendCoinsFromModuleToAccount(s.Ctx, minttypes.ModuleName, acc, someCoins)
 		s.Require().NoError(err)
 	}
 
@@ -312,9 +312,9 @@ func (s *CosmwasmAuthenticatorTest) TestGeneral() {
 		signatures,
 	)
 
-	ak := s.OsmosisApp.AccountKeeper
+	ak := s.NUAHApp.AccountKeeper
 	sigModeHandler := s.EncodingConfig.TxConfig.SignModeHandler()
-	request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.OsmosisApp.AppCodec(), ak, sigModeHandler, accounts[0], accounts[0], nil, feeCoins, testMsg, tx, 0, false, authenticator.SequenceMatch)
+	request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.NUAHApp.AppCodec(), ak, sigModeHandler, accounts[0], accounts[0], nil, feeCoins, testMsg, tx, 0, false, authenticator.SequenceMatch)
 	s.Require().NoError(err)
 	request.AuthenticatorId = "0"
 
@@ -384,9 +384,9 @@ func (s *CosmwasmAuthenticatorTest) TestCosignerContract() {
 	accounts := apptesting.CreateRandomAccounts(2)
 	for _, acc := range accounts {
 		someCoins := sdk.NewCoins(sdk.NewInt64Coin(sdk.DefaultBondDenom, 1000000))
-		err := s.OsmosisApp.BankKeeper.MintCoins(s.Ctx, minttypes.ModuleName, someCoins)
+		err := s.NUAHApp.BankKeeper.MintCoins(s.Ctx, minttypes.ModuleName, someCoins)
 		s.Require().NoError(err)
-		err = s.OsmosisApp.BankKeeper.SendCoinsFromModuleToAccount(s.Ctx, minttypes.ModuleName, acc, someCoins)
+		err = s.NUAHApp.BankKeeper.SendCoinsFromModuleToAccount(s.Ctx, minttypes.ModuleName, acc, someCoins)
 		s.Require().NoError(err)
 	}
 
@@ -444,9 +444,9 @@ func (s *CosmwasmAuthenticatorTest) TestCosignerContract() {
 	// TODO: this currently fails as signatures are stripped from the tx. Should we add them or maybe do a better
 	//  cosigner implementation later?
 	s.T().Skip("TODO: this currently fails as signatures are stripped from the tx. Should we add them or maybe do a better cosigner implementation later?")
-	ak := s.OsmosisApp.AccountKeeper
+	ak := s.NUAHApp.AccountKeeper
 	sigModeHandler := s.EncodingConfig.TxConfig.SignModeHandler()
-	request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.OsmosisApp.AppCodec(), ak, sigModeHandler, accounts[0], accounts[0], nil, sdk.NewCoins(), testMsg, tx, 0, false, authenticator.SequenceMatch)
+	request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.NUAHApp.AppCodec(), ak, sigModeHandler, accounts[0], accounts[0], nil, sdk.NewCoins(), testMsg, tx, 0, false, authenticator.SequenceMatch)
 	s.Require().NoError(err)
 
 	status := auth.Authenticate(s.Ctx.WithBlockTime(time.Now()), request)
@@ -457,9 +457,9 @@ func (s *CosmwasmAuthenticatorTest) TestCosignerContract() {
 }
 
 func (s *CosmwasmAuthenticatorTest) StoreContractCode(path string) uint64 {
-	osmosisApp := s.OsmosisApp
-	govKeeper := wasmkeeper.NewGovPermissionKeeper(osmosisApp.WasmKeeper)
-	creator := osmosisApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
+	NUAHApp := s.NUAHApp
+	govKeeper := wasmkeeper.NewGovPermissionKeeper(NUAHApp.WasmKeeper)
+	creator := NUAHApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
 
 	wasmCode, err := os.ReadFile(path)
 	s.Require().NoError(err)
@@ -470,9 +470,9 @@ func (s *CosmwasmAuthenticatorTest) StoreContractCode(path string) uint64 {
 }
 
 func (s *CosmwasmAuthenticatorTest) InstantiateContract(msg string, codeID uint64) sdk.AccAddress {
-	osmosisApp := s.OsmosisApp
-	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(osmosisApp.WasmKeeper)
-	creator := osmosisApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
+	NUAHApp := s.NUAHApp
+	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(NUAHApp.WasmKeeper)
+	creator := NUAHApp.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
 	addr, _, err := contractKeeper.Instantiate(s.Ctx.WithBlockTime(time.Now()), codeID, creator, creator, []byte(msg), "contract", nil)
 	s.Require().NoError(err)
 	return addr
@@ -480,8 +480,8 @@ func (s *CosmwasmAuthenticatorTest) InstantiateContract(msg string, codeID uint6
 
 func (s *CosmwasmAuthenticatorTest) QueryContract(msg string, contractAddr sdk.AccAddress) []byte {
 	// Query the contract
-	osmosisApp := s.OsmosisApp
-	res, err := osmosisApp.WasmKeeper.QuerySmart(s.Ctx.WithBlockTime(time.Now()), contractAddr, []byte(msg))
+	NUAHApp := s.NUAHApp
+	res, err := NUAHApp.WasmKeeper.QuerySmart(s.Ctx.WithBlockTime(time.Now()), contractAddr, []byte(msg))
 	s.Require().NoError(err)
 
 	return res
@@ -489,8 +489,8 @@ func (s *CosmwasmAuthenticatorTest) QueryContract(msg string, contractAddr sdk.A
 
 func (s *CosmwasmAuthenticatorTest) QueryLatestSudoCall(contractAddr sdk.AccAddress) authenticator.SudoMsg {
 	// Query the contract
-	osmosisApp := s.OsmosisApp
-	res, err := osmosisApp.WasmKeeper.QuerySmart(s.Ctx.WithBlockTime(time.Now()), contractAddr, []byte(`{"latest_sudo_call": {}}`))
+	NUAHApp := s.NUAHApp
+	res, err := NUAHApp.WasmKeeper.QuerySmart(s.Ctx.WithBlockTime(time.Now()), contractAddr, []byte(`{"latest_sudo_call": {}}`))
 	s.Require().NoError(err)
 
 	// unmarshal the call as SudoMsg

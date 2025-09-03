@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/osmosis-labs/osmosis/osmomath"
-	osmosisapp "github.com/osmosis-labs/osmosis/v30/app"
+	NUAHApp "github.com/osmosis-labs/osmosis/v30/app"
 
 	simapp "github.com/osmosis-labs/osmosis/v30/app"
 	mempool1559 "github.com/osmosis-labs/osmosis/v30/x/txfees/keeper/mempool-1559"
@@ -26,7 +26,7 @@ func TestSetBaseDenomOnInitBlock(t *testing.T) {
 	app := simapp.Setup(false)
 	ctx := app.BaseApp.NewContextLegacy(false, tmproto.Header{})
 
-	genesisState := osmosisapp.GenesisStateWithValSet(app)
+	genesisState := NUAHApp.GenesisStateWithValSet(app)
 	stateBytes, err := json.MarshalIndent(genesisState, "", " ")
 	if err != nil {
 		panic(err)
@@ -37,7 +37,7 @@ func TestSetBaseDenomOnInitBlock(t *testing.T) {
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: sims.DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
-			ChainId:         "osmosis-1",
+			ChainId:         "nuahchain-1",
 		},
 	)
 
@@ -50,9 +50,9 @@ func TestBeginBlock(t *testing.T) {
 	dirName := fmt.Sprintf("%d", rand.Int())
 	app := simapp.SetupWithCustomHome(false, dirName)
 
-	ctx := app.BaseApp.NewContextLegacy(false, tmproto.Header{ChainID: "osmosis-1", Height: 1})
+	ctx := app.BaseApp.NewContextLegacy(false, tmproto.Header{ChainID: "nuahchain-1", Height: 1})
 
-	genesisState := osmosisapp.GenesisStateWithValSet(app)
+	genesisState := NUAHApp.GenesisStateWithValSet(app)
 	stateBytes, err := json.MarshalIndent(genesisState, "", " ")
 	if err != nil {
 		panic(err)
@@ -63,7 +63,7 @@ func TestBeginBlock(t *testing.T) {
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: sims.DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
-			ChainId:         "osmosis-1",
+			ChainId:         "nuahchain-1",
 		},
 	)
 
@@ -102,7 +102,7 @@ func TestBeginBlock(t *testing.T) {
 	os.RemoveAll(dirName)
 }
 
-func RunFinalizeBlock(ctx sdk.Context, app *simapp.OsmosisApp) sdk.Context {
+func RunFinalizeBlock(ctx sdk.Context, app *simapp.NUAHApp) sdk.Context {
 	_, err := app.FinalizeBlock(&abci.RequestFinalizeBlock{Height: ctx.BlockHeight(), Time: ctx.BlockTime()})
 	if err != nil {
 		panic(err)

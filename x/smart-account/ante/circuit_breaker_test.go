@@ -24,7 +24,7 @@ import (
 // AuthenticatorCircuitBreakerAnteSuite is a test suite for the authenticator and CircuitBreaker AnteDecorator.
 type AuthenticatorCircuitBreakerAnteSuite struct {
 	suite.Suite
-	OsmosisApp             *app.OsmosisApp
+	NUAHApp                *app.NUAHApp
 	Ctx                    sdk.Context
 	EncodingConfig         params.EncodingConfig
 	AuthenticatorDecorator ante.AuthenticatorDecorator
@@ -53,9 +53,9 @@ func (s *AuthenticatorCircuitBreakerAnteSuite) SetupTest() {
 
 	// Initialize the Osmosis application
 	s.HomeDir = fmt.Sprintf("%d", rand.Int())
-	s.OsmosisApp = app.SetupWithCustomHome(false, s.HomeDir)
+	s.NUAHApp = app.SetupWithCustomHome(false, s.HomeDir)
 
-	s.Ctx = s.OsmosisApp.NewContextLegacy(false, tmproto.Header{})
+	s.Ctx = s.NUAHApp.NewContextLegacy(false, tmproto.Header{})
 
 	// Set up test accounts
 	for _, key := range TestKeys {
@@ -132,16 +132,16 @@ func (s *AuthenticatorCircuitBreakerAnteSuite) TestCircuitBreakerAnte() {
 
 	// Create a CircuitBreaker AnteDecorator
 	cbd := ante.NewCircuitBreakerDecorator(
-		s.OsmosisApp.SmartAccountKeeper,
+		s.NUAHApp.SmartAccountKeeper,
 		sdk.ChainAnteDecorators(mockTestAuthenticator),
 		sdk.ChainAnteDecorators(mockTestClassic),
 	)
 	anteHandler := sdk.ChainAnteDecorators(cbd)
 
 	// Deactivate smart accounts
-	params := s.OsmosisApp.SmartAccountKeeper.GetParams(s.Ctx)
+	params := s.NUAHApp.SmartAccountKeeper.GetParams(s.Ctx)
 	params.IsSmartAccountActive = false
-	s.OsmosisApp.SmartAccountKeeper.SetParams(s.Ctx, params)
+	s.NUAHApp.SmartAccountKeeper.SetParams(s.Ctx, params)
 
 	// Here we test when smart accounts are deactivated
 	ctx, err := anteHandler(s.Ctx, tx, false)
@@ -149,9 +149,9 @@ func (s *AuthenticatorCircuitBreakerAnteSuite) TestCircuitBreakerAnte() {
 	s.Require().Equal(int64(1), ctx.Priority(), "Should have disabled the full authentication flow")
 
 	// Reactivate smart accounts
-	params = s.OsmosisApp.SmartAccountKeeper.GetParams(ctx)
+	params = s.NUAHApp.SmartAccountKeeper.GetParams(ctx)
 	params.IsSmartAccountActive = true
-	s.OsmosisApp.SmartAccountKeeper.SetParams(ctx, params)
+	s.NUAHApp.SmartAccountKeeper.SetParams(ctx, params)
 
 	// Here we test when smart accounts are active and there is not selected authenticator
 	ctx, err = anteHandler(ctx, tx, false)

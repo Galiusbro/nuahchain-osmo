@@ -53,22 +53,22 @@ Documentation for Cosmovisor can be found [here](https://docs.cosmos.network/mai
 
 ```sh
 go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@v1.0.0
-mkdir -p ~/.osmosisd
-mkdir -p ~/.osmosisd/cosmovisor
-mkdir -p ~/.osmosisd/cosmovisor/genesis
-mkdir -p ~/.osmosisd/cosmovisor/genesis/bin
-mkdir -p ~/.osmosisd/cosmovisor/upgrades
-cp $GOPATH/bin/osmosisd ~/.osmosisd/cosmovisor/genesis/bin
-mkdir -p ~/.osmosisd/cosmovisor/upgrades/v21/bin
-cp $GOPATH/bin/osmosisd ~/.osmosisd/cosmovisor/upgrades/v21/bin
+mkdir -p ~/.nuahd
+mkdir -p ~/.nuahd/cosmovisor
+mkdir -p ~/.nuahd/cosmovisor/genesis
+mkdir -p ~/.nuahd/cosmovisor/genesis/bin
+mkdir -p ~/.nuahd/cosmovisor/upgrades
+cp $GOPATH/bin/nuahd ~/.nuahd/cosmovisor/genesis/bin
+mkdir -p ~/.nuahd/cosmovisor/upgrades/v21/bin
+cp $GOPATH/bin/nuahd ~/.nuahd/cosmovisor/upgrades/v21/bin
 ```
 
 *Add these lines to your profile to set up environment variables*:
 
 ```sh
 echo "# Cosmovisor Setup" >> ~/.profile
-echo "export DAEMON_NAME=osmosisd" >> ~/.profile
-echo "export DAEMON_HOME=$HOME/.osmosisd" >> ~/.profile
+echo "export DAEMON_NAME=nuahd" >> ~/.profile
+echo "export DAEMON_HOME=$HOME/.nuahd" >> ~/.profile
 echo "export DAEMON_ALLOW_DOWNLOAD_BINARIES=false" >> ~/.profile
 echo "export DAEMON_LOG_BUFFER_SIZE=512" >> ~/.profile
 echo "export DAEMON_RESTART_AFTER_UPGRADE=true" >> ~/.profile
@@ -81,12 +81,12 @@ source ~/.profile
 *To prepare for the upgrade, execute these commands*:
 
 ```sh
-mkdir -p ~/.osmosisd/cosmovisor/upgrades/v22/bin
+mkdir -p ~/.nuahd/cosmovisor/upgrades/v22/bin
 cd $HOME/osmosis
 git pull
 git checkout v22.0.0
 make build
-cp build/osmosisd ~/.osmosisd/cosmovisor/upgrades/v22/bin
+cp build/nuahd ~/.nuahd/cosmovisor/upgrades/v22/bin
 ```
 
 At the designated block height, Cosmovisor will automatically upgrade to version v22.

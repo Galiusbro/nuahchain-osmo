@@ -13,9 +13,9 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/simulation/simtypes"
 )
 
-func OsmosisAppCreator(logger log.Logger, db db.DB) simtypes.AppCreator {
+func NUAHAppCreator(logger log.Logger, db db.DB) simtypes.AppCreator {
 	return func(homepath string, legacyInvariantPeriod uint, baseappOptions ...func(*baseapp.BaseApp)) simtypes.App {
-		return app.NewOsmosisApp(
+		return app.NewNUAHApp(
 			logger,
 			db,
 			nil,

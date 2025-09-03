@@ -18,7 +18,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v30/x/gamm/pool-models/stableswap"
 
-	osmosisapp "github.com/osmosis-labs/osmosis/v30/app"
+	NUAHApp "github.com/osmosis-labs/osmosis/v30/app"
 	appparams "github.com/osmosis-labs/osmosis/v30/app/params"
 )
 
@@ -73,7 +73,7 @@ func (s *KeeperTestSuite) SetupPoolsTest() {
 	s.Setup()
 	s.setupParams()
 
-	encodingConfig := osmosisapp.GetEncodingConfig()
+	encodingConfig := NUAHApp.GetEncodingConfig()
 	s.clientCtx = client.Context{}.
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
 		WithTxConfig(encodingConfig.TxConfig).

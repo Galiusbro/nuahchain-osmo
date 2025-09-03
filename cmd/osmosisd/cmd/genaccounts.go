@@ -242,7 +242,7 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 // Both OSMO and ION recipients. If erroring, ensure to 'git lfs pull'
 
 // Example:
-// 	osmosisd import-genesis-accounts-from-snapshot networks/cosmoshub-3/snapshot.json networks/osmosis-1/ions.json output_address.json
+// 	nuahd import-genesis-accounts-from-snapshot networks/cosmoshub-3/snapshot.json networks/nuahchain-1/ions.json output_address.json
 // `,
 // 		Args: cobra.ExactArgs(3),
 // 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -304,9 +304,9 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 
 // Must also pass in an ions.json file to airdrop genesis ions
 // Example:
-// 	osmosisd import-genesis-accounts-from-snapshot ../snapshot.json ../ions.json
+// 	nuahd import-genesis-accounts-from-snapshot ../snapshot.json ../ions.json
 // 	- Check input genesis:
-// 		file is at ~/.osmosisd/config/genesis.json
+// 		file is at ~/.nuahd/config/genesis.json
 // `,
 // 		Args: cobra.ExactArgs(2),
 // 		RunE: func(cmd *cobra.Command, args []string) error {

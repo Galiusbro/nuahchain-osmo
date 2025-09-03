@@ -13,7 +13,7 @@ import (
 
 // ExportAppStateAndValidators exports the state of the application for a genesis
 // file.
-func (app *OsmosisApp) ExportAppStateAndValidators(
+func (app *NUAHApp) ExportAppStateAndValidators(
 	forZeroHeight bool, jailAllowedAddrs []string, modulesToExport []string,
 ) (servertypes.ExportedApp, error) {
 	// as if they could withdraw from the start of the next block
@@ -44,7 +44,7 @@ func (app *OsmosisApp) ExportAppStateAndValidators(
 	}, err
 }
 
-func (app *OsmosisApp) ExportState(ctx sdk.Context) map[string]json.RawMessage {
+func (app *NUAHApp) ExportState(ctx sdk.Context) map[string]json.RawMessage {
 	export, err := app.mm.ExportGenesis(ctx, app.AppCodec())
 	if err != nil {
 		panic(err)

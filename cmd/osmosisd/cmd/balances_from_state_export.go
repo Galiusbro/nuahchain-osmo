@@ -154,7 +154,7 @@ func ExportDeriveBalancesCmd() *cobra.Command {
 		Short: "Export a derive balances from a provided genesis export",
 		Long: `Export a derive balances from a provided genesis export
 Example:
-	osmosisd export-derive-balances ../genesis.json ../snapshot.json
+	nuahd export-derive-balances ../genesis.json ../snapshot.json
 `,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -324,7 +324,7 @@ func StakedToCSVCmd() *cobra.Command {
 		Short: "Export a airdrop csv from a provided balances export",
 		Long: `Export a airdrop csv from a provided balances export (from export-derive-balances)
 Example:
-	osmosisd staked-to-csv ../balances.json ../airdrop.csv
+	nuahd staked-to-csv ../balances.json ../airdrop.csv
 `,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {

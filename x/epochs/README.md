@@ -137,7 +137,7 @@ service Query {
 Query the currently running epochInfos
 
 ```sh
-osmosisd query epochs epoch-infos
+nuahd query epochs epoch-infos
 ```
 
 ::: details Example
@@ -169,7 +169,7 @@ epochs:
 Query the current epoch by the specified identifier
 
 ```sh
-osmosisd query epochs current-epoch [identifier]
+nuahd query epochs current-epoch [identifier]
 ```
 
 ::: details Example
@@ -177,7 +177,7 @@ osmosisd query epochs current-epoch [identifier]
 Query the current `day` epoch:
 
 ```sh
-osmosisd query epochs current-epoch day
+nuahd query epochs current-epoch day
 ```
 
 Which in this example outputs:

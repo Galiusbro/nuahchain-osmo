@@ -172,11 +172,11 @@ func (s *MessageFilterTest) TestBankSend() {
 			filter, err := s.MessageFilter.Initialize([]byte(tt.pattern))
 			s.Require().NoError(err)
 
-			ak := s.OsmosisApp.AccountKeeper
+			ak := s.NUAHApp.AccountKeeper
 			sigModeHandler := s.EncodingConfig.TxConfig.SignModeHandler()
 			tx, err := s.GenSimpleTx([]sdk.Msg{tt.msg}, []cryptotypes.PrivKey{s.TestPrivKeys[0]})
 			s.Require().NoError(err)
-			request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.OsmosisApp.AppCodec(), ak, sigModeHandler, s.TestAccAddress[0], s.TestAccAddress[0], nil, sdk.NewCoins(), tt.msg, tx, 0, false, authenticator.SequenceMatch)
+			request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.NUAHApp.AppCodec(), ak, sigModeHandler, s.TestAccAddress[0], s.TestAccAddress[0], nil, sdk.NewCoins(), tt.msg, tx, 0, false, authenticator.SequenceMatch)
 			s.Require().NoError(err)
 
 			err = filter.Authenticate(s.Ctx, request)
@@ -275,11 +275,11 @@ func (s *MessageFilterTest) TestPoolManagerSwapExactAmountIn() {
 			filter, err := s.MessageFilter.Initialize([]byte(tt.pattern))
 			s.Require().NoError(err)
 
-			ak := s.OsmosisApp.AccountKeeper
+			ak := s.NUAHApp.AccountKeeper
 			sigModeHandler := s.EncodingConfig.TxConfig.SignModeHandler()
 			tx, err := s.GenSimpleTx([]sdk.Msg{tt.msg}, []cryptotypes.PrivKey{s.TestPrivKeys[0]})
 			s.Require().NoError(err)
-			request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.OsmosisApp.AppCodec(), ak, sigModeHandler, s.TestAccAddress[0], s.TestAccAddress[0], nil, sdk.NewCoins(), tt.msg, tx, 0, false, authenticator.SequenceMatch)
+			request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.NUAHApp.AppCodec(), ak, sigModeHandler, s.TestAccAddress[0], s.TestAccAddress[0], nil, sdk.NewCoins(), tt.msg, tx, 0, false, authenticator.SequenceMatch)
 			s.Require().NoError(err)
 
 			err = filter.Authenticate(s.Ctx, request)
@@ -371,11 +371,11 @@ func (s *MessageFilterTest) TestLimitOrder() {
 			filter, err := s.MessageFilter.Initialize([]byte(tt.pattern))
 			s.Require().NoError(err)
 
-			ak := s.OsmosisApp.AccountKeeper
+			ak := s.NUAHApp.AccountKeeper
 			sigModeHandler := s.EncodingConfig.TxConfig.SignModeHandler()
 			tx, err := s.GenSimpleTx([]sdk.Msg{tt.msg}, []cryptotypes.PrivKey{s.TestPrivKeys[0]})
 			s.Require().NoError(err)
-			request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.OsmosisApp.AppCodec(), ak, sigModeHandler, s.TestAccAddress[0], s.TestAccAddress[0], nil, sdk.NewCoins(), tt.msg, tx, 0, false, authenticator.SequenceMatch)
+			request, err := authenticator.GenerateAuthenticationRequest(s.Ctx, s.NUAHApp.AppCodec(), ak, sigModeHandler, s.TestAccAddress[0], s.TestAccAddress[0], nil, sdk.NewCoins(), tt.msg, tx, 0, false, authenticator.SequenceMatch)
 			s.Require().NoError(err)
 
 			err = filter.Authenticate(s.Ctx, request)

@@ -39,7 +39,7 @@ import (
 
 type AuthenticatorAnteSuite struct {
 	suite.Suite
-	OsmosisApp             *app.OsmosisApp
+	NUAHApp                *app.NUAHApp
 	Ctx                    sdk.Context
 	EncodingConfig         params.EncodingConfig
 	AuthenticatorDecorator ante.AuthenticatorDecorator
@@ -63,9 +63,9 @@ func (s *AuthenticatorAnteSuite) SetupTest() {
 	s.EncodingConfig = app.MakeEncodingConfig()
 
 	s.HomeDir = fmt.Sprintf("%d", rand.Int())
-	s.OsmosisApp = app.SetupWithCustomHome(false, s.HomeDir)
+	s.NUAHApp = app.SetupWithCustomHome(false, s.HomeDir)
 
-	s.Ctx = s.OsmosisApp.NewContextLegacy(false, tmproto.Header{})
+	s.Ctx = s.NUAHApp.NewContextLegacy(false, tmproto.Header{})
 
 	// Set up test accounts
 	for _, key := range TestKeys {
@@ -82,12 +82,12 @@ func (s *AuthenticatorAnteSuite) SetupTest() {
 		s.TestAccAddress = append(s.TestAccAddress, accAddress)
 	}
 
-	deductFeeDecorator := txfeeskeeper.NewDeductFeeDecorator(*s.OsmosisApp.TxFeesKeeper, s.OsmosisApp.AccountKeeper, s.OsmosisApp.BankKeeper, nil)
+	deductFeeDecorator := txfeeskeeper.NewDeductFeeDecorator(*s.NUAHApp.TxFeesKeeper, s.NUAHApp.AccountKeeper, s.NUAHApp.BankKeeper, nil)
 
 	s.AuthenticatorDecorator = ante.NewAuthenticatorDecorator(
-		s.OsmosisApp.AppCodec(),
-		s.OsmosisApp.SmartAccountKeeper,
-		s.OsmosisApp.AccountKeeper,
+		s.NUAHApp.AppCodec(),
+		s.NUAHApp.SmartAccountKeeper,
+		s.NUAHApp.AccountKeeper,
 		s.EncodingConfig.TxConfig.SignModeHandler(),
 		deductFeeDecorator,
 	)
@@ -143,7 +143,7 @@ func (s *AuthenticatorAnteSuite) TestSignatureVerificationWithAuthenticatorInSto
 	// Ensure the feepayer has funds
 	fees := sdk.Coins{sdk.NewInt64Coin(osmoToken, 2500)}
 	feePayer := s.TestPrivKeys[0].PubKey().Address()
-	err := testutil.FundAccount(s.Ctx, s.OsmosisApp.BankKeeper, feePayer.Bytes(), fees)
+	err := testutil.FundAccount(s.Ctx, s.NUAHApp.BankKeeper, feePayer.Bytes(), fees)
 	s.Require().NoError(err)
 
 	// Create a test messages for signing
@@ -159,7 +159,7 @@ func (s *AuthenticatorAnteSuite) TestSignatureVerificationWithAuthenticatorInSto
 	}
 	feeCoins := sdk.Coins{sdk.NewInt64Coin(osmoToken, 2500)}
 
-	id, err := s.OsmosisApp.SmartAccountKeeper.AddAuthenticator(
+	id, err := s.NUAHApp.SmartAccountKeeper.AddAuthenticator(
 		s.Ctx,
 		s.TestAccAddress[0],
 		"SignatureVerification",
@@ -168,7 +168,7 @@ func (s *AuthenticatorAnteSuite) TestSignatureVerificationWithAuthenticatorInSto
 	s.Require().NoError(err)
 	s.Require().Equal(id, uint64(1), "Adding authenticator returning incorrect id")
 
-	id, err = s.OsmosisApp.SmartAccountKeeper.AddAuthenticator(
+	id, err = s.NUAHApp.SmartAccountKeeper.AddAuthenticator(
 		s.Ctx,
 		s.TestAccAddress[1],
 		"SignatureVerification",
@@ -202,14 +202,14 @@ func (s *AuthenticatorAnteSuite) TestSignatureVerificationOutOfGas() {
 	coins := sdk.Coins{sdk.NewInt64Coin(osmoToken, 2500)}
 	feeCoins := sdk.Coins{sdk.NewInt64Coin(osmoToken, 2500)}
 
-	maxUnauthenticatedGasLimit := s.OsmosisApp.SmartAccountKeeper.GetParams(s.Ctx).MaximumUnauthenticatedGas
+	maxUnauthenticatedGasLimit := s.NUAHApp.SmartAccountKeeper.GetParams(s.Ctx).MaximumUnauthenticatedGas
 	specifiedGasLimit := uint64(300_000)
 
 	// Ensure the feepayers have funds
 	fees := sdk.Coins{sdk.NewInt64Coin(osmoToken, 2500)}
-	err := testutil.FundAccount(s.Ctx, s.OsmosisApp.BankKeeper, s.TestPrivKeys[0].PubKey().Address().Bytes(), fees)
+	err := testutil.FundAccount(s.Ctx, s.NUAHApp.BankKeeper, s.TestPrivKeys[0].PubKey().Address().Bytes(), fees)
 	s.Require().NoError(err)
-	err = testutil.FundAccount(s.Ctx, s.OsmosisApp.BankKeeper, s.TestPrivKeys[1].PubKey().Address().Bytes(), fees)
+	err = testutil.FundAccount(s.Ctx, s.NUAHApp.BankKeeper, s.TestPrivKeys[1].PubKey().Address().Bytes(), fees)
 	s.Require().NoError(err)
 
 	// This message will have several authenticators for s.TestPrivKeys[0] and one for s.TestPrivKeys[1] at the end
@@ -220,7 +220,7 @@ func (s *AuthenticatorAnteSuite) TestSignatureVerificationOutOfGas() {
 	}
 
 	// fee payer is authenticated
-	sigId, err := s.OsmosisApp.SmartAccountKeeper.AddAuthenticator(
+	sigId, err := s.NUAHApp.SmartAccountKeeper.AddAuthenticator(
 		s.Ctx,
 		s.TestAccAddress[1],
 		"SignatureVerification",
@@ -230,9 +230,9 @@ func (s *AuthenticatorAnteSuite) TestSignatureVerificationOutOfGas() {
 	s.Require().Equal(sigId, uint64(1), "Adding authenticator returning incorrect id")
 
 	alwaysHigher := testutils.TestingAuthenticator{Approve: testutils.Always, GasConsumption: int(maxUnauthenticatedGasLimit + 1)}
-	s.OsmosisApp.AuthenticatorManager.RegisterAuthenticator(alwaysHigher)
+	s.NUAHApp.AuthenticatorManager.RegisterAuthenticator(alwaysHigher)
 
-	excessGasId, err := s.OsmosisApp.SmartAccountKeeper.AddAuthenticator(
+	excessGasId, err := s.NUAHApp.SmartAccountKeeper.AddAuthenticator(
 		s.Ctx,
 		s.TestAccAddress[0],
 		alwaysHigher.Type(),
@@ -291,7 +291,7 @@ func (s *AuthenticatorAnteSuite) TestFeePayerGasComsumption() {
 
 	// Ensure the feepayer has funds
 	fees := sdk.Coins{sdk.NewInt64Coin(osmoToken, 2500)}
-	err := testutil.FundAccount(s.Ctx, s.OsmosisApp.BankKeeper, s.TestPrivKeys[0].PubKey().Address().Bytes(), fees)
+	err := testutil.FundAccount(s.Ctx, s.NUAHApp.BankKeeper, s.TestPrivKeys[0].PubKey().Address().Bytes(), fees)
 	s.Require().NoError(err)
 
 	// Create two messages to ensure that the fee payer code path is reached twice
@@ -308,7 +308,7 @@ func (s *AuthenticatorAnteSuite) TestFeePayerGasComsumption() {
 	}
 
 	// Add a signature verification authenticator to the account
-	sigId, err := s.OsmosisApp.SmartAccountKeeper.AddAuthenticator(
+	sigId, err := s.NUAHApp.SmartAccountKeeper.AddAuthenticator(
 		s.Ctx,
 		s.TestAccAddress[0],
 		"SignatureVerification",
@@ -318,7 +318,7 @@ func (s *AuthenticatorAnteSuite) TestFeePayerGasComsumption() {
 	s.Require().Equal(sigId, uint64(1), "Adding authenticator returning incorrect id")
 
 	// Check balances before transaction
-	balances := s.OsmosisApp.BankKeeper.GetBalance(s.Ctx, sdk.AccAddress(s.TestPrivKeys[0].PubKey().Address()), osmoToken)
+	balances := s.NUAHApp.BankKeeper.GetBalance(s.Ctx, sdk.AccAddress(s.TestPrivKeys[0].PubKey().Address()), osmoToken)
 	s.Require().Equal(fees[0], balances, "Fees incorrect before transaction")
 
 	tx, _ := GenTx(s.Ctx, s.EncodingConfig.TxConfig, []sdk.Msg{
@@ -335,7 +335,7 @@ func (s *AuthenticatorAnteSuite) TestFeePayerGasComsumption() {
 	s.Require().NoError(err)
 
 	// Check balances after transaction
-	balances = s.OsmosisApp.BankKeeper.GetBalance(s.Ctx, sdk.AccAddress(s.TestPrivKeys[0].PubKey().Address()), osmoToken)
+	balances = s.NUAHApp.BankKeeper.GetBalance(s.Ctx, sdk.AccAddress(s.TestPrivKeys[0].PubKey().Address()), osmoToken)
 	emptyFees := sdk.NewInt64Coin(osmoToken, 0)
 	s.Require().Equal(emptyFees, balances, "Fees incorrect after transaction")
 }
@@ -352,7 +352,7 @@ func (s *AuthenticatorAnteSuite) TestSpecificAuthenticator() {
 	}
 	feeCoins := sdk.Coins{sdk.NewInt64Coin(osmoToken, 2500)}
 
-	sig1Id, err := s.OsmosisApp.SmartAccountKeeper.AddAuthenticator(
+	sig1Id, err := s.NUAHApp.SmartAccountKeeper.AddAuthenticator(
 		s.Ctx,
 		s.TestAccAddress[1],
 		"SignatureVerification",
@@ -361,7 +361,7 @@ func (s *AuthenticatorAnteSuite) TestSpecificAuthenticator() {
 	s.Require().NoError(err)
 	s.Require().Equal(sig1Id, uint64(1), "Adding authenticator returning incorrect id")
 
-	sig2Id, err := s.OsmosisApp.SmartAccountKeeper.AddAuthenticator(
+	sig2Id, err := s.NUAHApp.SmartAccountKeeper.AddAuthenticator(
 		s.Ctx,
 		s.TestAccAddress[1],
 		"SignatureVerification",
@@ -388,9 +388,9 @@ func (s *AuthenticatorAnteSuite) TestSpecificAuthenticator() {
 
 	// Ensure the feepayer has funds
 	fees := sdk.Coins{sdk.NewInt64Coin(osmoToken, 2_500_000)}
-	err = testutil.FundAccount(s.Ctx, s.OsmosisApp.BankKeeper, s.TestPrivKeys[0].PubKey().Address().Bytes(), fees)
+	err = testutil.FundAccount(s.Ctx, s.NUAHApp.BankKeeper, s.TestPrivKeys[0].PubKey().Address().Bytes(), fees)
 	s.Require().NoError(err)
-	err = testutil.FundAccount(s.Ctx, s.OsmosisApp.BankKeeper, s.TestPrivKeys[1].PubKey().Address().Bytes(), fees)
+	err = testutil.FundAccount(s.Ctx, s.NUAHApp.BankKeeper, s.TestPrivKeys[1].PubKey().Address().Bytes(), fees)
 	s.Require().NoError(err)
 
 	for _, tc := range testCases {

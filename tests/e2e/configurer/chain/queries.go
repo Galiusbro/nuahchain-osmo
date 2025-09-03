@@ -677,7 +677,7 @@ func (n *NodeConfig) QueryAllSuperfluidAssets() []superfluidtypes.SuperfluidAsse
 }
 
 func (n *NodeConfig) QueryCommunityPoolModuleAccount() string {
-	cmd := []string{"osmosisd", "query", "auth", "module-accounts", "--output=json"}
+	cmd := []string{"nuahd", "query", "auth", "module-accounts", "--output=json"}
 
 	out, _, err := n.containerManager.ExecCmd(n.t, n.Name, cmd, "", false, false)
 	require.NoError(n.t, err)

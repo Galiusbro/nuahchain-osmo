@@ -106,10 +106,10 @@ cd osmosis
 git checkout gentx-launch
 ```
 
-## Install osmosisd
+## Install nuahd
 
 You can now build Osmosis node software. Running the following command
-will install the executable osmosisd (Osmosis node daemon) to your
+will install the executable nuahd (Osmosis node daemon) to your
 GOPATH.
 
 ``` {.sh}
@@ -122,10 +122,10 @@ Verify that everything is OK. If you get something *like* the following,
 you've successfully installed Osmosis on your system.
 
 ``` {.sh}
-osmosisd version --long
+nuahd version --long
 
 name: osmosis
-server_name: osmosisd
+server_name: nuahd
 version: '"0.0.1"'
 commit: 197171b8fcb364bd2c5c2fbb2532eab3f5e8517c
 build_tags: netgo,ledger
@@ -133,28 +133,28 @@ go: go version go1.16.3 darwin/amd64
 ```
 
 If the software version does not match, then please check your `$PATH`
-to ensure the correct `osmosisd` is running.
+to ensure the correct `nuahd` is running.
 
-### Save your Chain ID in osmosisd config
+### Save your Chain ID in nuahd config
 
-We recommend saving the mainnet `chain-id` into your `osmosisd`'s
+We recommend saving the mainnet `chain-id` into your `nuahd`'s
 client.toml. This will make it so you do not have to manually pass in
 the chain-id flag for every CLI command.
 
 ``` {.sh}
-osmosisd config chain-id osmosis-1
+nuahd config chain-id nuahchain-1
 ```
 
 ### Initialize your Node
 
 Now that your software is installed, you can initialize the directory
-for osmosisd.
+for nuahd.
 
 ``` {.sh}
-osmosisd init --chain-id=osmosis-1 <your_moniker>
+nuahd init --chain-id=nuahchain-1 <your_moniker>
 ```
 
-This will create a new `.osmosisd` folder in your HOME directory.
+This will create a new `.nuahd` folder in your HOME directory.
 
 ### Download Pregenesis File
 
@@ -162,8 +162,8 @@ You can now download the "pregenesis" file for the chain. This is a
 genesis file with the chain-id and airdrop balances.
 
 ``` {.sh}
-cd $HOME/.osmosisd/config/
-curl https://raw.githubusercontent.com/osmosis-labs/networks/main/osmosis-1/pregenesis.json > $HOME/.osmosisd/config/genesis.json
+cd $HOME/.nuahd/config/
+curl https://raw.githubusercontent.com/osmosis-labs/networks/main/nuahchain-1/pregenesis.json > $HOME/.nuahd/config/genesis.json
 ```
 
 ### Import Validator Key
@@ -171,9 +171,9 @@ curl https://raw.githubusercontent.com/osmosis-labs/networks/main/osmosis-1/preg
 The create a gentx, you will need the private key to an address that
 received an allocation in the airdrop.
 
-There are a couple options for how to import a key into `osmosisd`.
+There are a couple options for how to import a key into `nuahd`.
 
-You can import such a key into `osmosisd` via a mnemonic or exporting
+You can import such a key into `nuahd` via a mnemonic or exporting
 and importing a keyfile from an existing CLI.
 
 #### Import Via Mnemonic
@@ -182,13 +182,13 @@ To import via mnemonic, you can do so using the following command and
 then input your mnemonic when prompted.
 
 ``` {.sh}
-osmosisd keys add <key_name> --recover
+nuahd keys add <key_name> --recover
 ```
 
 #### Import From Another CLI
 
 If you have the private key saved in the keystore of another CLI (such
-as gaiad), you can easily import it into `osmosisd` using the following
+as gaiad), you can easily import it into `nuahd` using the following
 steps.
 
 1. Export the key from an existing keystore. In this example we will
@@ -203,12 +203,12 @@ gaiad keys export <original_key_name>
     `BEGIN TENDERMINT PRIVATE KEY` and ending with the line that says
     `END TENDERMINT PRIVATE KEY` into a txt file somewhere on your
     machine.
-3. Import the key into `osmosisd` using the following command. When
+3. Import the key into `nuahd` using the following command. When
     prompted for a password, use the same password used in step 1 to
     encrypt the keyfile.
 
 ``` {.sh}
-osmosisd keys import <new_key_name> ./path/to/key.txt 
+nuahd keys import <new_key_name> ./path/to/key.txt 
 ```
 
 4. Delete the keyfile from your machine.
@@ -220,7 +220,7 @@ as adding a ledger key to the CLI normally. You can connect a Ledger
 device with the Cosmos app open and then run:
 
 ``` {.sh}
-osmosisd keys add <key_name> --ledger
+nuahd keys add <key_name> --ledger
 ```
 
 and follow any prompts.
@@ -234,7 +234,7 @@ If you are using Tendermint's native `priv_validator.json` as your
 consensus key, you display your validator public key using the following
 command
 
-    osmosisd tendermint show-validator
+    nuahd tendermint show-validator
 
 The pubkey should be formatted with the bech32 prefix `osmovalconspub1`.
 
@@ -271,8 +271,8 @@ If you would like to override the memo field, use the `--ip` and
 An example genesis command would thus look like:
 
 ``` {.sh}
-osmosisd gentx <key_name> 1000000uosmo \
-  --chain-id="osmosis-1" \
+nuahd gentx <key_name> 1000000uosmo \
+  --chain-id="nuahchain-1" \
   --moniker=osmosiswhale \
   --website="https://osmosis.zone" \
   --details="We love Osmossis" \
@@ -287,10 +287,10 @@ osmosisd gentx <key_name> 1000000uosmo \
 It will show an output something similar to:
 
 ``` {.sh}
-Genesis transaction written to "/Users/ubuntu/.osmosisd/config/gentx/gentx-eb3b1768d00e66ef83acb1eee59e1d3a35cf76fc.json"
+Genesis transaction written to "/Users/ubuntu/.nuahd/config/gentx/gentx-eb3b1768d00e66ef83acb1eee59e1d3a35cf76fc.json"
 ```
 
-The result should look something like this `/Users/sunnya97/.osmosisd/config/gentx/gentx-eb3b1768d00e66ef83acb1eee59e1d3a35cf76fc.json`.
+The result should look something like this `/Users/sunnya97/.nuahd/config/gentx/gentx-eb3b1768d00e66ef83acb1eee59e1d3a35cf76fc.json`.
 
 ### Submit Your GenTx
 
@@ -316,14 +316,14 @@ git clone https://github.com/<your_github_username>/networks
     correct folder)
 
 ``` {.sh}
-cp ~/.osmosisd/config/gentx/gentx-<your-moniker>.json networks/osmosis-1/gentxs/
+cp ~/.nuahd/config/gentx/gentx-<your-moniker>.json networks/nuahchain-1/gentxs/
 ```
 
 5. Commit and push to your repo.
 
 ``` {.sh}
 cd networks
-git add osmosis-1/gentxs/*
+git add nuahchain-1/gentxs/*
 git commit -m "<your validator moniker> gentx"
 git push origin master
 ```
@@ -360,7 +360,7 @@ This guide assumes that you have completed the tasks involved in [Part
 1](#setting-up-a-genesis-osmosis-validator). You should be running on a
 machine that meets the [hardware requirements specified in Part
 1](#hardware) with [Go installed](#install-go). We are assuming you
-already have a daemon home (\$HOME/.osmosisd) setup.
+already have a daemon home (\$HOME/.nuahd) setup.
 
 These instructions are for creating a basic setup on a single node.
 Validators should modify these instructions for their own custom setups
@@ -370,7 +370,7 @@ These examples are written targeting an Ubuntu 20.04 system. Relevant
 changes to commands should be made depending on the OS/architecture you
 are running on.
 
-### Update osmosisd to v1.0.0
+### Update nuahd to v1.0.0
 
 For the gentx creation, we used the `gentx-launch` branch of the
 [Osmosis codebase](https://github.com/osmosis-labs/osmosis).
@@ -394,10 +394,10 @@ you've successfully installed Osmosis on your system. (scroll up to see
 above the list of dependencies)
 
 ``` {.sh}
-osmosisd version --long
+nuahd version --long
 
 name: osmosis
-server_name: osmosisd
+server_name: nuahd
 version: '"1.0.1"'
 commit: a20dab6d638da0883f9fbb9f5bd222affb8700ad
 build_tags: netgo,ledger
@@ -405,9 +405,9 @@ go: go version go1.16.3 darwin/amd64
 ```
 
 If the software version does not match, then please check your `$PATH`
-to ensure the correct `osmosisd` is running.
+to ensure the correct `nuahd` is running.
 
-### Save your Chain ID in osmosisd config
+### Save your Chain ID in nuahd config
 
 Osmosis reintroduces the client-side config that was removed in earlier
 Stargate versions of the Cosmos SDK.
@@ -417,7 +417,7 @@ client.toml. This will make it so you do not have to manually pass in
 the chain-id flag for every CLI command.
 
 ``` {.sh}
-osmosisd config chain-id osmosis-1
+nuahd config chain-id nuahchain-1
 ```
 
 ### Install and setup Cosmovisor
@@ -447,14 +447,14 @@ cd $HOME
 ```
 
 After this, you must make the necessary folders for cosmosvisor in your
-daemon home directory (\~/.osmosisd).
+daemon home directory (\~/.nuahd).
 
 ``` {.sh}
-mkdir -p ~/.osmosisd
-mkdir -p ~/.osmosisd/cosmovisor
-mkdir -p ~/.osmosisd/cosmovisor/genesis
-mkdir -p ~/.osmosisd/cosmovisor/genesis/bin
-mkdir -p ~/.osmosisd/cosmovisor/upgrades
+mkdir -p ~/.nuahd
+mkdir -p ~/.nuahd/cosmovisor
+mkdir -p ~/.nuahd/cosmovisor/genesis
+mkdir -p ~/.nuahd/cosmovisor/genesis/bin
+mkdir -p ~/.nuahd/cosmovisor/upgrades
 ```
 
 Cosmovisor requires some ENVIRONMENT VARIABLES be set in order to
@@ -462,15 +462,15 @@ function properly. We recommend setting these in your `.profile` so it
 is automatically set in every session.
 
     echo "# Setup Cosmovisor" >> ~/.profile
-    echo "export DAEMON_NAME=osmosisd" >> ~/.profile
-    echo "export DAEMON_HOME=$HOME/.osmosisd" >> ~/.profile
+    echo "export DAEMON_NAME=nuahd" >> ~/.profile
+    echo "export DAEMON_HOME=$HOME/.nuahd" >> ~/.profile
     echo 'export PATH="$DAEMON_HOME/cosmovisor/current/bin:$PATH"' >> ~/.profile
     source ~/.profile
 
-Finally, you should move the osmosisd binary into the cosmovisor/genesis
+Finally, you should move the nuahd binary into the cosmovisor/genesis
 folder.
 
-    mv $GOPATH/bin/osmosisd ~/.osmosisd/cosmovisor/genesis/bin
+    mv $GOPATH/bin/nuahd ~/.nuahd/cosmovisor/genesis/bin
 
 ### Download Genesis File
 
@@ -478,13 +478,13 @@ You can now download the "genesis" file for the chain. It is pre-filled
 with the entire genesis state and gentxs.
 
 ``` {.sh}
-curl https://media.githubusercontent.com/media/osmosis-labs/networks/main/osmosis-1/genesis.json > ~/.osmosisd/config/genesis.json
+curl https://media.githubusercontent.com/media/osmosis-labs/networks/main/nuahchain-1/genesis.json > ~/.nuahd/config/genesis.json
 ```
 
 ### Updates to config files
 
 You should review the config.toml and app.toml that was generated when
-you ran `osmosisd init` last time.
+you ran `nuahd init` last time.
 
 A couple things to highlight especially:
 
@@ -515,7 +515,7 @@ There shouldn't be any chain database yet, but in case there is for some
 reason, you should reset it.
 
 ``` {.sh}
-osmosisd unsafe-reset-all
+nuahd unsafe-reset-all
 ```
 
 ### Start your node
@@ -530,7 +530,7 @@ You will need some way to keep the process always running. If you're on
 linux, you can do this by creating a service.
 
 ``` {.sh}
-sudo tee /etc/systemd/system/osmosisd.service > /dev/null <<EOF  
+sudo tee /etc/systemd/system/nuahd.service > /dev/null <<EOF  
 [Unit]
 Description=Osmosis Daemon
 After=network-online.target
@@ -542,8 +542,8 @@ Restart=always
 RestartSec=3
 LimitNOFILE=infinity
 
-Environment="DAEMON_HOME=$HOME/.osmosisd"
-Environment="DAEMON_NAME=osmosisd"
+Environment="DAEMON_HOME=$HOME/.nuahd"
+Environment="DAEMON_NAME=nuahd"
 Environment="DAEMON_ALLOW_DOWNLOAD_BINARIES=false"
 Environment="DAEMON_RESTART_AFTER_UPGRADE=true"
 
@@ -556,14 +556,14 @@ Then update and start the node
 
 ``` {.sh}
 sudo -S systemctl daemon-reload
-sudo -S systemctl enable osmosisd
-sudo -S systemctl start osmosisd
+sudo -S systemctl enable nuahd
+sudo -S systemctl start nuahd
 ```
 
 You can check the status with:
 
 ``` {.sh}
-systemctl status osmosisd
+systemctl status nuahd
 ```
 
 ## Conclusion

@@ -1,17 +1,17 @@
 #!/bin/bash
 
-rm -rf $HOME/.osmosisd/
+rm -rf $HOME/.nuahd/
 
 cd $HOME
 
-osmosisd init --chain-id=testing testing --home=$HOME/.osmosisd
-osmosisd keys add validator --keyring-backend=test --home=$HOME/.osmosisd
-osmosisd add-genesis-account $(osmosisd keys show validator -a --keyring-backend=test --home=$HOME/.osmosisd) 100000000000stake,100000000000valtoken --home=$HOME/.osmosisd
-osmosisd gentx validator 500000000stake --keyring-backend=test --home=$HOME/.osmosisd --chain-id=testing
-osmosisd collect-gentxs --home=$HOME/.osmosisd
+nuahd init --chain-id=testing testing --home=$HOME/.nuahd
+nuahd keys add validator --keyring-backend=test --home=$HOME/.nuahd
+nuahd add-genesis-account $(nuahd keys show validator -a --keyring-backend=test --home=$HOME/.nuahd) 100000000000stake,100000000000valtoken --home=$HOME/.nuahd
+nuahd gentx validator 500000000stake --keyring-backend=test --home=$HOME/.nuahd --chain-id=testing
+nuahd collect-gentxs --home=$HOME/.nuahd
 
 update_genesis () {    
-    cat $HOME/.osmosisd/validator1/config/genesis.json | jq "$1" > $HOME/.osmosisd/validator1/config/tmp_genesis.json && mv $HOME/.osmosisd/validator1/config/tmp_genesis.json $HOME/.osmosisd/validator1/config/genesis.json
+    cat $HOME/.nuahd/validator1/config/genesis.json | jq "$1" > $HOME/.nuahd/validator1/config/tmp_genesis.json && mv $HOME/.nuahd/validator1/config/tmp_genesis.json $HOME/.nuahd/validator1/config/genesis.json
 }
 
 # update staking genesis
@@ -45,4 +45,4 @@ update_genesis '.app_state["gamm"]["params"]["pool_creation_fee"][0]["denom"]="s
 # update superfluid genesis
 update_genesis '.app_state["superfluid"]["params"]["minimum_risk_factor"]="0.500000000000000000"'
 
-osmosisd start --home=$HOME/.osmosisd
+nuahd start --home=$HOME/.nuahd

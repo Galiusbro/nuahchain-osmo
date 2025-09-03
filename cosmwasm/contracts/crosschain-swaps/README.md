@@ -349,7 +349,7 @@ osmosis testnets and a relayer between them.
 
 
 #### Prerequisites
-* osmosisd command line tool installed and configured.
+* nuahd command line tool installed and configured.
 * [jenv](https://github.com/nicolaslara/jenv) command line tool installed, if you don't have it you can generate the json manually or modify the commands accordingly.
 * jq command line tool installed.
 * localrelayer tool installed, configured and running.
@@ -369,14 +369,14 @@ docker run --rm -v "$(pwd)":/code \
 Create an alias for chainA and chainB commands that will be used throughout the guide:
 
 ```bash
-alias chainA="osmosisd --node http://localhost:26657 --chain-id localosmosis-a"
-alias chainB="osmosisd --node http://localhost:36657 --chain-id localosmosis-b"
+alias chainA="nuahd --node http://localhost:26657 --chain-id localnuah-a"
+alias chainB="nuahd --node http://localhost:36657 --chain-id localnuah-b"
 ```
 
 Prepare other variables that we will use across the test:
 
 ```bash
-VALIDATOR=$(osmosisd keys show validator -a --keyring-backend test)
+VALIDATOR=$(nuahd keys show validator -a --keyring-backend test)
 CHANNEL_ID="channel-0"
 args="--keyring-backend test --gas auto --gas-prices 0.1uosmo --gas-adjustment 2 --broadcast-mode block --yes"
 TX_FLAGS=($args)
@@ -386,8 +386,8 @@ TX_FLAGS=($args)
 First, you need to generate the keys that will be used in the test:
 
 ```bash
-echo "bottom loan skill merry east cradle onion journey palm apology verb edit desert impose absurd oil bubble sweet glove shallow size build burst effort" | osmosisd --keyring-backend test keys add validator --recover
-echo "increase bread alpha rigid glide amused approve oblige print asset idea enact lawn proof unfold jeans rabbit audit return chuckle valve rather cactus great" | osmosisd --keyring-backend test  keys add faucet --recover
+echo "bottom loan skill merry east cradle onion journey palm apology verb edit desert impose absurd oil bubble sweet glove shallow size build burst effort" | nuahd --keyring-backend test keys add validator --recover
+echo "increase bread alpha rigid glide amused approve oblige print asset idea enact lawn proof unfold jeans rabbit audit return chuckle valve rather cactus great" | nuahd --keyring-backend test  keys add faucet --recover
 ```
 This will generate two keys, validator and faucet and will be used to send money to the validator on both chains.
 

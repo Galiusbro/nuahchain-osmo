@@ -40,7 +40,7 @@ RUN ARCH=$(uname -m) && WASMVM_VERSION=$(go list -m github.com/CosmWasm/wasmvm/v
 # Copy the remaining files
 COPY . .
 
-# Build osmosisd binary
+# Build nuahd binary
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/root/go/pkg/mod \
     GOWORK=off go build \
@@ -48,13 +48,13 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     -tags "netgo,ledger,muslc" \
     -ldflags \
     "-X github.com/cosmos/cosmos-sdk/version.Name="osmosis" \
-    -X github.com/cosmos/cosmos-sdk/version.AppName="osmosisd" \
+    -X github.com/cosmos/cosmos-sdk/version.AppName="nuahd" \
     -X github.com/cosmos/cosmos-sdk/version.Version=${GIT_VERSION} \
     -X github.com/cosmos/cosmos-sdk/version.Commit=${GIT_COMMIT} \
     -X github.com/cosmos/cosmos-sdk/version.BuildTags=${BUILD_TAGS} \
     -w -s -linkmode=external -extldflags '-Wl,-z,muldefs -static'" \
     -trimpath \
-    -o /osmosis/build/osmosisd \
+    -o /osmosis/build/nuahd \
     /osmosis/cmd/osmosisd/main.go
 
 # --------------------------------------------------------
@@ -63,7 +63,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 FROM ${RUNNER_IMAGE}
 
-COPY --from=builder /osmosis/build/osmosisd /bin/osmosisd
+COPY --from=builder /osmosis/build/nuahd /bin/nuahd
 
 ENV HOME=/osmosis
 WORKDIR $HOME
@@ -71,8 +71,8 @@ WORKDIR $HOME
 EXPOSE 26656
 EXPOSE 26657
 EXPOSE 1317
-# Note: uncomment the line below if you need pprof in localosmosis
+# Note: uncomment the line below if you need pprof in localnuah
 # We disable it by default in out main Dockerfile for security reasons
 # EXPOSE 6060
 
-ENTRYPOINT ["osmosisd"]
+ENTRYPOINT ["nuahd"]

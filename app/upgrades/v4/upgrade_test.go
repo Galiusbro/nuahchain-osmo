@@ -29,7 +29,7 @@ type UpgradeTestSuite struct {
 	suite.Suite
 
 	ctx       sdk.Context
-	app       *app.OsmosisApp
+	app       *app.NUAHApp
 	preModule appmodule.HasPreBlocker
 	HomeDir   string
 }
@@ -38,7 +38,7 @@ func (s *UpgradeTestSuite) SetupTest() {
 	s.HomeDir = fmt.Sprintf("%d", rand.Int())
 	s.app = app.SetupWithCustomHome(false, s.HomeDir)
 
-	s.ctx = s.app.BaseApp.NewContextLegacy(false, tmproto.Header{Height: 1, ChainID: "osmosis-1", Time: time.Now().UTC()})
+	s.ctx = s.app.BaseApp.NewContextLegacy(false, tmproto.Header{Height: 1, ChainID: "nuahchain-1", Time: time.Now().UTC()})
 	s.preModule = upgrade.NewAppModule(s.app.UpgradeKeeper, addresscodec.NewBech32Codec("osmo"))
 }
 

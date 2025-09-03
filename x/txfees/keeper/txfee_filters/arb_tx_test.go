@@ -55,7 +55,7 @@ func (suite *KeeperTestSuite) TestIsArbTxLooseAuthz_AffiliateSwapMsg() {
 	affiliateSwapMsgBz, err := json.Marshal(affiliateSwapMsg)
 	suite.Require().NoError(err)
 
-	// https://celatone.osmosis.zone/osmosis-1/txs/315EB6284778EBB5BAC0F94CC740F5D7E35DDA5BBE4EC9EC79F012548589C6E5
+	// https://celatone.osmosis.zone/nuahchain-1/txs/315EB6284778EBB5BAC0F94CC740F5D7E35DDA5BBE4EC9EC79F012548589C6E5
 	executeMsg := &wasmtypes.MsgExecuteContract{
 		Contract: "osmo1etpha3a65tds0hmn3wfjeag6wgxgrkuwg2zh94cf5hapz7mz04dq6c25s5",
 		Sender:   "osmo1dldrxz5p8uezxz3qstpv92de7wgfp7hvr72dcm",
@@ -85,7 +85,7 @@ func (suite *KeeperTestSuite) TestIsArbTxLooseAuthz_SwapMsg() {
 	msgBz, err := json.Marshal(contractSwapMsg)
 	suite.Require().NoError(err)
 
-	// https://celatone.osmosis.zone/osmosis-1/txs/8D20755D4E009CB72C763963A76886BCCCC5C2EBFC3F57266332710216A0D10D
+	// https://celatone.osmosis.zone/nuahchain-1/txs/8D20755D4E009CB72C763963A76886BCCCC5C2EBFC3F57266332710216A0D10D
 	executeMsg := &wasmtypes.MsgExecuteContract{
 		Contract: "osmo1etpha3a65tds0hmn3wfjeag6wgxgrkuwg2zh94cf5hapz7mz04dq6c25s5",
 		Sender:   "osmo1dldrxz5p8uezxz3qstpv92de7wgfp7hvr72dcm",
@@ -100,7 +100,7 @@ func (suite *KeeperTestSuite) TestIsArbTxLooseAuthz_SwapMsg() {
 func (suite *KeeperTestSuite) TestIsArbTxLooseAuthz_OtherMsg() {
 	otherMsg := []byte(`{"update_feed": {}}`)
 
-	// https://celatone.osmosis.zone/osmosis-1/txs/315EB6284778EBB5BAC0F94CC740F5D7E35DDA5BBE4EC9EC79F012548589C6E5
+	// https://celatone.osmosis.zone/nuahchain-1/txs/315EB6284778EBB5BAC0F94CC740F5D7E35DDA5BBE4EC9EC79F012548589C6E5
 	executeMsg := &wasmtypes.MsgExecuteContract{
 		Contract: "osmo1etpha3a65tds0hmn3wfjeag6wgxgrkuwg2zh94cf5hapz7mz04dq6c25s5",
 		Sender:   "osmo1dldrxz5p8uezxz3qstpv92de7wgfp7hvr72dcm",

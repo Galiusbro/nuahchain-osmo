@@ -3647,7 +3647,7 @@ func (s *KeeperTestSuite) TestIncentiveTruncation() {
 	// Create a pool
 	pool := s.PrepareConcentratedPool()
 
-	// 	osmosisd q concentratedliquidity incentive-records 1423 --node https://osmosis-rpc.polkachu.com:443
+	// 	nuahd q concentratedliquidity incentive-records 1423 --node https://osmosis-rpc.polkachu.com:443
 	// incentive_records:
 	// - incentive_id: "5833"
 	//   incentive_record_body:

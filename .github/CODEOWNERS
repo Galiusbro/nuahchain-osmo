@@ -19,5 +19,5 @@ x/valset-pref/ @mattverse @stackman27
 Dockerfile @osmosis-labs/devops
 .dockerignore @osmosis-labs/devops
 Makefile @osmosis-labs/devops
-/tests/localosmosis/ @osmosis-labs/devops
+/tests/localnuah/ @osmosis-labs/devops
 /tests/localrelayer/ @osmosis-labs/devops

@@ -1,14 +1,14 @@
 version: 2
 
-project_name: osmosisd
+project_name: nuahd
 
 env:
   - CGO_ENABLED=1
 
 builds:
-  - id: osmosisd-linux-amd64
+  - id: nuahd-linux-amd64
     main: ./cmd/osmosisd
-    binary: osmosisd
+    binary: nuahd
     hooks:
       pre:
         - wget https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvm_muslc.x86_64.a -O /usr/lib/libwasmvm_muslc.x86_64.a
@@ -23,7 +23,7 @@ builds:
       - -trimpath
     ldflags:
       - -X github.com/cosmos/cosmos-sdk/version.Name=osmosis
-      - -X github.com/cosmos/cosmos-sdk/version.AppName=osmosisd
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=nuahd
       - -X github.com/cosmos/cosmos-sdk/version.Version={{ .Version }}
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
       - -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger,muslc,osusergo
@@ -36,9 +36,9 @@ builds:
       - muslc
       - osusergo
 
-  - id: osmosisd-linux-arm64
+  - id: nuahd-linux-arm64
     main: ./cmd/osmosisd
-    binary: osmosisd
+    binary: nuahd
     hooks:
       pre:
         - wget https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvm_muslc.aarch64.a -O /usr/lib/libwasmvm_muslc.aarch64.a
@@ -53,7 +53,7 @@ builds:
       - -trimpath
     ldflags:
       - -X github.com/cosmos/cosmos-sdk/version.Name=osmosis
-      - -X github.com/cosmos/cosmos-sdk/version.AppName=osmosisd
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=nuahd
       - -X github.com/cosmos/cosmos-sdk/version.Version={{ .Version }}
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
       - -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger,muslc,osusergo
@@ -66,9 +66,9 @@ builds:
       - muslc
       - osusergo
 
-  - id: osmosisd-darwin-amd64
+  - id: nuahd-darwin-amd64
     main: ./cmd/osmosisd/main.go
-    binary: osmosisd
+    binary: nuahd
     hooks:
       pre:
         - wget https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvmstatic_darwin.a -O /lib/libwasmvmstatic_darwin.a
@@ -85,7 +85,7 @@ builds:
       - -trimpath
     ldflags:
       - -X github.com/cosmos/cosmos-sdk/version.Name=osmosis
-      - -X github.com/cosmos/cosmos-sdk/version.AppName=osmosisd
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=nuahd
       - -X github.com/cosmos/cosmos-sdk/version.Version={{ .Version }}
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
       - -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger,static_wasm
@@ -96,9 +96,9 @@ builds:
       - ledger
       - static_wasm
 
-  - id: osmosisd-darwin-arm64
+  - id: nuahd-darwin-arm64
     main: ./cmd/osmosisd/main.go
-    binary: osmosisd
+    binary: nuahd
     hooks:
       pre:
         - wget https://github.com/CosmWasm/wasmvm/releases/download/{{ .Env.COSMWASM_VERSION }}/libwasmvmstatic_darwin.a -O /lib/libwasmvmstatic_darwin.a
@@ -114,7 +114,7 @@ builds:
       - -trimpath
     ldflags:
       - -X github.com/cosmos/cosmos-sdk/version.Name=osmosis
-      - -X github.com/cosmos/cosmos-sdk/version.AppName=osmosisd
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=nuahd
       - -X github.com/cosmos/cosmos-sdk/version.Version={{ .Version }}
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
       - -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger,static_wasm
@@ -126,31 +126,31 @@ builds:
       - static_wasm
 
 universal_binaries:
-  - id: osmosisd-darwin-universal
+  - id: nuahd-darwin-universal
     ids:
-      - osmosisd-darwin-amd64
-      - osmosisd-darwin-arm64
+      - nuahd-darwin-amd64
+      - nuahd-darwin-arm64
     replace: false
 
 archives:
   - id: zipped
     builds:
-      - osmosisd-darwin-universal
-      - osmosisd-linux-amd64
-      - osmosisd-linux-arm64
-      - osmosisd-darwin-amd64
-      - osmosisd-darwin-arm64
+      - nuahd-darwin-universal
+      - nuahd-linux-amd64
+      - nuahd-linux-arm64
+      - nuahd-darwin-amd64
+      - nuahd-darwin-arm64
     name_template: "{{.ProjectName}}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     format: tar.gz
     files:
       - none*
   - id: binaries
     builds:
-      - osmosisd-darwin-universal
-      - osmosisd-linux-amd64
-      - osmosisd-linux-arm64
-      - osmosisd-darwin-amd64
-      - osmosisd-darwin-arm64
+      - nuahd-darwin-universal
+      - nuahd-linux-amd64
+      - nuahd-linux-arm64
+      - nuahd-darwin-amd64
+      - nuahd-darwin-arm64
     name_template: "{{.ProjectName}}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     format: binary
     files:
@@ -204,7 +204,7 @@ release:
 
     ## 🐳 Run with Docker
 
-    As an alternative to installing and running osmosisd on your system, you may run osmosisd in a Docker container.
+    As an alternative to installing and running nuahd on your system, you may run nuahd in a Docker container.
     The following Docker images are available in our registry:
 
     | Image Name                                   | Base                                 | Description                       |

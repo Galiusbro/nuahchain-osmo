@@ -17,8 +17,8 @@ go install -ldflags '-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=pebbl
 
 
 # MAKE HOME FOLDER AND GET GENESIS
-osmosisd init test
-wget -O ~/.osmosisd/config/genesis.json https://ipfs.io/ipfs/QmXRvBT3hgoXwwPqbK6a2sXUuArGM8wPyo1ybskyyUwUxs?filename=osmosis-genesis.json
+nuahd init test
+wget -O ~/.nuahd/config/genesis.json https://ipfs.io/ipfs/QmXRvBT3hgoXwwPqbK6a2sXUuArGM8wPyo1ybskyyUwUxs?filename=osmosis-genesis.json
 
 
 INTERVAL=1500
@@ -45,4 +45,4 @@ export OSMOSISD_STATESYNC_TRUST_HASH=$TRUST_HASH
 
 
 # THERE, NOW IT'S SYNCED AND YOU CAN PLAY
-osmosisd start
+nuahd start

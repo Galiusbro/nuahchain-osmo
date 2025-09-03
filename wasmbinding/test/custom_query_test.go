@@ -20,7 +20,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/wasmbinding/bindings"
 )
 
-func SetupCustomApp(t *testing.T, addr sdk.AccAddress) (*app.OsmosisApp, sdk.Context, string) {
+func SetupCustomApp(t *testing.T, addr sdk.AccAddress) (*app.NUAHApp, sdk.Context, string) {
 	t.Helper()
 
 	osmosis, ctx, homeDir := CreateTestInput()
@@ -70,7 +70,7 @@ type ChainResponse struct {
 	Data []byte `json:"data"`
 }
 
-func queryCustom(t *testing.T, ctx sdk.Context, osmosis *app.OsmosisApp, contract sdk.AccAddress, request bindings.OsmosisQuery, response interface{}) {
+func queryCustom(t *testing.T, ctx sdk.Context, osmosis *app.NUAHApp, contract sdk.AccAddress, request bindings.OsmosisQuery, response interface{}) {
 	t.Helper()
 
 	msgBz, err := json.Marshal(request)
@@ -93,7 +93,7 @@ func queryCustom(t *testing.T, ctx sdk.Context, osmosis *app.OsmosisApp, contrac
 	require.NoError(t, err)
 }
 
-func storeReflectCode(t *testing.T, ctx sdk.Context, osmosis *app.OsmosisApp, addr sdk.AccAddress) {
+func storeReflectCode(t *testing.T, ctx sdk.Context, osmosis *app.NUAHApp, addr sdk.AccAddress) {
 	t.Helper()
 	wasmCode, err := os.ReadFile("../testdata/osmo_reflect.wasm")
 	require.NoError(t, err)
@@ -114,7 +114,7 @@ func storeReflectCode(t *testing.T, ctx sdk.Context, osmosis *app.OsmosisApp, ad
 	osmosis.WasmKeeper.SetParams(ctx, originalParams)
 }
 
-func instantiateReflectContract(t *testing.T, ctx sdk.Context, osmosis *app.OsmosisApp, funder sdk.AccAddress) sdk.AccAddress {
+func instantiateReflectContract(t *testing.T, ctx sdk.Context, osmosis *app.NUAHApp, funder sdk.AccAddress) sdk.AccAddress {
 	t.Helper()
 
 	initMsgBz := []byte("{}")
@@ -126,7 +126,7 @@ func instantiateReflectContract(t *testing.T, ctx sdk.Context, osmosis *app.Osmo
 	return addr
 }
 
-func fundAccount(t *testing.T, ctx sdk.Context, osmosis *app.OsmosisApp, addr sdk.AccAddress, coins sdk.Coins) {
+func fundAccount(t *testing.T, ctx sdk.Context, osmosis *app.NUAHApp, addr sdk.AccAddress, coins sdk.Coins) {
 	t.Helper()
 	err := testutil.FundAccount(
 		ctx,

@@ -311,7 +311,7 @@ func NewCmdUpdateUnpoolWhitelistProposal() *cobra.Command {
 		Long: "This proposal will update the unpool whitelist if passed. " +
 			"Every pool id must be valid. If the pool id is invalid, the proposal will not be submitted. " +
 			"If the flag to overwrite is set, the whitelist is completely overridden. Otherwise, it is appended to the existing whitelist, having all duplicates removed.",
-		Example: "osmosisd tx gov submit-proposal update-unpool-whitelist --pool-ids \"1, 2, 3\" --title \"Title\" --summary \"Description\"",
+		Example: "nuahd tx gov submit-proposal update-unpool-whitelist --pool-ids \"1, 2, 3\" --title \"Title\" --summary \"Description\"",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, proposalTitle, summary, deposit, isExpedited, authority, err := osmocli.GetProposalInfo(cmd)
 			if err != nil {
@@ -349,7 +349,7 @@ func NewCreateFullRangePositionAndSuperfluidDelegateCmd() (*osmocli.TxCliDesc, *
 	return &osmocli.TxCliDesc{
 		Use:     "create-full-range-position-and-sf-delegate",
 		Short:   "creates a full range concentrated position and superfluid delegates it to the provided validator",
-		Example: "create-full-range-position-and-sf-delegate 100000000uosmo,10000udai 45 --from val --chain-id osmosis-1",
+		Example: "create-full-range-position-and-sf-delegate 100000000uosmo,10000udai 45 --from val --chain-id nuahchain-1",
 	}, &types.MsgCreateFullRangePositionAndSuperfluidDelegate{}
 }
 

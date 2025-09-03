@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eo pipefail
 
-DEFAULT_CHAIN_ID="localosmosis"
+DEFAULT_CHAIN_ID="localnuah"
 DEFAULT_VALIDATOR_MONIKER="validator"
 DEFAULT_VALIDATOR_MNEMONIC="bottom loan skill merry east cradle onion journey palm apology verb edit desert impose absurd oil bubble sweet glove shallow size build burst effort"
 DEFAULT_FAUCET_MNEMONIC="increase bread alpha rigid glide amused approve oblige print asset idea enact lawn proof unfold jeans rabbit audit return chuckle valve rather cactus great"
@@ -14,7 +14,7 @@ VALIDATOR_MNEMONIC=${VALIDATOR_MNEMONIC:-$DEFAULT_VALIDATOR_MNEMONIC}
 FAUCET_MNEMONIC=${FAUCET_MNEMONIC:-$DEFAULT_FAUCET_MNEMONIC}
 RELAYER_MNEMONIC=${RELAYER_MNEMONIC:-$DEFAULT_RELAYER_MNEMONIC}
 
-OSMOSIS_HOME=$HOME/.osmosisd
+OSMOSIS_HOME=$HOME/.nuahd
 CONFIG_FOLDER=$OSMOSIS_HOME/config
 
 install_prerequisites () {
@@ -70,24 +70,24 @@ add_genesis_accounts () {
     
     # Validator
     echo "⚖️ Add validator account"
-    echo $VALIDATOR_MNEMONIC | osmosisd keys add $VALIDATOR_MONIKER --recover --keyring-backend=test --home $OSMOSIS_HOME
-    VALIDATOR_ACCOUNT=$(osmosisd keys show -a $VALIDATOR_MONIKER --keyring-backend test --home $OSMOSIS_HOME)
-    osmosisd add-genesis-account $VALIDATOR_ACCOUNT 100000000000uosmo,100000000000uion,100000000000stake --home $OSMOSIS_HOME
+    echo $VALIDATOR_MNEMONIC | nuahd keys add $VALIDATOR_MONIKER --recover --keyring-backend=test --home $OSMOSIS_HOME
+    VALIDATOR_ACCOUNT=$(nuahd keys show -a $VALIDATOR_MONIKER --keyring-backend test --home $OSMOSIS_HOME)
+    nuahd add-genesis-account $VALIDATOR_ACCOUNT 100000000000uosmo,100000000000uion,100000000000stake --home $OSMOSIS_HOME
     
     # Faucet
     echo "🚰 Add faucet account"
-    echo $FAUCET_MNEMONIC | osmosisd keys add faucet --recover --keyring-backend=test --home $OSMOSIS_HOME
-    FAUCET_ACCOUNT=$(osmosisd keys show -a faucet --keyring-backend test --home $OSMOSIS_HOME)
-    osmosisd add-genesis-account $FAUCET_ACCOUNT 100000000000uosmo,100000000000uion,100000000000stake --home $OSMOSIS_HOME
+    echo $FAUCET_MNEMONIC | nuahd keys add faucet --recover --keyring-backend=test --home $OSMOSIS_HOME
+    FAUCET_ACCOUNT=$(nuahd keys show -a faucet --keyring-backend test --home $OSMOSIS_HOME)
+    nuahd add-genesis-account $FAUCET_ACCOUNT 100000000000uosmo,100000000000uion,100000000000stake --home $OSMOSIS_HOME
 
     # Relayer
     echo "🔗 Add relayer account"
-    echo $RELAYER_MNEMONIC | osmosisd keys add relayer --recover --keyring-backend=test --home $OSMOSIS_HOME
-    RELAYER_ACCOUNT=$(osmosisd keys show -a relayer --keyring-backend test --home $OSMOSIS_HOME)
-    osmosisd add-genesis-account $RELAYER_ACCOUNT 1000000000uosmo,1000000000uion,1000000000stake --home $OSMOSIS_HOME
+    echo $RELAYER_MNEMONIC | nuahd keys add relayer --recover --keyring-backend=test --home $OSMOSIS_HOME
+    RELAYER_ACCOUNT=$(nuahd keys show -a relayer --keyring-backend test --home $OSMOSIS_HOME)
+    nuahd add-genesis-account $RELAYER_ACCOUNT 1000000000uosmo,1000000000uion,1000000000stake --home $OSMOSIS_HOME
     
-    osmosisd gentx $VALIDATOR_MONIKER 500000000uosmo --keyring-backend=test --chain-id=$CHAIN_ID --home $OSMOSIS_HOME
-    osmosisd collect-gentxs --home $OSMOSIS_HOME
+    nuahd gentx $VALIDATOR_MONIKER 500000000uosmo --keyring-backend=test --chain-id=$CHAIN_ID --home $OSMOSIS_HOME
+    nuahd collect-gentxs --home $OSMOSIS_HOME
 }
 
 edit_config () {
@@ -105,11 +105,11 @@ if [[ ! -d $CONFIG_FOLDER ]]
 then
     install_prerequisites
     echo "🧪 Creating Osmosis home for $VALIDATOR_MONIKER"
-    echo $VALIDATOR_MNEMONIC | osmosisd init -o --chain-id=$CHAIN_ID --home $OSMOSIS_HOME --recover $VALIDATOR_MONIKER
+    echo $VALIDATOR_MNEMONIC | nuahd init -o --chain-id=$CHAIN_ID --home $OSMOSIS_HOME --recover $VALIDATOR_MONIKER
     edit_genesis
     add_genesis_accounts
     edit_config
 fi
 
 echo "🏁 Starting $CHAIN_ID..."
-osmosisd start --home $OSMOSIS_HOME
+nuahd start --home $OSMOSIS_HOME

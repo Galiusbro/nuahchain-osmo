@@ -29,7 +29,7 @@ func moduleHashByHeightQuery(appCreator servertypes.AppCreator) *cobra.Command {
 		Short: "Get module hashes at a given height",
 		Long: `Get module hashes at a given height. This command is useful for debugging and verifying the state of the application at a given height.
 Example:
-	osmosisd module-hash-by-height 16841115,
+	nuahd module-hash-by-height 16841115,
 `,
 		Args: cobra.ExactArgs(1), // Ensure exactly one argument is provided
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -61,7 +61,7 @@ func getModuleHashesAtHeight(svrCtx *server.Context, appCreator servertypes.AppC
 	home := svrCtx.Config.RootDir
 	db, err := openDB(home, server.GetAppDBBackend(svrCtx.Viper))
 	if err != nil {
-		return nil, fmt.Errorf("error opening DB, make sure osmosisd is not running when calling this query: %w", err)
+		return nil, fmt.Errorf("error opening DB, make sure nuahd is not running when calling this query: %w", err)
 	}
 	app := appCreator(svrCtx.Logger, db, nil, svrCtx.Viper)
 	rms, ok := app.CommitMultiStore().(*rootmulti.Store)

@@ -15,7 +15,7 @@ Validator = namedtuple(
 
 # returns all validators
 def get_all_validators() -> List[Validator]:
-    command = f"osmosisd q staking validators --output=json --limit={pagination_limit}"
+    command = f"nuahd q staking validators --output=json --limit={pagination_limit}"
     if block_height > 0:
         command += f" --height={block_height}"
     response = get_json_cli_response(command)
