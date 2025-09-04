@@ -12,7 +12,7 @@ import (
 // MakeEncodingConfig creates an EncodingConfig for an amino based test configuration.
 func MakeEncodingConfig() EncodingConfig {
 	amino := codec.NewLegacyAmino()
-	interfaceRegistry := testutil.CodecOptions{AccAddressPrefix: "osmo", ValAddressPrefix: "nuahvaloper"}.NewInterfaceRegistry()
+	interfaceRegistry := testutil.CodecOptions{AccAddressPrefix: "nuah", ValAddressPrefix: "nuahvaloper"}.NewInterfaceRegistry()
 	marshaler := codec.NewProtoCodec(interfaceRegistry)
 	txCfg := tx.NewTxConfig(marshaler, tx.DefaultSignModes)
 

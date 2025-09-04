@@ -37,7 +37,7 @@ type preparePositionConfig struct {
 	upperTick int64
 }
 
-var PoolCreationFee = sdk.NewInt64Coin("stake", 10_000_000)
+var PoolCreationFee = sdk.NewInt64Coin("nuah", 10_000_000)
 
 func RandomMsgCreateConcentratedPool(k clkeeper.Keeper, sim *osmosimtypes.SimCtx, ctx sdk.Context) (*clmodeltypes.MsgCreateConcentratedPool, error) {
 	preparePoolInfo, err := RandomPreparePoolFunc(sim, ctx, k)

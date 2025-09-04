@@ -154,7 +154,7 @@ func (suite *StargateTestSuite) TestStargateQuerier() {
 				suite.Require().NoError(err)
 
 				// fund account to receive non-empty response
-				err = testutil.FundAccount(suite.ctx, suite.app.BankKeeper, accAddr, sdk.Coins{sdk.NewCoin("stake", osmomath.NewInt(10))})
+				err = testutil.FundAccount(suite.ctx, suite.app.BankKeeper, accAddr, sdk.Coins{sdk.NewCoin("nuah", osmomath.NewInt(10))})
 				suite.Require().NoError(err)
 
 				wasmbinding.SetWhitelistedQuery("/cosmos.bank.v1beta1.Query/AllBalances", &banktypes.QueryAllBalancesResponse{})
@@ -177,7 +177,7 @@ func (suite *StargateTestSuite) TestStargateQuerier() {
 				suite.Require().NoError(err)
 
 				// fund account to receive non-empty response
-				err = testutil.FundAccount(suite.ctx, suite.app.BankKeeper, accAddr, sdk.Coins{sdk.NewCoin("stake", osmomath.NewInt(10))})
+				err = testutil.FundAccount(suite.ctx, suite.app.BankKeeper, accAddr, sdk.Coins{sdk.NewCoin("nuah", osmomath.NewInt(10))})
 				suite.Require().NoError(err)
 
 				wasmbinding.SetWhitelistedQuery("/cosmos.bank.v1beta1.Query/AllBalances", &banktypes.QueryAllBalancesResponse{})

@@ -184,7 +184,7 @@ func TestMsgCreateGauge(t *testing.T) {
 			name: "invalid due to denom being set",
 			msg: createMsg(func(msg incentivestypes.MsgCreateGauge) incentivestypes.MsgCreateGauge {
 				msg.DistributeTo.LockQueryType = lockuptypes.NoLock
-				msg.DistributeTo.Denom = "stake"
+				msg.DistributeTo.Denom = "nuah"
 				return msg
 			}),
 			expectPass: false,
@@ -235,7 +235,7 @@ func TestMsgAddToGauge(t *testing.T) {
 		properMsg := *incentivestypes.NewMsgAddToGauge(
 			addr1,
 			1,
-			sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+			sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 		)
 
 		return after(properMsg)
@@ -298,7 +298,7 @@ func TestMsgCreateGroup(t *testing.T) {
 	// make a proper createGroup message
 	createMsg := func(after func(msg incentivestypes.MsgCreateGroup) incentivestypes.MsgCreateGroup) incentivestypes.MsgCreateGroup {
 		properMsg := *incentivestypes.NewMsgCreateGroup(
-			sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+			sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			0,
 			addr1,
 			[]uint64{1, 2, 3},

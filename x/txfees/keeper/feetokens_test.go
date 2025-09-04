@@ -56,9 +56,9 @@ func (s *KeeperTestSuite) TestCalcFeeSpotPrice() {
 		// then use different denoms for each pool to test
 		balancerPoolId := s.PrepareBalancerPoolWithCoins(
 			sdk.NewCoin("foo", osmomath.NewInt(10000000)),
-			sdk.NewCoin("stake", osmomath.NewInt(10000000)),
+			sdk.NewCoin("nuah", osmomath.NewInt(10000000)),
 		)
-		clPool := s.PrepareConcentratedPoolWithCoinsAndFullRangePosition("eth", "stake")
+		clPool := s.PrepareConcentratedPoolWithCoinsAndFullRangePosition("eth", "nuah")
 		clPoolId := clPool.GetId()
 
 		// register both denoms

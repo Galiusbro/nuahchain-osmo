@@ -25,7 +25,7 @@ type TestEncodingConfig struct {
 
 func MakeTestEncodingConfig(modules ...module.AppModuleBasic) TestEncodingConfig {
 	cdc := codec.NewLegacyAmino()
-	interfaceRegistry := testutil.CodecOptions{AccAddressPrefix: "osmo", ValAddressPrefix: "nuahvaloper"}.NewInterfaceRegistry()
+	interfaceRegistry := testutil.CodecOptions{AccAddressPrefix: "nuah", ValAddressPrefix: "nuahvaloper"}.NewInterfaceRegistry()
 	codec := codec.NewProtoCodec(interfaceRegistry)
 
 	encCfg := TestEncodingConfig{

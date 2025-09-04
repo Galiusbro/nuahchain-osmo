@@ -47,7 +47,7 @@ update_genesis '.app_state["incentives"]["lockable_durations"][3]="240s"'
 update_genesis '.app_state["mint"]["params"]["epoch_identifier"]="min"'
 
 # update gamm genesis
-update_genesis '.app_state["gamm"]["params"]["pool_creation_fee"][0]["denom"]="stake"'
+update_genesis '.app_state["gamm"]["params"]["pool_creation_fee"][0]["denom"]="nuah"'
 
 # update superfluid genesis
 update_genesis '.app_state["superfluid"]["params"]["minimum_risk_factor"]="0.500000000000000000"'

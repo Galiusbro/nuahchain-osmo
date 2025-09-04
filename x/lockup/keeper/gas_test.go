@@ -9,7 +9,7 @@ import (
 
 var (
 	defaultAddr  sdk.AccAddress = sdk.AccAddress([]byte("addr1---------------"))
-	defaultCoins sdk.Coins      = sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	defaultCoins sdk.Coins      = sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 )
 
 func (s *KeeperTestSuite) measureLockGas(addr sdk.AccAddress, coins sdk.Coins, dur time.Duration) uint64 {

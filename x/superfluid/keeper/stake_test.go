@@ -1101,7 +1101,7 @@ func (s *KeeperTestSuite) TestUnbondConvertAndStake() {
 			}
 
 			// only test with test related denoms
-			balanceBeforeConvertLockToStake := osmoutils.FilterDenoms(s.App.BankKeeper.GetAllBalances(s.Ctx, sender), []string{"foo", "stake", appparams.BaseCoinUnit})
+			balanceBeforeConvertLockToStake := osmoutils.FilterDenoms(s.App.BankKeeper.GetAllBalances(s.Ctx, sender), []string{"foo", "nuah", appparams.BaseCoinUnit})
 
 			// system under test
 			totalAmtConverted, err := s.App.SuperfluidKeeper.UnbondConvertAndStake(s.Ctx, lockId, sender.String(), valAddr.String(), minAmountToStake, sharesToConvert)
@@ -1116,7 +1116,7 @@ func (s *KeeperTestSuite) TestUnbondConvertAndStake() {
 			s.delegationCheck(sender, originalValAddr, valAddr, totalAmtConverted)
 
 			// Bank check
-			balanceAfterConvertLockToStake := osmoutils.FilterDenoms(s.App.BankKeeper.GetAllBalances(s.Ctx, sender), []string{"foo", "stake", appparams.BaseCoinUnit})
+			balanceAfterConvertLockToStake := osmoutils.FilterDenoms(s.App.BankKeeper.GetAllBalances(s.Ctx, sender), []string{"foo", "nuah", appparams.BaseCoinUnit})
 			s.Require().True(balanceBeforeConvertLockToStake.Equal(balanceAfterConvertLockToStake))
 
 			// if unlocked, no need to check locks since there is no lock existing
@@ -1430,7 +1430,7 @@ func (s *KeeperTestSuite) TestConvertGammSharesToOsmoAndStake() {
 			pool, err := s.App.GAMMKeeper.GetPoolAndPoke(s.Ctx, poolId)
 			s.Require().NoError(err)
 			poolLiquidityBeforeSwap := pool.GetTotalPoolLiquidity(s.Ctx)
-			poolBeforeBondDenomAmt := poolLiquidityBeforeSwap.AmountOf("stake")
+			poolBeforeBondDenomAmt := poolLiquidityBeforeSwap.AmountOf("nuah")
 			poolBeforeNonBondDenomAmt := poolLiquidityBeforeSwap.AmountOf("foo")
 
 			// system under test.
@@ -1469,7 +1469,7 @@ func (s *KeeperTestSuite) TestConvertGammSharesToOsmoAndStake() {
 			pool, err = s.App.GAMMKeeper.GetPoolAndPoke(s.Ctx, poolId)
 			s.Require().NoError(err)
 			poolLiquidityAfterSwap := pool.GetTotalPoolLiquidity(s.Ctx)
-			poolAfterBondDenomAmt := poolLiquidityAfterSwap.AmountOf("stake")
+			poolAfterBondDenomAmt := poolLiquidityAfterSwap.AmountOf("nuah")
 			poolAfterNonBondDenomAmt := poolLiquidityAfterSwap.AmountOf("foo")
 			// we swapped from non-bond denom to bond denom,
 			// thus bond denom token in pool should have decreased, non bond denom token should have increased
@@ -1606,7 +1606,7 @@ func (s *KeeperTestSuite) SetupUnbondConvertAndStakeTest(ctx sdk.Context, superf
 	// Set up a single validator.
 	valAddr = s.SetupValidator(stakingtypes.Bonded)
 
-	// Create a balancer pool of "stake" and "foo".
+	// Create a balancer pool of "nuah" and "foo".
 	msg := balancer.NewMsgCreateBalancerPool(poolCreateAcc, balancer.PoolParams{
 		SwapFee: osmomath.NewDecWithPrec(1, 2),
 		ExitFee: osmomath.NewDec(0),

@@ -1,0 +1,22 @@
+{
+  "chain_id": "nuahchain-1",
+  "network_name": "Nuah Chain",
+  "native_token": {
+    "symbol": "NUAH",
+    "display_name": "Nuah",
+    "base_denom": "unuah",
+    "display_denom": "NUAH",
+    "decimals": 6,
+    "conversion_rate": "1000000",
+    "description": "Native token of Nuah Chain"
+  },
+  "endpoints": {
+    "rpc": "http://localhost:26657",
+    "api": "http://localhost:1317",
+    "grpc": "localhost:9090"
+  },
+  "explorer": {
+    "tx_page": "http://localhost:26657/tx/{txHash}",
+    "account_page": "http://localhost:26657/account/{address}"
+  }
+}

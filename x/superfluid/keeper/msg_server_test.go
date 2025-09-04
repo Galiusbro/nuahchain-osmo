@@ -15,7 +15,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/superfluid/types"
 )
 
-var defaultFunds = sdk.NewCoins(defaultPoolAssets[0].Token, sdk.NewCoin("stake", osmomath.NewInt(5000000000)))
+var defaultFunds = sdk.NewCoins(defaultPoolAssets[0].Token, sdk.NewCoin("nuah", osmomath.NewInt(5000000000)))
 
 func (s *KeeperTestSuite) TestMsgSuperfluidDelegate() {
 	type param struct {
@@ -32,7 +32,7 @@ func (s *KeeperTestSuite) TestMsgSuperfluidDelegate() {
 		{
 			name: "superfluid delegation for not allowed asset",
 			param: param{
-				coinsToLock: sdk.Coins{sdk.NewInt64Coin("stake", 10)},       // setup wallet
+				coinsToLock: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},        // setup wallet
 				lockOwner:   sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:    time.Hour * 504,
 			},
@@ -103,10 +103,10 @@ func (s *KeeperTestSuite) TestMsgSuperfluidUndelegate() {
 		{
 			name: "superfluid undelegation for not superfluid delegated lockup",
 			param: param{
-				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("stake", 10)},       // setup wallet
+				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("nuah", 10)},        // setup wallet
 				lockOwner:           sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:            time.Second,
-				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			expectPass: false,
 		},
@@ -157,7 +157,7 @@ func (s *KeeperTestSuite) TestMsgCreateFullRangePositionAndSuperfluidDelegate() 
 		{
 			name: "superfluid delegation for not allowed asset",
 			param: param{
-				coinsToLock: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsToLock: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			expectPass: false,
 		},
@@ -227,10 +227,10 @@ func (s *KeeperTestSuite) TestMsgSuperfluidUnbondLock() {
 		{
 			name: "superfluid unbond lock that is not superfluid lockup",
 			param: param{
-				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("stake", 10)},       // setup wallet
+				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("nuah", 10)},        // setup wallet
 				lockOwner:           sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:            time.Second,
-				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			expectPass: false,
 		},
@@ -274,11 +274,11 @@ func (s *KeeperTestSuite) TestMsgSuperfluidUndelegateAndUnbondLock() {
 		{
 			name: "superfluid unbond lock that is not superfluid lockup",
 			param: param{
-				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("stake", 10)},
-				amountToUnlock:      sdk.NewInt64Coin("stake", 10),
+				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
+				amountToUnlock:      sdk.NewInt64Coin("nuah", 10),
 				lockOwner:           sdk.AccAddress([]byte("addr1---------------")),
 				duration:            time.Second,
-				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			expectPass: false,
 		},
@@ -321,10 +321,10 @@ func (s *KeeperTestSuite) TestMsgLockAndSuperfluidDelegate() {
 		{
 			name: "superfluid lock and superfluid delegate for not allowed asset",
 			param: param{
-				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("stake", 10)},       // setup wallet
+				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("nuah", 10)},        // setup wallet
 				lockOwner:           sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:            time.Second,
-				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			expectPass: false,
 		},

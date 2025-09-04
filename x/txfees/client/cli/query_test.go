@@ -25,7 +25,7 @@ func (s *QueryTestSuite) SetupSuite() {
 	// set up pool
 	poolAssets := []sdk.Coin{
 		sdk.NewInt64Coin(appparams.BaseCoinUnit, 1000000),
-		sdk.NewInt64Coin("stake", 120000000),
+		sdk.NewInt64Coin("nuah", 120000000),
 	}
 	s.PrepareBalancerPoolWithCoins(poolAssets...)
 

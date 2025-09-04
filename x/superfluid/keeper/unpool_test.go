@@ -109,7 +109,7 @@ func (s *KeeperTestSuite) TestUnpool() {
 			// set up validator
 			valAddr := s.SetupValidator(stakingtypes.Bonded)
 
-			// create pool of "stake" and "foo"
+			// create pool of "nuah" and "foo"
 			msg := balancer.NewMsgCreateBalancerPool(poolCreateAcc, balancer.PoolParams{
 				SwapFee: osmomath.NewDecWithPrec(1, 2),
 				ExitFee: osmomath.NewDec(0),

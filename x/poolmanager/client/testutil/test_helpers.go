@@ -74,7 +74,7 @@ func MsgCreatePool(
 
 // UpdateTxFeeDenom creates and modifies gamm genesis to pay fee with given denom.
 func UpdateTxFeeDenom(cdc codec.Codec, denom string) map[string]json.RawMessage {
-	// modification to pay fee with test bond denom "stake"
+	// modification to pay fee with test bond denom "nuah"
 	genesisState := keepers.AppModuleBasics.DefaultGenesis(cdc)
 	poolmanagerGen := poolmanagertypes.DefaultGenesis()
 	poolmanagerGen.Params.PoolCreationFee = sdk.Coins{sdk.NewInt64Coin(denom, 1000000)}

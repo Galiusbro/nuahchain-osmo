@@ -1,0 +1,38 @@
+{
+  "messages": [
+    {
+      "@type": "/cosmos.bank.v1beta1.MsgSetDenomMetadata",
+      "authority": "nuah10d07y265gmmuvt4z0w9aw880jnsr700jrw4d7l",
+      "metadata": {
+        "description": "NUAH is the native staking and governance token of Nuah Chain, an Osmosis-based blockchain network designed for decentralized finance applications.",
+        "denom_units": [
+          {
+            "denom": "unuah",
+            "exponent": 0,
+            "aliases": ["microNUAH", "µNUAH"]
+          },
+          {
+            "denom": "mnuah", 
+            "exponent": 3,
+            "aliases": ["milliNUAH", "mNUAH"]
+          },
+          {
+            "denom": "nuah",
+            "exponent": 6,
+            "aliases": ["NUAH"]
+          }
+        ],
+        "base": "unuah",
+        "display": "nuah",
+        "name": "Nuah Token",
+        "symbol": "NUAH",
+        "uri": "https://nuahchain.com",
+        "uri_hash": ""
+      }
+    }
+  ],
+  "metadata": "ipfs://CID",
+  "deposit": "10000000unuah",
+  "title": "Set NUAH Token Metadata",
+  "summary": "This proposal sets the official metadata for the NUAH native token, including proper denomination units, symbols, and descriptions for wallet display."
+}

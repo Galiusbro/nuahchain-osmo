@@ -55,7 +55,7 @@ const (
 	// common
 	OsmoDenom           = appparams.BaseCoinUnit
 	IonDenom            = "uion"
-	StakeDenom          = "stake"
+	StakeDenom          = "nuah"
 	AtomDenom           = "uatom"
 	DaiDenom            = "ibc/0CD3A0285E1341859B5E86B6AB7682F023D03E97607CCC1DC95706411D866DF7"
 	OsmoIBCDenom        = "ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518"

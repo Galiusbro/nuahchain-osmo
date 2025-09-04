@@ -56,9 +56,9 @@ func (s *KeeperTestSuite) TestOsmoEquivalentMultiplierSetGetDeleteFlow() {
 func (s *KeeperTestSuite) TestGetSuperfluidOSMOTokens() {
 	s.SetupTest()
 	minRiskFactor := s.App.SuperfluidKeeper.GetParams(s.Ctx).MinimumRiskFactor
-	poolCoins := sdk.NewCoins(sdk.NewCoin("stake", osmomath.NewInt(1000000000000000000)), sdk.NewCoin("foo", osmomath.NewInt(1000000000000000000)))
+	poolCoins := sdk.NewCoins(sdk.NewCoin("nuah", osmomath.NewInt(1000000000000000000)), sdk.NewCoin("foo", osmomath.NewInt(1000000000000000000)))
 	s.PrepareBalancerPoolWithCoins(poolCoins...)
-	s.PrepareConcentratedPoolWithCoinsAndFullRangePosition("stake", "foo")
+	s.PrepareConcentratedPoolWithCoinsAndFullRangePosition("nuah", "foo")
 
 	gammShareDenom := DefaultGammAsset
 	clShareDenom := cltypes.GetConcentratedLockupDenomFromPoolId(2)

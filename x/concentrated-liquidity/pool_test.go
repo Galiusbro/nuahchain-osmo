@@ -645,7 +645,7 @@ func (s *KeeperTestSuite) TestGetUserUnbondingPositions() {
 		}
 		defaultPoolAssets []balancer.PoolAsset = []balancer.PoolAsset{defaultFooAsset, defaultBondDenomAsset}
 		defaultAddress                         = s.TestAccs[0]
-		defaultFunds                           = sdk.NewCoins(defaultPoolAssets[0].Token, sdk.NewCoin("stake", osmomath.NewInt(5000000000)))
+		defaultFunds                           = sdk.NewCoins(defaultPoolAssets[0].Token, sdk.NewCoin("nuah", osmomath.NewInt(5000000000)))
 		defaultBlockTime                       = time.Unix(1, 1).UTC()
 		defaultLockedAmt                       = sdk.NewCoins(sdk.NewCoin("cl/pool/1", osmomath.NewInt(10000)))
 	)

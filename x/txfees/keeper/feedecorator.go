@@ -295,7 +295,7 @@ func (dfd DeductFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 	// set it as coming from the burn addr
 	if simulate && fees.IsZero() {
 		fees = sdk.NewCoins(sdk.NewInt64Coin(appparams.BaseCoinUnit, 1))
-		burnAcctAddr, _ := sdk.AccAddressFromBech32("osmo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmcn030")
+		burnAcctAddr, _ := sdk.AccAddressFromBech32("nuah1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqvthuyl")
 		// were doing 1 extra get account call alas
 		burnAcct := dfd.ak.GetAccount(ctx, burnAcctAddr)
 		if burnAcct != nil {

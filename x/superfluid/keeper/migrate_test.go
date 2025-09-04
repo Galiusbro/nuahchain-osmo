@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	STAKE            = "stake"
+	STAKE            = "nuah"
 	DefaultAmt0      = osmomath.NewInt(1000000)
 	DefaultCoin0     = sdk.NewCoin(STAKE, DefaultAmt0)
 	USDC             = "usdc"
@@ -51,7 +51,7 @@ func (s *KeeperTestSuite) SetupMigrationTest(ctx sdk.Context, superfluidDelegate
 	// Set up a single validator.
 	valAddr = s.SetupValidator(stakingtypes.Bonded)
 
-	// Create a balancer pool of "stake" and "foo".
+	// Create a balancer pool of "nuah" and "foo".
 	msg := balancer.NewMsgCreateBalancerPool(poolCreateAcc, balancer.PoolParams{
 		SwapFee: osmomath.NewDecWithPrec(1, 2),
 		ExitFee: osmomath.NewDec(0),

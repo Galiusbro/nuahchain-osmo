@@ -278,7 +278,7 @@ func (s *KeeperTestSuite) TestCreateDeveloperVestingModuleAccount() {
 	}{
 		"valid call": {
 			blockHeight: 0,
-			amount:      sdk.NewCoin("stake", osmomath.NewInt(keeper.DeveloperVestingAmount)),
+			amount:      sdk.NewCoin("nuah", osmomath.NewInt(keeper.DeveloperVestingAmount)),
 		},
 		"nil amount": {
 			blockHeight:   0,
@@ -286,12 +286,12 @@ func (s *KeeperTestSuite) TestCreateDeveloperVestingModuleAccount() {
 		},
 		"zero amount": {
 			blockHeight:   0,
-			amount:        sdk.NewCoin("stake", osmomath.NewInt(0)),
+			amount:        sdk.NewCoin("nuah", osmomath.NewInt(0)),
 			expectedError: errorsmod.Wrap(types.ErrAmountNilOrZero, "amount cannot be nil or zero"),
 		},
 		"module account is already created": {
 			blockHeight:                     0,
-			amount:                          sdk.NewCoin("stake", osmomath.NewInt(keeper.DeveloperVestingAmount)),
+			amount:                          sdk.NewCoin("nuah", osmomath.NewInt(keeper.DeveloperVestingAmount)),
 			isDeveloperModuleAccountCreated: true,
 			expectedError:                   errorsmod.Wrapf(types.ErrModuleAccountAlreadyExist, "%s vesting module account already exist", types.DeveloperVestingModuleAcctName),
 		},

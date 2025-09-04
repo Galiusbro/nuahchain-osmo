@@ -55,7 +55,7 @@ func (suite *MempoolCapacityTestSuite) SetupTest() {
 		suite.App.AccountKeeper.SetAccount(suite.Ctx, acc)
 
 		// fund each account
-		err := testutil.FundAccount(suite.Ctx, suite.App.BankKeeper, suite.accAddresses[i], sdk.NewCoins(sdk.NewInt64Coin("stake", 1000000000000000000)))
+		err := testutil.FundAccount(suite.Ctx, suite.App.BankKeeper, suite.accAddresses[i], sdk.NewCoins(sdk.NewInt64Coin("nuah", 1000000000000000000)))
 		suite.Require().NoError(err)
 	}
 
@@ -103,7 +103,7 @@ func (suite *MempoolCapacityTestSuite) createTestTx(txIndex int) sdk.Tx {
 	msg := banktypes.NewMsgSend(
 		suite.accAddresses[accountIndex],
 		suite.accAddresses[accountIndex],
-		sdk.NewCoins(sdk.NewInt64Coin("stake", 1)),
+		sdk.NewCoins(sdk.NewInt64Coin("nuah", 1)),
 	)
 
 	// Get the actual account number and sequence from the stored account
@@ -114,7 +114,7 @@ func (suite *MempoolCapacityTestSuite) createTestTx(txIndex int) sdk.Tx {
 		suite.Ctx,
 		suite.encoding,
 		[]sdk.Msg{msg},
-		sdk.NewCoins(sdk.NewInt64Coin("stake", 20000)), // fee
+		sdk.NewCoins(sdk.NewInt64Coin("nuah", 20000)), // fee
 		200000, // gas
 		suite.Ctx.ChainID(),
 		[]uint64{account.GetAccountNumber()}, // accNums

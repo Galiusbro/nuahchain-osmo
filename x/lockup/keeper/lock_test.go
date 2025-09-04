@@ -27,7 +27,7 @@ func (s *KeeperTestSuite) TestBeginUnlocking() { // test for all unlockable coin
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// check locks
@@ -55,7 +55,7 @@ func (s *KeeperTestSuite) TestBeginUnlocking() { // test for all unlockable coin
 
 func (s *KeeperTestSuite) TestBeginForceUnlock() {
 	// coins to lock
-	coins := sdk.NewCoins(sdk.NewInt64Coin("stake", 10))
+	coins := sdk.NewCoins(sdk.NewInt64Coin("nuah", 10))
 
 	testCases := []struct {
 		name             string
@@ -66,7 +66,7 @@ func (s *KeeperTestSuite) TestBeginForceUnlock() {
 		{
 			name:             "new lock id is returned if the lock was split",
 			coins:            coins,
-			unlockCoins:      sdk.NewCoins(sdk.NewInt64Coin("stake", 1)),
+			unlockCoins:      sdk.NewCoins(sdk.NewInt64Coin("nuah", 1)),
 			expectSameLockID: false,
 		},
 		{
@@ -127,7 +127,7 @@ func (s *KeeperTestSuite) TestGetPeriodLocks() {
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// check locks
@@ -138,7 +138,7 @@ func (s *KeeperTestSuite) TestGetPeriodLocks() {
 
 func (s *KeeperTestSuite) TestUnlock() {
 	s.SetupTest()
-	initialLockCoins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	initialLockCoins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	concentratedShareCoins := sdk.NewCoins(sdk.NewCoin(cltypes.GetConcentratedLockupDenomFromPoolId(1), osmomath.NewInt(10)))
 
 	testCases := []struct {
@@ -180,7 +180,7 @@ func (s *KeeperTestSuite) TestUnlock() {
 		},
 		{
 			name:                          "unlocking coins exceed what's in lock",
-			unlockingCoins:                sdk.Coins{sdk.NewInt64Coin("stake", 20)},
+			unlockingCoins:                sdk.Coins{sdk.NewInt64Coin("nuah", 20)},
 			fundAcc:                       initialLockCoins,
 			passedTime:                    time.Second,
 			expectedUnlockMaturedLockPass: false,
@@ -196,12 +196,12 @@ func (s *KeeperTestSuite) TestUnlock() {
 		},
 		{
 			name:                          "partial unlocking",
-			unlockingCoins:                sdk.Coins{sdk.NewInt64Coin("stake", 5)},
+			unlockingCoins:                sdk.Coins{sdk.NewInt64Coin("nuah", 5)},
 			fundAcc:                       initialLockCoins,
 			expectedBeginUnlockPass:       true,
 			passedTime:                    time.Second,
 			expectedUnlockMaturedLockPass: true,
-			balanceAfterUnlock:            sdk.Coins{sdk.NewInt64Coin("stake", 5)},
+			balanceAfterUnlock:            sdk.Coins{sdk.NewInt64Coin("nuah", 5)},
 			isPartial:                     true,
 		},
 		{
@@ -433,7 +433,7 @@ func (s *KeeperTestSuite) TestModuleLockedCoins() {
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// final check
@@ -448,16 +448,16 @@ func (s *KeeperTestSuite) TestLocksPastTimeDenom() {
 	s.Ctx = s.Ctx.WithBlockTime(now)
 
 	// initial check
-	locks := s.App.LockupKeeper.GetLocksPastTimeDenom(s.Ctx, "stake", now)
+	locks := s.App.LockupKeeper.GetLocksPastTimeDenom(s.Ctx, "nuah", now)
 	s.Require().Len(locks, 0)
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// final check
-	locks = s.App.LockupKeeper.GetLocksPastTimeDenom(s.Ctx, "stake", now)
+	locks = s.App.LockupKeeper.GetLocksPastTimeDenom(s.Ctx, "nuah", now)
 	s.Require().Len(locks, 1)
 }
 
@@ -466,16 +466,16 @@ func (s *KeeperTestSuite) TestLocksLongerThanDurationDenom() {
 
 	// initial check
 	duration := time.Second
-	locks := s.App.LockupKeeper.GetLocksLongerThanDurationDenom(s.Ctx, "stake", duration)
+	locks := s.App.LockupKeeper.GetLocksLongerThanDurationDenom(s.Ctx, "nuah", duration)
 	s.Require().Len(locks, 0)
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// final check
-	locks = s.App.LockupKeeper.GetLocksLongerThanDurationDenom(s.Ctx, "stake", duration)
+	locks = s.App.LockupKeeper.GetLocksLongerThanDurationDenom(s.Ctx, "nuah", duration)
 	s.Require().Len(locks, 1)
 }
 
@@ -483,7 +483,7 @@ func (s *KeeperTestSuite) TestCreateLock() {
 	s.SetupTest()
 
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 
 	// test locking without balance
 	_, err := s.App.LockupKeeper.CreateLock(s.Ctx, addr1, coins, time.Second)
@@ -507,13 +507,13 @@ func (s *KeeperTestSuite) TestCreateLock() {
 	// check accumulation store
 	accum := s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
 		LockQueryType: types.ByDuration,
-		Denom:         "stake",
+		Denom:         "nuah",
 		Duration:      time.Second,
 	})
 	s.Require().Equal(accum.String(), "10")
 
 	// create new lock
-	coins = sdk.Coins{sdk.NewInt64Coin("stake", 20)}
+	coins = sdk.Coins{sdk.NewInt64Coin("nuah", 20)}
 	s.FundAcc(addr1, coins)
 
 	lock, err = s.App.LockupKeeper.CreateLock(s.Ctx, addr1, coins, time.Second)
@@ -525,17 +525,17 @@ func (s *KeeperTestSuite) TestCreateLock() {
 	// check accumulation store
 	accum = s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
 		LockQueryType: types.ByDuration,
-		Denom:         "stake",
+		Denom:         "nuah",
 		Duration:      time.Second,
 	})
 	s.Require().Equal(accum.String(), "30")
 
 	// check balance
-	balance := s.App.BankKeeper.GetBalance(s.Ctx, addr1, "stake")
+	balance := s.App.BankKeeper.GetBalance(s.Ctx, addr1, "nuah")
 	s.Require().Equal(osmomath.ZeroInt(), balance.Amount)
 
 	acc := s.App.AccountKeeper.GetModuleAccount(s.Ctx, types.ModuleName)
-	balance = s.App.BankKeeper.GetBalance(s.Ctx, acc.GetAddress(), "stake")
+	balance = s.App.BankKeeper.GetBalance(s.Ctx, acc.GetAddress(), "nuah")
 	s.Require().Equal(osmomath.NewInt(30), balance.Amount)
 }
 
@@ -581,7 +581,7 @@ func (s *KeeperTestSuite) TestSetLockRewardReceiverAddress() {
 			s.SetupTest()
 
 			addr1 := s.TestAccs[0]
-			coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+			coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 
 			s.FundAcc(addr1, coins)
 
@@ -624,7 +624,7 @@ func (s *KeeperTestSuite) TestCreateLockNoSend() {
 	s.SetupTest()
 
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 
 	// test locking without balance
 	lock, err := s.App.LockupKeeper.CreateLockNoSend(s.Ctx, addr1, coins, time.Second)
@@ -642,14 +642,14 @@ func (s *KeeperTestSuite) TestCreateLockNoSend() {
 	// check accumulation store
 	accum := s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
 		LockQueryType: types.ByDuration,
-		Denom:         "stake",
+		Denom:         "nuah",
 		Duration:      time.Second,
 	})
 	s.Require().Equal(accum.String(), "10")
 
 	// create new lock (this time with a balance)
 	originalLockBalance := int64(20)
-	coins = sdk.Coins{sdk.NewInt64Coin("stake", originalLockBalance)}
+	coins = sdk.Coins{sdk.NewInt64Coin("nuah", originalLockBalance)}
 	s.FundAcc(addr1, coins)
 
 	lock, err = s.App.LockupKeeper.CreateLockNoSend(s.Ctx, addr1, coins, time.Second)
@@ -661,22 +661,22 @@ func (s *KeeperTestSuite) TestCreateLockNoSend() {
 	// check accumulation store
 	accum = s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
 		LockQueryType: types.ByDuration,
-		Denom:         "stake",
+		Denom:         "nuah",
 		Duration:      time.Second,
 	})
 	s.Require().Equal(accum.String(), "30")
 
 	// check that send did not occur and balances are unchanged
-	balance := s.App.BankKeeper.GetBalance(s.Ctx, addr1, "stake")
+	balance := s.App.BankKeeper.GetBalance(s.Ctx, addr1, "nuah")
 	s.Require().Equal(osmomath.NewInt(originalLockBalance).String(), balance.Amount.String())
 
 	acc := s.App.AccountKeeper.GetModuleAccount(s.Ctx, types.ModuleName)
-	balance = s.App.BankKeeper.GetBalance(s.Ctx, acc.GetAddress(), "stake")
+	balance = s.App.BankKeeper.GetBalance(s.Ctx, acc.GetAddress(), "nuah")
 	s.Require().Equal(osmomath.ZeroInt().String(), balance.Amount.String())
 }
 
 func (s *KeeperTestSuite) TestAddTokensToLock() {
-	initialLockCoin := sdk.NewInt64Coin("stake", 10)
+	initialLockCoin := sdk.NewInt64Coin("nuah", 10)
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
 	addr2 := sdk.AccAddress([]byte("addr2---------------"))
 
@@ -714,7 +714,7 @@ func (s *KeeperTestSuite) TestAddTokensToLock() {
 		},
 		{
 			name:           "token to add exceeds balance",
-			tokenToAdd:     sdk.NewCoin("stake", osmomath.NewInt(20)),
+			tokenToAdd:     sdk.NewCoin("nuah", osmomath.NewInt(20)),
 			duration:       time.Second,
 			lockingAddress: addr1,
 		},
@@ -749,7 +749,7 @@ func (s *KeeperTestSuite) TestAddTokensToLock() {
 			// check accumulation store
 			accum := s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
 				LockQueryType: types.ByDuration,
-				Denom:         "stake",
+				Denom:         "nuah",
 				Duration:      time.Second,
 			})
 			s.Require().Equal(initialLockCoin.Amount.Add(tc.tokenToAdd.Amount), accum)
@@ -766,7 +766,7 @@ func (s *KeeperTestSuite) TestAddTokensToLock() {
 			// check accumulation store didn't change
 			accum := s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
 				LockQueryType: types.ByDuration,
-				Denom:         "stake",
+				Denom:         "nuah",
 				Duration:      time.Second,
 			})
 			s.Require().Equal(initialLockCoin.Amount, accum)
@@ -789,34 +789,34 @@ func (s *KeeperTestSuite) TestHasLock() {
 	}{
 		{
 			name:            "same token, same duration",
-			tokenLocked:     sdk.NewInt64Coin("stake", 10),
+			tokenLocked:     sdk.NewInt64Coin("nuah", 10),
 			durationLocked:  time.Minute,
 			lockAddr:        addr1,
-			denomToQuery:    "stake",
+			denomToQuery:    "nuah",
 			durationToQuery: time.Minute,
 			expectedHas:     true,
 		},
 		{
 			name:            "same token, shorter duration",
-			tokenLocked:     sdk.NewInt64Coin("stake", 10),
+			tokenLocked:     sdk.NewInt64Coin("nuah", 10),
 			durationLocked:  time.Minute,
 			lockAddr:        addr1,
-			denomToQuery:    "stake",
+			denomToQuery:    "nuah",
 			durationToQuery: time.Second,
 			expectedHas:     false,
 		},
 		{
 			name:            "same token, longer duration",
-			tokenLocked:     sdk.NewInt64Coin("stake", 10),
+			tokenLocked:     sdk.NewInt64Coin("nuah", 10),
 			durationLocked:  time.Minute,
 			lockAddr:        addr1,
-			denomToQuery:    "stake",
+			denomToQuery:    "nuah",
 			durationToQuery: time.Minute * 2,
 			expectedHas:     false,
 		},
 		{
 			name:            "different token, same duration",
-			tokenLocked:     sdk.NewInt64Coin("stake", 10),
+			tokenLocked:     sdk.NewInt64Coin("nuah", 10),
 			durationLocked:  time.Minute,
 			lockAddr:        addr1,
 			denomToQuery:    appparams.BaseCoinUnit,
@@ -825,7 +825,7 @@ func (s *KeeperTestSuite) TestHasLock() {
 		},
 		{
 			name:            "same token, same duration, different address",
-			tokenLocked:     sdk.NewInt64Coin("stake", 10),
+			tokenLocked:     sdk.NewInt64Coin("nuah", 10),
 			durationLocked:  time.Minute,
 			lockAddr:        addr2,
 			denomToQuery:    appparams.BaseCoinUnit,
@@ -849,7 +849,7 @@ func (s *KeeperTestSuite) TestLock() {
 	s.SetupTest()
 
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 
 	lock := types.PeriodLock{
 		ID:       1,
@@ -866,7 +866,7 @@ func (s *KeeperTestSuite) TestLock() {
 	// check accumulation store
 	accum := s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
 		LockQueryType: types.ByDuration,
-		Denom:         "stake",
+		Denom:         "nuah",
 		Duration:      time.Second,
 	})
 	s.Require().Equal(accum.String(), "10")
@@ -878,17 +878,17 @@ func (s *KeeperTestSuite) TestLock() {
 	// check accumulation store
 	accum = s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
 		LockQueryType: types.ByDuration,
-		Denom:         "stake",
+		Denom:         "nuah",
 		Duration:      time.Second,
 	})
 	s.Require().Equal(accum.String(), "20")
 
 	// Since lock method no longer sends the underlying coins, the account balance should be unchanged
-	balance := s.App.BankKeeper.GetBalance(s.Ctx, addr1, "stake")
+	balance := s.App.BankKeeper.GetBalance(s.Ctx, addr1, "nuah")
 	s.Require().Equal(osmomath.NewInt(10).String(), balance.Amount.String())
 
 	acc := s.App.AccountKeeper.GetModuleAccount(s.Ctx, types.ModuleName)
-	balance = s.App.BankKeeper.GetBalance(s.Ctx, acc.GetAddress(), "stake")
+	balance = s.App.BankKeeper.GetBalance(s.Ctx, acc.GetAddress(), "nuah")
 	s.Require().Equal(osmomath.NewInt(0).String(), balance.Amount.String())
 }
 func (s *KeeperTestSuite) TestSplitLock() {
@@ -1000,13 +1000,13 @@ func (s *KeeperTestSuite) AddTokensToLockForSynth() {
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// lock coins on other durations
-	coins = sdk.Coins{sdk.NewInt64Coin("stake", 20)}
+	coins = sdk.Coins{sdk.NewInt64Coin("nuah", 20)}
 	s.LockTokens(addr1, coins, time.Second*2)
-	coins = sdk.Coins{sdk.NewInt64Coin("stake", 30)}
+	coins = sdk.Coins{sdk.NewInt64Coin("nuah", 30)}
 	s.LockTokens(addr1, coins, time.Second*3)
 
 	synthlocks := []types.SyntheticLock{}
@@ -1079,7 +1079,7 @@ func (s *KeeperTestSuite) AddTokensToLockForSynth() {
 
 	// call AddTokensToLock
 	for i := uint64(1); i <= 3; i++ {
-		coins := sdk.NewInt64Coin("stake", int64(i)*10)
+		coins := sdk.NewInt64Coin("nuah", int64(i)*10)
 		s.FundAcc(addr1, sdk.Coins{coins})
 		_, err := s.App.LockupKeeper.AddTokensToLockByID(s.Ctx, i, addr1, coins)
 		s.Require().NoError(err)
@@ -1094,7 +1094,7 @@ func (s *KeeperTestSuite) TestEndblockerWithdrawAllMaturedLockups() {
 	clPoolDenom := cltypes.GetConcentratedLockupDenomFromPoolId(1)
 
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.NewCoins(sdk.NewInt64Coin("stake", 10), sdk.NewInt64Coin(clPoolDenom, 20))
+	coins := sdk.NewCoins(sdk.NewInt64Coin("nuah", 10), sdk.NewInt64Coin(clPoolDenom, 20))
 	totalCoins := coins.Add(coins...).Add(coins...)
 
 	// lock coins for 5 second, 1 seconds, and 3 seconds in that order
@@ -1188,38 +1188,38 @@ func (s *KeeperTestSuite) TestLockAccumulationStore() {
 	// 1 * time.Second: 10 + 20
 	// 2 * time.Second: 20 + 30
 	// 3 * time.Second: 30
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr, coins, time.Second)
-	coins = sdk.Coins{sdk.NewInt64Coin("stake", 20)}
+	coins = sdk.Coins{sdk.NewInt64Coin("nuah", 20)}
 	s.LockTokens(addr, coins, time.Second)
 	s.LockTokens(addr, coins, time.Second*2)
-	coins = sdk.Coins{sdk.NewInt64Coin("stake", 30)}
+	coins = sdk.Coins{sdk.NewInt64Coin("nuah", 30)}
 	s.LockTokens(addr, coins, time.Second*2)
 	s.LockTokens(addr, coins, time.Second*3)
 
 	// check accumulations
 	acc := s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
-		Denom:    "stake",
+		Denom:    "nuah",
 		Duration: 0,
 	})
 	s.Require().Equal(int64(110), acc.Int64())
 	acc = s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
-		Denom:    "stake",
+		Denom:    "nuah",
 		Duration: time.Second * 1,
 	})
 	s.Require().Equal(int64(110), acc.Int64())
 	acc = s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
-		Denom:    "stake",
+		Denom:    "nuah",
 		Duration: time.Second * 2,
 	})
 	s.Require().Equal(int64(80), acc.Int64())
 	acc = s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
-		Denom:    "stake",
+		Denom:    "nuah",
 		Duration: time.Second * 3,
 	})
 	s.Require().Equal(int64(30), acc.Int64())
 	acc = s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
-		Denom:    "stake",
+		Denom:    "nuah",
 		Duration: time.Second * 4,
 	})
 	s.Require().Equal(int64(0), acc.Int64())
@@ -1237,21 +1237,21 @@ func (s *KeeperTestSuite) TestSlashTokensFromLockByID() {
 	addr := sdk.AccAddress([]byte("addr1---------------"))
 
 	// 1 * time.Second: 10
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr, coins, time.Second)
 
 	// check accumulations
 	acc := s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
-		Denom:    "stake",
+		Denom:    "nuah",
 		Duration: time.Second,
 	})
 	s.Require().Equal(int64(10), acc.Int64())
 
-	_, err = s.App.LockupKeeper.SlashTokensFromLockByID(s.Ctx, 1, sdk.Coins{sdk.NewInt64Coin("stake", 1)})
+	_, err = s.App.LockupKeeper.SlashTokensFromLockByID(s.Ctx, 1, sdk.Coins{sdk.NewInt64Coin("nuah", 1)})
 	s.Require().NoError(err)
 
 	acc = s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
-		Denom:    "stake",
+		Denom:    "nuah",
 		Duration: time.Second,
 	})
 	s.Require().Equal(int64(9), acc.Int64())
@@ -1260,7 +1260,7 @@ func (s *KeeperTestSuite) TestSlashTokensFromLockByID() {
 	s.Require().NoError(err)
 	s.Require().Equal(lock.Coins.String(), "9stake")
 
-	_, err = s.App.LockupKeeper.SlashTokensFromLockByID(s.Ctx, 1, sdk.Coins{sdk.NewInt64Coin("stake", 11)})
+	_, err = s.App.LockupKeeper.SlashTokensFromLockByID(s.Ctx, 1, sdk.Coins{sdk.NewInt64Coin("nuah", 11)})
 	s.Require().Error(err)
 
 	_, err = s.App.LockupKeeper.SlashTokensFromLockByID(s.Ctx, 1, sdk.Coins{sdk.NewInt64Coin("stake1", 1)})
@@ -1404,12 +1404,12 @@ func (s *KeeperTestSuite) TestEditLockup() {
 	addr := sdk.AccAddress([]byte("addr1---------------"))
 
 	// 1 * time.Second: 10
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr, coins, time.Second)
 
 	// check accumulations
 	acc := s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
-		Denom:    "stake",
+		Denom:    "nuah",
 		Duration: time.Second,
 	})
 	s.Require().Equal(int64(10), acc.Int64())
@@ -1433,25 +1433,25 @@ func (s *KeeperTestSuite) TestEditLockup() {
 	s.Require().Equal(uint64(1), lock.ID)
 	s.Require().Equal(coins, lock.Coins)
 
-	locks = s.App.LockupKeeper.GetLocksLongerThanDurationDenom(s.Ctx, "stake", time.Second)
+	locks = s.App.LockupKeeper.GetLocksLongerThanDurationDenom(s.Ctx, "nuah", time.Second)
 	s.Require().Equal(len(locks), 1)
 
-	locks = s.App.LockupKeeper.GetLocksLongerThanDurationDenom(s.Ctx, "stake", time.Second*2)
+	locks = s.App.LockupKeeper.GetLocksLongerThanDurationDenom(s.Ctx, "nuah", time.Second*2)
 	s.Require().Equal(len(locks), 1)
 
 	// check accumulations
 	acc = s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
-		Denom:    "stake",
+		Denom:    "nuah",
 		Duration: time.Second,
 	})
 	s.Require().Equal(int64(10), acc.Int64())
 	acc = s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
-		Denom:    "stake",
+		Denom:    "nuah",
 		Duration: time.Second * 2,
 	})
 	s.Require().Equal(int64(10), acc.Int64())
 	acc = s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
-		Denom:    "stake",
+		Denom:    "nuah",
 		Duration: time.Second * 3,
 	})
 	s.Require().Equal(int64(0), acc.Int64())
@@ -1478,7 +1478,7 @@ func (s *KeeperTestSuite) TestForceUnlock() {
 	for _, tc := range testCases {
 		// set up test and create default lock
 		s.SetupTest()
-		coinsToLock := sdk.NewCoins(sdk.NewCoin("stake", osmomath.NewInt(10000000)))
+		coinsToLock := sdk.NewCoins(sdk.NewCoin("nuah", osmomath.NewInt(10000000)))
 		s.FundAcc(addr1, sdk.NewCoins(coinsToLock...))
 		lock, err := s.App.LockupKeeper.CreateLock(s.Ctx, addr1, coinsToLock, time.Minute)
 		s.Require().NoError(err)
@@ -1519,9 +1519,9 @@ func (s *KeeperTestSuite) TestForceUnlock() {
 func (s *KeeperTestSuite) TestPartialForceUnlock() {
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
 
-	defaultDenomToLock := "stake"
+	defaultDenomToLock := "nuah"
 	defaultAmountToLock := osmomath.NewInt(10000000)
-	coinsToLock := sdk.NewCoins(sdk.NewCoin("stake", defaultAmountToLock))
+	coinsToLock := sdk.NewCoins(sdk.NewCoin("nuah", defaultAmountToLock))
 
 	testCases := []struct {
 		name               string
@@ -1564,7 +1564,7 @@ func (s *KeeperTestSuite) TestPartialForceUnlock() {
 			s.Require().NoError(err)
 
 			// check balance
-			balanceAfterForceUnlock := s.App.BankKeeper.GetBalance(s.Ctx, addr1, "stake")
+			balanceAfterForceUnlock := s.App.BankKeeper.GetBalance(s.Ctx, addr1, "nuah")
 
 			if tc.coinsToForceUnlock.Empty() {
 				tc.coinsToForceUnlock = coinsToLock
@@ -1574,7 +1574,7 @@ func (s *KeeperTestSuite) TestPartialForceUnlock() {
 			s.Require().Error(err)
 
 			// check balance
-			balanceAfterForceUnlock := s.App.BankKeeper.GetBalance(s.Ctx, addr1, "stake")
+			balanceAfterForceUnlock := s.App.BankKeeper.GetBalance(s.Ctx, addr1, "nuah")
 			s.Require().Equal(osmomath.NewInt(0), balanceAfterForceUnlock.Amount)
 		}
 	}

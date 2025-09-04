@@ -270,7 +270,7 @@ func (s *KeeperTestSuite) SetupLockAndGauge(isPerpetual bool) (sdk.AccAddress, u
 	s.LockTokens(lockOwner, sdk.Coins{sdk.NewInt64Coin("lptoken", 10)}, time.Second)
 
 	// create gauge
-	gaugeID, _, gaugeCoins, startTime := s.SetupNewGauge(isPerpetual, sdk.Coins{sdk.NewInt64Coin("stake", 10)})
+	gaugeID, _, gaugeCoins, startTime := s.SetupNewGauge(isPerpetual, sdk.Coins{sdk.NewInt64Coin("nuah", 10)})
 
 	return lockOwner, gaugeID, gaugeCoins, startTime
 }
