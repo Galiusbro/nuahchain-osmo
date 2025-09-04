@@ -28,20 +28,20 @@ func (s *KeeperTestSuite) TestMsgLockTokens() {
 		{
 			name: "creation of lock via lockTokens",
 			param: param{
-				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("stake", 10)},       // setup wallet
+				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("nuah", 10)},        // setup wallet
 				lockOwner:           sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:            time.Second,
-				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			expectPass: true,
 		},
 		{
 			name: "locking more coins than are in the address",
 			param: param{
-				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("stake", 20)},       // setup wallet
+				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("nuah", 20)},        // setup wallet
 				lockOwner:           sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:            time.Second,
-				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			expectPass: false,
 		},
@@ -70,7 +70,7 @@ func (s *KeeperTestSuite) TestMsgLockTokens() {
 			// check accumulation store is correctly updated
 			accum := s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
 				LockQueryType: types.ByDuration,
-				Denom:         "stake",
+				Denom:         "nuah",
 				Duration:      test.param.duration,
 			})
 			s.Require().Equal(accum.String(), "10")
@@ -90,7 +90,7 @@ func (s *KeeperTestSuite) TestMsgLockTokens() {
 			// check accumulation store is correctly updated
 			accum = s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
 				LockQueryType: types.ByDuration,
-				Denom:         "stake",
+				Denom:         "nuah",
 				Duration:      test.param.duration,
 			})
 			s.Require().Equal(accum.String(), "20")
@@ -120,24 +120,24 @@ func (s *KeeperTestSuite) TestMsgBeginUnlocking() {
 		{
 			name: "unlock full amount of tokens via begin unlock",
 			param: param{
-				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("stake", 10)}, // setup wallet
+				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("nuah", 10)}, // setup wallet
 				isSyntheticLockup:   false,
-				coinsToUnlock:       sdk.Coins{sdk.NewInt64Coin("stake", 10)},       // setup wallet
+				coinsToUnlock:       sdk.Coins{sdk.NewInt64Coin("nuah", 10)},        // setup wallet
 				lockOwner:           sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:            time.Second,
-				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			expectPass: true,
 		},
 		{
 			name: "unlock partial amount of tokens via begin unlock",
 			param: param{
-				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("stake", 10)}, // setup wallet
+				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("nuah", 10)}, // setup wallet
 				isSyntheticLockup:   false,
-				coinsToUnlock:       sdk.Coins{sdk.NewInt64Coin("stake", 5)},        // setup wallet
+				coinsToUnlock:       sdk.Coins{sdk.NewInt64Coin("nuah", 5)},         // setup wallet
 				lockOwner:           sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:            time.Second,
-				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			isPartial:  true,
 			expectPass: true,
@@ -145,24 +145,24 @@ func (s *KeeperTestSuite) TestMsgBeginUnlocking() {
 		{
 			name: "unlock zero amount of tokens via begin unlock",
 			param: param{
-				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("stake", 10)}, // setup wallet
+				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("nuah", 10)}, // setup wallet
 				isSyntheticLockup:   false,
 				coinsToUnlock:       sdk.Coins{},                                    // setup wallet
 				lockOwner:           sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:            time.Second,
-				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			expectPass: true,
 		},
 		{
 			name: "unlock partial amount of tokens via begin unlock for lockup with synthetic versions",
 			param: param{
-				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("stake", 10)}, // setup wallet
+				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("nuah", 10)}, // setup wallet
 				isSyntheticLockup:   true,
-				coinsToUnlock:       sdk.Coins{sdk.NewInt64Coin("stake", 5)},        // setup wallet
+				coinsToUnlock:       sdk.Coins{sdk.NewInt64Coin("nuah", 5)},         // setup wallet
 				lockOwner:           sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:            time.Second,
-				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			expectPass: false,
 			isPartial:  true,
@@ -219,22 +219,22 @@ func (s *KeeperTestSuite) TestMsgBeginUnlockingAll() {
 		{
 			name: "unlock all lockups",
 			param: param{
-				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("stake", 10)}, // setup wallet
+				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("nuah", 10)}, // setup wallet
 				isSyntheticLockup:   false,
 				lockOwner:           sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:            time.Second,
-				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			expectPass: true,
 		},
 		{
 			name: "unlock all when synthetic versions exists",
 			param: param{
-				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("stake", 10)}, // setup wallet
+				coinsToLock:         sdk.Coins{sdk.NewInt64Coin("nuah", 10)}, // setup wallet
 				isSyntheticLockup:   true,
 				lockOwner:           sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:            time.Second,
-				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("stake", 10)},
+				coinsInOwnerAddress: sdk.Coins{sdk.NewInt64Coin("nuah", 10)},
 			},
 			expectPass: false,
 		},
@@ -282,7 +282,7 @@ func (s *KeeperTestSuite) TestMsgEditLockup() {
 		{
 			name: "edit lockups by duration",
 			param: param{
-				coinsToLock:       sdk.Coins{sdk.NewInt64Coin("stake", 10)}, // setup wallet
+				coinsToLock:       sdk.Coins{sdk.NewInt64Coin("nuah", 10)}, // setup wallet
 				isSyntheticLockup: false,
 				lockOwner:         sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:          time.Second,
@@ -293,7 +293,7 @@ func (s *KeeperTestSuite) TestMsgEditLockup() {
 		{
 			name: "edit lockups by lesser duration",
 			param: param{
-				coinsToLock:       sdk.Coins{sdk.NewInt64Coin("stake", 10)}, // setup wallet
+				coinsToLock:       sdk.Coins{sdk.NewInt64Coin("nuah", 10)}, // setup wallet
 				isSyntheticLockup: false,
 				lockOwner:         sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:          time.Second,
@@ -304,7 +304,7 @@ func (s *KeeperTestSuite) TestMsgEditLockup() {
 		{
 			name: "disallow edit when synthetic lockup exists",
 			param: param{
-				coinsToLock:       sdk.Coins{sdk.NewInt64Coin("stake", 10)}, // setup wallet
+				coinsToLock:       sdk.Coins{sdk.NewInt64Coin("nuah", 10)}, // setup wallet
 				isSyntheticLockup: true,
 				lockOwner:         sdk.AccAddress([]byte("addr1---------------")), // setup wallet
 				duration:          time.Second,
@@ -421,7 +421,7 @@ func (s *KeeperTestSuite) TestMsgForceUnlock() {
 		s.App.LockupKeeper.SetParams(s.Ctx, test.forceUnlockAllowedAddress)
 
 		// prepare pool for superfluid staking cases
-		poolId := s.PrepareBalancerPoolWithCoins(sdk.NewCoin("stake", osmomath.NewInt(1000000000000)), sdk.NewCoin("foo", osmomath.NewInt(5000)))
+		poolId := s.PrepareBalancerPoolWithCoins(sdk.NewCoin("nuah", osmomath.NewInt(1000000000000)), sdk.NewCoin("foo", osmomath.NewInt(5000)))
 
 		// lock tokens
 		msgServer := keeper.NewMsgServerImpl(s.App.LockupKeeper)

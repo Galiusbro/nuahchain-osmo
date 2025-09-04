@@ -28,7 +28,7 @@ func (s *KeeperTestSuite) SetupTest() {
 	lockableDurations := s.App.IncentivesKeeper.GetLockableDurations(s.Ctx)
 	lockableDurations = append(lockableDurations, 2*time.Second)
 	s.App.IncentivesKeeper.SetLockableDurations(s.Ctx, lockableDurations)
-	s.App.IncentivesKeeper.SetParam(s.Ctx, incentivetypes.KeyMinValueForDistr, sdk.NewCoin("stake", osmomath.NewInt(1)))
+	s.App.IncentivesKeeper.SetParam(s.Ctx, incentivetypes.KeyMinValueForDistr, sdk.NewCoin("nuah", osmomath.NewInt(1)))
 }
 
 func TestKeeperTestSuite(t *testing.T) {

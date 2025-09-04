@@ -3,7 +3,7 @@
 import subprocess
 import re
 
-denom0 = "stake"
+denom0 = "nuah"
 denom1 = "uosmo"
 tick_spacing = "1000"
 spread_factor = "0.001"

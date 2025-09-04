@@ -34,7 +34,7 @@ func (s *KeeperTestSuite) TestModuleBalance() {
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// final check
@@ -54,7 +54,7 @@ func (s *KeeperTestSuite) TestModuleLockedAmount() {
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 	s.BeginUnlocking(addr1)
 
@@ -89,7 +89,7 @@ func (s *KeeperTestSuite) TestAccountUnlockableCoins() {
 	s.Require().Equal(res.Coins, sdk.Coins{})
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// check before start unlocking
@@ -130,7 +130,7 @@ func (s *KeeperTestSuite) TestAccountUnlockingCoins() {
 	s.Require().Equal(res.Coins, sdk.Coins{})
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// check before start unlocking
@@ -143,7 +143,7 @@ func (s *KeeperTestSuite) TestAccountUnlockingCoins() {
 	// check at unlockTime - 1s
 	res, err = s.querier.AccountUnlockingCoins(s.Ctx, &types.AccountUnlockingCoinsRequest{Owner: addr1.String()})
 	s.Require().NoError(err)
-	s.Require().Equal(res.Coins, sdk.Coins{sdk.NewInt64Coin("stake", 10)})
+	s.Require().Equal(res.Coins, sdk.Coins{sdk.NewInt64Coin("nuah", 10)})
 
 	// check after 1 second = unlockTime
 	now := s.Ctx.BlockTime()
@@ -171,7 +171,7 @@ func (s *KeeperTestSuite) TestAccountLockedCoins() {
 	s.Require().Equal(res.Coins, sdk.Coins{})
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 	s.BeginUnlocking(addr1)
 
@@ -207,7 +207,7 @@ func (s *KeeperTestSuite) TestAccountLockedPastTime() {
 	s.Require().Len(res.Locks, 0)
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 	s.BeginUnlocking(addr1)
 
@@ -242,7 +242,7 @@ func (s *KeeperTestSuite) TestAccountLockedPastTimeNotUnlockingOnly() {
 	s.Require().Len(res.Locks, 0)
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// check when not start unlocking
@@ -274,7 +274,7 @@ func (s *KeeperTestSuite) TestAccountUnlockedBeforeTime() {
 	s.Require().Len(res.Locks, 0)
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 	s.BeginUnlocking(addr1)
 
@@ -300,21 +300,21 @@ func (s *KeeperTestSuite) TestAccountLockedPastTimeDenom() {
 	now := s.Ctx.BlockTime()
 
 	// empty address locks by denom check
-	_, err := s.querier.AccountLockedPastTimeDenom(s.Ctx, &types.AccountLockedPastTimeDenomRequest{Owner: "", Denom: "stake", Timestamp: now})
+	_, err := s.querier.AccountLockedPastTimeDenom(s.Ctx, &types.AccountLockedPastTimeDenomRequest{Owner: "", Denom: "nuah", Timestamp: now})
 	s.Require().Error(err)
 
 	// initial check
-	res, err := s.querier.AccountLockedPastTimeDenom(s.Ctx, &types.AccountLockedPastTimeDenomRequest{Owner: addr1.String(), Denom: "stake", Timestamp: now})
+	res, err := s.querier.AccountLockedPastTimeDenom(s.Ctx, &types.AccountLockedPastTimeDenomRequest{Owner: addr1.String(), Denom: "nuah", Timestamp: now})
 	s.Require().NoError(err)
 	s.Require().Len(res.Locks, 0)
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 	s.BeginUnlocking(addr1)
 
 	// check = unlockTime - 1s
-	res, err = s.querier.AccountLockedPastTimeDenom(s.Ctx, &types.AccountLockedPastTimeDenomRequest{Owner: addr1.String(), Denom: "stake", Timestamp: now})
+	res, err = s.querier.AccountLockedPastTimeDenom(s.Ctx, &types.AccountLockedPastTimeDenomRequest{Owner: addr1.String(), Denom: "nuah", Timestamp: now})
 	s.Require().NoError(err)
 	s.Require().Len(res.Locks, 1)
 
@@ -324,12 +324,12 @@ func (s *KeeperTestSuite) TestAccountLockedPastTimeDenom() {
 	s.Require().Len(res.Locks, 0)
 
 	// account locks by denom after 1 second = unlockTime
-	res, err = s.querier.AccountLockedPastTimeDenom(s.Ctx, &types.AccountLockedPastTimeDenomRequest{Owner: addr1.String(), Denom: "stake", Timestamp: now.Add(time.Second)})
+	res, err = s.querier.AccountLockedPastTimeDenom(s.Ctx, &types.AccountLockedPastTimeDenomRequest{Owner: addr1.String(), Denom: "nuah", Timestamp: now.Add(time.Second)})
 	s.Require().NoError(err)
 	s.Require().Len(res.Locks, 0)
 
 	// account locks by denom after 2 second = unlockTime + 1s
-	res, err = s.querier.AccountLockedPastTimeDenom(s.Ctx, &types.AccountLockedPastTimeDenomRequest{Owner: addr1.String(), Denom: "stake", Timestamp: now.Add(2 * time.Second)})
+	res, err = s.querier.AccountLockedPastTimeDenom(s.Ctx, &types.AccountLockedPastTimeDenomRequest{Owner: addr1.String(), Denom: "nuah", Timestamp: now.Add(2 * time.Second)})
 	s.Require().NoError(err)
 	s.Require().Len(res.Locks, 0)
 
@@ -348,7 +348,7 @@ func (s *KeeperTestSuite) TestLockedByID() {
 	s.Require().Error(err)
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// lock by available available id check
@@ -368,7 +368,7 @@ func (s *KeeperTestSuite) TestLockRewardReceiver() {
 	addr2 := sdk.AccAddress([]byte("addr2---------------"))
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	res, err := s.querier.LockRewardReceiver(s.Ctx, &types.LockRewardReceiverRequest{LockId: 1})
@@ -392,7 +392,7 @@ func (s *KeeperTestSuite) TestNextLockID() {
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// lock by available available id check
@@ -401,9 +401,9 @@ func (s *KeeperTestSuite) TestNextLockID() {
 	s.Require().Equal(res.LockId, uint64(2))
 
 	// create 2 more locks
-	coins = sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins = sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
-	coins = sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins = sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 	res, err = s.querier.NextLockID(s.Ctx, &types.NextLockIDRequest{})
 	s.Require().NoError(err)
@@ -424,7 +424,7 @@ func (s *KeeperTestSuite) TestAccountLockedLongerDuration() {
 	s.Require().Len(res.Locks, 0)
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 	s.BeginUnlocking(addr1)
 
@@ -458,7 +458,7 @@ func (s *KeeperTestSuite) TestAccountLockedLongerDurationNotUnlockingOnly() {
 	s.Require().Len(res.Locks, 0)
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// account locks longer than duration check before start unlocking, duration = 1s
@@ -479,26 +479,26 @@ func (s *KeeperTestSuite) TestAccountLockedLongerDurationDenom() {
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
 
 	// empty address locks longer than duration by denom check
-	_, err := s.querier.AccountLockedLongerDurationDenom(s.Ctx, &types.AccountLockedLongerDurationDenomRequest{Owner: "", Duration: time.Second, Denom: "stake"})
+	_, err := s.querier.AccountLockedLongerDurationDenom(s.Ctx, &types.AccountLockedLongerDurationDenomRequest{Owner: "", Duration: time.Second, Denom: "nuah"})
 	s.Require().Error(err)
 
 	// initial check
-	res, err := s.querier.AccountLockedLongerDurationDenom(s.Ctx, &types.AccountLockedLongerDurationDenomRequest{Owner: addr1.String(), Duration: time.Second, Denom: "stake"})
+	res, err := s.querier.AccountLockedLongerDurationDenom(s.Ctx, &types.AccountLockedLongerDurationDenomRequest{Owner: addr1.String(), Duration: time.Second, Denom: "nuah"})
 	s.Require().NoError(err)
 	s.Require().Len(res.Locks, 0)
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 	s.BeginUnlocking(addr1)
 
 	// account locks longer than duration check by denom, duration = 0s
-	res, err = s.querier.AccountLockedLongerDurationDenom(s.Ctx, &types.AccountLockedLongerDurationDenomRequest{Owner: addr1.String(), Duration: 0, Denom: "stake"})
+	res, err = s.querier.AccountLockedLongerDurationDenom(s.Ctx, &types.AccountLockedLongerDurationDenomRequest{Owner: addr1.String(), Duration: 0, Denom: "nuah"})
 	s.Require().NoError(err)
 	s.Require().Len(res.Locks, 1)
 
 	// account locks longer than duration check by denom, duration = 1s
-	res, err = s.querier.AccountLockedLongerDurationDenom(s.Ctx, &types.AccountLockedLongerDurationDenomRequest{Owner: addr1.String(), Duration: time.Second, Denom: "stake"})
+	res, err = s.querier.AccountLockedLongerDurationDenom(s.Ctx, &types.AccountLockedLongerDurationDenomRequest{Owner: addr1.String(), Duration: time.Second, Denom: "nuah"})
 	s.Require().NoError(err)
 	s.Require().Len(res.Locks, 1)
 
@@ -508,7 +508,7 @@ func (s *KeeperTestSuite) TestAccountLockedLongerDurationDenom() {
 	s.Require().Len(res.Locks, 0)
 
 	// account locks longer than duration check by denom, duration = 2s
-	res, err = s.querier.AccountLockedLongerDurationDenom(s.Ctx, &types.AccountLockedLongerDurationDenomRequest{Owner: addr1.String(), Duration: 2 * time.Second, Denom: "stake"})
+	res, err = s.querier.AccountLockedLongerDurationDenom(s.Ctx, &types.AccountLockedLongerDurationDenomRequest{Owner: addr1.String(), Duration: 2 * time.Second, Denom: "nuah"})
 	s.Require().NoError(err)
 	s.Require().Len(res.Locks, 0)
 
@@ -526,13 +526,13 @@ func (s *KeeperTestSuite) TestLockedDenom() {
 		duration, _ := time.ParseDuration(durationStr)
 		res, err := s.querier.LockedDenom(
 			s.Ctx,
-			&types.LockedDenomRequest{Denom: "stake", Duration: duration})
+			&types.LockedDenomRequest{Denom: "nuah", Duration: duration})
 		s.Require().NoError(err)
 		s.Require().Equal(res.Amount, osmomath.NewInt(expectedAmount))
 	}
 
 	// lock coins
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Hour)
 
 	// test with single lockup
@@ -544,7 +544,7 @@ func (s *KeeperTestSuite) TestLockedDenom() {
 	// adds different account and lockup for testing
 	addr2 := sdk.AccAddress([]byte("addr2---------------"))
 
-	coins = sdk.Coins{sdk.NewInt64Coin("stake", 20)}
+	coins = sdk.Coins{sdk.NewInt64Coin("nuah", 20)}
 	s.LockTokens(addr2, coins, time.Hour*2)
 
 	testTotalLockedDuration("30m", 30)

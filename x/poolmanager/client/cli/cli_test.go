@@ -82,7 +82,7 @@ func TestNewSwapExactAmountOutCmd(t *testing.T) {
 				Sender:           testAddresses[0].String(),
 				Routes:           []types.SwapAmountOutRoute{{PoolId: 1, TokenInDenom: "node0token"}},
 				TokenInMaxAmount: osmomath.NewIntFromUint64(20),
-				TokenOut:         sdk.NewInt64Coin("stake", 10),
+				TokenOut:         sdk.NewInt64Coin("nuah", 10),
 			},
 		},
 	}
@@ -179,7 +179,7 @@ func TestNewSwapExactAmountInCmd(t *testing.T) {
 			ExpectedMsg: &types.MsgSwapExactAmountIn{
 				Sender:            testAddresses[0].String(),
 				Routes:            []types.SwapAmountInRoute{{PoolId: 1, TokenOutDenom: "node0token"}},
-				TokenIn:           sdk.NewInt64Coin("stake", 10),
+				TokenIn:           sdk.NewInt64Coin("nuah", 10),
 				TokenOutMinAmount: osmomath.NewIntFromUint64(3),
 			},
 		},
@@ -559,7 +559,7 @@ func TestEstimateTradeBasedOnPriceImpact(t *testing.T) {
 					Denom:  "node0token",
 					Amount: osmomath.NewInt(100),
 				},
-				ToCoinDenom:    "stake",
+				ToCoinDenom:    "nuah",
 				PoolId:         1,
 				MaxPriceImpact: osmomath.MustNewDecFromStr("0.01"), // equivalent to 0.01
 				ExternalPrice:  osmomath.MustNewDecFromStr("0.02"), // equivalent to 0.02

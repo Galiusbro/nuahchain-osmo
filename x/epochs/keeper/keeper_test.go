@@ -36,7 +36,7 @@ func (s *KeeperTestSuite) SetupTest() {
 		GRPCQueryRouter: queryRouter,
 		Ctx:             s.Ctx,
 	}
-	interfaceRegistry := cdcutil.CodecOptions{AccAddressPrefix: "osmo", ValAddressPrefix: "nuahvaloper"}.NewInterfaceRegistry()
+	interfaceRegistry := cdcutil.CodecOptions{AccAddressPrefix: "nuah", ValAddressPrefix: "nuahvaloper"}.NewInterfaceRegistry()
 	grpcQueryService.SetInterfaceRegistry(interfaceRegistry)
 	s.queryClient = types.NewQueryClient(grpcQueryService)
 

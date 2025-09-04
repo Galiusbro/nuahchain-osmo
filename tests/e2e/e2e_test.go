@@ -299,7 +299,7 @@ func (s *IntegrationTestSuite) StableSwap() {
 	sender := chainABNode.GetWallet(initialization.ValidatorWalletName)
 
 	const (
-		denomA = "stake"
+		denomA = "nuah"
 		denomB = appparams.BaseCoinUnit
 
 		minAmountOut = "1"
@@ -700,7 +700,7 @@ func (s *IntegrationTestSuite) ArithmeticTWAP() {
 		poolFile   = "nativeDenomThreeAssetPool.json"
 		walletName = "arithmetic-twap-wallet"
 
-		denomA = "stake"
+		denomA = "nuah"
 		denomB = "uion"
 		denomC = appparams.BaseCoinUnit
 
@@ -930,7 +930,7 @@ func (s *IntegrationTestSuite) GeometricTWAP() {
 		walletName = "geometric-twap-wallet"
 
 		denomA = appparams.BaseCoinUnit // 1_000_000 uosmo
-		denomB = "stake"                // 2_000_000 stake
+		denomB = "nuah"                 // 2_000_000 stake
 
 		minAmountOut = "1"
 	)

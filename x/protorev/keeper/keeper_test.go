@@ -112,7 +112,7 @@ func (s *KeeperTestSuite) SetupPoolsTest() {
 		sdk.NewCoin("gamm/pool/1", osmomath.NewInt(9000000000000000000)),
 		sdk.NewCoin(apptesting.DefaultTransmuterDenomA, osmomath.NewInt(9000000000000000000)),
 		sdk.NewCoin(apptesting.DefaultTransmuterDenomB, osmomath.NewInt(9000000000000000000)),
-		sdk.NewCoin("stake", osmomath.NewInt(9000000000000000000)),
+		sdk.NewCoin("nuah", osmomath.NewInt(9000000000000000000)),
 	)
 	s.fundAllAccountsWith()
 
@@ -975,7 +975,7 @@ func (s *KeeperTestSuite) setUpPools() {
 	s.createGAMMPool(
 		[]balancer.PoolAsset{
 			{
-				Token:  sdk.NewCoin("stake", osmomath.NewInt(10000)),
+				Token:  sdk.NewCoin("nuah", osmomath.NewInt(10000)),
 				Weight: osmomath.NewInt(1),
 			},
 			{
@@ -992,7 +992,7 @@ func (s *KeeperTestSuite) setUpPools() {
 	s.createGAMMPool(
 		[]balancer.PoolAsset{
 			{
-				Token:  sdk.NewCoin("stake", osmomath.NewInt(100000000)),
+				Token:  sdk.NewCoin("nuah", osmomath.NewInt(100000000)),
 				Weight: osmomath.NewInt(1),
 			},
 			{

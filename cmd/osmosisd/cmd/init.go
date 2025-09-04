@@ -18,7 +18,6 @@ import (
 	tmcfg "github.com/cometbft/cometbft/config"
 	"github.com/cometbft/cometbft/libs/cli"
 	tmos "github.com/cometbft/cometbft/libs/os"
-	tmrand "github.com/cometbft/cometbft/libs/rand"
 	cmttypes "github.com/cometbft/cometbft/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -159,9 +158,9 @@ func InitCmd(mbm module.BasicManager, defaultNodeHome string) *cobra.Command {
 				err := downloadGenesis(config)
 				if err != nil {
 					// TODO: Maybe we should just fail in this case?
-					fmt.Println("Failed to download genesis file, using a random chain ID and genesis file for local testing")
+					fmt.Println("Failed to download genesis file, using nuahchain-1 chain ID and genesis file for local testing")
 					genesisFileDownloadFailed = true
-					chainID = fmt.Sprintf("test-chain-%v", tmrand.Str(6))
+					chainID = "nuahchain-1"
 				} else {
 					// Set chainID to nuahchain-1 in the case of a blank chainID
 					chainID = "nuahchain-1"

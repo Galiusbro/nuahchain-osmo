@@ -16,7 +16,7 @@ const (
 	BAR   = "bar"
 	BAZ   = "baz"
 	FOO   = "foo"
-	STAKE = "stake"
+	STAKE = "nuah"
 )
 
 var DefaultAcctFunds sdk.Coins = sdk.NewCoins(

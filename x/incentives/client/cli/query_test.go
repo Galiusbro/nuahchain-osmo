@@ -47,7 +47,7 @@ func (s *QueryTestSuite) TestQueriesNeverAlterState() {
 		{
 			"Query active gauges per denom",
 			"/osmosis.incentives.Query/ActiveGaugesPerDenom",
-			&types.ActiveGaugesPerDenomRequest{Denom: "stake"},
+			&types.ActiveGaugesPerDenomRequest{Denom: "nuah"},
 			&types.ActiveGaugesPerDenomResponse{},
 		},
 		{
@@ -89,7 +89,7 @@ func (s *QueryTestSuite) TestQueriesNeverAlterState() {
 		{
 			"Query upcoming gauges",
 			"/osmosis.incentives.Query/UpcomingGaugesPerDenom",
-			&types.UpcomingGaugesPerDenomRequest{Denom: "stake"},
+			&types.UpcomingGaugesPerDenomRequest{Denom: "nuah"},
 			&types.UpcomingGaugesPerDenomResponse{},
 		},
 	}

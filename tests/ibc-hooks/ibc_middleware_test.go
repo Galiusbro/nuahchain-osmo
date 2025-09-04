@@ -786,7 +786,7 @@ func (suite *HooksTestSuite) SetupCrosschainSwaps(chainName Chain, setupForwardi
 	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(NUAHApp.WasmKeeper)
 	ctx := chain.GetContext()
 
-	msg := `{"set_route":{"input_denom":"token0","output_denom":"token1","pool_route":[{"pool_id":"1","token_out_denom":"stake"},{"pool_id":"2","token_out_denom":"token1"}]}}`
+	msg := `{"set_route":{"input_denom":"token0","output_denom":"token1","pool_route":[{"pool_id":"1","token_out_denom":"nuah"},{"pool_id":"2","token_out_denom":"token1"}]}}`
 	_, err = contractKeeper.Execute(ctx, swaprouterAddr, owner, []byte(msg), sdk.NewCoins())
 	suite.Require().NoError(err)
 

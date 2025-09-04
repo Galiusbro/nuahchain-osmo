@@ -15,7 +15,7 @@ func (s *KeeperTestSuite) TestSyntheticLockupCreation() {
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	for i := 0; i < numLocks; i++ {
 		s.LockTokens(addr1, coins, time.Second)
 	}
@@ -54,7 +54,7 @@ func (s *KeeperTestSuite) TestSyntheticLockupCreateGetDeleteAccumulation() {
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	expectedLocks := []types.PeriodLock{
@@ -75,23 +75,23 @@ func (s *KeeperTestSuite) TestSyntheticLockupCreateGetDeleteAccumulation() {
 	// check accumulation store is correctly updated
 	accum := s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
 		LockQueryType: types.ByDuration,
-		Denom:         "stake",
+		Denom:         "nuah",
 		Duration:      time.Second,
 	})
 	s.Require().Equal(accum.String(), "10")
 
 	// check queries for native denom before creating synthetic lockup
-	locks = s.App.LockupKeeper.GetAccountLockedPastTimeDenom(s.Ctx, addr1, "stake", s.Ctx.BlockTime())
+	locks = s.App.LockupKeeper.GetAccountLockedPastTimeDenom(s.Ctx, addr1, "nuah", s.Ctx.BlockTime())
 	s.Require().Equal(locks, expectedLocks)
-	locks = s.App.LockupKeeper.GetAccountLockedDurationNotUnlockingOnly(s.Ctx, addr1, "stake", time.Second)
+	locks = s.App.LockupKeeper.GetAccountLockedDurationNotUnlockingOnly(s.Ctx, addr1, "nuah", time.Second)
 	s.Require().Equal(locks, expectedLocks)
-	locks = s.App.LockupKeeper.GetAccountLockedLongerDurationDenom(s.Ctx, addr1, "stake", time.Second)
+	locks = s.App.LockupKeeper.GetAccountLockedLongerDurationDenom(s.Ctx, addr1, "nuah", time.Second)
 	s.Require().Equal(locks, expectedLocks)
-	locks = s.App.LockupKeeper.GetLocksPastTimeDenom(s.Ctx, "stake", s.Ctx.BlockTime())
+	locks = s.App.LockupKeeper.GetLocksPastTimeDenom(s.Ctx, "nuah", s.Ctx.BlockTime())
 	s.Require().Equal(locks, expectedLocks)
-	locks = s.App.LockupKeeper.GetLocksLongerThanDurationDenom(s.Ctx, "stake", time.Second)
+	locks = s.App.LockupKeeper.GetLocksLongerThanDurationDenom(s.Ctx, "nuah", time.Second)
 	s.Require().Equal(locks, expectedLocks)
-	amount := s.App.LockupKeeper.GetLockedDenom(s.Ctx, "stake", time.Second)
+	amount := s.App.LockupKeeper.GetLockedDenom(s.Ctx, "nuah", time.Second)
 	s.Require().Equal(amount.String(), "10")
 
 	// check queries for synthetic denom before creating synthetic lockup
@@ -156,17 +156,17 @@ func (s *KeeperTestSuite) TestSyntheticLockupCreateGetDeleteAccumulation() {
 	s.Require().Equal(accum.String(), "10")
 
 	// check queries for native denom after creating synthetic lockup
-	locks = s.App.LockupKeeper.GetAccountLockedPastTimeDenom(s.Ctx, addr1, "stake", s.Ctx.BlockTime())
+	locks = s.App.LockupKeeper.GetAccountLockedPastTimeDenom(s.Ctx, addr1, "nuah", s.Ctx.BlockTime())
 	s.Require().Equal(locks, expectedLocks)
-	locks = s.App.LockupKeeper.GetAccountLockedDurationNotUnlockingOnly(s.Ctx, addr1, "stake", time.Second)
+	locks = s.App.LockupKeeper.GetAccountLockedDurationNotUnlockingOnly(s.Ctx, addr1, "nuah", time.Second)
 	s.Require().Equal(locks, expectedLocks)
-	locks = s.App.LockupKeeper.GetAccountLockedLongerDurationDenom(s.Ctx, addr1, "stake", time.Second)
+	locks = s.App.LockupKeeper.GetAccountLockedLongerDurationDenom(s.Ctx, addr1, "nuah", time.Second)
 	s.Require().Equal(locks, expectedLocks)
-	locks = s.App.LockupKeeper.GetLocksPastTimeDenom(s.Ctx, "stake", s.Ctx.BlockTime())
+	locks = s.App.LockupKeeper.GetLocksPastTimeDenom(s.Ctx, "nuah", s.Ctx.BlockTime())
 	s.Require().Equal(locks, expectedLocks)
-	locks = s.App.LockupKeeper.GetLocksLongerThanDurationDenom(s.Ctx, "stake", time.Second)
+	locks = s.App.LockupKeeper.GetLocksLongerThanDurationDenom(s.Ctx, "nuah", time.Second)
 	s.Require().Equal(locks, expectedLocks)
-	amount = s.App.LockupKeeper.GetLockedDenom(s.Ctx, "stake", time.Second)
+	amount = s.App.LockupKeeper.GetLockedDenom(s.Ctx, "nuah", time.Second)
 	s.Require().Equal(amount.String(), "10")
 
 	// check queries for synthetic denom after creating synthetic lockup
@@ -228,7 +228,7 @@ func (s *KeeperTestSuite) TestSyntheticLockupDeleteAllMaturedSyntheticLocks() {
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	for i := 0; i < numLocks; i++ {
 		s.LockTokens(addr1, coins, time.Second)
 	}
@@ -285,7 +285,7 @@ func (s *KeeperTestSuite) TestResetAllSyntheticLocks() {
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	s.LockTokens(addr1, coins, time.Second)
 
 	// check locks
@@ -329,7 +329,7 @@ func (s *KeeperTestSuite) TestResetAllSyntheticLocks() {
 
 	accum := s.App.LockupKeeper.GetPeriodLocksAccumulation(s.Ctx, types.QueryCondition{
 		LockQueryType: types.ByDuration,
-		Denom:         "stake",
+		Denom:         "nuah",
 		Duration:      time.Second,
 	})
 	s.Require().Equal(accum.String(), "10")

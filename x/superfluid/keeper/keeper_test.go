@@ -81,7 +81,7 @@ func (s *KeeperTestSuite) SetupTest() {
 	distributionParams.BonusProposerReward = osmomath.ZeroDec()
 	distributionParams.CommunityTax = osmomath.ZeroDec()
 	s.App.DistrKeeper.Params.Set(s.Ctx, distributionParams)
-	s.App.IncentivesKeeper.SetParam(s.Ctx, incentivetypes.KeyMinValueForDistr, sdk.NewCoin("stake", osmomath.NewInt(1)))
+	s.App.IncentivesKeeper.SetParam(s.Ctx, incentivetypes.KeyMinValueForDistr, sdk.NewCoin("nuah", osmomath.NewInt(1)))
 }
 
 func (s *KeeperTestSuite) SetupDefaultPool() {

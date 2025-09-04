@@ -1,42 +1,30 @@
 {
-  "cSpell.diagnosticLevel": "Hint",
-  "tabnine.experimentalAutoImports": true,
-  "go.lintOnSave": "workspace",
-  "go.lintTool": "golangci-lint",
-  "go.lintFlags": [
-    "--fast"
-  ],
-  "go.formatTool": "goimports",
-  "go.useLanguageServer": true,
-  "[go.mod]": {
+    "go.useLanguageServer": true,
+    "go.lintTool": "golangci-lint",
+    "go.lintFlags": [
+        "--fast"
+    ],
+    "go.formatTool": "goimports",
+    "go.buildTags": "",
+    "go.testFlags": [
+        "-v"
+    ],
+    "go.testTimeout": "10m",
+    "go.coverOnSingleTest": true,
+    "go.coverOnSingleTestFile": true,
+    "go.coverageDecorator": {
+        "type": "gutter",
+        "coveredHighlightColor": "rgba(64,128,64,0.5)",
+        "uncoveredHighlightColor": "rgba(128,64,64,0.25)"
+    },
+    "go.toolsManagement.autoUpdate": true,
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
-    }
-  },
-  "[go]": {
-    "editor.snippetSuggestions": "none",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
-    }
-  },
-  "gopls": {
-    "local": "github.com/osmosis-labs/osmosis"
-  },
-  "files.eol": "\n",
-  "[proto3]": {
-    "editor.defaultFormatter": "xaver.clang-format"
-  },
-  "clang-format.style": "{BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 120, AlignConsecutiveAssignments: true, AlignConsecutiveDeclarations: true, SpacesInSquareBrackets: true}",
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.autopep8"
-  },
-  "python.formatting.provider": "none",
-  "[go][go.mod]": {
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
-    }
-  },
-  "rust-analyzer.checkOnSave": false
+        "source.organizeImports": "explicit"
+    },
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false
 }

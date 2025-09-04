@@ -50,7 +50,7 @@ var (
 
 	distrToByGroup = lockuptypes.QueryCondition{LockQueryType: lockuptypes.ByGroup}
 
-	gaugeCoins = sdk.Coins{sdk.NewInt64Coin("stake", 10000)}
+	gaugeCoins = sdk.Coins{sdk.NewInt64Coin("nuah", 10000)}
 
 	gaugeOneRecord = types.InternalGaugeRecord{
 		GaugeId:          1,
@@ -101,7 +101,7 @@ func TestIncentivesExportGenesis(t *testing.T) {
 
 	// create an address and fund with coins
 	addr := sdk.AccAddress([]byte("addr1---------------"))
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 20000), sdk.NewInt64Coin(appparams.BaseCoinUnit, 10000000000)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 20000), sdk.NewInt64Coin(appparams.BaseCoinUnit, 10000000000)}
 	err := testutil.FundAccount(ctx, app.BankKeeper, addr, coins)
 	require.NoError(t, err)
 
@@ -131,7 +131,7 @@ func TestIncentivesExportGenesis(t *testing.T) {
 
 	// create a gauge of every type (byDuration, noLock, byGroup)
 	startTime := time.Now()
-	gaugeCoins := sdk.Coins{sdk.NewInt64Coin("stake", 10000)}
+	gaugeCoins := sdk.Coins{sdk.NewInt64Coin("nuah", 10000)}
 	createAllGaugeTypes(t, app, ctx, addr, gaugeCoins, startTime)
 
 	// directly modify the weights of the groups so we can see if non zero values persist

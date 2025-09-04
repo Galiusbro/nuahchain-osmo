@@ -22,7 +22,7 @@ func TestParamsMarshalUnmarshal(t *testing.T) {
 		},
 		{ // filled
 			params: &types.Params{
-				MintedDenom: "stake",
+				MintedDenom: "nuah",
 			},
 		},
 	}

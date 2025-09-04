@@ -16,7 +16,7 @@ import (
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v30/x/poolmanager/types"
 )
 
-var PoolCreationFee = sdk.NewInt64Coin("stake", 10_000_000)
+var PoolCreationFee = sdk.NewInt64Coin("nuah", 10_000_000)
 
 // RandomJoinPoolMsg pseudo-randomly selects an existing pool ID, attempts to find an account with the
 // respective underlying token denoms, and attempts to execute a join pool transaction

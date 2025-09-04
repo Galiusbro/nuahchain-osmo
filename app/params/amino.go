@@ -11,14 +11,15 @@ import (
 
 // MakeEncodingConfig creates an EncodingConfig for an amino based test configuration.
 func MakeEncodingConfig() EncodingConfig {
-	cdc := codec.New()
-	interfaceRegistry := testutil.CodecOptions{AccAddressPrefix: "osmo", ValAddressPrefix: "nuahvaloper"}.NewInterfaceRegistry()
-	marshaler := codec.NewAminoCodec(cdc)
+	amino := codec.NewLegacyAmino()
+	interfaceRegistry := testutil.CodecOptions{AccAddressPrefix: "nuah", ValAddressPrefix: "nuahvaloper"}.NewInterfaceRegistry()
+	marshaler := codec.NewProtoCodec(interfaceRegistry)
+	txCfg := tx.NewTxConfig(marshaler, tx.DefaultSignModes)
 
 	return EncodingConfig{
 		InterfaceRegistry: interfaceRegistry,
 		Marshaler:         marshaler,
-		TxConfig:          authtypes.StdTxConfig{Cdc: cdc},
-		Amino:             cdc,
+		TxConfig:          txCfg,
+		Amino:             amino,
 	}
 }

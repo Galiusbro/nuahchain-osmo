@@ -901,14 +901,14 @@ func (s *KeeperTestSuite) TestGetModuleToDistributeCoins() {
 	s.Require().Equal(coins, gaugeCoins)
 
 	// add coins to the previous gauge and check that the sum of coins yet to be distributed includes these new coins
-	addCoins := sdk.Coins{sdk.NewInt64Coin("stake", 200)}
+	addCoins := sdk.Coins{sdk.NewInt64Coin("nuah", 200)}
 	s.AddToGauge(addCoins, gaugeID)
 	coins = s.App.IncentivesKeeper.GetModuleToDistributeCoins(s.Ctx)
 	s.Require().Equal(coins, gaugeCoins.Add(addCoins...))
 
 	// create a new gauge
 	// check that the sum of coins yet to be distributed is equal to the gauge1 and gauge2 coins combined
-	_, _, gaugeCoins2, _ := s.SetupNewGauge(false, sdk.Coins{sdk.NewInt64Coin("stake", 1000)})
+	_, _, gaugeCoins2, _ := s.SetupNewGauge(false, sdk.Coins{sdk.NewInt64Coin("nuah", 1000)})
 	coins = s.App.IncentivesKeeper.GetModuleToDistributeCoins(s.Ctx)
 	s.Require().Equal(coins, gaugeCoins.Add(addCoins...).Add(gaugeCoins2...))
 
@@ -922,7 +922,7 @@ func (s *KeeperTestSuite) TestGetModuleToDistributeCoins() {
 	// distribute coins to stakers
 	distrCoins, err := s.App.IncentivesKeeper.Distribute(s.Ctx, []types.Gauge{*gauge})
 	s.Require().NoError(err)
-	s.Require().Equal(distrCoins, sdk.Coins{sdk.NewInt64Coin("stake", 105)})
+	s.Require().Equal(distrCoins, sdk.Coins{sdk.NewInt64Coin("nuah", 105)})
 
 	// check gauge changes after distribution
 	coins = s.App.IncentivesKeeper.GetModuleToDistributeCoins(s.Ctx)
@@ -954,7 +954,7 @@ func (s *KeeperTestSuite) TestGetModuleDistributedCoins() {
 	// distribute coins to stakers
 	distrCoins, err := s.App.IncentivesKeeper.Distribute(s.Ctx, []types.Gauge{*gauge})
 	s.Require().NoError(err)
-	s.Require().Equal(distrCoins, sdk.Coins{sdk.NewInt64Coin("stake", 5)})
+	s.Require().Equal(distrCoins, sdk.Coins{sdk.NewInt64Coin("nuah", 5)})
 
 	// check gauge changes after distribution
 	coins = s.App.IncentivesKeeper.GetModuleToDistributeCoins(s.Ctx)
@@ -966,7 +966,7 @@ func (s *KeeperTestSuite) TestByDurationPerpetualGaugeDistribution_NoLockNoOp() 
 	s.SetupTest()
 
 	// setup a perpetual gauge with no associated locks
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	gaugeID, _, _, startTime := s.SetupNewGauge(true, coins)
 
 	// ensure the created gauge has not completed distribution
@@ -1016,7 +1016,7 @@ func (s *KeeperTestSuite) TestByDurationNonPerpetualGaugeDistribution_NoLockNoOp
 	s.SetupTest()
 
 	// setup non-perpetual gauge with no associated locks
-	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
+	coins := sdk.Coins{sdk.NewInt64Coin("nuah", 10)}
 	gaugeID, _, _, startTime := s.SetupNewGauge(false, coins)
 
 	// ensure the created gauge has not completed distribution
@@ -1192,7 +1192,7 @@ func (s *KeeperTestSuite) TestFunctionalInternalExternalCLGauge() {
 		epochInfo = s.App.IncentivesKeeper.GetEpochInfo(s.Ctx)
 
 		requiredBalances         = sdk.NewCoins(sdk.NewCoin("eth", osmomath.NewInt(10_000_000)), sdk.NewCoin("usdc", osmomath.NewInt(10_000_000)))
-		internalGaugeCoins       = sdk.NewCoins(sdk.NewCoin("stake", osmomath.NewInt(defaultInternalGaugeValue)))                                                                                                                    // distributed full sum at epoch
+		internalGaugeCoins       = sdk.NewCoins(sdk.NewCoin("nuah", osmomath.NewInt(defaultInternalGaugeValue)))                                                                                                                     // distributed full sum at epoch
 		externalGaugeCoins       = sdk.NewCoins(sdk.NewCoin("eth", osmomath.NewInt(defaultExternalGaugeValue)), sdk.NewCoin("usdc", osmomath.NewInt(defaultExternalGaugeValue)))                                                     // distributed full sum at epoch
 		halfOfExternalGaugeCoins = sdk.NewCoins(sdk.NewCoin("eth", osmomath.NewInt(defaultExternalGaugeValue/numEpochsPaidOverGaugeTwo)), sdk.NewCoin("usdc", osmomath.NewInt(defaultExternalGaugeValue/numEpochsPaidOverGaugeTwo))) // distributed at each epoch for non-perp gauge with numEpoch = 2
 	)

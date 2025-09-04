@@ -455,7 +455,7 @@ func (suite *MiddlewareTestSuite) fullSendTest(native bool) map[string]string {
 
 // Test rate limiting on sends
 func (suite *MiddlewareTestSuite) TestSendTransferWithRateLimitingNative() {
-	// Sends denom=stake from A->B. Rate limit receives "stake" in the packet. Nothing to do in the contract
+	// Sends denom=stake from A->B. Rate limit receives "nuah" in the packet. Nothing to do in the contract
 	suite.fullSendTest(true)
 }
 
@@ -591,14 +591,14 @@ func (suite *MiddlewareTestSuite) fullRecvTest(native bool) sdk.AccAddress {
 
 func (suite *MiddlewareTestSuite) TestRecvTransferWithRateLimitingNative() {
 	// Sends denom=stake from B->A.
-	// Rate limit receives "stake" in the packet and should wrap it before calculating the value
+	// Rate limit receives "nuah" in the packet and should wrap it before calculating the value
 	// types.ReceiverChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom) should return false => Wrap the token
 	suite.fullRecvTest(true)
 }
 
 func (suite *MiddlewareTestSuite) TestRecvTransferWithRateLimitingNonNative() {
 	// Sends denom=ibc/C053D637CCA2A2BA030E2C5EE1B28A16F71CCB0E45E8BE52766DC1B241B77878 from B->A.
-	// Rate limit receives "transfer/channel-0/stake" in the packet and should turn it into "stake"
+	// Rate limit receives "transfer/channel-0/stake" in the packet and should turn it into "nuah"
 	// types.ReceiverChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom) should return true => unprefix. If unprefixed is not local, hash.
 	suite.fullRecvTest(false)
 }

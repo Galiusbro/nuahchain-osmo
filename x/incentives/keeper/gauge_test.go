@@ -134,9 +134,9 @@ func (s *KeeperTestSuite) TestGaugeOperations() {
 
 		// setup lock and gauge
 		lockOwners := s.SetupManyLocks(tc.numLocks, defaultLiquidTokens, defaultLPTokens, time.Second)
-		gaugeID, _, coins, startTime := s.SetupNewGauge(tc.isPerpetual, sdk.Coins{sdk.NewInt64Coin("stake", 12)})
+		gaugeID, _, coins, startTime := s.SetupNewGauge(tc.isPerpetual, sdk.Coins{sdk.NewInt64Coin("nuah", 12)})
 		// evenly distributed per lock
-		expectedCoinsPerLock := sdk.Coins{sdk.NewInt64Coin("stake", 12/int64(tc.numLocks))}
+		expectedCoinsPerLock := sdk.Coins{sdk.NewInt64Coin("nuah", 12/int64(tc.numLocks))}
 		// set expected epochs
 		var expectedNumEpochsPaidOver int
 		if tc.isPerpetual {
@@ -208,8 +208,8 @@ func (s *KeeperTestSuite) TestGaugeOperations() {
 		// distribute coins to stakers
 		distrCoins, err := s.App.IncentivesKeeper.Distribute(s.Ctx, []types.Gauge{*gauge})
 		s.Require().NoError(err)
-		// We hardcoded 12 "stake" tokens when initializing gauge
-		s.Require().Equal(sdk.Coins{sdk.NewInt64Coin("stake", int64(12/expectedNumEpochsPaidOver))}, distrCoins)
+		// We hardcoded 12 "nuah" tokens when initializing gauge
+		s.Require().Equal(sdk.Coins{sdk.NewInt64Coin("nuah", int64(12/expectedNumEpochsPaidOver))}, distrCoins)
 
 		if tc.isPerpetual {
 			// distributing twice without adding more for perpetual gauge
@@ -220,7 +220,7 @@ func (s *KeeperTestSuite) TestGaugeOperations() {
 			s.Require().True(distrCoins.Empty())
 
 			// add to gauge
-			addCoins := sdk.Coins{sdk.NewInt64Coin("stake", 200)}
+			addCoins := sdk.Coins{sdk.NewInt64Coin("nuah", 200)}
 			s.AddToGauge(addCoins, gaugeID)
 
 			// distributing twice with adding more for perpetual gauge
@@ -228,10 +228,10 @@ func (s *KeeperTestSuite) TestGaugeOperations() {
 			s.Require().NoError(err)
 			distrCoins, err = s.App.IncentivesKeeper.Distribute(s.Ctx, []types.Gauge{*gauge})
 			s.Require().NoError(err)
-			s.Require().Equal(sdk.Coins{sdk.NewInt64Coin("stake", 200)}, distrCoins)
+			s.Require().Equal(sdk.Coins{sdk.NewInt64Coin("nuah", 200)}, distrCoins)
 		} else {
 			// add to gauge
-			addCoins := sdk.Coins{sdk.NewInt64Coin("stake", 200)}
+			addCoins := sdk.Coins{sdk.NewInt64Coin("nuah", 200)}
 			s.AddToGauge(addCoins, gaugeID)
 		}
 
@@ -382,7 +382,7 @@ func (s *KeeperTestSuite) TestChargeFeeIfSufficientFeeDenomBalance() {
 }
 
 func (s *KeeperTestSuite) TestAddToGaugeRewards() {
-	defaultCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 12))
+	defaultCoins := sdk.NewCoins(sdk.NewInt64Coin("nuah", 12))
 
 	// since most of the same functionality and edge cases are tested by a higher level
 	// AddToGaugeRewards down below, we only include a happy path test for the internal helper.

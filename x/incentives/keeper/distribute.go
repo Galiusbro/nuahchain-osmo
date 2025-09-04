@@ -832,7 +832,7 @@ func (k Keeper) skipSpamGaugeDistribute(ctx sdk.Context, locks []*lockuptypes.Pe
 	}
 
 	// Remove some spam gauges that are not worth distributing. (We ignore the denom stake because of tests.)
-	if remainCoins.Len() == 1 && remainCoins[0].Amount.LTE(osmomath.NewInt(100)) && remainCoins[0].Denom != "stake" {
+	if remainCoins.Len() == 1 && remainCoins[0].Amount.LTE(osmomath.NewInt(100)) && remainCoins[0].Denom != "nuah" {
 		ctx.Logger().Debug(fmt.Sprintf("gauge debug, this gauge is perceived spam, skipping %d", gauge.Id))
 		err := k.updateGaugePostDistribute(ctx, gauge, totalDistrCoins)
 		return true, totalDistrCoins, err

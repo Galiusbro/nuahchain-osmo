@@ -32,7 +32,7 @@ func (s *IntegrationTestSuite) ConcentratedLiquidityPoolTWAP() {
 	chainA, chainANode := s.getChainACfgs()
 
 	var (
-		expectedDenom0       = "stake"
+		expectedDenom0       = "nuah"
 		expectedDenom1       = appparams.BaseCoinUnit
 		expectedTickspacing  = uint64(100)
 		expectedSpreadFactor = "0.001000000000000000"
@@ -765,7 +765,7 @@ func calculateSpreadRewardGrowthInside(spreadRewardGrowthGlobal, spreadRewardGro
 // * amount of `e2e-default-feetoken` dropped by 1000 (default amount for fee per tx)
 // * depending on `assertUosmoBalanceIsConstant` and `assertUionBalanceIsConstant` parameters, check that those balances have also not been changed
 func (s *IntegrationTestSuite) assertBalancesInvariants(balancesBefore, balancesAfter sdk.Coins, assertUosmoBalanceIsConstant, assertUionBalanceIsConstant bool) {
-	s.Require().True(balancesAfter.AmountOf("stake").Equal(balancesBefore.AmountOf("stake")))
+	s.Require().True(balancesAfter.AmountOf("nuah").Equal(balancesBefore.AmountOf("nuah")))
 	s.Require().True(balancesAfter.AmountOf("e2e-default-feetoken").Equal(balancesBefore.AmountOf("e2e-default-feetoken").Sub(defaultFeePerTx)))
 	if assertUionBalanceIsConstant {
 		s.Require().True(balancesAfter.AmountOf("uion").Equal(balancesBefore.AmountOf("uion")))

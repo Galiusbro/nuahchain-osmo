@@ -42,7 +42,7 @@ func (s *KeeperTestSuite) createGammPool(denoms []string) uint64 {
 
 func (s *KeeperTestSuite) TestHandleSetSuperfluidAssetsProposal() {
 	nativeAsset := types.SuperfluidAsset{
-		Denom:     "stake",
+		Denom:     "nuah",
 		AssetType: types.SuperfluidAssetTypeNative,
 	}
 	gammAsset := types.SuperfluidAsset{

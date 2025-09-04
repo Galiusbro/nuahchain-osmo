@@ -140,8 +140,8 @@ func (s *KeeperTestSuite) TestParams() {
 	res, err := queryClient.Params(context.Background(), &types.QueryParamsRequest{})
 	s.Require().NoError(err)
 
-	// Minted denom set as "stake" from the default genesis state
-	s.Require().Equal("stake", res.Params.MintedDenom)
+	// Minted denom set as "nuah" from the default genesis state
+	s.Require().Equal("nuah", res.Params.MintedDenom)
 }
 
 func (s *KeeperTestSuite) TestLockableDurations() {
@@ -377,7 +377,7 @@ func (s *KeeperTestSuite) TestExternalIncentiveGauges() {
 						_, err := s.App.IncentivesKeeper.CreateGauge(
 							s.Ctx, externalBalGauge.isPerpetual, sdk.AccAddress{}, sdk.Coins{}, lockuptypes.QueryCondition{
 								LockQueryType: lockuptypes.ByDuration,
-								Denom:         "stake",
+								Denom:         "nuah",
 								Duration:      time.Hour,
 							}, time.Now(), 1, 0)
 						s.Require().NoError(err)
@@ -435,7 +435,7 @@ func (s *KeeperTestSuite) TestExternalIncentiveGauges_NoLock() {
 		// Concentrated pool creates 1 internal gauge with id 4
 		firstExpectedExternalGaugeId = 5
 
-		defaultDenom = "stake"
+		defaultDenom = "nuah"
 	)
 
 	var (
