@@ -108,6 +108,8 @@ import (
 	valsetprefmodule "github.com/osmosis-labs/osmosis/v30/x/valset-pref/valpref-module"
 	"github.com/osmosis-labs/osmosis/x/epochs"
 	epochstypes "github.com/osmosis-labs/osmosis/x/epochs/types"
+	freeaccount "github.com/osmosis-labs/osmosis/v30/x/freeaccount"
+	freeaccounttypes "github.com/osmosis-labs/osmosis/v30/x/freeaccount/types"
 )
 
 // moduleAccountPermissions defines module account permissions
@@ -209,6 +211,7 @@ func appModules(
 		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)),
 		auction.NewAppModule(appCodec, *app.AuctionKeeper),
 		smartaccount.NewAppModule(appCodec, *app.SmartAccountKeeper),
+		freeaccount.NewAppModule(appCodec, *app.FreeAccountKeeper),
 	}
 }
 
@@ -277,6 +280,7 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		twaptypes.ModuleName,
 		txfeestypes.ModuleName,
 		smartaccounttypes.ModuleName,
+		freeaccounttypes.ModuleName, // freeaccount module
 		genutiltypes.ModuleName,
 		evidencetypes.ModuleName,
 		paramstypes.ModuleName,
