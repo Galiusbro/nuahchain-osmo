@@ -27,6 +27,8 @@ import (
 	txfeestypes "github.com/osmosis-labs/osmosis/v30/x/txfees/types"
 
 	auctionante "github.com/skip-mev/block-sdk/v2/x/auction/ante"
+
+	freeaccountkeeper "github.com/osmosis-labs/osmosis/v30/x/freeaccount/keeper"
 )
 
 // BlockSDKAnteHandlerParams are the parameters necessary to configure the block-sdk antehandlers
@@ -34,6 +36,11 @@ type BlockSDKAnteHandlerParams struct {
 	mevLane       auctionante.MEVLane
 	auctionKeeper auctionkeeper.Keeper
 	txConfig      client.TxConfig
+}
+
+// FreeAccountKeeper defines the interface for checking free accounts
+type FreeAccountKeeper interface {
+	IsFreeAccount(ctx sdk.Context, addr sdk.AccAddress) bool
 }
 
 // Link to default ante handler used by cosmos sdk:
@@ -55,9 +62,20 @@ func NewAnteHandler(
 	channelKeeper *ibckeeper.Keeper,
 	blockSDKParams BlockSDKAnteHandlerParams,
 	appCodec codec.Codec,
+	freeAccountKeeper *freeaccountkeeper.Keeper,
 ) sdk.AnteHandler {
 	mempoolFeeOptions := txfeestypes.NewMempoolFeeOptions(appOpts)
-	mempoolFeeDecorator := txfeeskeeper.NewMempoolFeeDecorator(*txFeesKeeper, mempoolFeeOptions)
+
+	// Create mempool fee decorator with free account support
+	var mempoolFeeDecorator sdk.AnteDecorator
+	if freeAccountKeeper != nil {
+		// Adapter to convert freeaccountkeeper.Keeper to FreeAccountChecker interface
+		freeAccountChecker := &freeAccountAdapter{keeper: freeAccountKeeper}
+		mempoolFeeDecorator = txfeeskeeper.NewMempoolFeeDecoratorWithFreeAccounts(*txFeesKeeper, mempoolFeeOptions, freeAccountChecker)
+	} else {
+		mempoolFeeDecorator = txfeeskeeper.NewMempoolFeeDecorator(*txFeesKeeper, mempoolFeeOptions)
+	}
+
 	sendblockOptions := osmoante.NewSendBlockOptions(appOpts)
 	sendblockDecorator := osmoante.NewSendBlockDecorator(sendblockOptions, appCodec)
 	deductFeeDecorator := txfeeskeeper.NewDeductFeeDecorator(*txFeesKeeper, accountKeeper, bankKeeper, nil)
@@ -108,6 +126,7 @@ func NewAnteHandler(
 		// https://github.com/cosmos/cosmos-sdk/blob/master/x/auth/middleware/fee.go#L34
 		mempoolFeeDecorator,
 		sendblockDecorator,
+		// Use context.Context version for ValidateBasicDecorator
 		ante.NewValidateBasicDecorator(),
 		ante.TxTimeoutHeightDecorator{},
 		ante.NewValidateMemoDecorator(accountKeeper),
@@ -118,4 +137,13 @@ func NewAnteHandler(
 			classicSignatureVerificationDecorator,
 		),
 	)
+}
+
+// freeAccountAdapter adapts freeaccountkeeper.Keeper to implement FreeAccountChecker interface
+type freeAccountAdapter struct {
+	keeper *freeaccountkeeper.Keeper
+}
+
+func (f *freeAccountAdapter) IsFreeAccount(ctx sdk.Context, addr sdk.AccAddress) bool {
+	return f.keeper.IsFreeAccount(ctx, addr)
 }
