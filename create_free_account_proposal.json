@@ -1,0 +1,13 @@
+{
+  "messages": [
+    {
+      "@type": "/osmosis.freeaccount.v1beta1.MsgCreateFreeAccount",
+      "authority": "nuah10d07y265gmmuvt4z0w9aw880jnsr700jquznk2",
+      "address": "nuah1720ejxzzew2l2tk2ndd20xzv7h5z8s2chdfwfa"
+    }
+  ],
+  "metadata": "Create free account proposal for testuser",
+  "deposit": "10000000unuah",
+  "title": "Create Free Account for TestUser",
+  "summary": "Create a free account for testuser address for testing purposes"
+}

@@ -1,18 +1,10 @@
 package types
 
 import (
-	errorsmod "cosmossdk.io/errors"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-)
+	"errors"
 
-// MsgCreateFreeAccount defines a message to create a free account
-type MsgCreateFreeAccount struct {
-	// Authority is the address that controls the module (gov module account)
-	Authority string `json:"authority,omitempty"`
-	// Address is the address to make fee-exempt
-	Address string `json:"address,omitempty"`
-}
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 // NewMsgCreateFreeAccount creates a new MsgCreateFreeAccount instance
 func NewMsgCreateFreeAccount(authority, address string) *MsgCreateFreeAccount {
@@ -22,47 +14,33 @@ func NewMsgCreateFreeAccount(authority, address string) *MsgCreateFreeAccount {
 	}
 }
 
-// Route returns the name of the module
-func (msg MsgCreateFreeAccount) Route() string { return ModuleName }
+// Route returns the route of MsgCreateFreeAccount
+func (msg MsgCreateFreeAccount) Route() string { return RouterKey }
 
-// Type returns the action
+// Type returns the type of MsgCreateFreeAccount
 func (msg MsgCreateFreeAccount) Type() string { return "create_free_account" }
 
-// GetSigners returns the expected signers for the message
-func (msg *MsgCreateFreeAccount) GetSigners() []sdk.AccAddress {
-	authority, _ := sdk.AccAddressFromBech32(msg.Authority)
-	return []sdk.AccAddress{authority}
+// GetSigners returns the signers of MsgCreateFreeAccount
+func (msg MsgCreateFreeAccount) GetSigners() []sdk.AccAddress {
+	addr, err := sdk.AccAddressFromBech32(msg.Authority)
+	if err != nil {
+		panic(err)
+	}
+	return []sdk.AccAddress{addr}
 }
 
-// GetSignBytes encodes the message for signing
-func (msg *MsgCreateFreeAccount) GetSignBytes() []byte {
-	return sdk.MustSortJSON(Amino.MustMarshalJSON(msg))
+// GetSignBytes returns the sign bytes of MsgCreateFreeAccount
+func (msg MsgCreateFreeAccount) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
-// ValidateBasic performs basic validation of the message
-func (msg *MsgCreateFreeAccount) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Authority)
-	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid authority address (%s)", err)
+// ValidateBasic validates the MsgCreateFreeAccount
+func (msg MsgCreateFreeAccount) ValidateBasic() error {
+	if msg.Authority == "" {
+		return errors.New("authority cannot be empty")
 	}
-
-	_, err = sdk.AccAddressFromBech32(msg.Address)
-	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address (%s)", err)
+	if msg.Address == "" {
+		return errors.New("address cannot be empty")
 	}
-
 	return nil
-}
-
-// ProtoMessage implements proto.Message interface
-func (msg *MsgCreateFreeAccount) ProtoMessage() {}
-
-// Reset implements proto.Message interface
-func (msg *MsgCreateFreeAccount) Reset() {
-	*msg = MsgCreateFreeAccount{}
-}
-
-// String implements proto.Message interface
-func (msg *MsgCreateFreeAccount) String() string {
-	return "MsgCreateFreeAccount{Authority: " + msg.Authority + ", Address: " + msg.Address + "}"
 }

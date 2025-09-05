@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
-	"github.com/osmosis-labs/osmosis/v30/x/freeaccount/types"
+	freeaccounttypes "github.com/osmosis-labs/osmosis/v30/x/freeaccount/types"
 )
 
 type msgServer struct {
@@ -15,14 +15,14 @@ type msgServer struct {
 
 // NewMsgServerImpl returns an implementation of the MsgServer interface
 // for the provided Keeper.
-func NewMsgServerImpl(keeper Keeper) types.MsgServer {
+func NewMsgServerImpl(keeper Keeper) freeaccounttypes.MsgServer {
 	return &msgServer{Keeper: keeper}
 }
 
-var _ types.MsgServer = msgServer{}
+var _ freeaccounttypes.MsgServer = msgServer{}
 
 // CreateFreeAccount creates a new free account
-func (k msgServer) CreateFreeAccount(goCtx context.Context, msg *types.MsgCreateFreeAccount) (*types.MsgCreateFreeAccountResponse, error) {
+func (k msgServer) CreateFreeAccount(goCtx context.Context, msg *freeaccounttypes.MsgCreateFreeAccount) (*freeaccounttypes.MsgCreateFreeAccountResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// Validate authority
@@ -51,5 +51,5 @@ func (k msgServer) CreateFreeAccount(goCtx context.Context, msg *types.MsgCreate
 		),
 	)
 
-	return &types.MsgCreateFreeAccountResponse{}, nil
+	return &freeaccounttypes.MsgCreateFreeAccountResponse{}, nil
 }

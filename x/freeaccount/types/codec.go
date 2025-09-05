@@ -33,6 +33,8 @@ var (
 
 func init() {
 	RegisterLegacyAminoCodec(Amino)
-	RegisterInterfaces(codectypes.NewInterfaceRegistry())
+	registry := codectypes.NewInterfaceRegistry()
+	RegisterInterfaces(registry)
+	ModuleCdc = codec.NewProtoCodec(registry)
 	Amino.Seal()
 }

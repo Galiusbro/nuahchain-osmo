@@ -127,7 +127,7 @@ make build
 
 ⚠️ **Warning:** Always test changes on a development network first!
 
-📝 **Remember:** 
+📝 **Remember:**
 - Source code changes require rebuilding the binary
 - Configuration changes require node restart
 - The ConsensusMinFee has the highest priority

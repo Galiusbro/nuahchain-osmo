@@ -9,14 +9,14 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
-	"github.com/osmosis-labs/osmosis/v30/x/freeaccount/types"
+	freeaccounttypes "github.com/osmosis-labs/osmosis/v30/x/freeaccount/types"
 )
 
 // GetTxCmd returns the transaction commands for this module
 func GetTxCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:                        types.ModuleName,
-		Short:                      fmt.Sprintf("%s transactions subcommands", types.ModuleName),
+		Use:                        freeaccounttypes.ModuleName,
+		Short:                      fmt.Sprintf("%s transactions subcommands", freeaccounttypes.ModuleName),
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
@@ -48,7 +48,7 @@ func CmdCreateFreeAccount() *cobra.Command {
 			// Get authority (should be gov module account)
 			authority := clientCtx.GetFromAddress().String()
 
-			msg := types.NewMsgCreateFreeAccount(authority, args[0])
+			msg := freeaccounttypes.NewMsgCreateFreeAccount(authority, args[0])
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}

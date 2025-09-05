@@ -66,6 +66,7 @@ import (
 	valsetprefmodule "github.com/osmosis-labs/osmosis/v30/x/valset-pref/valpref-module"
 	"github.com/osmosis-labs/osmosis/x/epochs"
 	ibc_hooks "github.com/osmosis-labs/osmosis/x/ibc-hooks"
+	freeaccount "github.com/osmosis-labs/osmosis/v30/x/freeaccount"
 )
 
 // AppModuleBasics returns ModuleBasics for the module BasicManager.
@@ -132,4 +133,5 @@ var AppModuleBasics = module.NewBasicManager(
 	tendermint.AppModuleBasic{},
 	auction.AppModuleBasic{},
 	smartaccount.AppModuleBasic{},
+	freeaccount.AppModuleBasic{},
 )

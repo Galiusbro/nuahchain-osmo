@@ -9,14 +9,14 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
-	"github.com/osmosis-labs/osmosis/v30/x/freeaccount/types"
+	freeaccounttypes "github.com/osmosis-labs/osmosis/v30/x/freeaccount/types"
 )
 
 // GetQueryCmd returns the cli query commands for this module
 func GetQueryCmd(queryRoute string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:                        types.ModuleName,
-		Short:                      fmt.Sprintf("Querying commands for the %s module", types.ModuleName),
+		Use:                        freeaccounttypes.ModuleName,
+		Short:                      fmt.Sprintf("Querying commands for the %s module", freeaccounttypes.ModuleName),
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
@@ -45,9 +45,9 @@ func CmdQueryIsFreeAccount() *cobra.Command {
 				return fmt.Errorf("invalid address: %w", err)
 			}
 
-			queryClient := types.NewQueryClient(clientCtx)
+			queryClient := freeaccounttypes.NewQueryClient(clientCtx)
 
-			res, err := queryClient.IsFreeAccount(context.Background(), &types.QueryIsFreeAccountRequest{
+			res, err := queryClient.IsFreeAccount(context.Background(), &freeaccounttypes.QueryIsFreeAccountRequest{
 				Address: addr.String(),
 			})
 			if err != nil {

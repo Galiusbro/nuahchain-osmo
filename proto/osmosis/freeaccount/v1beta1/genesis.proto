@@ -1,0 +1,12 @@
+syntax = "proto3";
+package osmosis.freeaccount.v1beta1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/freeaccount/types";
+
+// GenesisState defines the freeaccount module's genesis state.
+message GenesisState {
+  // free_accounts is the list of free account addresses
+  repeated string free_accounts = 1;
+}
