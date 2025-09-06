@@ -1,0 +1,40 @@
+package types
+
+import (
+	sdkerrors "cosmossdk.io/errors"
+)
+
+// x/softpeg module sentinel errors
+var (
+	ErrInvalidSigner             = sdkerrors.Register(ModuleName, 1100, "expected gov account as only signer for proposal message")
+	ErrInvalidTimestamp          = sdkerrors.Register(ModuleName, 1101, "invalid timestamp")
+	ErrInvalidPrice              = sdkerrors.Register(ModuleName, 1102, "invalid price")
+	ErrInvalidTargetPrice        = sdkerrors.Register(ModuleName, 1103, "invalid target price")
+	ErrInvalidDeviationThreshold = sdkerrors.Register(ModuleName, 1104, "invalid deviation threshold")
+	ErrInvalidUpdateInterval     = sdkerrors.Register(ModuleName, 1105, "invalid update interval")
+	ErrInvalidTrustIndex         = sdkerrors.Register(ModuleName, 1106, "invalid trust index")
+	ErrPriceDataNotFound         = sdkerrors.Register(ModuleName, 1107, "price data not found")
+	ErrCommunityMetricsNotFound  = sdkerrors.Register(ModuleName, 1108, "community metrics not found")
+	ErrAlertNotFound             = sdkerrors.Register(ModuleName, 1109, "alert not found")
+	ErrInvalidAlertType          = sdkerrors.Register(ModuleName, 1110, "invalid alert type")
+	ErrInvalidAlertSeverity      = sdkerrors.Register(ModuleName, 1111, "invalid alert severity")
+	ErrInvalidFeedbackType       = sdkerrors.Register(ModuleName, 1112, "invalid feedback type")
+	ErrInvalidRating             = sdkerrors.Register(ModuleName, 1113, "invalid rating, must be between 1 and 5")
+	ErrPegConfigNotFound         = sdkerrors.Register(ModuleName, 1114, "peg configuration not found")
+	ErrMonitoringDisabled        = sdkerrors.Register(ModuleName, 1115, "monitoring is disabled")
+	ErrInsufficientLiquidity     = sdkerrors.Register(ModuleName, 1116, "insufficient liquidity")
+	ErrExcessiveDeviation        = sdkerrors.Register(ModuleName, 1117, "price deviation exceeds maximum allowed")
+	ErrInvalidPoolID             = sdkerrors.Register(ModuleName, 1118, "invalid pool ID")
+	ErrPoolNotFound              = sdkerrors.Register(ModuleName, 1119, "pool not found")
+	ErrInvalidDenom              = sdkerrors.Register(ModuleName, 1120, "invalid denomination")
+	ErrUnauthorized              = sdkerrors.Register(ModuleName, 1121, "unauthorized")
+	ErrInvalidParams             = sdkerrors.Register(ModuleName, 1122, "invalid parameters")
+	ErrAlertAlreadyResolved      = sdkerrors.Register(ModuleName, 1123, "alert already resolved")
+	ErrInvalidConfidence         = sdkerrors.Register(ModuleName, 1124, "invalid confidence level")
+	ErrDataSourceUnavailable     = sdkerrors.Register(ModuleName, 1125, "data source unavailable")
+	ErrInvalidTimeRange          = sdkerrors.Register(ModuleName, 1126, "invalid time range")
+	ErrTooManyAlerts             = sdkerrors.Register(ModuleName, 1127, "too many active alerts")
+	ErrInvalidSubmitter          = sdkerrors.Register(ModuleName, 1128, "invalid submitter address")
+	ErrDuplicateFeedback         = sdkerrors.Register(ModuleName, 1129, "duplicate feedback submission")
+	ErrFeedbackTooFrequent       = sdkerrors.Register(ModuleName, 1130, "feedback submissions too frequent")
+)
