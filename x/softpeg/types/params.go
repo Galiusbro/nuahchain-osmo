@@ -13,60 +13,41 @@ var _ paramtypes.ParamSet = (*Params)(nil)
 
 // Parameter store keys
 var (
-	KeyTargetPrice           = []byte("TargetPrice")
-	KeyDeviationThreshold    = []byte("DeviationThreshold")
-	KeyAlertThreshold        = []byte("AlertThreshold")
-	KeyMonitoringEnabled     = []byte("MonitoringEnabled")
-	KeyUpdateInterval        = []byte("UpdateInterval")
-	KeyMinLiquidity          = []byte("MinLiquidity")
-	KeyMaxDeviation          = []byte("MaxDeviation")
-	KeyTrustDecayRate        = []byte("TrustDecayRate")
-	KeyMinConfidence         = []byte("MinConfidence")
-	KeyMaxAlertsPerHour      = []byte("MaxAlertsPerHour")
-	KeyFeedbackCooldown      = []byte("FeedbackCooldown")
-	KeyPriceDataRetention    = []byte("PriceDataRetention")
-	KeyCommunityWeight       = []byte("CommunityWeight")
-	KeyLiquidityWeight       = []byte("LiquidityWeight")
-	KeyVolumeWeight          = []byte("VolumeWeight")
+	KeyTargetPrice        = []byte("TargetPrice")
+	KeyDeviationThreshold = []byte("DeviationThreshold")
+	KeyAlertThreshold     = []byte("AlertThreshold")
+	KeyMonitoringEnabled  = []byte("MonitoringEnabled")
+	KeyUpdateInterval     = []byte("UpdateInterval")
+	KeyMinLiquidity       = []byte("MinLiquidity")
+	KeyMaxDeviation       = []byte("MaxDeviation")
+	KeyTrustDecayRate     = []byte("TrustDecayRate")
+	KeyMinConfidence      = []byte("MinConfidence")
+	KeyMaxAlertsPerHour   = []byte("MaxAlertsPerHour")
+	KeyFeedbackCooldown   = []byte("FeedbackCooldown")
+	KeyPriceDataRetention = []byte("PriceDataRetention")
+	KeyCommunityWeight    = []byte("CommunityWeight")
+	KeyLiquidityWeight    = []byte("LiquidityWeight")
+	KeyVolumeWeight       = []byte("VolumeWeight")
 )
 
 // Default parameter values
 var (
-	DefaultTargetPrice        = osmomath.OneDec()                    // 1.0 USD
-	DefaultDeviationThreshold = osmomath.MustNewDecFromStr("0.05")   // 5%
-	DefaultAlertThreshold     = osmomath.MustNewDecFromStr("0.03")   // 3%
+	DefaultTargetPrice        = osmomath.OneDec()                  // 1.0 USD
+	DefaultDeviationThreshold = osmomath.MustNewDecFromStr("0.05") // 5%
+	DefaultAlertThreshold     = osmomath.MustNewDecFromStr("0.03") // 3%
 	DefaultMonitoringEnabled  = true
-	DefaultUpdateInterval     = time.Minute * 5                      // 5 minutes
-	DefaultMinLiquidity       = osmomath.NewInt(100000)              // 100k NUAH
-	DefaultMaxDeviation       = osmomath.MustNewDecFromStr("0.10")   // 10%
-	DefaultTrustDecayRate     = osmomath.MustNewDecFromStr("0.001")  // 0.1% per hour
-	DefaultMinConfidence      = osmomath.MustNewDecFromStr("0.70")   // 70%
+	DefaultUpdateInterval     = time.Minute * 5                     // 5 minutes
+	DefaultMinLiquidity       = osmomath.NewInt(100000)             // 100k NUAH
+	DefaultMaxDeviation       = osmomath.MustNewDecFromStr("0.10")  // 10%
+	DefaultTrustDecayRate     = osmomath.MustNewDecFromStr("0.001") // 0.1% per hour
+	DefaultMinConfidence      = osmomath.MustNewDecFromStr("0.70")  // 70%
 	DefaultMaxAlertsPerHour   = int64(10)
-	DefaultFeedbackCooldown   = time.Hour * 1                       // 1 hour
-	DefaultPriceDataRetention = time.Hour * 24 * 30                  // 30 days
-	DefaultCommunityWeight    = osmomath.MustNewDecFromStr("0.30")   // 30%
-	DefaultLiquidityWeight    = osmomath.MustNewDecFromStr("0.40")   // 40%
-	DefaultVolumeWeight       = osmomath.MustNewDecFromStr("0.30")   // 30%
+	DefaultFeedbackCooldown   = time.Hour * 1                      // 1 hour
+	DefaultPriceDataRetention = time.Hour * 24 * 30                // 30 days
+	DefaultCommunityWeight    = osmomath.MustNewDecFromStr("0.30") // 30%
+	DefaultLiquidityWeight    = osmomath.MustNewDecFromStr("0.40") // 40%
+	DefaultVolumeWeight       = osmomath.MustNewDecFromStr("0.30") // 30%
 )
-
-// Params defines the parameters for the softpeg module.
-type Params struct {
-	TargetPrice        osmomath.Dec  `protobuf:"bytes,1,opt,name=target_price,json=targetPrice,proto3,customtype=github.com/osmosis-labs/osmosis/osmomath.Dec" json:"target_price" yaml:"target_price"`
-	DeviationThreshold osmomath.Dec  `protobuf:"bytes,2,opt,name=deviation_threshold,json=deviationThreshold,proto3,customtype=github.com/osmosis-labs/osmosis/osmomath.Dec" json:"deviation_threshold" yaml:"deviation_threshold"`
-	AlertThreshold     osmomath.Dec  `protobuf:"bytes,3,opt,name=alert_threshold,json=alertThreshold,proto3,customtype=github.com/osmosis-labs/osmosis/osmomath.Dec" json:"alert_threshold" yaml:"alert_threshold"`
-	MonitoringEnabled  bool          `protobuf:"varint,4,opt,name=monitoring_enabled,json=monitoringEnabled,proto3" json:"monitoring_enabled" yaml:"monitoring_enabled"`
-	UpdateInterval     time.Duration `protobuf:"bytes,5,opt,name=update_interval,json=updateInterval,proto3,stdduration" json:"update_interval" yaml:"update_interval"`
-	MinLiquidity       osmomath.Int  `protobuf:"bytes,6,opt,name=min_liquidity,json=minLiquidity,proto3,customtype=github.com/osmosis-labs/osmosis/osmomath.Int" json:"min_liquidity" yaml:"min_liquidity"`
-	MaxDeviation       osmomath.Dec  `protobuf:"bytes,7,opt,name=max_deviation,json=maxDeviation,proto3,customtype=github.com/osmosis-labs/osmosis/osmomath.Dec" json:"max_deviation" yaml:"max_deviation"`
-	TrustDecayRate     osmomath.Dec  `protobuf:"bytes,8,opt,name=trust_decay_rate,json=trustDecayRate,proto3,customtype=github.com/osmosis-labs/osmosis/osmomath.Dec" json:"trust_decay_rate" yaml:"trust_decay_rate"`
-	MinConfidence      osmomath.Dec  `protobuf:"bytes,9,opt,name=min_confidence,json=minConfidence,proto3,customtype=github.com/osmosis-labs/osmosis/osmomath.Dec" json:"min_confidence" yaml:"min_confidence"`
-	MaxAlertsPerHour   int64         `protobuf:"varint,10,opt,name=max_alerts_per_hour,json=maxAlertsPerHour,proto3" json:"max_alerts_per_hour" yaml:"max_alerts_per_hour"`
-	FeedbackCooldown   time.Duration `protobuf:"bytes,11,opt,name=feedback_cooldown,json=feedbackCooldown,proto3,stdduration" json:"feedback_cooldown" yaml:"feedback_cooldown"`
-	PriceDataRetention time.Duration `protobuf:"bytes,12,opt,name=price_data_retention,json=priceDataRetention,proto3,stdduration" json:"price_data_retention" yaml:"price_data_retention"`
-	CommunityWeight    osmomath.Dec  `protobuf:"bytes,13,opt,name=community_weight,json=communityWeight,proto3,customtype=github.com/osmosis-labs/osmosis/osmomath.Dec" json:"community_weight" yaml:"community_weight"`
-	LiquidityWeight    osmomath.Dec  `protobuf:"bytes,14,opt,name=liquidity_weight,json=liquidityWeight,proto3,customtype=github.com/osmosis-labs/osmosis/osmomath.Dec" json:"liquidity_weight" yaml:"liquidity_weight"`
-	VolumeWeight       osmomath.Dec  `protobuf:"bytes,15,opt,name=volume_weight,json=volumeWeight,proto3,customtype=github.com/osmosis-labs/osmosis/osmomath.Dec" json:"volume_weight" yaml:"volume_weight"`
-}
 
 // NewParams creates a new Params instance
 func NewParams(

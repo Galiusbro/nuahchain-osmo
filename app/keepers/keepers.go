@@ -79,13 +79,13 @@ import (
 	// IBC Transfer: Defines the "transfer" IBC port
 	transfer "github.com/cosmos/ibc-go/v8/modules/apps/transfer"
 
-	"github.com/osmosis-labs/osmosis/v30/x/smart-account/authenticator"
-	smartaccountkeeper "github.com/osmosis-labs/osmosis/v30/x/smart-account/keeper"
-	smartaccounttypes "github.com/osmosis-labs/osmosis/v30/x/smart-account/types"
 	freeaccountkeeper "github.com/osmosis-labs/osmosis/v30/x/freeaccount/keeper"
 	freeaccounttypes "github.com/osmosis-labs/osmosis/v30/x/freeaccount/types"
 	limitedaccountkeeper "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/keeper"
 	limitedaccounttypes "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/types"
+	"github.com/osmosis-labs/osmosis/v30/x/smart-account/authenticator"
+	smartaccountkeeper "github.com/osmosis-labs/osmosis/v30/x/smart-account/keeper"
+	smartaccounttypes "github.com/osmosis-labs/osmosis/v30/x/smart-account/types"
 
 	_ "github.com/osmosis-labs/osmosis/v30/client/docs/statik"
 	owasm "github.com/osmosis-labs/osmosis/v30/wasmbinding"
@@ -962,7 +962,7 @@ func KVStoreKeys() []string {
 		icqtypes.StoreKey,
 		packetforwardtypes.StoreKey,
 		cosmwasmpooltypes.StoreKey,
-smartaccounttypes.StoreKey,
+		smartaccounttypes.StoreKey,
 		freeaccounttypes.StoreKey,
 		limitedaccounttypes.StoreKey,
 		auctiontypes.StoreKey,

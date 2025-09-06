@@ -82,6 +82,8 @@ import (
 	concentratedliquiditytypes "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/types"
 	cwpoolmodule "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/module"
 	cosmwasmpooltypes "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/types"
+	freeaccount "github.com/osmosis-labs/osmosis/v30/x/freeaccount"
+	freeaccounttypes "github.com/osmosis-labs/osmosis/v30/x/freeaccount/types"
 	"github.com/osmosis-labs/osmosis/v30/x/gamm"
 	gammtypes "github.com/osmosis-labs/osmosis/v30/x/gamm/types"
 	"github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit/ibcratelimitmodule"
@@ -110,8 +112,6 @@ import (
 	valsetprefmodule "github.com/osmosis-labs/osmosis/v30/x/valset-pref/valpref-module"
 	"github.com/osmosis-labs/osmosis/x/epochs"
 	epochstypes "github.com/osmosis-labs/osmosis/x/epochs/types"
-	freeaccount "github.com/osmosis-labs/osmosis/v30/x/freeaccount"
-	freeaccounttypes "github.com/osmosis-labs/osmosis/v30/x/freeaccount/types"
 )
 
 // moduleAccountPermissions defines module account permissions
@@ -284,7 +284,7 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		twaptypes.ModuleName,
 		txfeestypes.ModuleName,
 		smartaccounttypes.ModuleName,
-		freeaccounttypes.ModuleName, // freeaccount module
+		freeaccounttypes.ModuleName,    // freeaccount module
 		limitedaccounttypes.ModuleName, // limitedaccount module
 		genutiltypes.ModuleName,
 		evidencetypes.ModuleName,

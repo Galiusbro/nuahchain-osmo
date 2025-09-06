@@ -1,0 +1,115 @@
+syntax = "proto3";
+package osmosis.softpeg.v1beta1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/softpeg/types";
+
+// PriceData represents price information at a specific timestamp
+message PriceData {
+  
+  // timestamp when the price was recorded
+  int64 timestamp = 1;
+  
+  // price of NUAH in USD
+  string price = 2 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+  
+  // confidence level of the price data (0-1)
+  string confidence = 3 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+  
+  // source of the price data
+  string source = 4;
+}
+
+// CommunityMetrics represents community sentiment and engagement metrics
+message CommunityMetrics {
+  
+  // timestamp when the metrics were recorded
+  int64 timestamp = 1;
+  
+  // sentiment_score represents overall community sentiment (0-1)
+  string sentiment_score = 2 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+  
+  // trust_score represents community trust level (0-1)
+  string trust_score = 3 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+  
+  // participation_rate represents governance participation (0-1)
+  string participation_rate = 4 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+  
+  // governance_activity represents recent governance activity count
+  int64 governance_activity = 5;
+  
+  // social_mentions represents social media mentions count
+  int64 social_mentions = 6;
+  
+  // community_size represents active community members count
+  int64 community_size = 7;
+}
+
+// PegConfig represents the configuration for the soft peg mechanism
+message PegConfig {
+  
+  // enabled indicates if the soft peg is active
+  bool enabled = 1;
+  
+  // target_asset is the asset to peg against (e.g., "USD")
+  string target_asset = 2;
+  
+  // adjustment_factor controls how aggressively to adjust (0-1)
+  string adjustment_factor = 3 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+  
+  // last_adjustment_time is the timestamp of the last adjustment
+  int64 last_adjustment_time = 4;
+}
+
+// AlertType defines the type of alert
+enum AlertType {
+  option (gogoproto.goproto_enum_prefix) = false;
+  
+  // ALERT_TYPE_UNSPECIFIED is the default value
+  ALERT_TYPE_UNSPECIFIED = 0 [(gogoproto.enumvalue_customname) = "AlertTypeUnspecified"];
+  
+  // ALERT_TYPE_PRICE_DEVIATION indicates price deviation alert
+  ALERT_TYPE_PRICE_DEVIATION = 1 [(gogoproto.enumvalue_customname) = "AlertTypePriceDeviation"];
+  
+  // ALERT_TYPE_LIQUIDITY_LOW indicates low liquidity alert
+  ALERT_TYPE_LIQUIDITY_LOW = 2 [(gogoproto.enumvalue_customname) = "AlertTypeLiquidityLow"];
+  
+  // ALERT_TYPE_COMMUNITY_SENTIMENT indicates community sentiment alert
+  ALERT_TYPE_COMMUNITY_SENTIMENT = 3 [(gogoproto.enumvalue_customname) = "AlertTypeCommunitySentiment"];
+}
+
+// AlertSeverity defines the severity level of an alert
+enum AlertSeverity {
+  option (gogoproto.goproto_enum_prefix) = false;
+  
+  // ALERT_SEVERITY_UNSPECIFIED is the default value
+  ALERT_SEVERITY_UNSPECIFIED = 0 [(gogoproto.enumvalue_customname) = "AlertSeverityUnspecified"];
+  
+  // ALERT_SEVERITY_INFO indicates informational alert
+  ALERT_SEVERITY_INFO = 1 [(gogoproto.enumvalue_customname) = "AlertSeverityInfo"];
+  
+  // ALERT_SEVERITY_WARNING indicates warning alert
+  ALERT_SEVERITY_WARNING = 2 [(gogoproto.enumvalue_customname) = "AlertSeverityWarning"];
+  
+  // ALERT_SEVERITY_CRITICAL indicates critical alert
+  ALERT_SEVERITY_CRITICAL = 3 [(gogoproto.enumvalue_customname) = "AlertSeverityCritical"];
+}

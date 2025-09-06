@@ -1,0 +1,96 @@
+syntax = "proto3";
+package osmosis.softpeg.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/softpeg/types";
+
+// Params defines the parameters for the softpeg module.
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+
+  // target_price is the target price for NUAH (usually 1.0 USD)
+  string target_price = 1 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+
+  // deviation_threshold is the allowed price deviation before alerts
+  string deviation_threshold = 2 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+
+  // alert_threshold is the deviation threshold for creating alerts
+  string alert_threshold = 3 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+
+  // monitoring_enabled enables/disables price monitoring
+  bool monitoring_enabled = 4;
+
+  // update_interval is the interval for price updates
+  google.protobuf.Duration update_interval = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdduration) = true
+  ];
+
+  // min_liquidity is the minimum liquidity required for price calculations
+  string min_liquidity = 6 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Int",
+    (gogoproto.nullable) = false
+  ];
+
+  // max_deviation is the maximum allowed price deviation
+  string max_deviation = 7 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+
+  // trust_decay_rate is the rate at which trust decays over time
+  string trust_decay_rate = 8 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+
+  // min_confidence is the minimum confidence required for price data
+  string min_confidence = 9 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+
+  // max_alerts_per_hour limits the number of alerts per hour
+  int64 max_alerts_per_hour = 10;
+
+  // feedback_cooldown is the cooldown period for community feedback
+  google.protobuf.Duration feedback_cooldown = 11 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdduration) = true
+  ];
+
+  // price_data_retention is how long to keep price data
+  google.protobuf.Duration price_data_retention = 12 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdduration) = true
+  ];
+
+  // community_weight is the weight of community sentiment in calculations
+  string community_weight = 13 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+
+  // liquidity_weight is the weight of liquidity in calculations
+  string liquidity_weight = 14 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+
+  // volume_weight is the weight of volume in calculations
+  string volume_weight = 15 [
+    (gogoproto.customtype) = "github.com/osmosis-labs/osmosis/osmomath.Dec",
+    (gogoproto.nullable) = false
+  ];
+}
