@@ -29,6 +29,8 @@ import (
 	auctionante "github.com/skip-mev/block-sdk/v2/x/auction/ante"
 
 	freeaccountkeeper "github.com/osmosis-labs/osmosis/v30/x/freeaccount/keeper"
+	limitedaccountante "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/ante"
+	limitedaccountkeeper "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/keeper"
 )
 
 // BlockSDKAnteHandlerParams are the parameters necessary to configure the block-sdk antehandlers
@@ -41,6 +43,12 @@ type BlockSDKAnteHandlerParams struct {
 // FreeAccountKeeper defines the interface for checking free accounts
 type FreeAccountKeeper interface {
 	IsFreeAccount(ctx sdk.Context, addr sdk.AccAddress) bool
+}
+
+// CombinedFreeAccountChecker combines freeaccount and limitedaccount checking
+type CombinedFreeAccountChecker struct {
+	freeAccountKeeper    *freeaccountkeeper.Keeper
+	limitedAccountKeeper *limitedaccountkeeper.Keeper
 }
 
 // Link to default ante handler used by cosmos sdk:
@@ -63,15 +71,19 @@ func NewAnteHandler(
 	blockSDKParams BlockSDKAnteHandlerParams,
 	appCodec codec.Codec,
 	freeAccountKeeper *freeaccountkeeper.Keeper,
+	limitedAccountKeeper *limitedaccountkeeper.Keeper,
 ) sdk.AnteHandler {
 	mempoolFeeOptions := txfeestypes.NewMempoolFeeOptions(appOpts)
 
-	// Create mempool fee decorator with free account support
+	// Create mempool fee decorator with free account and limited account support
 	var mempoolFeeDecorator sdk.AnteDecorator
-	if freeAccountKeeper != nil {
-		// Adapter to convert freeaccountkeeper.Keeper to FreeAccountChecker interface
-		freeAccountChecker := &freeAccountAdapter{keeper: freeAccountKeeper}
-		mempoolFeeDecorator = txfeeskeeper.NewMempoolFeeDecoratorWithFreeAccounts(*txFeesKeeper, mempoolFeeOptions, freeAccountChecker)
+	if freeAccountKeeper != nil || limitedAccountKeeper != nil {
+		// Combined checker for both free accounts and limited accounts (within daily limit)
+		combinedChecker := &CombinedFreeAccountChecker{
+			freeAccountKeeper:    freeAccountKeeper,
+			limitedAccountKeeper: limitedAccountKeeper,
+		}
+		mempoolFeeDecorator = txfeeskeeper.NewMempoolFeeDecoratorWithFreeAccounts(*txFeesKeeper, mempoolFeeOptions, combinedChecker)
 	} else {
 		mempoolFeeDecorator = txfeeskeeper.NewMempoolFeeDecorator(*txFeesKeeper, mempoolFeeOptions)
 	}
@@ -79,6 +91,7 @@ func NewAnteHandler(
 	sendblockOptions := osmoante.NewSendBlockOptions(appOpts)
 	sendblockDecorator := osmoante.NewSendBlockDecorator(sendblockOptions, appCodec)
 	deductFeeDecorator := txfeeskeeper.NewDeductFeeDecorator(*txFeesKeeper, accountKeeper, bankKeeper, nil)
+	limitedAccountDecorator := limitedaccountante.NewLimitedAccountDecorator(limitedAccountKeeper, appCodec)
 
 	// classicSignatureVerificationDecorator is the old flow to enable a circuit breaker
 	classicSignatureVerificationDecorator := sdk.ChainAnteDecorators(
@@ -131,6 +144,8 @@ func NewAnteHandler(
 		ante.TxTimeoutHeightDecorator{},
 		ante.NewValidateMemoDecorator(accountKeeper),
 		ante.NewConsumeGasForTxSizeDecorator(accountKeeper),
+		// Check limited account transaction limits before signature verification
+		limitedAccountDecorator,
 		smartaccountante.NewCircuitBreakerDecorator(
 			smartAccountKeeper,
 			authenticatorVerificationDecorator,
@@ -146,4 +161,22 @@ type freeAccountAdapter struct {
 
 func (f *freeAccountAdapter) IsFreeAccount(ctx sdk.Context, addr sdk.AccAddress) bool {
 	return f.keeper.IsFreeAccount(ctx, addr)
+}
+
+// IsFreeAccount implements FreeAccountChecker interface for combined checker
+func (c *CombinedFreeAccountChecker) IsFreeAccount(ctx sdk.Context, addr sdk.AccAddress) bool {
+	// Check if it's a free account (unlimited free transactions)
+	if c.freeAccountKeeper != nil && c.freeAccountKeeper.IsFreeAccount(ctx, addr) {
+		return true
+	}
+	
+	// Check if it's a limited account that can still transact for free
+	if c.limitedAccountKeeper != nil {
+		addrStr := addr.String()
+		if c.limitedAccountKeeper.IsLimitedAccount(ctx, addrStr) {
+			return c.limitedAccountKeeper.CanTransact(ctx, addrStr)
+		}
+	}
+	
+	return false
 }

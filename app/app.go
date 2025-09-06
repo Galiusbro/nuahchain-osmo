@@ -606,6 +606,7 @@ func NewNUAHApp(
 		},
 		appCodec,
 		app.FreeAccountKeeper,
+		app.LimitedAccountKeeper,
 	)
 
 	// update ante-handlers on lanes

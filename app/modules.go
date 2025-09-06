@@ -11,6 +11,8 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	icq "github.com/cosmos/ibc-apps/modules/async-icq/v8"
 	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
+	limitedaccount "github.com/osmosis-labs/osmosis/v30/x/limitedaccount"
+	limitedaccounttypes "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/types"
 
 	ibcwasm "github.com/cosmos/ibc-go/modules/light-clients/08-wasm"
 	ibcwasmtypes "github.com/cosmos/ibc-go/modules/light-clients/08-wasm/types"
@@ -144,6 +146,7 @@ var moduleAccountPermissions = map[string][]string{
 	cosmwasmpooltypes.ModuleName:             nil,
 	auctiontypes.ModuleName:                  nil,
 	smartaccounttypes.ModuleName:             nil,
+	limitedaccounttypes.ModuleName:           nil,
 }
 
 // appModules return modules to initialize module manager.
@@ -212,6 +215,7 @@ func appModules(
 		auction.NewAppModule(appCodec, *app.AuctionKeeper),
 		smartaccount.NewAppModule(appCodec, *app.SmartAccountKeeper),
 		freeaccount.NewAppModule(appCodec, *app.FreeAccountKeeper),
+		limitedaccount.NewAppModule(appCodec, *app.LimitedAccountKeeper),
 	}
 }
 
@@ -281,6 +285,7 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		txfeestypes.ModuleName,
 		smartaccounttypes.ModuleName,
 		freeaccounttypes.ModuleName, // freeaccount module
+		limitedaccounttypes.ModuleName, // limitedaccount module
 		genutiltypes.ModuleName,
 		evidencetypes.ModuleName,
 		paramstypes.ModuleName,

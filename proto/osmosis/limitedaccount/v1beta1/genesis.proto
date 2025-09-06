@@ -1,0 +1,40 @@
+syntax = "proto3";
+package osmosis.limitedaccount.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/types";
+
+// LimitedAccount defines an account with daily transaction limits
+message LimitedAccount {
+  // address is the account address
+  string address = 1;
+  
+  // daily_tx_count is the number of transactions used today
+  uint32 daily_tx_count = 2;
+  
+  // last_reset_time is when the daily counter was last reset
+  google.protobuf.Timestamp last_reset_time = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+  
+  // max_daily_txs is the maximum number of free transactions per day (default: 3)
+  uint32 max_daily_txs = 4;
+}
+
+// Params defines the parameters for the limitedaccount module
+message Params {
+  // default_daily_limit is the default number of free transactions per day
+  uint32 default_daily_limit = 1;
+  
+  // reset_hour is the hour (0-23) when daily limits reset (default: 0 for midnight UTC)
+  uint32 reset_hour = 2;
+}
+
+// GenesisState defines the limitedaccount module's genesis state
+message GenesisState {
+  // params defines the parameters for the module
+  Params params = 1;
+  
+  // limited_accounts is the list of limited accounts with their current state
+  repeated LimitedAccount limited_accounts = 2;
+}

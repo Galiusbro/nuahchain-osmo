@@ -45,11 +45,13 @@ import (
 	cwpoolclient "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/client"
 	cosmwasmpoolmodule "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/module"
 	downtimemodule "github.com/osmosis-labs/osmosis/v30/x/downtime-detector/module"
+	freeaccount "github.com/osmosis-labs/osmosis/v30/x/freeaccount"
 	"github.com/osmosis-labs/osmosis/v30/x/gamm"
 	gammclient "github.com/osmosis-labs/osmosis/v30/x/gamm/client"
 	"github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit/ibcratelimitmodule"
 	"github.com/osmosis-labs/osmosis/v30/x/incentives"
 	incentivesclient "github.com/osmosis-labs/osmosis/v30/x/incentives/client"
+	limitedaccount "github.com/osmosis-labs/osmosis/v30/x/limitedaccount"
 	"github.com/osmosis-labs/osmosis/v30/x/lockup"
 	"github.com/osmosis-labs/osmosis/v30/x/mint"
 	poolincentives "github.com/osmosis-labs/osmosis/v30/x/pool-incentives"
@@ -66,7 +68,6 @@ import (
 	valsetprefmodule "github.com/osmosis-labs/osmosis/v30/x/valset-pref/valpref-module"
 	"github.com/osmosis-labs/osmosis/x/epochs"
 	ibc_hooks "github.com/osmosis-labs/osmosis/x/ibc-hooks"
-	freeaccount "github.com/osmosis-labs/osmosis/v30/x/freeaccount"
 )
 
 // AppModuleBasics returns ModuleBasics for the module BasicManager.
@@ -134,4 +135,5 @@ var AppModuleBasics = module.NewBasicManager(
 	auction.AppModuleBasic{},
 	smartaccount.AppModuleBasic{},
 	freeaccount.AppModuleBasic{},
+	limitedaccount.AppModuleBasic{},
 )

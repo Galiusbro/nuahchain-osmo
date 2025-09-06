@@ -84,6 +84,8 @@ import (
 	smartaccounttypes "github.com/osmosis-labs/osmosis/v30/x/smart-account/types"
 	freeaccountkeeper "github.com/osmosis-labs/osmosis/v30/x/freeaccount/keeper"
 	freeaccounttypes "github.com/osmosis-labs/osmosis/v30/x/freeaccount/types"
+	limitedaccountkeeper "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/keeper"
+	limitedaccounttypes "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/types"
 
 	_ "github.com/osmosis-labs/osmosis/v30/client/docs/statik"
 	owasm "github.com/osmosis-labs/osmosis/v30/wasmbinding"
@@ -181,6 +183,7 @@ type AppKeepers struct {
 	SmartAccountKeeper           *smartaccountkeeper.Keeper
 	AuthenticatorManager         *authenticator.AuthenticatorManager
 	FreeAccountKeeper            *freeaccountkeeper.Keeper
+	LimitedAccountKeeper         *limitedaccountkeeper.Keeper
 
 	// IBC modules
 	// transfer module
@@ -264,6 +267,14 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 		appKeepers.AccountKeeper,
 	)
 	appKeepers.FreeAccountKeeper = &freeAccountKeeper
+
+	limitedAccountKeeper := limitedaccountkeeper.NewKeeper(
+		appCodec,
+		runtime.NewKVStoreService(appKeepers.keys[limitedaccounttypes.StoreKey]),
+		bApp.Logger(),
+		govModuleAddr.String(),
+	)
+	appKeepers.LimitedAccountKeeper = &limitedAccountKeeper
 
 	authzKeeper := authzkeeper.NewKeeper(
 		runtime.NewKVStoreService(appKeepers.keys[authzkeeper.StoreKey]),
@@ -951,8 +962,9 @@ func KVStoreKeys() []string {
 		icqtypes.StoreKey,
 		packetforwardtypes.StoreKey,
 		cosmwasmpooltypes.StoreKey,
-		auctiontypes.StoreKey,
-		smartaccounttypes.StoreKey,
+smartaccounttypes.StoreKey,
 		freeaccounttypes.StoreKey,
+		limitedaccounttypes.StoreKey,
+		auctiontypes.StoreKey,
 	}
 }
