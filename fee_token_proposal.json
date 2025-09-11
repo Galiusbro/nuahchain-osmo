@@ -1,0 +1,17 @@
+{
+  "title": "Add N$ Token to Fee Abstraction Whitelist",
+  "description": "This proposal adds the N$ stablecoin token to the fee abstraction whitelist, allowing users to pay transaction fees using N$ tokens instead of NUAH.",
+  "changes": [
+    {
+      "subspace": "txfees",
+      "key": "FeeTokens",
+      "value": [
+        {
+          "denom": "factory/nuah1uwjmdjzspz2xa2g60dh6hq2h30jjmufutf099d/ndollar",
+          "poolID": "1"
+        }
+      ]
+    }
+  ],
+  "deposit": "10000000unuah"
+}

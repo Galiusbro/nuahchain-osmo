@@ -1,0 +1,16 @@
+{
+  "fee_abstraction": {
+    "enabled": true,
+    "allowed_fee_tokens": [
+      {
+        "denom": "factory/nuah1uwjmdjzspz2xa2g60dh6hq2h30jjmufutf099d/ndollar",
+        "pool_id": 1,
+        "min_swap_amount": "1000",
+        "max_swap_amount": "1000000",
+        "twap_window": "30s"
+      }
+    ],
+    "base_denom": "unuah",
+    "twap_oracle_enabled": true
+  }
+}
