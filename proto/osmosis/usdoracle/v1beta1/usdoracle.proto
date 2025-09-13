@@ -39,20 +39,101 @@ message PriceSource {
   string url = 4;
 }
 
-// PriceAggregation represents aggregated price data from multiple sources
-message PriceAggregation {
-  // Weighted average price
-  string weighted_price = 1 [
+// SupportedToken represents a token supported by the USD Oracle
+message SupportedToken {
+  // Token denomination (e.g., "uosmo", "ibc/...")
+  string denom = 1;
+  // Human-readable symbol (e.g., "OSMO", "ATOM")
+  string symbol = 2;
+  // Token name (e.g., "Osmosis", "Cosmos Hub")
+  string name = 3;
+  // Decimal places for the token
+  uint32 decimals = 4;
+  // Whether this token is currently enabled for price feeds
+  bool enabled = 5;
+  // Minimum price update frequency in seconds
+  uint64 min_update_frequency = 6;
+  // Maximum allowed price deviation percentage
+  string max_price_deviation = 7 [
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
-  // Individual source prices
-  repeated USDPrice source_prices = 2 [ (gogoproto.nullable) = false ];
-  // Timestamp of aggregation
+  // External token identifiers for different price sources
+  map<string, string> external_ids = 8;
+}
+
+// TokenPrice represents a USD price for a specific token
+message TokenPrice {
+  // Token denomination
+  string denom = 1;
+  // The USD price as a decimal string
+  string price = 2 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // Timestamp when the price was recorded
   google.protobuf.Timestamp timestamp = 3 [
     (gogoproto.nullable) = false,
     (gogoproto.stdtime) = true
   ];
+  // Source of the price data (e.g., "coingecko", "binance")
+  string source = 4;
+  // Block height when the price was recorded
+  int64 block_height = 5;
+  // Price confidence/reliability score (0-1)
+  string confidence = 6 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// PriceAggregation represents aggregated price data from multiple sources
+message PriceAggregation {
+  // Token denomination
+  string denom = 1;
+  // Weighted average price
+  string weighted_price = 2 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // Individual source prices
+  repeated TokenPrice source_prices = 3 [ (gogoproto.nullable) = false ];
+  // Timestamp of aggregation
+  google.protobuf.Timestamp timestamp = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
   // Number of sources used in aggregation
-  uint32 source_count = 4;
+  uint32 source_count = 5;
+  // Price deviation from previous aggregation
+  string price_deviation = 6 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// PriceUpdate represents a price update event
+message PriceUpdate {
+  // Token denomination
+  string denom = 1;
+  // Previous price
+  string previous_price = 2 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // New price
+  string new_price = 3 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // Price change percentage
+  string price_change = 4 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // Update timestamp
+  google.protobuf.Timestamp timestamp = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
 }

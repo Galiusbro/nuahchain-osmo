@@ -118,6 +118,8 @@ import (
 	txfeestypes "github.com/osmosis-labs/osmosis/v30/x/txfees/types"
 	usdoraclekeeper "github.com/osmosis-labs/osmosis/v30/x/usdoracle/keeper"
 	usdoracletypes "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types"
+	exchangekeeper "github.com/osmosis-labs/osmosis/v30/x/exchange/keeper"
+	exchangetypes "github.com/osmosis-labs/osmosis/v30/x/exchange/types"
 	valsetpref "github.com/osmosis-labs/osmosis/v30/x/valset-pref"
 	valsetpreftypes "github.com/osmosis-labs/osmosis/v30/x/valset-pref/types"
 	epochskeeper "github.com/osmosis-labs/osmosis/x/epochs/keeper"
@@ -189,6 +191,7 @@ type AppKeepers struct {
 	FreeAccountKeeper            *freeaccountkeeper.Keeper
 	LimitedAccountKeeper         *limitedaccountkeeper.Keeper
 	USDOracleKeeper              *usdoraclekeeper.Keeper
+	ExchangeKeeper               *exchangekeeper.Keeper
 	PegKeeperKeeper              *pegkeeperkeeper.Keeper
 
 	// IBC modules
@@ -602,6 +605,20 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 	appKeepers.USDOracleKeeper = usdOracleKeeper
+
+	// Initialize Exchange keeper
+	exchangeKeeper := exchangekeeper.NewKeeper(
+		appCodec,
+		runtime.NewKVStoreService(appKeepers.keys[exchangetypes.StoreKey]),
+		bApp.Logger(),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		appKeepers.AccountKeeper,
+		appKeepers.BankKeeper,
+		appKeepers.USDOracleKeeper,
+		appKeepers.TwapKeeper,
+		appKeepers.DistrKeeper,
+	)
+	appKeepers.ExchangeKeeper = exchangeKeeper
 
 	// Initialize PegKeeper
 	pegKeeperKeeper := pegkeeperkeeper.NewKeeper(

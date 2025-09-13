@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -206,4 +207,38 @@ func (k Keeper) UpdatePriceFromSources(ctx sdk.Context, sourcePrices []types.USD
 	k.AddPriceHistory(ctx, newPrice)
 
 	return nil
+}
+
+// GetTokenPriceForExchange returns the price for a specific token (for Exchange module)
+func (k Keeper) GetTokenPriceForExchange(ctx context.Context, denom string) (types.TokenPrice, bool) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	// For now, return a mock implementation
+	// In a real implementation, this would query token-specific prices
+	currentPrice, found := k.GetCurrentPrice(sdkCtx)
+	if !found {
+		return types.TokenPrice{}, false
+	}
+
+	tokenPrice := types.TokenPrice{
+		Denom:     denom,
+		Price:     currentPrice.Price,
+		Timestamp: currentPrice.Timestamp,
+	}
+
+	return tokenPrice, true
+}
+
+
+
+// IsTokenSupported checks if a token is supported for price feeds
+func (k Keeper) IsTokenSupported(ctx context.Context, denom string) bool {
+	params := k.GetParams(ctx)
+
+	// Check if token is in supported tokens list
+	for _, token := range params.SupportedTokens {
+		if token.Denom == denom {
+			return true
+		}
+	}
+	return false
 }

@@ -1,0 +1,57 @@
+syntax = "proto3";
+package osmosis.exchange.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "osmosis/exchange/v1beta1/params.proto";
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/exchange/types";
+
+// Msg defines the exchange Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // ExchangeTokens exchanges tokens for N$ (Nuah Dollar)
+  rpc ExchangeTokens(MsgExchangeTokens) returns (MsgExchangeTokensResponse);
+
+  // UpdateParams updates the exchange module parameters
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+}
+
+// MsgExchangeTokens defines the message for exchanging tokens to N$
+message MsgExchangeTokens {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name) = "osmosis/exchange/exchange-tokens";
+
+  string sender = 1;
+  cosmos.base.v1beta1.Coin token_in = 2 [(gogoproto.nullable) = false];
+  string min_nuah_out = 3 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// MsgExchangeTokensResponse defines the response for MsgExchangeTokens
+message MsgExchangeTokensResponse {
+  string nuah_out = 1 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// MsgUpdateParams defines the message for updating exchange module parameters
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/exchange/update-params";
+
+  string authority = 1;
+  Params params = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgUpdateParamsResponse defines the response for MsgUpdateParams
+message MsgUpdateParamsResponse {}

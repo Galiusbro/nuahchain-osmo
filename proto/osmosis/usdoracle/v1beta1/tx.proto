@@ -8,6 +8,7 @@ import "osmosis/usdoracle/v1beta1/params.proto";
 import "osmosis/usdoracle/v1beta1/usdoracle.proto";
 import "cosmos_proto/cosmos.proto";
 import "cosmos/msg/v1/msg.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types";
 
@@ -18,16 +19,46 @@ service Msg {
     option (google.api.http).post = "/osmosis/usdoracle/update_params";
   };
 
-  // UpdateUSDPrice updates the USD price manually.
+  // UpdateUSDPrice updates the USD price manually (legacy).
   // Can only be called by the admin account.
   rpc UpdateUSDPrice(MsgUpdateUSDPrice) returns (MsgUpdateUSDPriceResponse) {
     option (google.api.http).post = "/osmosis/usdoracle/update_usd_price";
+  };
+
+  // UpdateTokenPrice updates the USD price for a specific token.
+  // Can only be called by the admin account.
+  rpc UpdateTokenPrice(MsgUpdateTokenPrice) returns (MsgUpdateTokenPriceResponse) {
+    option (google.api.http).post = "/osmosis/usdoracle/update_token_price";
+  };
+
+  // AddSupportedToken adds a new supported token.
+  // Can only be called by the admin account.
+  rpc AddSupportedToken(MsgAddSupportedToken) returns (MsgAddSupportedTokenResponse) {
+    option (google.api.http).post = "/osmosis/usdoracle/add_supported_token";
+  };
+
+  // RemoveSupportedToken removes a supported token.
+  // Can only be called by the admin account.
+  rpc RemoveSupportedToken(MsgRemoveSupportedToken) returns (MsgRemoveSupportedTokenResponse) {
+    option (google.api.http).post = "/osmosis/usdoracle/remove_supported_token";
+  };
+
+  // UpdateSupportedToken updates configuration for a supported token.
+  // Can only be called by the admin account.
+  rpc UpdateSupportedToken(MsgUpdateSupportedToken) returns (MsgUpdateSupportedTokenResponse) {
+    option (google.api.http).post = "/osmosis/usdoracle/update_supported_token";
   };
 
   // SetPriceSources sets the price sources configuration.
   // Can only be called by the admin account.
   rpc SetPriceSources(MsgSetPriceSources) returns (MsgSetPriceSourcesResponse) {
     option (google.api.http).post = "/osmosis/usdoracle/set_price_sources";
+  };
+
+  // UpdatePriceSource updates a specific price source configuration.
+  // Can only be called by the admin account.
+  rpc UpdatePriceSource(MsgUpdatePriceSource) returns (MsgUpdatePriceSourceResponse) {
+    option (google.api.http).post = "/osmosis/usdoracle/update_price_source";
   };
 }
 
@@ -77,3 +108,80 @@ message MsgSetPriceSources {
 
 // MsgSetPriceSourcesResponse is the response type for MsgSetPriceSources
 message MsgSetPriceSourcesResponse {}
+
+// MsgUpdateTokenPrice is the message type for updating token price
+message MsgUpdateTokenPrice {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/usdoracle/update-token-price";
+
+  // Authority is the address that controls the module
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Token denomination
+  string denom = 2;
+  // Price is the new USD price for the token
+  string price = 3 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // Source identifier for this price update
+  string source = 4;
+}
+
+// MsgUpdateTokenPriceResponse is the response type for MsgUpdateTokenPrice
+message MsgUpdateTokenPriceResponse {}
+
+// MsgAddSupportedToken is the message type for adding a supported token
+message MsgAddSupportedToken {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/usdoracle/add-supported-token";
+
+  // Authority is the address that controls the module
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Token configuration
+  SupportedToken token = 2 [ (gogoproto.nullable) = false ];
+}
+
+// MsgAddSupportedTokenResponse is the response type for MsgAddSupportedToken
+message MsgAddSupportedTokenResponse {}
+
+// MsgRemoveSupportedToken is the message type for removing a supported token
+message MsgRemoveSupportedToken {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/usdoracle/remove-supported-token";
+
+  // Authority is the address that controls the module
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Token denomination to remove
+  string denom = 2;
+}
+
+// MsgRemoveSupportedTokenResponse is the response type for MsgRemoveSupportedToken
+message MsgRemoveSupportedTokenResponse {}
+
+// MsgUpdateSupportedToken is the message type for updating a supported token
+message MsgUpdateSupportedToken {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/usdoracle/update-supported-token";
+
+  // Authority is the address that controls the module
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Updated token configuration
+  SupportedToken token = 2 [ (gogoproto.nullable) = false ];
+}
+
+// MsgUpdateSupportedTokenResponse is the response type for MsgUpdateSupportedToken
+message MsgUpdateSupportedTokenResponse {}
+
+// MsgUpdatePriceSource is the message type for updating a price source
+message MsgUpdatePriceSource {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/usdoracle/update-price-source";
+
+  // Authority is the address that controls the module
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Updated price source configuration
+  PriceSource source = 2 [ (gogoproto.nullable) = false ];
+}
+
+// MsgUpdatePriceSourceResponse is the response type for MsgUpdatePriceSource
+message MsgUpdatePriceSourceResponse {}

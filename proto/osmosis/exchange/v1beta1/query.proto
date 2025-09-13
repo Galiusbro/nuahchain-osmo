@@ -1,0 +1,72 @@
+syntax = "proto3";
+package osmosis.exchange.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "osmosis/exchange/v1beta1/params.proto";
+import "osmosis/exchange/v1beta1/exchange.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/exchange/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Params returns the exchange module parameters
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/osmosis/exchange/v1beta1/params";
+  }
+  
+  // ExchangeRate returns the current exchange rate for a token
+  rpc ExchangeRate(QueryExchangeRateRequest) returns (QueryExchangeRateResponse) {
+    option (google.api.http).get = "/osmosis/exchange/v1beta1/exchange_rate/{denom}";
+  }
+  
+  // ExchangeRates returns all current exchange rates
+  rpc ExchangeRates(QueryExchangeRatesRequest) returns (QueryExchangeRatesResponse) {
+    option (google.api.http).get = "/osmosis/exchange/v1beta1/exchange_rates";
+  }
+  
+  // DailyLimit returns the daily exchange limit for an address
+  rpc DailyLimit(QueryDailyLimitRequest) returns (QueryDailyLimitResponse) {
+    option (google.api.http).get = "/osmosis/exchange/v1beta1/daily_limit/{address}";
+  }
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryExchangeRateRequest is the request type for the Query/ExchangeRate RPC method.
+message QueryExchangeRateRequest {
+  string denom = 1;
+}
+
+// QueryExchangeRateResponse is the response type for the Query/ExchangeRate RPC method.
+message QueryExchangeRateResponse {
+  ExchangeRate exchange_rate = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryExchangeRatesRequest is the request type for the Query/ExchangeRates RPC method.
+message QueryExchangeRatesRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryExchangeRatesResponse is the response type for the Query/ExchangeRates RPC method.
+message QueryExchangeRatesResponse {
+  repeated ExchangeRate exchange_rates = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryDailyLimitRequest is the request type for the Query/DailyLimit RPC method.
+message QueryDailyLimitRequest {
+  string address = 1;
+}
+
+// QueryDailyLimitResponse is the response type for the Query/DailyLimit RPC method.
+message QueryDailyLimitResponse {
+  DailyLimit daily_limit = 1 [(gogoproto.nullable) = false];
+}

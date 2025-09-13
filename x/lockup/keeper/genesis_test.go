@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/osmosis-labs/osmosis/osmomath"
-	osmoapp "github.com/osmosis-labs/osmosis/v30/app"
+	nuahapp "github.com/osmosis-labs/osmosis/v30/app"
 	"github.com/osmosis-labs/osmosis/v30/x/lockup"
 	"github.com/osmosis-labs/osmosis/v30/x/lockup/types"
 
@@ -59,7 +59,7 @@ var (
 )
 
 func TestInitGenesis(t *testing.T) {
-	app := osmoapp.Setup(false)
+	app := nuahapp.Setup(false)
 	ctx := app.BaseApp.NewContextLegacy(false, tmproto.Header{})
 	ctx = ctx.WithBlockTime(now.Add(time.Second))
 	genesis := testGenesis
@@ -86,7 +86,7 @@ func TestInitGenesis(t *testing.T) {
 
 func TestExportGenesis(t *testing.T) {
 	dirName := fmt.Sprintf("%d", rand.Int())
-	app := osmoapp.SetupWithCustomHome(false, dirName)
+	app := nuahapp.SetupWithCustomHome(false, dirName)
 
 	ctx := app.BaseApp.NewContextLegacy(false, tmproto.Header{})
 	ctx = ctx.WithBlockTime(now.Add(time.Second))
@@ -145,20 +145,20 @@ func TestExportGenesis(t *testing.T) {
 
 func TestMarshalUnmarshalGenesis(t *testing.T) {
 	// Create a unique temporary directory for each test
-	dirName, err := os.MkdirTemp("", "osmoapp_test")
+	dirName, err := os.MkdirTemp("", "nuahapp_test")
 	require.NoError(t, err)
 
 	// Ensure the directory is cleaned up after the test completes
 	defer os.RemoveAll(dirName)
 
 	// Setup the app with the custom directory
-	app := osmoapp.SetupWithCustomHome(false, dirName)
+	app := nuahapp.SetupWithCustomHome(false, dirName)
 
 	// Continue with the rest of your test setup
 	ctx := app.BaseApp.NewContextLegacy(false, tmproto.Header{})
 	ctx = ctx.WithBlockTime(now.Add(time.Second))
 
-	encodingConfig := osmoapp.MakeEncodingConfig()
+	encodingConfig := nuahapp.MakeEncodingConfig()
 	appCodec := encodingConfig.Marshaler
 	am := lockup.NewAppModule(*app.LockupKeeper, app.AccountKeeper, app.BankKeeper)
 

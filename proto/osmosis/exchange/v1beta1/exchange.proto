@@ -1,0 +1,56 @@
+syntax = "proto3";
+package osmosis.exchange.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/exchange/types";
+
+// ExchangeRate represents the exchange rate for a token to N$
+message ExchangeRate {
+  string denom = 1;
+  string rate = 2 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  google.protobuf.Timestamp last_updated = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+}
+
+// ExchangeTransaction represents a completed exchange transaction
+message ExchangeTransaction {
+  string id = 1;
+  string user = 2;
+  string input_denom = 3;
+  string input_amount = 4 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+  string output_denom = 5;
+  string output_amount = 6 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+  string exchange_rate = 7 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  google.protobuf.Timestamp timestamp = 8 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+  uint64 block_height = 9;
+}
+
+// DailyLimit tracks daily exchange limits per address
+message DailyLimit {
+  string address = 1;
+  string total_exchanged_usd = 2 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  string date = 3; // YYYY-MM-DD format
+}

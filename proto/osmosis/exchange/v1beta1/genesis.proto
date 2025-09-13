@@ -1,0 +1,20 @@
+syntax = "proto3";
+package osmosis.exchange.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "osmosis/exchange/v1beta1/params.proto";
+import "osmosis/exchange/v1beta1/exchange.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/exchange/types";
+
+// GenesisState defines the exchange module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [(gogoproto.nullable) = false];
+  
+  // exchange_rates defines the initial exchange rates
+  repeated ExchangeRate exchange_rates = 2 [(gogoproto.nullable) = false];
+  
+  // daily_limits defines the initial daily limits
+  repeated DailyLimit daily_limits = 3 [(gogoproto.nullable) = false];
+}

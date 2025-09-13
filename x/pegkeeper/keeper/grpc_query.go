@@ -21,7 +21,7 @@ func (k Keeper) Params(c context.Context, req *types.QueryParamsRequest) (*types
 	ctx := sdk.UnwrapSDKContext(c)
 
 	params := k.GetParams(ctx)
-	return &types.QueryParamsResponse{Params: &params}, nil
+	return &types.QueryParamsResponse{Params: params}, nil
 }
 
 // PegState returns the current peg state.
@@ -32,7 +32,7 @@ func (k Keeper) PegState(c context.Context, req *types.QueryPegStateRequest) (*t
 	ctx := sdk.UnwrapSDKContext(c)
 
 	params := k.GetParams(ctx)
-	
+
 	// Get current price from USD Oracle
 	currentPrice := "1.0" // Default value
 	if usdPrice, found := k.usdOracleKeeper.GetCurrentPrice(ctx); found {
@@ -43,13 +43,13 @@ func (k Keeper) PegState(c context.Context, req *types.QueryPegStateRequest) (*t
 	deviation := "0.0" // Simplified calculation
 
 	pegState := &types.PegState{
-		TargetDenom:          params.TargetDenom,
-		ReferenceDenom:       params.ReferenceDenom,
-		CurrentPrice:         currentPrice,
-		TargetPrice:          params.TargetPrice,
-		Deviation:            deviation,
-		IsActive:             params.Enabled,
-		LastAdjustmentTime:   time.Time{}, // Initialize with zero time
+		TargetDenom:        params.TargetDenom,
+		ReferenceDenom:     params.ReferenceDenom,
+		CurrentPrice:       currentPrice,
+		TargetPrice:        params.TargetPrice,
+		Deviation:          deviation,
+		IsActive:           params.Enabled,
+		LastAdjustmentTime: time.Time{}, // Initialize with zero time
 	}
 
 	return &types.QueryPegStateResponse{PegState: pegState}, nil

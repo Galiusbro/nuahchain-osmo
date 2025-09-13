@@ -3,6 +3,7 @@ package osmosis.usdoracle.v1beta1;
 
 import "gogoproto/gogo.proto";
 import "cosmos_proto/cosmos.proto";
+import "osmosis/usdoracle/v1beta1/usdoracle.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types";
 
@@ -17,6 +18,30 @@ message Params {
   // Price deviation threshold for alerts (default: 0.05 = 5%)
   string price_deviation_threshold = 4 [
     (gogoproto.moretags) = "yaml:\"price_deviation_threshold\"",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // List of supported tokens for price feeds
+  repeated SupportedToken supported_tokens = 5 [
+    (gogoproto.moretags) = "yaml:\"supported_tokens\"",
+    (gogoproto.nullable) = false
+  ];
+  // List of configured price sources
+  repeated PriceSource price_sources = 6 [
+    (gogoproto.moretags) = "yaml:\"price_sources\"",
+    (gogoproto.nullable) = false
+  ];
+  // Minimum number of sources required for price aggregation
+  uint32 min_sources = 7 [ (gogoproto.moretags) = "yaml:\"min_sources\"" ];
+  // Maximum age of price data in seconds before considered stale
+  uint64 max_price_age = 8 [ (gogoproto.moretags) = "yaml:\"max_price_age\"" ];
+  // Enable automatic token registration through governance
+  bool auto_token_registration = 9 [ (gogoproto.moretags) = "yaml:\"auto_token_registration\"" ];
+  // Default price update frequency for new tokens (seconds)
+  uint64 default_update_frequency = 10 [ (gogoproto.moretags) = "yaml:\"default_update_frequency\"" ];
+  // Default maximum price deviation for new tokens
+  string default_max_deviation = 11 [
+    (gogoproto.moretags) = "yaml:\"default_max_deviation\"",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];

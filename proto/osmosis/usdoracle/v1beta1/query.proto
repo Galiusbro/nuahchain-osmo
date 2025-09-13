@@ -16,19 +16,54 @@ service Query {
     option (google.api.http).get = "/osmosis/usdoracle/params";
   }
 
-  // GetUSDPrice queries the current USD price
+  // GetUSDPrice queries the current USD price (legacy)
   rpc GetUSDPrice(QueryGetUSDPriceRequest) returns (QueryGetUSDPriceResponse) {
     option (google.api.http).get = "/osmosis/usdoracle/usd_price";
   }
 
-  // GetPriceHistory queries the USD price history
+  // GetTokenPrice queries the current USD price for a specific token
+  rpc GetTokenPrice(QueryGetTokenPriceRequest) returns (QueryGetTokenPriceResponse) {
+    option (google.api.http).get = "/osmosis/usdoracle/token_price/{denom}";
+  }
+
+  // GetAllTokenPrices queries USD prices for all supported tokens
+  rpc GetAllTokenPrices(QueryGetAllTokenPricesRequest) returns (QueryGetAllTokenPricesResponse) {
+    option (google.api.http).get = "/osmosis/usdoracle/all_token_prices";
+  }
+
+  // GetSupportedTokens queries all supported tokens
+  rpc GetSupportedTokens(QueryGetSupportedTokensRequest) returns (QueryGetSupportedTokensResponse) {
+    option (google.api.http).get = "/osmosis/usdoracle/supported_tokens";
+  }
+
+  // GetTokenInfo queries information about a specific token
+  rpc GetTokenInfo(QueryGetTokenInfoRequest) returns (QueryGetTokenInfoResponse) {
+    option (google.api.http).get = "/osmosis/usdoracle/token_info/{denom}";
+  }
+
+  // GetPriceHistory queries the USD price history (legacy)
   rpc GetPriceHistory(QueryGetPriceHistoryRequest) returns (QueryGetPriceHistoryResponse) {
     option (google.api.http).get = "/osmosis/usdoracle/price_history";
   }
 
-  // GetPriceDeviation queries the current price deviation from peg
+  // GetTokenPriceHistory queries the USD price history for a specific token
+  rpc GetTokenPriceHistory(QueryGetTokenPriceHistoryRequest) returns (QueryGetTokenPriceHistoryResponse) {
+    option (google.api.http).get = "/osmosis/usdoracle/token_price_history/{denom}";
+  }
+
+  // GetPriceDeviation queries the current price deviation from peg (legacy)
   rpc GetPriceDeviation(QueryGetPriceDeviationRequest) returns (QueryGetPriceDeviationResponse) {
     option (google.api.http).get = "/osmosis/usdoracle/price_deviation";
+  }
+
+  // GetTokenPriceDeviation queries the price deviation for a specific token
+  rpc GetTokenPriceDeviation(QueryGetTokenPriceDeviationRequest) returns (QueryGetTokenPriceDeviationResponse) {
+    option (google.api.http).get = "/osmosis/usdoracle/token_price_deviation/{denom}";
+  }
+
+  // GetPriceAggregation queries aggregated price data for a token
+  rpc GetPriceAggregation(QueryGetPriceAggregationRequest) returns (QueryGetPriceAggregationResponse) {
+    option (google.api.http).get = "/osmosis/usdoracle/price_aggregation/{denom}";
   }
 }
 
@@ -70,4 +105,86 @@ message QueryGetPriceDeviationResponse {
     (gogoproto.nullable) = false
   ];
   bool is_within_threshold = 2;
+}
+
+// QueryGetTokenPriceRequest is request type for the Query/GetTokenPrice RPC method.
+message QueryGetTokenPriceRequest {
+  string denom = 1;
+}
+
+// QueryGetTokenPriceResponse is response type for the Query/GetTokenPrice RPC method.
+message QueryGetTokenPriceResponse {
+  TokenPrice price = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryGetAllTokenPricesRequest is request type for the Query/GetAllTokenPrices RPC method.
+message QueryGetAllTokenPricesRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryGetAllTokenPricesResponse is response type for the Query/GetAllTokenPrices RPC method.
+message QueryGetAllTokenPricesResponse {
+  repeated TokenPrice prices = 1 [ (gogoproto.nullable) = false ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryGetSupportedTokensRequest is request type for the Query/GetSupportedTokens RPC method.
+message QueryGetSupportedTokensRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryGetSupportedTokensResponse is response type for the Query/GetSupportedTokens RPC method.
+message QueryGetSupportedTokensResponse {
+  repeated SupportedToken tokens = 1 [ (gogoproto.nullable) = false ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryGetTokenInfoRequest is request type for the Query/GetTokenInfo RPC method.
+message QueryGetTokenInfoRequest {
+  string denom = 1;
+}
+
+// QueryGetTokenInfoResponse is response type for the Query/GetTokenInfo RPC method.
+message QueryGetTokenInfoResponse {
+  SupportedToken token = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryGetTokenPriceHistoryRequest is request type for the Query/GetTokenPriceHistory RPC method.
+message QueryGetTokenPriceHistoryRequest {
+  string denom = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryGetTokenPriceHistoryResponse is response type for the Query/GetTokenPriceHistory RPC method.
+message QueryGetTokenPriceHistoryResponse {
+  repeated TokenPrice prices = 1 [ (gogoproto.nullable) = false ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryGetTokenPriceDeviationRequest is request type for the Query/GetTokenPriceDeviation RPC method.
+message QueryGetTokenPriceDeviationRequest {
+  string denom = 1;
+}
+
+// QueryGetTokenPriceDeviationResponse is response type for the Query/GetTokenPriceDeviation RPC method.
+message QueryGetTokenPriceDeviationResponse {
+  string deviation = 1 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  bool is_within_threshold = 2;
+  string threshold = 3 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// QueryGetPriceAggregationRequest is request type for the Query/GetPriceAggregation RPC method.
+message QueryGetPriceAggregationRequest {
+  string denom = 1;
+}
+
+// QueryGetPriceAggregationResponse is response type for the Query/GetPriceAggregation RPC method.
+message QueryGetPriceAggregationResponse {
+  PriceAggregation aggregation = 1 [ (gogoproto.nullable) = false ];
 }
