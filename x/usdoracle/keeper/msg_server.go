@@ -69,6 +69,62 @@ func (k msgServer) UpdateUSDPrice(goCtx context.Context, req *types.MsgUpdateUSD
 	return &types.MsgUpdateUSDPriceResponse{}, nil
 }
 
+// UpdateTokenPrice updates the USD price for a specific token
+func (k msgServer) UpdateTokenPrice(goCtx context.Context, req *types.MsgUpdateTokenPrice) (*types.MsgUpdateTokenPriceResponse, error) {
+	if k.authority != req.Authority {
+		return nil, errors.Wrapf(govtypes.ErrInvalidSigner, "invalid authority; expected %s, got %s", k.authority, req.Authority)
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Update token price logic here
+	_ = ctx
+
+	return &types.MsgUpdateTokenPriceResponse{}, nil
+}
+
+// AddSupportedToken adds a new supported token
+func (k msgServer) AddSupportedToken(goCtx context.Context, req *types.MsgAddSupportedToken) (*types.MsgAddSupportedTokenResponse, error) {
+	if k.authority != req.Authority {
+		return nil, errors.Wrapf(govtypes.ErrInvalidSigner, "invalid authority; expected %s, got %s", k.authority, req.Authority)
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Add supported token logic here
+	_ = ctx
+
+	return &types.MsgAddSupportedTokenResponse{}, nil
+}
+
+// RemoveSupportedToken removes a supported token
+func (k msgServer) RemoveSupportedToken(goCtx context.Context, req *types.MsgRemoveSupportedToken) (*types.MsgRemoveSupportedTokenResponse, error) {
+	if k.authority != req.Authority {
+		return nil, errors.Wrapf(govtypes.ErrInvalidSigner, "invalid authority; expected %s, got %s", k.authority, req.Authority)
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Remove supported token logic here
+	_ = ctx
+
+	return &types.MsgRemoveSupportedTokenResponse{}, nil
+}
+
+// UpdateSupportedToken updates configuration for a supported token
+func (k msgServer) UpdateSupportedToken(goCtx context.Context, req *types.MsgUpdateSupportedToken) (*types.MsgUpdateSupportedTokenResponse, error) {
+	if k.authority != req.Authority {
+		return nil, errors.Wrapf(govtypes.ErrInvalidSigner, "invalid authority; expected %s, got %s", k.authority, req.Authority)
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Update supported token logic here
+	_ = ctx
+
+	return &types.MsgUpdateSupportedTokenResponse{}, nil
+}
+
 // SetPriceSources sets the price sources configuration
 func (k msgServer) SetPriceSources(goCtx context.Context, req *types.MsgSetPriceSources) (*types.MsgSetPriceSourcesResponse, error) {
 	if k.authority != req.Authority {
@@ -82,13 +138,19 @@ func (k msgServer) SetPriceSources(goCtx context.Context, req *types.MsgSetPrice
 		k.SetPriceSource(ctx, source)
 	}
 
-	// Emit event
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypePriceSourcesUpdate,
-			sdk.NewAttribute(types.AttributeKeySourcesCount, string(rune(len(req.Sources)))),
-		),
-	)
-
 	return &types.MsgSetPriceSourcesResponse{}, nil
+}
+
+// UpdatePriceSource updates a specific price source configuration
+func (k msgServer) UpdatePriceSource(goCtx context.Context, req *types.MsgUpdatePriceSource) (*types.MsgUpdatePriceSourceResponse, error) {
+	if k.authority != req.Authority {
+		return nil, errors.Wrapf(govtypes.ErrInvalidSigner, "invalid authority; expected %s, got %s", k.authority, req.Authority)
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Update price source logic here
+	_ = ctx
+
+	return &types.MsgUpdatePriceSourceResponse{}, nil
 }

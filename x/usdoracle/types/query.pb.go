@@ -377,6 +377,670 @@ func (m *QueryGetPriceDeviationResponse) GetIsWithinThreshold() bool {
 	return false
 }
 
+// QueryGetTokenPriceRequest is request type for the Query/GetTokenPrice RPC method.
+type QueryGetTokenPriceRequest struct {
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *QueryGetTokenPriceRequest) Reset()         { *m = QueryGetTokenPriceRequest{} }
+func (m *QueryGetTokenPriceRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetTokenPriceRequest) ProtoMessage()    {}
+func (*QueryGetTokenPriceRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{8}
+}
+func (m *QueryGetTokenPriceRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetTokenPriceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetTokenPriceRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetTokenPriceRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetTokenPriceRequest.Merge(m, src)
+}
+func (m *QueryGetTokenPriceRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetTokenPriceRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetTokenPriceRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetTokenPriceRequest proto.InternalMessageInfo
+
+func (m *QueryGetTokenPriceRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// QueryGetTokenPriceResponse is response type for the Query/GetTokenPrice RPC method.
+type QueryGetTokenPriceResponse struct {
+	Price TokenPrice `protobuf:"bytes,1,opt,name=price,proto3" json:"price"`
+}
+
+func (m *QueryGetTokenPriceResponse) Reset()         { *m = QueryGetTokenPriceResponse{} }
+func (m *QueryGetTokenPriceResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetTokenPriceResponse) ProtoMessage()    {}
+func (*QueryGetTokenPriceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{9}
+}
+func (m *QueryGetTokenPriceResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetTokenPriceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetTokenPriceResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetTokenPriceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetTokenPriceResponse.Merge(m, src)
+}
+func (m *QueryGetTokenPriceResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetTokenPriceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetTokenPriceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetTokenPriceResponse proto.InternalMessageInfo
+
+func (m *QueryGetTokenPriceResponse) GetPrice() TokenPrice {
+	if m != nil {
+		return m.Price
+	}
+	return TokenPrice{}
+}
+
+// QueryGetAllTokenPricesRequest is request type for the Query/GetAllTokenPrices RPC method.
+type QueryGetAllTokenPricesRequest struct {
+	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryGetAllTokenPricesRequest) Reset()         { *m = QueryGetAllTokenPricesRequest{} }
+func (m *QueryGetAllTokenPricesRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetAllTokenPricesRequest) ProtoMessage()    {}
+func (*QueryGetAllTokenPricesRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{10}
+}
+func (m *QueryGetAllTokenPricesRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetAllTokenPricesRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetAllTokenPricesRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetAllTokenPricesRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetAllTokenPricesRequest.Merge(m, src)
+}
+func (m *QueryGetAllTokenPricesRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetAllTokenPricesRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetAllTokenPricesRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetAllTokenPricesRequest proto.InternalMessageInfo
+
+func (m *QueryGetAllTokenPricesRequest) GetPagination() *query.PageRequest {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+// QueryGetAllTokenPricesResponse is response type for the Query/GetAllTokenPrices RPC method.
+type QueryGetAllTokenPricesResponse struct {
+	Prices     []TokenPrice        `protobuf:"bytes,1,rep,name=prices,proto3" json:"prices"`
+	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryGetAllTokenPricesResponse) Reset()         { *m = QueryGetAllTokenPricesResponse{} }
+func (m *QueryGetAllTokenPricesResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetAllTokenPricesResponse) ProtoMessage()    {}
+func (*QueryGetAllTokenPricesResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{11}
+}
+func (m *QueryGetAllTokenPricesResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetAllTokenPricesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetAllTokenPricesResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetAllTokenPricesResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetAllTokenPricesResponse.Merge(m, src)
+}
+func (m *QueryGetAllTokenPricesResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetAllTokenPricesResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetAllTokenPricesResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetAllTokenPricesResponse proto.InternalMessageInfo
+
+func (m *QueryGetAllTokenPricesResponse) GetPrices() []TokenPrice {
+	if m != nil {
+		return m.Prices
+	}
+	return nil
+}
+
+func (m *QueryGetAllTokenPricesResponse) GetPagination() *query.PageResponse {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+// QueryGetSupportedTokensRequest is request type for the Query/GetSupportedTokens RPC method.
+type QueryGetSupportedTokensRequest struct {
+	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryGetSupportedTokensRequest) Reset()         { *m = QueryGetSupportedTokensRequest{} }
+func (m *QueryGetSupportedTokensRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetSupportedTokensRequest) ProtoMessage()    {}
+func (*QueryGetSupportedTokensRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{12}
+}
+func (m *QueryGetSupportedTokensRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetSupportedTokensRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetSupportedTokensRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetSupportedTokensRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetSupportedTokensRequest.Merge(m, src)
+}
+func (m *QueryGetSupportedTokensRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetSupportedTokensRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetSupportedTokensRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetSupportedTokensRequest proto.InternalMessageInfo
+
+func (m *QueryGetSupportedTokensRequest) GetPagination() *query.PageRequest {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+// QueryGetSupportedTokensResponse is response type for the Query/GetSupportedTokens RPC method.
+type QueryGetSupportedTokensResponse struct {
+	Tokens     []SupportedToken    `protobuf:"bytes,1,rep,name=tokens,proto3" json:"tokens"`
+	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryGetSupportedTokensResponse) Reset()         { *m = QueryGetSupportedTokensResponse{} }
+func (m *QueryGetSupportedTokensResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetSupportedTokensResponse) ProtoMessage()    {}
+func (*QueryGetSupportedTokensResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{13}
+}
+func (m *QueryGetSupportedTokensResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetSupportedTokensResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetSupportedTokensResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetSupportedTokensResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetSupportedTokensResponse.Merge(m, src)
+}
+func (m *QueryGetSupportedTokensResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetSupportedTokensResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetSupportedTokensResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetSupportedTokensResponse proto.InternalMessageInfo
+
+func (m *QueryGetSupportedTokensResponse) GetTokens() []SupportedToken {
+	if m != nil {
+		return m.Tokens
+	}
+	return nil
+}
+
+func (m *QueryGetSupportedTokensResponse) GetPagination() *query.PageResponse {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+// QueryGetTokenInfoRequest is request type for the Query/GetTokenInfo RPC method.
+type QueryGetTokenInfoRequest struct {
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *QueryGetTokenInfoRequest) Reset()         { *m = QueryGetTokenInfoRequest{} }
+func (m *QueryGetTokenInfoRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetTokenInfoRequest) ProtoMessage()    {}
+func (*QueryGetTokenInfoRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{14}
+}
+func (m *QueryGetTokenInfoRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetTokenInfoRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetTokenInfoRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetTokenInfoRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetTokenInfoRequest.Merge(m, src)
+}
+func (m *QueryGetTokenInfoRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetTokenInfoRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetTokenInfoRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetTokenInfoRequest proto.InternalMessageInfo
+
+func (m *QueryGetTokenInfoRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// QueryGetTokenInfoResponse is response type for the Query/GetTokenInfo RPC method.
+type QueryGetTokenInfoResponse struct {
+	Token SupportedToken `protobuf:"bytes,1,opt,name=token,proto3" json:"token"`
+}
+
+func (m *QueryGetTokenInfoResponse) Reset()         { *m = QueryGetTokenInfoResponse{} }
+func (m *QueryGetTokenInfoResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetTokenInfoResponse) ProtoMessage()    {}
+func (*QueryGetTokenInfoResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{15}
+}
+func (m *QueryGetTokenInfoResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetTokenInfoResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetTokenInfoResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetTokenInfoResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetTokenInfoResponse.Merge(m, src)
+}
+func (m *QueryGetTokenInfoResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetTokenInfoResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetTokenInfoResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetTokenInfoResponse proto.InternalMessageInfo
+
+func (m *QueryGetTokenInfoResponse) GetToken() SupportedToken {
+	if m != nil {
+		return m.Token
+	}
+	return SupportedToken{}
+}
+
+// QueryGetTokenPriceHistoryRequest is request type for the Query/GetTokenPriceHistory RPC method.
+type QueryGetTokenPriceHistoryRequest struct {
+	Denom      string             `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+	Pagination *query.PageRequest `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryGetTokenPriceHistoryRequest) Reset()         { *m = QueryGetTokenPriceHistoryRequest{} }
+func (m *QueryGetTokenPriceHistoryRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetTokenPriceHistoryRequest) ProtoMessage()    {}
+func (*QueryGetTokenPriceHistoryRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{16}
+}
+func (m *QueryGetTokenPriceHistoryRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetTokenPriceHistoryRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetTokenPriceHistoryRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetTokenPriceHistoryRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetTokenPriceHistoryRequest.Merge(m, src)
+}
+func (m *QueryGetTokenPriceHistoryRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetTokenPriceHistoryRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetTokenPriceHistoryRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetTokenPriceHistoryRequest proto.InternalMessageInfo
+
+func (m *QueryGetTokenPriceHistoryRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+func (m *QueryGetTokenPriceHistoryRequest) GetPagination() *query.PageRequest {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+// QueryGetTokenPriceHistoryResponse is response type for the Query/GetTokenPriceHistory RPC method.
+type QueryGetTokenPriceHistoryResponse struct {
+	Prices     []TokenPrice        `protobuf:"bytes,1,rep,name=prices,proto3" json:"prices"`
+	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryGetTokenPriceHistoryResponse) Reset()         { *m = QueryGetTokenPriceHistoryResponse{} }
+func (m *QueryGetTokenPriceHistoryResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetTokenPriceHistoryResponse) ProtoMessage()    {}
+func (*QueryGetTokenPriceHistoryResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{17}
+}
+func (m *QueryGetTokenPriceHistoryResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetTokenPriceHistoryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetTokenPriceHistoryResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetTokenPriceHistoryResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetTokenPriceHistoryResponse.Merge(m, src)
+}
+func (m *QueryGetTokenPriceHistoryResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetTokenPriceHistoryResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetTokenPriceHistoryResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetTokenPriceHistoryResponse proto.InternalMessageInfo
+
+func (m *QueryGetTokenPriceHistoryResponse) GetPrices() []TokenPrice {
+	if m != nil {
+		return m.Prices
+	}
+	return nil
+}
+
+func (m *QueryGetTokenPriceHistoryResponse) GetPagination() *query.PageResponse {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+// QueryGetTokenPriceDeviationRequest is request type for the Query/GetTokenPriceDeviation RPC method.
+type QueryGetTokenPriceDeviationRequest struct {
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *QueryGetTokenPriceDeviationRequest) Reset()         { *m = QueryGetTokenPriceDeviationRequest{} }
+func (m *QueryGetTokenPriceDeviationRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetTokenPriceDeviationRequest) ProtoMessage()    {}
+func (*QueryGetTokenPriceDeviationRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{18}
+}
+func (m *QueryGetTokenPriceDeviationRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetTokenPriceDeviationRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetTokenPriceDeviationRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetTokenPriceDeviationRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetTokenPriceDeviationRequest.Merge(m, src)
+}
+func (m *QueryGetTokenPriceDeviationRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetTokenPriceDeviationRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetTokenPriceDeviationRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetTokenPriceDeviationRequest proto.InternalMessageInfo
+
+func (m *QueryGetTokenPriceDeviationRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// QueryGetTokenPriceDeviationResponse is response type for the Query/GetTokenPriceDeviation RPC method.
+type QueryGetTokenPriceDeviationResponse struct {
+	Deviation         cosmossdk_io_math.LegacyDec `protobuf:"bytes,1,opt,name=deviation,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"deviation"`
+	IsWithinThreshold bool                        `protobuf:"varint,2,opt,name=is_within_threshold,json=isWithinThreshold,proto3" json:"is_within_threshold,omitempty"`
+	Threshold         cosmossdk_io_math.LegacyDec `protobuf:"bytes,3,opt,name=threshold,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"threshold"`
+}
+
+func (m *QueryGetTokenPriceDeviationResponse) Reset()         { *m = QueryGetTokenPriceDeviationResponse{} }
+func (m *QueryGetTokenPriceDeviationResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetTokenPriceDeviationResponse) ProtoMessage()    {}
+func (*QueryGetTokenPriceDeviationResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{19}
+}
+func (m *QueryGetTokenPriceDeviationResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetTokenPriceDeviationResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetTokenPriceDeviationResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetTokenPriceDeviationResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetTokenPriceDeviationResponse.Merge(m, src)
+}
+func (m *QueryGetTokenPriceDeviationResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetTokenPriceDeviationResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetTokenPriceDeviationResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetTokenPriceDeviationResponse proto.InternalMessageInfo
+
+func (m *QueryGetTokenPriceDeviationResponse) GetIsWithinThreshold() bool {
+	if m != nil {
+		return m.IsWithinThreshold
+	}
+	return false
+}
+
+// QueryGetPriceAggregationRequest is request type for the Query/GetPriceAggregation RPC method.
+type QueryGetPriceAggregationRequest struct {
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *QueryGetPriceAggregationRequest) Reset()         { *m = QueryGetPriceAggregationRequest{} }
+func (m *QueryGetPriceAggregationRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetPriceAggregationRequest) ProtoMessage()    {}
+func (*QueryGetPriceAggregationRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{20}
+}
+func (m *QueryGetPriceAggregationRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetPriceAggregationRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetPriceAggregationRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetPriceAggregationRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetPriceAggregationRequest.Merge(m, src)
+}
+func (m *QueryGetPriceAggregationRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetPriceAggregationRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetPriceAggregationRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetPriceAggregationRequest proto.InternalMessageInfo
+
+func (m *QueryGetPriceAggregationRequest) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// QueryGetPriceAggregationResponse is response type for the Query/GetPriceAggregation RPC method.
+type QueryGetPriceAggregationResponse struct {
+	Aggregation PriceAggregation `protobuf:"bytes,1,opt,name=aggregation,proto3" json:"aggregation"`
+}
+
+func (m *QueryGetPriceAggregationResponse) Reset()         { *m = QueryGetPriceAggregationResponse{} }
+func (m *QueryGetPriceAggregationResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetPriceAggregationResponse) ProtoMessage()    {}
+func (*QueryGetPriceAggregationResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_59e7766b170b4cea, []int{21}
+}
+func (m *QueryGetPriceAggregationResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetPriceAggregationResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetPriceAggregationResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetPriceAggregationResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetPriceAggregationResponse.Merge(m, src)
+}
+func (m *QueryGetPriceAggregationResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetPriceAggregationResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetPriceAggregationResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetPriceAggregationResponse proto.InternalMessageInfo
+
+func (m *QueryGetPriceAggregationResponse) GetAggregation() PriceAggregation {
+	if m != nil {
+		return m.Aggregation
+	}
+	return PriceAggregation{}
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "osmosis.usdoracle.v1beta1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "osmosis.usdoracle.v1beta1.QueryParamsResponse")
@@ -386,6 +1050,20 @@ func init() {
 	proto.RegisterType((*QueryGetPriceHistoryResponse)(nil), "osmosis.usdoracle.v1beta1.QueryGetPriceHistoryResponse")
 	proto.RegisterType((*QueryGetPriceDeviationRequest)(nil), "osmosis.usdoracle.v1beta1.QueryGetPriceDeviationRequest")
 	proto.RegisterType((*QueryGetPriceDeviationResponse)(nil), "osmosis.usdoracle.v1beta1.QueryGetPriceDeviationResponse")
+	proto.RegisterType((*QueryGetTokenPriceRequest)(nil), "osmosis.usdoracle.v1beta1.QueryGetTokenPriceRequest")
+	proto.RegisterType((*QueryGetTokenPriceResponse)(nil), "osmosis.usdoracle.v1beta1.QueryGetTokenPriceResponse")
+	proto.RegisterType((*QueryGetAllTokenPricesRequest)(nil), "osmosis.usdoracle.v1beta1.QueryGetAllTokenPricesRequest")
+	proto.RegisterType((*QueryGetAllTokenPricesResponse)(nil), "osmosis.usdoracle.v1beta1.QueryGetAllTokenPricesResponse")
+	proto.RegisterType((*QueryGetSupportedTokensRequest)(nil), "osmosis.usdoracle.v1beta1.QueryGetSupportedTokensRequest")
+	proto.RegisterType((*QueryGetSupportedTokensResponse)(nil), "osmosis.usdoracle.v1beta1.QueryGetSupportedTokensResponse")
+	proto.RegisterType((*QueryGetTokenInfoRequest)(nil), "osmosis.usdoracle.v1beta1.QueryGetTokenInfoRequest")
+	proto.RegisterType((*QueryGetTokenInfoResponse)(nil), "osmosis.usdoracle.v1beta1.QueryGetTokenInfoResponse")
+	proto.RegisterType((*QueryGetTokenPriceHistoryRequest)(nil), "osmosis.usdoracle.v1beta1.QueryGetTokenPriceHistoryRequest")
+	proto.RegisterType((*QueryGetTokenPriceHistoryResponse)(nil), "osmosis.usdoracle.v1beta1.QueryGetTokenPriceHistoryResponse")
+	proto.RegisterType((*QueryGetTokenPriceDeviationRequest)(nil), "osmosis.usdoracle.v1beta1.QueryGetTokenPriceDeviationRequest")
+	proto.RegisterType((*QueryGetTokenPriceDeviationResponse)(nil), "osmosis.usdoracle.v1beta1.QueryGetTokenPriceDeviationResponse")
+	proto.RegisterType((*QueryGetPriceAggregationRequest)(nil), "osmosis.usdoracle.v1beta1.QueryGetPriceAggregationRequest")
+	proto.RegisterType((*QueryGetPriceAggregationResponse)(nil), "osmosis.usdoracle.v1beta1.QueryGetPriceAggregationResponse")
 }
 
 func init() {
@@ -393,47 +1071,76 @@ func init() {
 }
 
 var fileDescriptor_59e7766b170b4cea = []byte{
-	// 632 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x94, 0x4d, 0x6f, 0xd3, 0x4c,
-	0x10, 0xc7, 0xe3, 0x3e, 0x4f, 0x23, 0xba, 0x3d, 0xa0, 0x6e, 0x2b, 0xd1, 0xba, 0xc5, 0x6d, 0xdd,
-	0x52, 0x4a, 0xa5, 0xae, 0x69, 0x22, 0xde, 0x4e, 0x88, 0x28, 0xa2, 0x1c, 0x90, 0x28, 0xe1, 0x4d,
-	0x82, 0x43, 0xb4, 0x71, 0x56, 0xf6, 0x8a, 0xc4, 0xeb, 0x7a, 0x37, 0x81, 0x5c, 0x39, 0x72, 0x42,
-	0xea, 0x09, 0x89, 0x4f, 0x80, 0x38, 0xf2, 0x21, 0x7a, 0xac, 0xc4, 0x05, 0x71, 0xa8, 0x50, 0xc2,
-	0x07, 0x41, 0xde, 0x5d, 0x3b, 0x49, 0x93, 0xb4, 0x09, 0x37, 0x6b, 0x67, 0xfe, 0xf3, 0xff, 0xcd,
-	0xec, 0xac, 0xc1, 0x35, 0xc6, 0xeb, 0x8c, 0x53, 0xee, 0x34, 0x78, 0x95, 0x45, 0xd8, 0xad, 0x11,
-	0xa7, 0xb9, 0x57, 0x21, 0x02, 0xef, 0x39, 0x87, 0x0d, 0x12, 0xb5, 0x50, 0x18, 0x31, 0xc1, 0xe0,
-	0x92, 0x4e, 0x43, 0x69, 0x1a, 0xd2, 0x69, 0xe6, 0x82, 0xc7, 0x3c, 0x26, 0xb3, 0x9c, 0xf8, 0x4b,
-	0x09, 0xcc, 0x15, 0x8f, 0x31, 0xaf, 0x46, 0x1c, 0x1c, 0x52, 0x07, 0x07, 0x01, 0x13, 0x58, 0x50,
-	0x16, 0x70, 0x1d, 0xdd, 0x71, 0x65, 0x3d, 0xa7, 0x82, 0x39, 0x51, 0x3e, 0xa9, 0x6b, 0x88, 0x3d,
-	0x1a, 0xc8, 0x64, 0x9d, 0xbb, 0x35, 0x9a, 0x30, 0xc4, 0x11, 0xae, 0x27, 0x35, 0x6f, 0x8c, 0xce,
-	0xeb, 0x42, 0xcb, 0x54, 0x7b, 0x01, 0xc0, 0xa7, 0xb1, 0xe9, 0x81, 0xd4, 0x97, 0xc8, 0x61, 0x83,
-	0x70, 0x61, 0xbf, 0x04, 0xf3, 0x7d, 0xa7, 0x3c, 0x64, 0x01, 0x27, 0xf0, 0x3e, 0xc8, 0x2a, 0x9f,
-	0x45, 0x63, 0xcd, 0xd8, 0x9e, 0xcd, 0xad, 0xa3, 0x91, 0xb3, 0x40, 0x4a, 0x5a, 0xf8, 0xff, 0xf8,
-	0x74, 0x35, 0x53, 0xd2, 0x32, 0x7b, 0x09, 0x5c, 0x91, 0x75, 0xf7, 0x89, 0x78, 0xf1, 0xac, 0x78,
-	0x10, 0x51, 0x97, 0x24, 0x96, 0x6f, 0xc0, 0xe2, 0x60, 0x28, 0xf5, 0x9d, 0x0e, 0xe3, 0x03, 0x6d,
-	0xbb, 0x71, 0x8e, 0x6d, 0xa2, 0xd5, 0xc6, 0x4a, 0x67, 0x13, 0xb0, 0x9c, 0x14, 0x97, 0xd1, 0x47,
-	0x94, 0x0b, 0x16, 0xb5, 0xb4, 0x37, 0x7c, 0x08, 0x40, 0x77, 0xd6, 0xda, 0x64, 0x0b, 0xa9, 0x8b,
-	0x41, 0xf1, 0xc5, 0x20, 0xb5, 0x00, 0xdd, 0xde, 0xbc, 0x84, 0xbb, 0xd4, 0xa3, 0xb4, 0xbf, 0x1a,
-	0x60, 0x65, 0xb8, 0x8f, 0x6e, 0xe4, 0x01, 0xc8, 0x4a, 0xa0, 0x78, 0x80, 0xff, 0x4d, 0xd6, 0x89,
-	0x16, 0xc2, 0xfd, 0x3e, 0xd6, 0x29, 0xc9, 0x7a, 0xfd, 0x42, 0x56, 0xe5, 0xdf, 0x07, 0xbb, 0x0a,
-	0xae, 0xf6, 0xb1, 0x16, 0x49, 0x93, 0xca, 0x48, 0x72, 0x23, 0x47, 0x06, 0xb0, 0x46, 0x65, 0xa4,
-	0xfd, 0xcc, 0x54, 0x93, 0x43, 0x39, 0xb7, 0x99, 0xc2, 0x46, 0x4c, 0xfb, 0xeb, 0x74, 0x75, 0x59,
-	0x21, 0xf1, 0xea, 0x5b, 0x44, 0x99, 0x53, 0xc7, 0xc2, 0x47, 0x8f, 0x89, 0x87, 0xdd, 0x56, 0x91,
-	0xb8, 0xa5, 0xae, 0x0a, 0x22, 0x30, 0x4f, 0x79, 0xf9, 0x1d, 0x15, 0x3e, 0x0d, 0xca, 0xc2, 0x8f,
-	0x08, 0xf7, 0x59, 0xad, 0x2a, 0x1b, 0xbb, 0x54, 0x9a, 0xa3, 0xfc, 0x95, 0x8c, 0x3c, 0x4f, 0x02,
-	0xb9, 0xcf, 0xd3, 0x60, 0x5a, 0x52, 0xc1, 0x8f, 0x06, 0xc8, 0xaa, 0x2d, 0x83, 0xbb, 0xe7, 0xcc,
-	0x71, 0x70, 0xbd, 0x4d, 0x34, 0x6e, 0xba, 0x6a, 0xd3, 0x5e, 0xff, 0xf0, 0xe3, 0xcf, 0xd1, 0xd4,
-	0x32, 0x5c, 0x72, 0x06, 0x1f, 0x96, 0xda, 0x6c, 0xf8, 0xc5, 0x00, 0xb3, 0x3d, 0xab, 0x0b, 0x73,
-	0x17, 0x59, 0x0c, 0x3e, 0x01, 0x33, 0x3f, 0x91, 0x46, 0xb3, 0x6d, 0x4a, 0x36, 0x0b, 0xae, 0x0c,
-	0x61, 0x6b, 0xf0, 0x6a, 0x59, 0xae, 0x0d, 0xfc, 0x66, 0x80, 0xcb, 0x67, 0x96, 0x12, 0xde, 0x1e,
-	0xc3, 0x6e, 0xc8, 0x6b, 0x31, 0xef, 0x4c, 0xac, 0xd3, 0xa8, 0xdb, 0x12, 0xd5, 0x86, 0x6b, 0xc3,
-	0xc6, 0x18, 0x0b, 0xca, 0xbe, 0x46, 0xfb, 0x6e, 0x80, 0xb9, 0x81, 0xad, 0x83, 0x77, 0xc7, 0x35,
-	0x3e, 0xbb, 0xca, 0xe6, 0xbd, 0x7f, 0x50, 0x6a, 0xe8, 0x1d, 0x09, 0xbd, 0x09, 0xed, 0x91, 0xd0,
-	0xe9, 0x2e, 0x17, 0x9e, 0x1c, 0xb7, 0x2d, 0xe3, 0xa4, 0x6d, 0x19, 0xbf, 0xdb, 0x96, 0xf1, 0xa9,
-	0x63, 0x65, 0x4e, 0x3a, 0x56, 0xe6, 0x67, 0xc7, 0xca, 0xbc, 0xbe, 0xe5, 0x51, 0xe1, 0x37, 0x2a,
-	0xc8, 0x65, 0xf5, 0xa4, 0xce, 0x6e, 0x0d, 0x57, 0x78, 0x5a, 0xb4, 0x99, 0xbf, 0xe9, 0xbc, 0xef,
-	0x29, 0x2d, 0x5a, 0x21, 0xe1, 0x95, 0xac, 0xfc, 0x49, 0xe7, 0xff, 0x06, 0x00, 0x00, 0xff, 0xff,
-	0x9a, 0x0c, 0xaa, 0x8d, 0x9b, 0x06, 0x00, 0x00,
+	// 1099 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x58, 0x5d, 0x6b, 0x1c, 0x55,
+	0x18, 0xce, 0x49, 0x4d, 0xb0, 0x6f, 0x94, 0xd2, 0x93, 0xa0, 0xcd, 0x24, 0x6e, 0x92, 0x49, 0x93,
+	0xa6, 0xad, 0x99, 0xc9, 0x57, 0x3f, 0x4c, 0xfd, 0x20, 0x31, 0x1a, 0x05, 0xc1, 0xba, 0xa9, 0x0a,
+	0x7a, 0xb1, 0xcc, 0xee, 0x9e, 0xce, 0x0e, 0xdd, 0x9d, 0xb3, 0x9d, 0x33, 0x9b, 0x1a, 0x44, 0x10,
+	0x2f, 0xbd, 0x12, 0x7a, 0xeb, 0x0f, 0x10, 0x29, 0x82, 0xa8, 0xe0, 0x0f, 0xf0, 0xa2, 0x5e, 0x08,
+	0x15, 0x6f, 0x44, 0xa1, 0x48, 0xe2, 0x0f, 0x91, 0x3d, 0xe7, 0xcc, 0xf7, 0x47, 0x66, 0x96, 0x80,
+	0xbd, 0x4b, 0xe6, 0xbc, 0xcf, 0x79, 0x9e, 0xe7, 0x7d, 0xdf, 0x73, 0xde, 0xc3, 0xc2, 0x02, 0x65,
+	0x1d, 0xca, 0x2c, 0xa6, 0xf7, 0x58, 0x93, 0x3a, 0x46, 0xa3, 0x4d, 0xf4, 0xfd, 0xd5, 0x3a, 0x71,
+	0x8d, 0x55, 0xfd, 0x6e, 0x8f, 0x38, 0x07, 0x5a, 0xd7, 0xa1, 0x2e, 0xc5, 0x93, 0x32, 0x4c, 0xf3,
+	0xc3, 0x34, 0x19, 0xa6, 0x4c, 0x98, 0xd4, 0xa4, 0x3c, 0x4a, 0xef, 0xff, 0x25, 0x00, 0xca, 0xb4,
+	0x49, 0xa9, 0xd9, 0x26, 0xba, 0xd1, 0xb5, 0x74, 0xc3, 0xb6, 0xa9, 0x6b, 0xb8, 0x16, 0xb5, 0x99,
+	0x5c, 0xbd, 0xd4, 0xe0, 0xfb, 0xe9, 0x75, 0x83, 0x11, 0xc1, 0xe3, 0xb3, 0x76, 0x0d, 0xd3, 0xb2,
+	0x79, 0xb0, 0x8c, 0x5d, 0xcc, 0x56, 0xd8, 0x35, 0x1c, 0xa3, 0xe3, 0xed, 0x79, 0x31, 0x3b, 0x2e,
+	0x10, 0xcd, 0x43, 0xd5, 0x09, 0xc0, 0xef, 0xf5, 0x49, 0x6f, 0x72, 0x7c, 0x95, 0xdc, 0xed, 0x11,
+	0xe6, 0xaa, 0x1f, 0xc0, 0x78, 0xe4, 0x2b, 0xeb, 0x52, 0x9b, 0x11, 0xfc, 0x1a, 0x8c, 0x0a, 0x9e,
+	0x73, 0x68, 0x16, 0x2d, 0x8d, 0xad, 0xcd, 0x69, 0x99, 0xb9, 0xd0, 0x04, 0x74, 0xfb, 0xa9, 0x87,
+	0x8f, 0x67, 0x86, 0xaa, 0x12, 0xa6, 0x4e, 0xc2, 0xf3, 0x7c, 0xdf, 0x5d, 0xe2, 0xbe, 0xbf, 0xb7,
+	0x73, 0xd3, 0xb1, 0x1a, 0xc4, 0xa3, 0xfc, 0x18, 0xce, 0x25, 0x97, 0x7c, 0xde, 0x91, 0x6e, 0xff,
+	0x83, 0xa4, 0x9d, 0xcf, 0xa1, 0xf5, 0xb0, 0x92, 0x58, 0xe0, 0x54, 0x02, 0x53, 0xde, 0xe6, 0x7c,
+	0xf5, 0x2d, 0x8b, 0xb9, 0xd4, 0x39, 0x90, 0xdc, 0xf8, 0x4d, 0x80, 0x20, 0xd7, 0x92, 0x64, 0x51,
+	0x13, 0x85, 0xd1, 0xfa, 0x85, 0xd1, 0x44, 0x03, 0x04, 0xde, 0x4c, 0x4f, 0x77, 0x35, 0x84, 0x54,
+	0xbf, 0x45, 0x30, 0x9d, 0xce, 0x23, 0x8d, 0x6c, 0xc1, 0x28, 0x17, 0xd4, 0x4f, 0xe0, 0xa9, 0x72,
+	0x4e, 0x24, 0x10, 0xef, 0x46, 0xb4, 0x0e, 0x73, 0xad, 0x17, 0x8e, 0xd5, 0x2a, 0xf8, 0x23, 0x62,
+	0x67, 0xe0, 0x85, 0x88, 0xd6, 0x1d, 0xb2, 0x6f, 0xf1, 0x15, 0xaf, 0x22, 0xf7, 0x11, 0x54, 0xb2,
+	0x22, 0x7c, 0x3f, 0xa7, 0x9b, 0xde, 0x47, 0x9e, 0xb7, 0xd3, 0xdb, 0xf3, 0x7d, 0xb5, 0x7f, 0x3d,
+	0x9e, 0x99, 0x12, 0x92, 0x58, 0xf3, 0x8e, 0x66, 0x51, 0xbd, 0x63, 0xb8, 0x2d, 0xed, 0x1d, 0x62,
+	0x1a, 0x8d, 0x83, 0x1d, 0xd2, 0xa8, 0x06, 0x28, 0xac, 0xc1, 0xb8, 0xc5, 0x6a, 0xf7, 0x2c, 0xb7,
+	0x65, 0xd9, 0x35, 0xb7, 0xe5, 0x10, 0xd6, 0xa2, 0xed, 0x26, 0x37, 0xf6, 0x74, 0xf5, 0xac, 0xc5,
+	0x3e, 0xe4, 0x2b, 0xb7, 0xbc, 0x05, 0x75, 0x15, 0x26, 0x3d, 0x51, 0xb7, 0xe8, 0x1d, 0x62, 0x87,
+	0x9b, 0x08, 0x4f, 0xc0, 0x48, 0x93, 0xd8, 0xb4, 0x23, 0xb4, 0x54, 0xc5, 0x3f, 0x6a, 0x0d, 0x94,
+	0x34, 0x88, 0xef, 0x21, 0xd2, 0x5c, 0x0b, 0x39, 0x25, 0x09, 0xd0, 0xd1, 0xf6, 0x32, 0x83, 0x54,
+	0x6e, 0xb5, 0xdb, 0x41, 0x14, 0x3b, 0xe9, 0x06, 0xfb, 0x2e, 0x54, 0x92, 0x38, 0x93, 0xb4, 0xf3,
+	0x7a, 0xac, 0xc5, 0x4a, 0xf9, 0x39, 0xf1, 0x26, 0x6b, 0x05, 0x7a, 0xf7, 0x7a, 0xdd, 0x2e, 0x75,
+	0x5c, 0xd2, 0xe4, 0xac, 0x27, 0x9e, 0x9a, 0x1f, 0x10, 0xcc, 0x64, 0x52, 0xc9, 0xdc, 0xec, 0xc2,
+	0xa8, 0xcb, 0xbf, 0xc8, 0xdc, 0x5c, 0xcc, 0xc9, 0x4d, 0x74, 0x0f, 0x2f, 0x3f, 0x02, 0x7e, 0x72,
+	0xf9, 0x59, 0x09, 0x6e, 0x3d, 0xce, 0xf3, 0xb6, 0x7d, 0x9b, 0xe6, 0x37, 0x73, 0x3d, 0xd6, 0xff,
+	0x02, 0x21, 0x0d, 0xbe, 0x01, 0x23, 0x5c, 0xa1, 0xcc, 0x63, 0x69, 0x7f, 0x02, 0xad, 0x7e, 0x8e,
+	0x60, 0x36, 0x79, 0x62, 0x62, 0x97, 0x66, 0xaa, 0xbc, 0x58, 0x39, 0x87, 0x07, 0x2e, 0xe7, 0xf7,
+	0x08, 0xe6, 0x72, 0x24, 0x3c, 0x91, 0xcd, 0xbe, 0x09, 0x6a, 0x52, 0x72, 0xfc, 0x5a, 0xcd, 0x28,
+	0xeb, 0xdf, 0x08, 0xe6, 0x73, 0xc1, 0xff, 0xdb, 0x8d, 0xdb, 0xa7, 0x0c, 0xa2, 0x4e, 0x95, 0xa0,
+	0xf4, 0x51, 0xea, 0xb5, 0xe0, 0x6c, 0x72, 0x5f, 0x5b, 0xa6, 0xe9, 0x10, 0xb3, 0x40, 0x5a, 0xee,
+	0x05, 0x8d, 0x98, 0x04, 0xca, 0x94, 0xec, 0xc1, 0x98, 0x11, 0x7c, 0x96, 0xad, 0x7f, 0x39, 0xef,
+	0x69, 0x12, 0xdb, 0x49, 0xf6, 0x43, 0x78, 0x97, 0xb5, 0xdf, 0xce, 0xc0, 0x08, 0x67, 0xc6, 0x5f,
+	0x22, 0x18, 0x15, 0x8f, 0x19, 0xbc, 0x9c, 0xb3, 0x69, 0xf2, 0x15, 0xa5, 0x68, 0x45, 0xc3, 0x85,
+	0x11, 0x75, 0xee, 0x8b, 0x3f, 0xfe, 0xbd, 0x3f, 0x3c, 0x85, 0x27, 0xf5, 0xe4, 0xfb, 0x4d, 0x3c,
+	0xa0, 0xf0, 0xd7, 0x08, 0xc6, 0x42, 0x2f, 0x24, 0xbc, 0x76, 0x1c, 0x45, 0xf2, 0xa5, 0xa5, 0xac,
+	0x97, 0xc2, 0x48, 0x6d, 0xe7, 0xb9, 0xb6, 0x0a, 0x9e, 0x4e, 0xd1, 0xd6, 0x63, 0xcd, 0x1a, 0x3f,
+	0x4b, 0xf8, 0x01, 0x82, 0x67, 0x23, 0x0d, 0x8c, 0x37, 0x0a, 0x90, 0x25, 0xe6, 0xb8, 0x72, 0xa5,
+	0x24, 0x4a, 0x8a, 0xd4, 0xb8, 0xc8, 0x25, 0xbc, 0x98, 0x22, 0x92, 0xdf, 0x6c, 0x42, 0xa6, 0xfe,
+	0x29, 0x6f, 0xae, 0xcf, 0xf0, 0x4f, 0x08, 0xce, 0x26, 0x26, 0x29, 0xbe, 0x5e, 0x80, 0x3c, 0x75,
+	0xcc, 0x2b, 0x2f, 0x0d, 0x80, 0x94, 0xd2, 0x2f, 0x73, 0xe9, 0x0b, 0x78, 0x3e, 0x45, 0xba, 0xd1,
+	0x6e, 0xd7, 0x42, 0xf2, 0x19, 0xfe, 0x19, 0x01, 0x4e, 0x8e, 0x39, 0x5c, 0x84, 0x3e, 0x7d, 0x0a,
+	0x2b, 0x9b, 0x83, 0x40, 0x0b, 0x48, 0x67, 0x1e, 0xa6, 0x26, 0x27, 0xe7, 0x37, 0x08, 0x9e, 0x09,
+	0x8f, 0x2e, 0xbc, 0x5e, 0xb4, 0xd4, 0xa1, 0xd1, 0xa8, 0x6c, 0x94, 0x03, 0x49, 0xa1, 0xcb, 0x5c,
+	0xe8, 0x05, 0xbc, 0x90, 0xd9, 0x1e, 0x96, 0x7d, 0x9b, 0xfa, 0xdd, 0xf1, 0x00, 0xc1, 0x99, 0xd8,
+	0x43, 0x1e, 0x5f, 0x2d, 0x40, 0x9c, 0x32, 0x2c, 0x95, 0x6b, 0xa5, 0x71, 0x52, 0xf3, 0x12, 0xd7,
+	0xac, 0xe2, 0xd9, 0xb4, 0x3b, 0xa1, 0x0f, 0xa8, 0xb5, 0xa4, 0xb4, 0x5f, 0x11, 0x4c, 0xa4, 0x0d,
+	0x4b, 0x7c, 0xa3, 0xd4, 0x61, 0x8a, 0x09, 0x7f, 0x79, 0x30, 0xb0, 0x54, 0x7f, 0x95, 0xab, 0x5f,
+	0xc1, 0x5a, 0xfe, 0x81, 0xf4, 0x3c, 0xf8, 0xa9, 0xff, 0x51, 0x1c, 0xcc, 0xe8, 0x0c, 0x2c, 0x74,
+	0x30, 0x53, 0x67, 0x6e, 0xa1, 0x83, 0x99, 0x3e, 0x70, 0xd5, 0x4b, 0xdc, 0xc2, 0x79, 0xac, 0x66,
+	0x16, 0x20, 0x98, 0xac, 0xbf, 0x23, 0x78, 0x2e, 0x7d, 0x7e, 0xe3, 0x57, 0x4a, 0xe5, 0x31, 0x61,
+	0xe0, 0xd5, 0x41, 0xe1, 0xd2, 0xc5, 0x75, 0xee, 0x62, 0x0d, 0xaf, 0x1c, 0x53, 0x08, 0xdf, 0x8b,
+	0x5f, 0x8a, 0x5f, 0x10, 0x8c, 0xa7, 0x4c, 0x5f, 0xbc, 0x59, 0x34, 0xa5, 0xc9, 0x59, 0xaf, 0xdc,
+	0x18, 0x08, 0x2b, 0xad, 0x6c, 0x70, 0x2b, 0x1a, 0x7e, 0x31, 0xb3, 0x20, 0xa1, 0x39, 0xee, 0xd9,
+	0xd8, 0x7e, 0xf7, 0xe1, 0x61, 0x05, 0x3d, 0x3a, 0xac, 0xa0, 0x7f, 0x0e, 0x2b, 0xe8, 0xab, 0xa3,
+	0xca, 0xd0, 0xa3, 0xa3, 0xca, 0xd0, 0x9f, 0x47, 0x95, 0xa1, 0x8f, 0xae, 0x98, 0x96, 0xdb, 0xea,
+	0xd5, 0xb5, 0x06, 0xed, 0x78, 0x3b, 0x2e, 0xb7, 0x8d, 0x3a, 0xf3, 0xb7, 0xdf, 0x5f, 0x5f, 0xd1,
+	0x3f, 0x09, 0xe7, 0xeb, 0xa0, 0x4b, 0x58, 0x7d, 0x94, 0xff, 0x7e, 0xb2, 0xfe, 0x5f, 0x00, 0x00,
+	0x00, 0xff, 0xff, 0x09, 0x39, 0xa7, 0x50, 0x36, 0x12, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -450,12 +1157,26 @@ const _ = grpc.SupportPackageIsVersion4
 type QueryClient interface {
 	// Params queries the parameters of the module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
-	// GetUSDPrice queries the current USD price
+	// GetUSDPrice queries the current USD price (legacy)
 	GetUSDPrice(ctx context.Context, in *QueryGetUSDPriceRequest, opts ...grpc.CallOption) (*QueryGetUSDPriceResponse, error)
-	// GetPriceHistory queries the USD price history
+	// GetTokenPrice queries the current USD price for a specific token
+	GetTokenPrice(ctx context.Context, in *QueryGetTokenPriceRequest, opts ...grpc.CallOption) (*QueryGetTokenPriceResponse, error)
+	// GetAllTokenPrices queries USD prices for all supported tokens
+	GetAllTokenPrices(ctx context.Context, in *QueryGetAllTokenPricesRequest, opts ...grpc.CallOption) (*QueryGetAllTokenPricesResponse, error)
+	// GetSupportedTokens queries all supported tokens
+	GetSupportedTokens(ctx context.Context, in *QueryGetSupportedTokensRequest, opts ...grpc.CallOption) (*QueryGetSupportedTokensResponse, error)
+	// GetTokenInfo queries information about a specific token
+	GetTokenInfo(ctx context.Context, in *QueryGetTokenInfoRequest, opts ...grpc.CallOption) (*QueryGetTokenInfoResponse, error)
+	// GetPriceHistory queries the USD price history (legacy)
 	GetPriceHistory(ctx context.Context, in *QueryGetPriceHistoryRequest, opts ...grpc.CallOption) (*QueryGetPriceHistoryResponse, error)
-	// GetPriceDeviation queries the current price deviation from peg
+	// GetTokenPriceHistory queries the USD price history for a specific token
+	GetTokenPriceHistory(ctx context.Context, in *QueryGetTokenPriceHistoryRequest, opts ...grpc.CallOption) (*QueryGetTokenPriceHistoryResponse, error)
+	// GetPriceDeviation queries the current price deviation from peg (legacy)
 	GetPriceDeviation(ctx context.Context, in *QueryGetPriceDeviationRequest, opts ...grpc.CallOption) (*QueryGetPriceDeviationResponse, error)
+	// GetTokenPriceDeviation queries the price deviation for a specific token
+	GetTokenPriceDeviation(ctx context.Context, in *QueryGetTokenPriceDeviationRequest, opts ...grpc.CallOption) (*QueryGetTokenPriceDeviationResponse, error)
+	// GetPriceAggregation queries aggregated price data for a token
+	GetPriceAggregation(ctx context.Context, in *QueryGetPriceAggregationRequest, opts ...grpc.CallOption) (*QueryGetPriceAggregationResponse, error)
 }
 
 type queryClient struct {
@@ -484,9 +1205,54 @@ func (c *queryClient) GetUSDPrice(ctx context.Context, in *QueryGetUSDPriceReque
 	return out, nil
 }
 
+func (c *queryClient) GetTokenPrice(ctx context.Context, in *QueryGetTokenPriceRequest, opts ...grpc.CallOption) (*QueryGetTokenPriceResponse, error) {
+	out := new(QueryGetTokenPriceResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usdoracle.v1beta1.Query/GetTokenPrice", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetAllTokenPrices(ctx context.Context, in *QueryGetAllTokenPricesRequest, opts ...grpc.CallOption) (*QueryGetAllTokenPricesResponse, error) {
+	out := new(QueryGetAllTokenPricesResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usdoracle.v1beta1.Query/GetAllTokenPrices", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetSupportedTokens(ctx context.Context, in *QueryGetSupportedTokensRequest, opts ...grpc.CallOption) (*QueryGetSupportedTokensResponse, error) {
+	out := new(QueryGetSupportedTokensResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usdoracle.v1beta1.Query/GetSupportedTokens", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetTokenInfo(ctx context.Context, in *QueryGetTokenInfoRequest, opts ...grpc.CallOption) (*QueryGetTokenInfoResponse, error) {
+	out := new(QueryGetTokenInfoResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usdoracle.v1beta1.Query/GetTokenInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *queryClient) GetPriceHistory(ctx context.Context, in *QueryGetPriceHistoryRequest, opts ...grpc.CallOption) (*QueryGetPriceHistoryResponse, error) {
 	out := new(QueryGetPriceHistoryResponse)
 	err := c.cc.Invoke(ctx, "/osmosis.usdoracle.v1beta1.Query/GetPriceHistory", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetTokenPriceHistory(ctx context.Context, in *QueryGetTokenPriceHistoryRequest, opts ...grpc.CallOption) (*QueryGetTokenPriceHistoryResponse, error) {
+	out := new(QueryGetTokenPriceHistoryResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usdoracle.v1beta1.Query/GetTokenPriceHistory", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -502,16 +1268,48 @@ func (c *queryClient) GetPriceDeviation(ctx context.Context, in *QueryGetPriceDe
 	return out, nil
 }
 
+func (c *queryClient) GetTokenPriceDeviation(ctx context.Context, in *QueryGetTokenPriceDeviationRequest, opts ...grpc.CallOption) (*QueryGetTokenPriceDeviationResponse, error) {
+	out := new(QueryGetTokenPriceDeviationResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usdoracle.v1beta1.Query/GetTokenPriceDeviation", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetPriceAggregation(ctx context.Context, in *QueryGetPriceAggregationRequest, opts ...grpc.CallOption) (*QueryGetPriceAggregationResponse, error) {
+	out := new(QueryGetPriceAggregationResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usdoracle.v1beta1.Query/GetPriceAggregation", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Params queries the parameters of the module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
-	// GetUSDPrice queries the current USD price
+	// GetUSDPrice queries the current USD price (legacy)
 	GetUSDPrice(context.Context, *QueryGetUSDPriceRequest) (*QueryGetUSDPriceResponse, error)
-	// GetPriceHistory queries the USD price history
+	// GetTokenPrice queries the current USD price for a specific token
+	GetTokenPrice(context.Context, *QueryGetTokenPriceRequest) (*QueryGetTokenPriceResponse, error)
+	// GetAllTokenPrices queries USD prices for all supported tokens
+	GetAllTokenPrices(context.Context, *QueryGetAllTokenPricesRequest) (*QueryGetAllTokenPricesResponse, error)
+	// GetSupportedTokens queries all supported tokens
+	GetSupportedTokens(context.Context, *QueryGetSupportedTokensRequest) (*QueryGetSupportedTokensResponse, error)
+	// GetTokenInfo queries information about a specific token
+	GetTokenInfo(context.Context, *QueryGetTokenInfoRequest) (*QueryGetTokenInfoResponse, error)
+	// GetPriceHistory queries the USD price history (legacy)
 	GetPriceHistory(context.Context, *QueryGetPriceHistoryRequest) (*QueryGetPriceHistoryResponse, error)
-	// GetPriceDeviation queries the current price deviation from peg
+	// GetTokenPriceHistory queries the USD price history for a specific token
+	GetTokenPriceHistory(context.Context, *QueryGetTokenPriceHistoryRequest) (*QueryGetTokenPriceHistoryResponse, error)
+	// GetPriceDeviation queries the current price deviation from peg (legacy)
 	GetPriceDeviation(context.Context, *QueryGetPriceDeviationRequest) (*QueryGetPriceDeviationResponse, error)
+	// GetTokenPriceDeviation queries the price deviation for a specific token
+	GetTokenPriceDeviation(context.Context, *QueryGetTokenPriceDeviationRequest) (*QueryGetTokenPriceDeviationResponse, error)
+	// GetPriceAggregation queries aggregated price data for a token
+	GetPriceAggregation(context.Context, *QueryGetPriceAggregationRequest) (*QueryGetPriceAggregationResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -524,11 +1322,32 @@ func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParamsReq
 func (*UnimplementedQueryServer) GetUSDPrice(ctx context.Context, req *QueryGetUSDPriceRequest) (*QueryGetUSDPriceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUSDPrice not implemented")
 }
+func (*UnimplementedQueryServer) GetTokenPrice(ctx context.Context, req *QueryGetTokenPriceRequest) (*QueryGetTokenPriceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenPrice not implemented")
+}
+func (*UnimplementedQueryServer) GetAllTokenPrices(ctx context.Context, req *QueryGetAllTokenPricesRequest) (*QueryGetAllTokenPricesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllTokenPrices not implemented")
+}
+func (*UnimplementedQueryServer) GetSupportedTokens(ctx context.Context, req *QueryGetSupportedTokensRequest) (*QueryGetSupportedTokensResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSupportedTokens not implemented")
+}
+func (*UnimplementedQueryServer) GetTokenInfo(ctx context.Context, req *QueryGetTokenInfoRequest) (*QueryGetTokenInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenInfo not implemented")
+}
 func (*UnimplementedQueryServer) GetPriceHistory(ctx context.Context, req *QueryGetPriceHistoryRequest) (*QueryGetPriceHistoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPriceHistory not implemented")
 }
+func (*UnimplementedQueryServer) GetTokenPriceHistory(ctx context.Context, req *QueryGetTokenPriceHistoryRequest) (*QueryGetTokenPriceHistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenPriceHistory not implemented")
+}
 func (*UnimplementedQueryServer) GetPriceDeviation(ctx context.Context, req *QueryGetPriceDeviationRequest) (*QueryGetPriceDeviationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPriceDeviation not implemented")
+}
+func (*UnimplementedQueryServer) GetTokenPriceDeviation(ctx context.Context, req *QueryGetTokenPriceDeviationRequest) (*QueryGetTokenPriceDeviationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenPriceDeviation not implemented")
+}
+func (*UnimplementedQueryServer) GetPriceAggregation(ctx context.Context, req *QueryGetPriceAggregationRequest) (*QueryGetPriceAggregationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPriceAggregation not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -571,6 +1390,78 @@ func _Query_GetUSDPrice_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_GetTokenPrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetTokenPriceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetTokenPrice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.usdoracle.v1beta1.Query/GetTokenPrice",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetTokenPrice(ctx, req.(*QueryGetTokenPriceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetAllTokenPrices_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetAllTokenPricesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetAllTokenPrices(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.usdoracle.v1beta1.Query/GetAllTokenPrices",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetAllTokenPrices(ctx, req.(*QueryGetAllTokenPricesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetSupportedTokens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetSupportedTokensRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetSupportedTokens(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.usdoracle.v1beta1.Query/GetSupportedTokens",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetSupportedTokens(ctx, req.(*QueryGetSupportedTokensRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetTokenInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetTokenInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetTokenInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.usdoracle.v1beta1.Query/GetTokenInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetTokenInfo(ctx, req.(*QueryGetTokenInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Query_GetPriceHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(QueryGetPriceHistoryRequest)
 	if err := dec(in); err != nil {
@@ -585,6 +1476,24 @@ func _Query_GetPriceHistory_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).GetPriceHistory(ctx, req.(*QueryGetPriceHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetTokenPriceHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetTokenPriceHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetTokenPriceHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.usdoracle.v1beta1.Query/GetTokenPriceHistory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetTokenPriceHistory(ctx, req.(*QueryGetTokenPriceHistoryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -607,6 +1516,42 @@ func _Query_GetPriceDeviation_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_GetTokenPriceDeviation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetTokenPriceDeviationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetTokenPriceDeviation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.usdoracle.v1beta1.Query/GetTokenPriceDeviation",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetTokenPriceDeviation(ctx, req.(*QueryGetTokenPriceDeviationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetPriceAggregation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetPriceAggregationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetPriceAggregation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.usdoracle.v1beta1.Query/GetPriceAggregation",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetPriceAggregation(ctx, req.(*QueryGetPriceAggregationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "osmosis.usdoracle.v1beta1.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -620,12 +1565,40 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_GetUSDPrice_Handler,
 		},
 		{
+			MethodName: "GetTokenPrice",
+			Handler:    _Query_GetTokenPrice_Handler,
+		},
+		{
+			MethodName: "GetAllTokenPrices",
+			Handler:    _Query_GetAllTokenPrices_Handler,
+		},
+		{
+			MethodName: "GetSupportedTokens",
+			Handler:    _Query_GetSupportedTokens_Handler,
+		},
+		{
+			MethodName: "GetTokenInfo",
+			Handler:    _Query_GetTokenInfo_Handler,
+		},
+		{
 			MethodName: "GetPriceHistory",
 			Handler:    _Query_GetPriceHistory_Handler,
 		},
 		{
+			MethodName: "GetTokenPriceHistory",
+			Handler:    _Query_GetTokenPriceHistory_Handler,
+		},
+		{
 			MethodName: "GetPriceDeviation",
 			Handler:    _Query_GetPriceDeviation_Handler,
+		},
+		{
+			MethodName: "GetTokenPriceDeviation",
+			Handler:    _Query_GetTokenPriceDeviation_Handler,
+		},
+		{
+			MethodName: "GetPriceAggregation",
+			Handler:    _Query_GetPriceAggregation_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -894,6 +1867,537 @@ func (m *QueryGetPriceDeviationResponse) MarshalToSizedBuffer(dAtA []byte) (int,
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryGetTokenPriceRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetTokenPriceRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetTokenPriceRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetTokenPriceResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetTokenPriceResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetTokenPriceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.Price.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetAllTokenPricesRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetAllTokenPricesRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetAllTokenPricesRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetAllTokenPricesResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetAllTokenPricesResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetAllTokenPricesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Prices) > 0 {
+		for iNdEx := len(m.Prices) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Prices[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetSupportedTokensRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetSupportedTokensRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetSupportedTokensRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetSupportedTokensResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetSupportedTokensResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetSupportedTokensResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Tokens) > 0 {
+		for iNdEx := len(m.Tokens) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Tokens[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetTokenInfoRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetTokenInfoRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetTokenInfoRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetTokenInfoResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetTokenInfoResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetTokenInfoResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.Token.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetTokenPriceHistoryRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetTokenPriceHistoryRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetTokenPriceHistoryRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetTokenPriceHistoryResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetTokenPriceHistoryResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetTokenPriceHistoryResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Prices) > 0 {
+		for iNdEx := len(m.Prices) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Prices[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetTokenPriceDeviationRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetTokenPriceDeviationRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetTokenPriceDeviationRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetTokenPriceDeviationResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetTokenPriceDeviationResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetTokenPriceDeviationResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size := m.Threshold.Size()
+		i -= size
+		if _, err := m.Threshold.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x1a
+	if m.IsWithinThreshold {
+		i--
+		if m.IsWithinThreshold {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x10
+	}
+	{
+		size := m.Deviation.Size()
+		i -= size
+		if _, err := m.Deviation.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetPriceAggregationRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetPriceAggregationRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetPriceAggregationRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetPriceAggregationResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetPriceAggregationResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetPriceAggregationResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.Aggregation.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -997,6 +2501,207 @@ func (m *QueryGetPriceDeviationResponse) Size() (n int) {
 	if m.IsWithinThreshold {
 		n += 2
 	}
+	return n
+}
+
+func (m *QueryGetTokenPriceRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetTokenPriceResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.Price.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryGetAllTokenPricesRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetAllTokenPricesResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Prices) > 0 {
+		for _, e := range m.Prices {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetSupportedTokensRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetSupportedTokensResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Tokens) > 0 {
+		for _, e := range m.Tokens {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetTokenInfoRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetTokenInfoResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.Token.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryGetTokenPriceHistoryRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetTokenPriceHistoryResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Prices) > 0 {
+		for _, e := range m.Prices {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetTokenPriceDeviationRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetTokenPriceDeviationResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.Deviation.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	if m.IsWithinThreshold {
+		n += 2
+	}
+	l = m.Threshold.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryGetPriceAggregationRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetPriceAggregationResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.Aggregation.Size()
+	n += 1 + l + sovQuery(uint64(l))
 	return n
 }
 
@@ -1611,6 +3316,1371 @@ func (m *QueryGetPriceDeviationResponse) Unmarshal(dAtA []byte) error {
 				}
 			}
 			m.IsWithinThreshold = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetTokenPriceRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetTokenPriceRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetTokenPriceRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetTokenPriceResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetTokenPriceResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetTokenPriceResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Price", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Price.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetAllTokenPricesRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetAllTokenPricesRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetAllTokenPricesRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageRequest{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetAllTokenPricesResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetAllTokenPricesResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetAllTokenPricesResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Prices", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Prices = append(m.Prices, TokenPrice{})
+			if err := m.Prices[len(m.Prices)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageResponse{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetSupportedTokensRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetSupportedTokensRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetSupportedTokensRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageRequest{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetSupportedTokensResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetSupportedTokensResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetSupportedTokensResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Tokens", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Tokens = append(m.Tokens, SupportedToken{})
+			if err := m.Tokens[len(m.Tokens)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageResponse{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetTokenInfoRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetTokenInfoRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetTokenInfoRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetTokenInfoResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetTokenInfoResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetTokenInfoResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Token", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Token.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetTokenPriceHistoryRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetTokenPriceHistoryRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetTokenPriceHistoryRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageRequest{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetTokenPriceHistoryResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetTokenPriceHistoryResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetTokenPriceHistoryResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Prices", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Prices = append(m.Prices, TokenPrice{})
+			if err := m.Prices[len(m.Prices)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageResponse{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetTokenPriceDeviationRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetTokenPriceDeviationRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetTokenPriceDeviationRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetTokenPriceDeviationResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetTokenPriceDeviationResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetTokenPriceDeviationResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Deviation", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Deviation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IsWithinThreshold", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.IsWithinThreshold = bool(v != 0)
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Threshold", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Threshold.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetPriceAggregationRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetPriceAggregationRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetPriceAggregationRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetPriceAggregationResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetPriceAggregationResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetPriceAggregationResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Aggregation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Aggregation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipQuery(dAtA[iNdEx:])
