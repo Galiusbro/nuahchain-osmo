@@ -65,8 +65,16 @@ func (k msgServer) ExchangeTokens(ctx sdk.Context, msg *types.MsgExchangeTokens)
 		}
 	}
 
-	// Calculate USD value of input tokens
-	usdValue := math.LegacyNewDecFromInt(msg.TokenIn.Amount).Mul(exchangeRate.Rate)
+	// Get token decimals for proper USD value calculation
+	supportedToken, found := k.usdOracleKeeper.GetSupportedToken(ctx, msg.TokenIn.Denom)
+	if !found {
+		return nil, errors.Wrapf(types.ErrUnsupportedToken, "token %s not found in supported tokens", msg.TokenIn.Denom)
+	}
+
+	// Calculate USD value of the input token, adjusting for token decimals
+	// Convert from token base units to actual token amount using decimals
+	tokenAmount := math.LegacyNewDecFromInt(msg.TokenIn.Amount).Quo(math.LegacyNewDec(10).Power(uint64(supportedToken.Decimals)))
+	usdValue := tokenAmount.Mul(exchangeRate.Rate)
 
 	// Validate exchange amount limits
 	if usdValue.LT(params.MinExchangeAmountUsd) {
@@ -83,9 +91,9 @@ func (k msgServer) ExchangeTokens(ctx sdk.Context, msg *types.MsgExchangeTokens)
 	if err != nil {
 		// Create new daily limit if not found
 		dailyLimit = types.DailyLimit{
-			Address:            msg.Sender,
-			TotalExchangedUsd:  math.LegacyZeroDec(),
-			Date:               today,
+			Address:           msg.Sender,
+			TotalExchangedUsd: math.LegacyZeroDec(),
+			Date:              today,
 		}
 	}
 
@@ -99,7 +107,8 @@ func (k msgServer) ExchangeTokens(ctx sdk.Context, msg *types.MsgExchangeTokens)
 	netUsdValue := usdValue.Sub(feeAmount)
 
 	// Calculate N$ output (1:1 with USD after fees)
-	nuahOut := netUsdValue.TruncateInt()
+	// N$ has 6 decimals, so multiply by 10^6 to convert from USD to base units
+	nuahOut := netUsdValue.Mul(math.LegacyNewDec(1000000)).TruncateInt()
 
 	// Check minimum output
 	if nuahOut.LT(msg.MinNuahOut) {
@@ -141,7 +150,8 @@ func (k msgServer) ExchangeTokens(ctx sdk.Context, msg *types.MsgExchangeTokens)
 		}
 	} else {
 		// Send to community pool via distribution module
-		if err := k.distributionKeeper.FundCommunityPool(ctx, sdk.NewCoins(msg.TokenIn), senderAddr); err != nil {
+		moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
+		if err := k.distributionKeeper.FundCommunityPool(ctx, sdk.NewCoins(msg.TokenIn), moduleAddr); err != nil {
 			return nil, errors.Wrap(err, "failed to send tokens to community pool")
 		}
 	}

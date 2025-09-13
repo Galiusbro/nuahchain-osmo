@@ -85,9 +85,9 @@ func (k Keeper) DailyLimit(ctx sdk.Context, req *types.QueryDailyLimitRequest) (
 	if err != nil {
 		// If not found, return zero limit
 		dailyLimit = types.DailyLimit{
-			Address:            req.Address,
-			TotalExchangedUsd:  math.LegacyZeroDec(),
-			Date:               today,
+			Address:           req.Address,
+			TotalExchangedUsd: math.LegacyZeroDec(),
+			Date:              today,
 		}
 	}
 

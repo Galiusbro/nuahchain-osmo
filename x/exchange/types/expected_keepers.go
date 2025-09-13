@@ -38,6 +38,7 @@ type USDOracleKeeper interface {
 	GetTokenPriceForExchange(ctx context.Context, denom string) (usdoracletypes.TokenPrice, bool)
 	GetParams(ctx context.Context) usdoracletypes.Params
 	IsTokenSupported(ctx context.Context, denom string) bool
+	GetSupportedToken(ctx context.Context, denom string) (usdoracletypes.SupportedToken, bool)
 }
 
 // TWAPKeeper defines the expected interface for the TWAP module

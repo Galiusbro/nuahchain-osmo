@@ -10,26 +10,26 @@ import (
 
 // Parameter store keys
 var (
-	KeyEnabled                   = []byte("Enabled")
-	KeyAdmin                     = []byte("Admin")
-	KeyMinExchangeAmountUSD      = []byte("MinExchangeAmountUSD")
-	KeyMaxExchangeAmountUSD      = []byte("MaxExchangeAmountUSD")
-	KeyDailyLimitUSD             = []byte("DailyLimitUSD")
-	KeyPriceDeviationThreshold   = []byte("PriceDeviationThreshold")
-	KeyTreasuryAddresses         = []byte("TreasuryAddresses")
-	KeyExchangeFee               = []byte("ExchangeFee")
+	KeyEnabled                 = []byte("Enabled")
+	KeyAdmin                   = []byte("Admin")
+	KeyMinExchangeAmountUSD    = []byte("MinExchangeAmountUSD")
+	KeyMaxExchangeAmountUSD    = []byte("MaxExchangeAmountUSD")
+	KeyDailyLimitUSD           = []byte("DailyLimitUSD")
+	KeyPriceDeviationThreshold = []byte("PriceDeviationThreshold")
+	KeyTreasuryAddresses       = []byte("TreasuryAddresses")
+	KeyExchangeFee             = []byte("ExchangeFee")
 )
 
 // Default parameter values
 var (
-	DefaultEnabled                   = true
-	DefaultAdmin                     = ""
-	DefaultMinExchangeAmountUSD      = math.LegacyNewDec(10)    // $10
-	DefaultMaxExchangeAmountUSD      = math.LegacyNewDec(100000) // $100k
-	DefaultDailyLimitUSD             = math.LegacyNewDec(1000000) // $1M
-	DefaultPriceDeviationThreshold   = math.LegacyNewDecWithPrec(2, 2) // 2%
-	DefaultTreasuryAddresses         = []string{}
-	DefaultExchangeFee               = math.LegacyNewDecWithPrec(1, 3) // 0.1%
+	DefaultEnabled                 = true
+	DefaultAdmin                   = ""
+	DefaultMinExchangeAmountUSD    = math.LegacyNewDec(10)           // $10
+	DefaultMaxExchangeAmountUSD    = math.LegacyNewDec(100000)       // $100k
+	DefaultDailyLimitUSD           = math.LegacyNewDec(1000000)      // $1M
+	DefaultPriceDeviationThreshold = math.LegacyNewDecWithPrec(2, 2) // 2%
+	DefaultTreasuryAddresses       = []string{}
+	DefaultExchangeFee             = math.LegacyNewDecWithPrec(1, 3) // 0.1%
 )
 
 // NewParams creates a new Params instance
@@ -44,14 +44,14 @@ func NewParams(
 	treasuryAddresses []string,
 ) Params {
 	return Params{
-		Enabled:                   enabled,
-		Admin:                     admin,
-		MinExchangeAmountUsd:      minExchangeAmountUSD,
-		MaxExchangeAmountUsd:      maxExchangeAmountUSD,
-		DailyLimitUsd:             dailyLimitUSD,
-		PriceDeviationThreshold:   priceDeviationThreshold,
-		TreasuryAddresses:         treasuryAddresses,
-		ExchangeFee:               exchangeFee,
+		Enabled:                 enabled,
+		Admin:                   admin,
+		MinExchangeAmountUsd:    minExchangeAmountUSD,
+		MaxExchangeAmountUsd:    maxExchangeAmountUSD,
+		DailyLimitUsd:           dailyLimitUSD,
+		PriceDeviationThreshold: priceDeviationThreshold,
+		TreasuryAddresses:       treasuryAddresses,
+		ExchangeFee:             exchangeFee,
 	}
 }
 

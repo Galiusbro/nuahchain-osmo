@@ -17,6 +17,7 @@ import (
 	pegkeepertypes "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/types"
 	"github.com/osmosis-labs/osmosis/v30/x/usdoracle"
 	usdoracletypes "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types"
+	exchangetypes "github.com/osmosis-labs/osmosis/v30/x/exchange/types"
 
 	ibcwasm "github.com/cosmos/ibc-go/modules/light-clients/08-wasm"
 	ibcwasmtypes "github.com/cosmos/ibc-go/modules/light-clients/08-wasm/types"
@@ -153,6 +154,7 @@ var moduleAccountPermissions = map[string][]string{
 	limitedaccounttypes.ModuleName:           nil,
 	usdoracletypes.ModuleName:                nil,
 	pegkeepertypes.ModuleName:                nil,
+	exchangetypes.ModuleName:                 {authtypes.Minter, authtypes.Burner},
 }
 
 // appModules return modules to initialize module manager.

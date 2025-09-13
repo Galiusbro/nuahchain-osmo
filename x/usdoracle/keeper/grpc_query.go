@@ -76,7 +76,7 @@ func (k Keeper) GetAllTokenPrices(goCtx context.Context, req *types.QueryGetAllT
 	_ = ctx
 
 	return &types.QueryGetAllTokenPricesResponse{
-		Prices: []types.TokenPrice{},
+		Prices:     []types.TokenPrice{},
 		Pagination: nil,
 	}, nil
 }
@@ -86,13 +86,14 @@ func (k Keeper) GetTokenPrice(goCtx context.Context, req *types.QueryGetTokenPri
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	// TODO: Implement get token price
-	_ = ctx
+	// Get token price using the same logic as GetTokenPriceForExchange
+	tokenPrice, found := k.GetTokenPriceForExchange(goCtx, req.Denom)
+	if !found {
+		return nil, status.Error(codes.NotFound, "token price not found")
+	}
 
 	return &types.QueryGetTokenPriceResponse{
-		Price: types.TokenPrice{},
+		Price: tokenPrice,
 	}, nil
 }
 
@@ -107,7 +108,7 @@ func (k Keeper) GetSupportedTokens(goCtx context.Context, req *types.QueryGetSup
 	_ = ctx
 
 	return &types.QueryGetSupportedTokensResponse{
-		Tokens: []types.SupportedToken{},
+		Tokens:     []types.SupportedToken{},
 		Pagination: nil,
 	}, nil
 }
@@ -138,9 +139,9 @@ func (k Keeper) GetTokenPriceDeviation(goCtx context.Context, req *types.QueryGe
 	_ = ctx
 
 	return &types.QueryGetTokenPriceDeviationResponse{
-		Deviation: math.LegacyZeroDec(),
+		Deviation:         math.LegacyZeroDec(),
 		IsWithinThreshold: true,
-		Threshold: math.LegacyZeroDec(),
+		Threshold:         math.LegacyZeroDec(),
 	}, nil
 }
 
@@ -170,7 +171,7 @@ func (k Keeper) GetTokenPriceHistory(goCtx context.Context, req *types.QueryGetT
 	_ = ctx
 
 	return &types.QueryGetTokenPriceHistoryResponse{
-		Prices: []types.TokenPrice{},
+		Prices:     []types.TokenPrice{},
 		Pagination: nil,
 	}, nil
 }

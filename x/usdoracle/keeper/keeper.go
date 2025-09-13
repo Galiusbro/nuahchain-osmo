@@ -209,26 +209,54 @@ func (k Keeper) UpdatePriceFromSources(ctx sdk.Context, sourcePrices []types.USD
 	return nil
 }
 
+// SetTokenPrice sets the price for a specific token
+func (k Keeper) SetTokenPrice(ctx sdk.Context, tokenPrice types.TokenPrice) {
+	store := ctx.KVStore(k.storeKey)
+	key := []byte("token_price_" + tokenPrice.Denom)
+	bz := k.cdc.MustMarshal(&tokenPrice)
+	store.Set(key, bz)
+}
+
+// GetStoredTokenPrice gets the price for a specific token from storage
+func (k Keeper) GetStoredTokenPrice(ctx sdk.Context, denom string) (types.TokenPrice, bool) {
+	store := ctx.KVStore(k.storeKey)
+	key := []byte("token_price_" + denom)
+	bz := store.Get(key)
+	if bz == nil {
+		return types.TokenPrice{}, false
+	}
+
+	var tokenPrice types.TokenPrice
+	k.cdc.MustUnmarshal(bz, &tokenPrice)
+	return tokenPrice, true
+}
+
 // GetTokenPriceForExchange returns the price for a specific token (for Exchange module)
 func (k Keeper) GetTokenPriceForExchange(ctx context.Context, denom string) (types.TokenPrice, bool) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	// For now, return a mock implementation
-	// In a real implementation, this would query token-specific prices
+
+	// First try to get token-specific price
+	tokenPrice, found := k.GetStoredTokenPrice(sdkCtx, denom)
+	if found {
+		return tokenPrice, true
+	}
+
+	// Fallback to current price if no token-specific price is set
 	currentPrice, found := k.GetCurrentPrice(sdkCtx)
 	if !found {
 		return types.TokenPrice{}, false
 	}
 
-	tokenPrice := types.TokenPrice{
-		Denom:     denom,
-		Price:     currentPrice.Price,
-		Timestamp: currentPrice.Timestamp,
+	tokenPrice = types.TokenPrice{
+		Denom:       denom,
+		Price:       currentPrice.Price,
+		Timestamp:   currentPrice.Timestamp,
+		Source:      currentPrice.Source,
+		BlockHeight: currentPrice.BlockHeight,
 	}
 
 	return tokenPrice, true
 }
-
-
 
 // IsTokenSupported checks if a token is supported for price feeds
 func (k Keeper) IsTokenSupported(ctx context.Context, denom string) bool {
@@ -241,4 +269,15 @@ func (k Keeper) IsTokenSupported(ctx context.Context, denom string) bool {
 		}
 	}
 	return false
+}
+
+// GetSupportedToken returns the supported token configuration for a given denom
+func (k Keeper) GetSupportedToken(ctx context.Context, denom string) (types.SupportedToken, bool) {
+	params := k.GetParams(ctx)
+	for _, token := range params.SupportedTokens {
+		if token.Denom == denom {
+			return token, true
+		}
+	}
+	return types.SupportedToken{}, false
 }

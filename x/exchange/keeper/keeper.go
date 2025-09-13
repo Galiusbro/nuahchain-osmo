@@ -18,19 +18,19 @@ import (
 
 type (
 	Keeper struct {
-		cdc      codec.BinaryCodec
+		cdc          codec.BinaryCodec
 		storeService store.KVStoreService
-		logger   log.Logger
+		logger       log.Logger
 
 		// the address capable of executing a MsgUpdateParams message. Typically, this
 		// should be the x/gov module account.
 		authority string
 
 		// Keepers
-		accountKeeper    types.AccountKeeper
-		bankKeeper       types.BankKeeper
-		usdOracleKeeper  types.USDOracleKeeper
-		twapKeeper       types.TWAPKeeper
+		accountKeeper      types.AccountKeeper
+		bankKeeper         types.BankKeeper
+		usdOracleKeeper    types.USDOracleKeeper
+		twapKeeper         types.TWAPKeeper
 		distributionKeeper types.DistributionKeeper
 
 		// Collections
@@ -59,14 +59,14 @@ func NewKeeper(
 	sb := collections.NewSchemaBuilder(storeService)
 
 	k := Keeper{
-		cdc:          cdc,
-		storeService: storeService,
-		logger:       logger,
-		authority:    authority,
-		accountKeeper:    accountKeeper,
-		bankKeeper:       bankKeeper,
-		usdOracleKeeper:  usdOracleKeeper,
-		twapKeeper:       twapKeeper,
+		cdc:                cdc,
+		storeService:       storeService,
+		logger:             logger,
+		authority:          authority,
+		accountKeeper:      accountKeeper,
+		bankKeeper:         bankKeeper,
+		usdOracleKeeper:    usdOracleKeeper,
+		twapKeeper:         twapKeeper,
 		distributionKeeper: distributionKeeper,
 		ParamsStore: collections.NewItem(
 			sb,
@@ -165,15 +165,15 @@ func (k Keeper) GetTWAPPrice(ctx sdk.Context, denom string, poolId uint64) (osmo
 	// Get TWAP for the last 15 minutes
 	endTime := ctx.BlockTime()
 	startTime := endTime.Add(-15 * time.Minute)
-	
+
 	// Use USDC as quote asset for TWAP calculation
 	quoteAsset := "ibc/D189335C6E4A68B513C10AB227BF1C1D38C746766278BA3EEB4FB14124F1D858" // USDC
-	
+
 	twapPrice, err := k.twapKeeper.GetArithmeticTwap(ctx, poolId, denom, quoteAsset, startTime, endTime)
 	if err != nil {
 		return osmomath.ZeroDec(), err
 	}
-	
+
 	return twapPrice, nil
 }
 
@@ -183,7 +183,7 @@ func (k Keeper) ValidatePriceDeviation(ctx sdk.Context, denom string, oraclePric
 	if err != nil {
 		return err
 	}
-	
+
 	// Get TWAP price
 	twapPriceOsmo, err := k.GetTWAPPrice(ctx, denom, poolId)
 	if err != nil {
@@ -191,10 +191,10 @@ func (k Keeper) ValidatePriceDeviation(ctx sdk.Context, denom string, oraclePric
 		k.Logger().Warn("TWAP price not available, using Oracle price only", "denom", denom, "error", err)
 		return nil
 	}
-	
+
 	// Convert osmomath.Dec to math.LegacyDec for comparison
 	twapPrice := math.LegacyNewDecFromBigInt(twapPriceOsmo.BigInt())
-	
+
 	// Calculate deviation percentage
 	var deviation math.LegacyDec
 	if oraclePrice.GT(twapPrice) {
@@ -202,12 +202,12 @@ func (k Keeper) ValidatePriceDeviation(ctx sdk.Context, denom string, oraclePric
 	} else {
 		deviation = twapPrice.Sub(oraclePrice).Quo(twapPrice)
 	}
-	
+
 	// Check if deviation exceeds threshold
 	if deviation.GT(params.PriceDeviationThreshold) {
 		return types.ErrPriceDeviationTooHigh
 	}
-	
+
 	return nil
 }
 

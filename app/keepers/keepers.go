@@ -93,6 +93,8 @@ import (
 	owasm "github.com/osmosis-labs/osmosis/v30/wasmbinding"
 	concentratedliquidity "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity"
 	concentratedliquiditytypes "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/types"
+	exchangekeeper "github.com/osmosis-labs/osmosis/v30/x/exchange/keeper"
+	exchangetypes "github.com/osmosis-labs/osmosis/v30/x/exchange/types"
 	gammkeeper "github.com/osmosis-labs/osmosis/v30/x/gamm/keeper"
 	gammtypes "github.com/osmosis-labs/osmosis/v30/x/gamm/types"
 	incentiveskeeper "github.com/osmosis-labs/osmosis/v30/x/incentives/keeper"
@@ -118,8 +120,6 @@ import (
 	txfeestypes "github.com/osmosis-labs/osmosis/v30/x/txfees/types"
 	usdoraclekeeper "github.com/osmosis-labs/osmosis/v30/x/usdoracle/keeper"
 	usdoracletypes "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types"
-	exchangekeeper "github.com/osmosis-labs/osmosis/v30/x/exchange/keeper"
-	exchangetypes "github.com/osmosis-labs/osmosis/v30/x/exchange/types"
 	valsetpref "github.com/osmosis-labs/osmosis/v30/x/valset-pref"
 	valsetpreftypes "github.com/osmosis-labs/osmosis/v30/x/valset-pref/types"
 	epochskeeper "github.com/osmosis-labs/osmosis/x/epochs/keeper"
@@ -886,6 +886,7 @@ func (appKeepers *AppKeepers) initParamsKeeper(appCodec codec.BinaryCodec, legac
 	paramsKeeper.Subspace(auctiontypes.ModuleName)
 	paramsKeeper.Subspace(pegkeepertypes.ModuleName)
 	paramsKeeper.Subspace(usdoracletypes.ModuleName).WithKeyTable(usdoracletypes.ParamKeyTable())
+	paramsKeeper.Subspace(exchangetypes.ModuleName).WithKeyTable(exchangetypes.ParamKeyTable())
 
 	return paramsKeeper
 }
@@ -1013,6 +1014,7 @@ func KVStoreKeys() []string {
 		limitedaccounttypes.StoreKey,
 		auctiontypes.StoreKey,
 		usdoracletypes.StoreKey,
+		exchangetypes.StoreKey,
 		pegkeepertypes.StoreKey,
 	}
 }
