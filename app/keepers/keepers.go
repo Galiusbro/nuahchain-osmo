@@ -51,6 +51,8 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/gamm"
 	ibcratelimit "github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit"
 	ibcratelimittypes "github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit/types"
+	pegkeeperkeeper "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/keeper"
+	pegkeepertypes "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/types"
 	"github.com/osmosis-labs/osmosis/v30/x/poolmanager"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v30/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v30/x/protorev"
@@ -114,6 +116,8 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/txfees"
 	txfeeskeeper "github.com/osmosis-labs/osmosis/v30/x/txfees/keeper"
 	txfeestypes "github.com/osmosis-labs/osmosis/v30/x/txfees/types"
+	usdoraclekeeper "github.com/osmosis-labs/osmosis/v30/x/usdoracle/keeper"
+	usdoracletypes "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types"
 	valsetpref "github.com/osmosis-labs/osmosis/v30/x/valset-pref"
 	valsetpreftypes "github.com/osmosis-labs/osmosis/v30/x/valset-pref/types"
 	epochskeeper "github.com/osmosis-labs/osmosis/x/epochs/keeper"
@@ -184,6 +188,8 @@ type AppKeepers struct {
 	AuthenticatorManager         *authenticator.AuthenticatorManager
 	FreeAccountKeeper            *freeaccountkeeper.Keeper
 	LimitedAccountKeeper         *limitedaccountkeeper.Keeper
+	USDOracleKeeper              *usdoraclekeeper.Keeper
+	PegKeeperKeeper              *pegkeeperkeeper.Keeper
 
 	// IBC modules
 	// transfer module
@@ -588,6 +594,27 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 
 	appKeepers.ValidatorSetPreferenceKeeper = &validatorSetPreferenceKeeper
 
+	// Initialize USD Oracle keeper
+	usdOracleKeeper := usdoraclekeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[usdoracletypes.StoreKey],
+		appKeepers.GetSubspace(usdoracletypes.ModuleName),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+	appKeepers.USDOracleKeeper = usdOracleKeeper
+
+	// Initialize PegKeeper
+	pegKeeperKeeper := pegkeeperkeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[pegkeepertypes.StoreKey],
+		appKeepers.GetSubspace(pegkeepertypes.ModuleName),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		*appKeepers.BankKeeper,
+		*appKeepers.MintKeeper,
+		*appKeepers.USDOracleKeeper,
+	)
+	appKeepers.PegKeeperKeeper = pegKeeperKeeper
+
 	appKeepers.SuperfluidKeeper = superfluidkeeper.NewKeeper(
 		appKeepers.keys[superfluidtypes.StoreKey], appKeepers.GetSubspace(superfluidtypes.ModuleName),
 		*appKeepers.AccountKeeper, appKeepers.BankKeeper, appKeepers.StakingKeeper, appKeepers.DistrKeeper, appKeepers.EpochsKeeper, appKeepers.LockupKeeper, appKeepers.GAMMKeeper, appKeepers.IncentivesKeeper,
@@ -840,6 +867,8 @@ func (appKeepers *AppKeepers) initParamsKeeper(appCodec codec.BinaryCodec, legac
 	paramsKeeper.Subspace(smartaccounttypes.ModuleName).WithKeyTable(smartaccounttypes.ParamKeyTable())
 	paramsKeeper.Subspace(txfeestypes.ModuleName)
 	paramsKeeper.Subspace(auctiontypes.ModuleName)
+	paramsKeeper.Subspace(pegkeepertypes.ModuleName)
+	paramsKeeper.Subspace(usdoracletypes.ModuleName).WithKeyTable(usdoracletypes.ParamKeyTable())
 
 	return paramsKeeper
 }
@@ -966,5 +995,7 @@ func KVStoreKeys() []string {
 		freeaccounttypes.StoreKey,
 		limitedaccounttypes.StoreKey,
 		auctiontypes.StoreKey,
+		usdoracletypes.StoreKey,
+		pegkeepertypes.StoreKey,
 	}
 }

@@ -18,6 +18,7 @@ func MakeEncodingConfig() params.EncodingConfig {
 	encodingConfig := params.MakeEncodingConfig()
 	std.RegisterLegacyAminoCodec(encodingConfig.Amino)
 	std.RegisterInterfaces(encodingConfig.InterfaceRegistry)
-	keepers.AppModuleBasics.RegisterInterfaces(encodingConfig.InterfaceRegistry)
+	// Use NewAppModuleBasics with codec to properly register pegkeeper interfaces
+	keepers.NewAppModuleBasics(encodingConfig.Marshaler).RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	return encodingConfig
 }

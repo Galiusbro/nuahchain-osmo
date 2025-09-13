@@ -20,6 +20,23 @@ type PriceResponse struct {
 	QuoteDenom string    `json:"quote_denom"`
 }
 
+// USDPriceResponse represents USD price from oracle
+type USDPriceResponse struct {
+	Price     string    `json:"price"`
+	Timestamp time.Time `json:"timestamp"`
+	Source    string    `json:"source"`
+}
+
+// PegKeeperStatusResponse represents pegkeeper status
+type PegKeeperStatusResponse struct {
+	Active       bool      `json:"active"`
+	TargetPrice  string    `json:"target_price"`
+	CurrentPrice string    `json:"current_price"`
+	Deviation    string    `json:"deviation"`
+	LastAction   string    `json:"last_action"`
+	LastUpdated  time.Time `json:"last_updated"`
+}
+
 // MetricsResponse represents comprehensive N$ token metrics
 type MetricsResponse struct {
 	Price         string `json:"price"`
@@ -50,6 +67,8 @@ func (api *NDollarAPI) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/api/v1/ndollar/twap", api.GetTWAP).Methods("GET")
 	r.HandleFunc("/api/v1/ndollar/metrics", api.GetMetrics).Methods("GET")
 	r.HandleFunc("/api/v1/ndollar/supply", api.GetSupply).Methods("GET")
+	r.HandleFunc("/api/v1/usd/price", api.GetUSDPrice).Methods("GET")
+	r.HandleFunc("/api/v1/pegkeeper/status", api.GetPegKeeperStatus).Methods("GET")
 }
 
 // GetPrice returns the current spot price of N$ from the AMM pool
@@ -138,6 +157,39 @@ func (api *NDollarAPI) queryTWAP(poolID uint64, baseDenom, quoteDenom string, st
 	// This would use the actual TWAP keeper in a real implementation
 	// return app.TwapKeeper.GetArithmeticTwap(ctx, poolID, baseDenom, quoteDenom, startTime, endTime)
 	return osmomath.NewDecWithPrec(1001025908322333333, 18), nil
+}
+
+// GetUSDPrice returns current USD price from oracle
+func (api *NDollarAPI) GetUSDPrice(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	// Mock USD price - replace with actual USD oracle query
+	response := USDPriceResponse{
+		Price:     "1.0000",
+		Timestamp: time.Now(),
+		Source:    "USD Oracle",
+	}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+// GetPegKeeperStatus returns current pegkeeper status
+func (api *NDollarAPI) GetPegKeeperStatus(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	// Mock pegkeeper status - replace with actual pegkeeper query
+	response := PegKeeperStatusResponse{
+		Active:       true,
+		TargetPrice:  "1.0000",
+		CurrentPrice: "1.0010",
+		Deviation:    "0.10%",
+		LastAction:   "mint",
+		LastUpdated:  time.Now(),
+	}
+
+	json.NewEncoder(w).Encode(response)
 }
 
 // Helper function to query token supply (to be implemented with actual keeper)

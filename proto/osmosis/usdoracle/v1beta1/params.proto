@@ -1,0 +1,23 @@
+syntax = "proto3";
+package osmosis.usdoracle.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types";
+
+// Params defines the parameters for the USD oracle module.
+message Params {
+  // Boolean whether the USD oracle module is enabled.
+  bool enabled = 1 [ (gogoproto.moretags) = "yaml:\"enabled\"" ];
+  // The admin account of the USD oracle module.
+  string admin = 2 [ (gogoproto.moretags) = "yaml:\"admin\"" ];
+  // Update interval for USD price in seconds (default: 60 seconds)
+  uint64 update_interval = 3 [ (gogoproto.moretags) = "yaml:\"update_interval\"" ];
+  // Price deviation threshold for alerts (default: 0.05 = 5%)
+  string price_deviation_threshold = 4 [
+    (gogoproto.moretags) = "yaml:\"price_deviation_threshold\"",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}

@@ -43,6 +43,8 @@ func main() {
 	fmt.Println("  GET /api/v1/ndollar/twap?period=1h - TWAP price")
 	fmt.Println("  GET /api/v1/ndollar/metrics - Comprehensive metrics")
 	fmt.Println("  GET /api/v1/ndollar/supply - Token supply information")
+	fmt.Println("  GET /api/v1/usd/price - USD price from oracle")
+	fmt.Println("  GET /api/v1/pegkeeper/status - PegKeeper status")
 
 	// Start server
 	log.Fatal(http.ListenAndServe(":"+port, r))

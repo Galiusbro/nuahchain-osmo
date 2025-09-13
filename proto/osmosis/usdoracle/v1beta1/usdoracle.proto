@@ -1,0 +1,58 @@
+syntax = "proto3";
+package osmosis.usdoracle.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types";
+
+// USDPrice represents a USD price data point
+message USDPrice {
+  // The USD price as a decimal string
+  string price = 1 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // Timestamp when the price was recorded
+  google.protobuf.Timestamp timestamp = 2 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+  // Source of the price data (e.g., "coingecko", "binance")
+  string source = 3;
+  // Block height when the price was recorded
+  int64 block_height = 4;
+}
+
+// PriceSource represents a price data source configuration
+message PriceSource {
+  // Name of the price source
+  string name = 1;
+  // Weight of this source in price aggregation
+  string weight = 2 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // Whether this source is currently enabled
+  bool enabled = 3;
+  // API endpoint URL
+  string url = 4;
+}
+
+// PriceAggregation represents aggregated price data from multiple sources
+message PriceAggregation {
+  // Weighted average price
+  string weighted_price = 1 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // Individual source prices
+  repeated USDPrice source_prices = 2 [ (gogoproto.nullable) = false ];
+  // Timestamp of aggregation
+  google.protobuf.Timestamp timestamp = 3 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true
+  ];
+  // Number of sources used in aggregation
+  uint32 source_count = 4;
+}

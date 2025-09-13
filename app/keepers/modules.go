@@ -12,6 +12,7 @@ import (
 
 	"cosmossdk.io/x/evidence"
 	"cosmossdk.io/x/upgrade"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
@@ -54,6 +55,7 @@ import (
 	limitedaccount "github.com/osmosis-labs/osmosis/v30/x/limitedaccount"
 	"github.com/osmosis-labs/osmosis/v30/x/lockup"
 	"github.com/osmosis-labs/osmosis/v30/x/mint"
+	"github.com/osmosis-labs/osmosis/v30/x/pegkeeper"
 	poolincentives "github.com/osmosis-labs/osmosis/v30/x/pool-incentives"
 	poolincentivesclient "github.com/osmosis-labs/osmosis/v30/x/pool-incentives/client"
 	poolmanagerclient "github.com/osmosis-labs/osmosis/v30/x/poolmanager/client"
@@ -65,12 +67,86 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/twap/twapmodule"
 	"github.com/osmosis-labs/osmosis/v30/x/txfees"
 	txfeesclient "github.com/osmosis-labs/osmosis/v30/x/txfees/client"
+	"github.com/osmosis-labs/osmosis/v30/x/usdoracle"
 	valsetprefmodule "github.com/osmosis-labs/osmosis/v30/x/valset-pref/valpref-module"
 	"github.com/osmosis-labs/osmosis/x/epochs"
 	ibc_hooks "github.com/osmosis-labs/osmosis/x/ibc-hooks"
 )
 
 // AppModuleBasics returns ModuleBasics for the module BasicManager.
+// NewAppModuleBasics creates a new AppModuleBasics with codec for modules that need it
+func NewAppModuleBasics(cdc codec.Codec) module.BasicManager {
+	return module.NewBasicManager(
+		auth.AppModuleBasic{},
+		genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
+		bank.AppModuleBasic{},
+		capability.AppModuleBasic{},
+		staking.AppModuleBasic{},
+		mint.AppModuleBasic{},
+		downtimemodule.AppModuleBasic{},
+		distr.AppModuleBasic{},
+		gov.NewAppModuleBasic(
+			[]govclient.ProposalHandler{
+				paramsclient.ProposalHandler,
+				poolincentivesclient.UpdatePoolIncentivesHandler,
+				poolincentivesclient.ReplacePoolIncentivesHandler,
+				superfluidclient.SetSuperfluidAssetsProposalHandler,
+				superfluidclient.RemoveSuperfluidAssetsProposalHandler,
+				superfluidclient.UpdateUnpoolWhitelistProposalHandler,
+				gammclient.ReplaceMigrationRecordsProposalHandler,
+				gammclient.UpdateMigrationRecordsProposalHandler,
+				gammclient.CreateCLPoolAndLinkToCFMMProposalHandler,
+				gammclient.SetScalingFactorControllerProposalHandler,
+				clclient.TickSpacingDecreaseProposalHandler,
+				cwpoolclient.UploadCodeIdAndWhitelistProposalHandler,
+				cwpoolclient.MigratePoolContractsProposalHandler,
+				txfeesclient.SubmitUpdateFeeTokenProposalHandler,
+				poolmanagerclient.DenomPairTakerFeeProposalHandler,
+				incentivesclient.HandleCreateGroupsProposal,
+			},
+		),
+		params.AppModuleBasic{},
+		crisis.AppModuleBasic{},
+		slashing.AppModuleBasic{},
+		authzmodule.AppModuleBasic{},
+		consensus.AppModuleBasic{},
+		ibc.AppModuleBasic{},
+		upgrade.AppModuleBasic{},
+		evidence.AppModuleBasic{},
+		transfer.AppModuleBasic{},
+		vesting.AppModuleBasic{},
+		gamm.AppModuleBasic{},
+		poolmanager.AppModuleBasic{},
+		twapmodule.AppModuleBasic{},
+		concentratedliquidity.AppModuleBasic{},
+		protorev.AppModuleBasic{},
+		txfees.AppModuleBasic{},
+		incentives.AppModuleBasic{},
+		lockup.AppModuleBasic{},
+		poolincentives.AppModuleBasic{},
+		epochs.AppModuleBasic{},
+		superfluid.AppModuleBasic{},
+		tokenfactory.AppModuleBasic{},
+		valsetprefmodule.AppModuleBasic{},
+		wasm.AppModuleBasic{},
+		icq.AppModuleBasic{},
+		ica.AppModuleBasic{},
+		ibc_hooks.AppModuleBasic{},
+		ibcratelimitmodule.AppModuleBasic{},
+		ibcwasm.AppModuleBasic{},
+		packetforward.AppModuleBasic{},
+		cosmwasmpoolmodule.AppModuleBasic{},
+		tendermint.AppModuleBasic{},
+		auction.AppModuleBasic{},
+		smartaccount.AppModuleBasic{},
+		freeaccount.AppModuleBasic{},
+		limitedaccount.AppModuleBasic{},
+		pegkeeper.NewAppModuleBasic(cdc),
+		usdoracle.AppModuleBasic{},
+	)
+}
+
+// AppModuleBasics is the default AppModuleBasics for backward compatibility
 var AppModuleBasics = module.NewBasicManager(
 	auth.AppModuleBasic{},
 	genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
@@ -136,4 +212,6 @@ var AppModuleBasics = module.NewBasicManager(
 	smartaccount.AppModuleBasic{},
 	freeaccount.AppModuleBasic{},
 	limitedaccount.AppModuleBasic{},
+	pegkeeper.AppModuleBasic{},
+	usdoracle.AppModuleBasic{},
 )

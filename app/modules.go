@@ -13,6 +13,10 @@ import (
 	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
 	limitedaccount "github.com/osmosis-labs/osmosis/v30/x/limitedaccount"
 	limitedaccounttypes "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/types"
+	"github.com/osmosis-labs/osmosis/v30/x/pegkeeper"
+	pegkeepertypes "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/types"
+	"github.com/osmosis-labs/osmosis/v30/x/usdoracle"
+	usdoracletypes "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types"
 
 	ibcwasm "github.com/cosmos/ibc-go/modules/light-clients/08-wasm"
 	ibcwasmtypes "github.com/cosmos/ibc-go/modules/light-clients/08-wasm/types"
@@ -147,6 +151,8 @@ var moduleAccountPermissions = map[string][]string{
 	auctiontypes.ModuleName:                  nil,
 	smartaccounttypes.ModuleName:             nil,
 	limitedaccounttypes.ModuleName:           nil,
+	usdoracletypes.ModuleName:                nil,
+	pegkeepertypes.ModuleName:                nil,
 }
 
 // appModules return modules to initialize module manager.
@@ -216,6 +222,8 @@ func appModules(
 		smartaccount.NewAppModule(appCodec, *app.SmartAccountKeeper),
 		freeaccount.NewAppModule(appCodec, *app.FreeAccountKeeper),
 		limitedaccount.NewAppModule(appCodec, *app.LimitedAccountKeeper),
+		usdoracle.NewAppModule(appCodec, *app.USDOracleKeeper),
+		pegkeeper.NewAppModule(appCodec, *app.PegKeeperKeeper),
 	}
 }
 
@@ -312,6 +320,8 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		packetforwardtypes.ModuleName,
 		cosmwasmpooltypes.ModuleName,
 		auctiontypes.ModuleName,
+		usdoracletypes.ModuleName,
+		pegkeepertypes.ModuleName,
 	}
 }
 

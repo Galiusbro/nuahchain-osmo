@@ -1,0 +1,20 @@
+syntax = "proto3";
+package osmosis.pegkeeper.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "osmosis/pegkeeper/v1beta1/params.proto";
+import "osmosis/pegkeeper/v1beta1/types.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/types";
+
+// GenesisState defines the pegkeeper module's genesis state
+message GenesisState {
+  // params defines the parameters for the module
+  Params params = 1 [(gogoproto.nullable) = false];
+
+  // peg_state defines the current peg state
+  PegState peg_state = 2;
+
+  // adjustment_history is the list of historical supply adjustments
+  repeated SupplyAdjustment adjustment_history = 3;
+}

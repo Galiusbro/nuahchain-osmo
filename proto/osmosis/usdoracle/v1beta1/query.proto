@@ -1,0 +1,73 @@
+syntax = "proto3";
+package osmosis.usdoracle.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "osmosis/usdoracle/v1beta1/params.proto";
+import "osmosis/usdoracle/v1beta1/usdoracle.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Params queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/osmosis/usdoracle/params";
+  }
+
+  // GetUSDPrice queries the current USD price
+  rpc GetUSDPrice(QueryGetUSDPriceRequest) returns (QueryGetUSDPriceResponse) {
+    option (google.api.http).get = "/osmosis/usdoracle/usd_price";
+  }
+
+  // GetPriceHistory queries the USD price history
+  rpc GetPriceHistory(QueryGetPriceHistoryRequest) returns (QueryGetPriceHistoryResponse) {
+    option (google.api.http).get = "/osmosis/usdoracle/price_history";
+  }
+
+  // GetPriceDeviation queries the current price deviation from peg
+  rpc GetPriceDeviation(QueryGetPriceDeviationRequest) returns (QueryGetPriceDeviationResponse) {
+    option (google.api.http).get = "/osmosis/usdoracle/price_deviation";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryGetUSDPriceRequest is request type for the Query/GetUSDPrice RPC method.
+message QueryGetUSDPriceRequest {}
+
+// QueryGetUSDPriceResponse is response type for the Query/GetUSDPrice RPC method.
+message QueryGetUSDPriceResponse {
+  USDPrice price = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryGetPriceHistoryRequest is request type for the Query/GetPriceHistory RPC method.
+message QueryGetPriceHistoryRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryGetPriceHistoryResponse is response type for the Query/GetPriceHistory RPC method.
+message QueryGetPriceHistoryResponse {
+  repeated USDPrice prices = 1 [ (gogoproto.nullable) = false ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryGetPriceDeviationRequest is request type for the Query/GetPriceDeviation RPC method.
+message QueryGetPriceDeviationRequest {}
+
+// QueryGetPriceDeviationResponse is response type for the Query/GetPriceDeviation RPC method.
+message QueryGetPriceDeviationResponse {
+  string deviation = 1 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  bool is_within_threshold = 2;
+}

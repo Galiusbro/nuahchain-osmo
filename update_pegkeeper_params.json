@@ -1,0 +1,23 @@
+{
+    "messages": [
+        {
+            "@type": "/osmosis.pegkeeper.v1beta1.MsgUpdateParams",
+            "authority": "nuah10d07y265gmmuvt4z0w9aw880jnsr700jquznk2",
+            "params": {
+                "max_deviation_threshold": "0.05",
+                "adjustment_factor": "0.1",
+                "min_adjustment_interval": "3600",
+                "max_supply_change_per_adjustment": "0.02",
+                "oracle_module": "usdoracle",
+                "enabled": true,
+                "target_denom": "factory/nuah1tvnraf3rgdajgtfu2rz9jxatxxkp8qqquzq7dp/ndollar",
+                "reference_denom": "usd",
+                "target_price": "1.0"
+            }
+        }
+    ],
+    "metadata": "Update pegkeeper parameters to work with N$ token",
+    "deposit": "10000000unuah",
+    "title": "Update Pegkeeper Parameters for N$ Token",
+    "summary": "This proposal updates the pegkeeper module parameters to stabilize the N$ token (factory/nuah1tvnraf3rgdajgtfu2rz9jxatxxkp8qqquzq7dp/ndollar) instead of NUAH token."
+}

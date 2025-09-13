@@ -1,0 +1,34 @@
+syntax = "proto3";
+package osmosis.pegkeeper.v1beta1;
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/types";
+
+// Params defines the parameters for the pegkeeper module.
+message Params {
+  // max_deviation_threshold is the maximum allowed price deviation before intervention
+  string max_deviation_threshold = 1;
+
+  // adjustment_factor determines how aggressively to adjust supply
+  string adjustment_factor = 2;
+
+  // min_adjustment_interval is the minimum time between adjustments (in seconds)
+  int64 min_adjustment_interval = 3;
+
+  // max_supply_change_per_adjustment is the maximum supply change per adjustment (as percentage)
+  string max_supply_change_per_adjustment = 4;
+
+  // oracle_module is the module to get price data from
+  string oracle_module = 5;
+
+  // enabled indicates if the stabilization mechanism is enabled
+  bool enabled = 6;
+
+  // target_denom is the denomination we're pegging (e.g., "nuah")
+  string target_denom = 7;
+
+  // reference_denom is what we're pegging to (e.g., "usd")
+  string reference_denom = 8;
+
+  // target_price is the desired price (usually "1.0" for 1:1 peg)
+  string target_price = 9;
+}

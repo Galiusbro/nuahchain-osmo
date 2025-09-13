@@ -1,0 +1,55 @@
+syntax = "proto3";
+package osmosis.pegkeeper.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/types";
+
+// PegState represents the current state of the peg mechanism
+message PegState {
+  // target_denom is the denomination we're pegging (e.g., "nuah")
+  string target_denom = 1;
+
+  // reference_denom is what we're pegging to (e.g., "usd")
+  string reference_denom = 2;
+
+  // current_price is the current price of target_denom in reference_denom
+  string current_price = 3;
+
+  // target_price is the desired price (usually 1.0 for 1:1 peg)
+  string target_price = 4;
+
+  // deviation is the current deviation from target price
+  string deviation = 5;
+
+  // is_active indicates if the peg mechanism is currently active
+  bool is_active = 6;
+
+  // last_adjustment_time is when the last supply adjustment was made
+  google.protobuf.Timestamp last_adjustment_time = 7 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+}
+
+// SupplyAdjustment represents a historical supply adjustment
+message SupplyAdjustment {
+  // timestamp when the adjustment was made
+  google.protobuf.Timestamp timestamp = 1 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+
+  // price_before is the price before adjustment
+  string price_before = 2;
+
+  // price_after is the expected price after adjustment
+  string price_after = 3;
+
+  // supply_change_amount is the amount of supply change (positive for mint, negative for burn)
+  string supply_change_amount = 4;
+
+  // supply_change_denom is the denomination of the supply change
+  string supply_change_denom = 5;
+
+  // deviation is the price deviation that triggered this adjustment
+  string deviation = 6;
+
+  // adjustment_type indicates the type of adjustment (mint/burn)
+  string adjustment_type = 7;
+}

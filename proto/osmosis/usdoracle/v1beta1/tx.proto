@@ -1,0 +1,79 @@
+syntax = "proto3";
+package osmosis.usdoracle.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "google/api/annotations.proto";
+import "osmosis/usdoracle/v1beta1/params.proto";
+import "osmosis/usdoracle/v1beta1/usdoracle.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types";
+
+service Msg {
+  // UpdateParams updates the parameters of the USD oracle module.
+  // Can only be called by the admin account.
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse) {
+    option (google.api.http).post = "/osmosis/usdoracle/update_params";
+  };
+
+  // UpdateUSDPrice updates the USD price manually.
+  // Can only be called by the admin account.
+  rpc UpdateUSDPrice(MsgUpdateUSDPrice) returns (MsgUpdateUSDPriceResponse) {
+    option (google.api.http).post = "/osmosis/usdoracle/update_usd_price";
+  };
+
+  // SetPriceSources sets the price sources configuration.
+  // Can only be called by the admin account.
+  rpc SetPriceSources(MsgSetPriceSources) returns (MsgSetPriceSourcesResponse) {
+    option (google.api.http).post = "/osmosis/usdoracle/set_price_sources";
+  };
+}
+
+// MsgUpdateParams is the message type for updating module parameters
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/usdoracle/update-params";
+
+  // Authority is the address that controls the module
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Params defines the parameters to update
+  Params params = 2 [ (gogoproto.nullable) = false ];
+}
+
+// MsgUpdateParamsResponse is the response type for MsgUpdateParams
+message MsgUpdateParamsResponse {}
+
+// MsgUpdateUSDPrice is the message type for manually updating USD price
+message MsgUpdateUSDPrice {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/usdoracle/update-usd-price";
+
+  // Authority is the address that controls the module
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Price is the new USD price
+  string price = 2 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  // Source identifier for this price update
+  string source = 3;
+}
+
+// MsgUpdateUSDPriceResponse is the response type for MsgUpdateUSDPrice
+message MsgUpdateUSDPriceResponse {}
+
+// MsgSetPriceSources is the message type for setting price sources
+message MsgSetPriceSources {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/usdoracle/set-price-sources";
+
+  // Authority is the address that controls the module
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // Sources are the price source configurations
+  repeated PriceSource sources = 2 [ (gogoproto.nullable) = false ];
+}
+
+// MsgSetPriceSourcesResponse is the response type for MsgSetPriceSources
+message MsgSetPriceSourcesResponse {}

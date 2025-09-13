@@ -1,0 +1,67 @@
+syntax = "proto3";
+package osmosis.pegkeeper.v1beta1;
+
+import "google/protobuf/timestamp.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "osmosis/pegkeeper/v1beta1/params.proto";
+import "osmosis/pegkeeper/v1beta1/types.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/types";
+option (gogoproto.goproto_getters_all) = false;
+
+// Query defines the gRPC querier service.
+service Query {
+  // Params returns the total set of pegkeeper parameters.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/osmosis/pegkeeper/v1beta1/params";
+  }
+
+  // PegState returns the current peg state.
+  rpc PegState(QueryPegStateRequest) returns (QueryPegStateResponse) {
+    option (google.api.http).get = "/osmosis/pegkeeper/v1beta1/peg_state";
+  }
+
+  // AdjustmentHistory returns the supply adjustment history.
+  rpc AdjustmentHistory(QueryAdjustmentHistoryRequest) returns (QueryAdjustmentHistoryResponse) {
+    option (google.api.http).get = "/osmosis/pegkeeper/v1beta1/adjustment_history";
+  }
+}
+
+
+
+
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params defines the parameters of the module.
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryPegStateRequest is the request type for the Query/PegState RPC method.
+message QueryPegStateRequest {}
+
+// QueryPegStateResponse is the response type for the Query/PegState RPC method.
+message QueryPegStateResponse {
+  // peg_state defines the current peg state.
+  PegState peg_state = 1;
+}
+
+// QueryAdjustmentHistoryRequest is the request type for the Query/AdjustmentHistory RPC method.
+message QueryAdjustmentHistoryRequest {
+  // limit is the maximum number of adjustments to return
+  uint64 limit = 1;
+  // offset is the number of adjustments to skip
+  uint64 offset = 2;
+}
+
+// QueryAdjustmentHistoryResponse is the response type for the Query/AdjustmentHistory RPC method.
+message QueryAdjustmentHistoryResponse {
+  // adjustments is the list of supply adjustments
+  repeated SupplyAdjustment adjustments = 1;
+  // total is the total number of adjustments
+  uint64 total = 2;
+}
