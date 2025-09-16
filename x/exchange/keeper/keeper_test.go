@@ -133,6 +133,8 @@ func (s *KeeperTestSuite) SetupTest() {
 	params.MinExchangeAmountUsd = math.LegacyNewDec(10)              // $10 in uusd
 	params.MaxExchangeAmountUsd = math.LegacyNewDec(100000)          // $100k in uusd
 	params.DailyLimitUsd = math.LegacyNewDec(1000000)                // $1M in uusd
+	// Update supported tokens to match USD Oracle tokens
+	params.SupportedTokens = []string{"ibc/ETH", "ibc/BTC", "ibc/USDC", "ibc/ATOM", "uosmo"}
 	err := s.keeper.SetParams(s.ctx, params)
 	s.Require().NoError(err)
 

@@ -1,0 +1,537 @@
+package keeper
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"cosmossdk.io/errors"
+	cosmossdk_io_math "cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
+
+	balancertypes "github.com/osmosis-labs/osmosis/v30/x/gamm/pool-models/balancer"
+	"github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
+)
+
+type msgServer struct {
+	Keeper
+}
+
+// NewMsgServerImpl returns an implementation of the MsgServer interface
+// for the provided Keeper.
+func NewMsgServerImpl(keeper Keeper) types.MsgServer {
+	return &msgServer{Keeper: keeper}
+}
+
+var _ types.MsgServer = msgServer{}
+
+func (k msgServer) CreateUserToken(goCtx context.Context, msg *types.MsgCreateUserToken) (*types.MsgCreateUserTokenResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Create the token via tokenfactory
+	denom, err := k.tokenfactoryKeeper.CreateDenom(ctx, msg.Creator, msg.Subdenom)
+	if err != nil {
+		return nil, err
+	}
+
+	// Transfer admin rights to usertoken module
+	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
+	if moduleAddr == nil {
+		return nil, errors.Wrapf(types.ErrInvalidAddress, "module address not found")
+	}
+
+	// Note: ChangeAdmin method needs to be implemented in tokenfactory keeper
+	// For now, we'll skip this step and implement it later
+	_ = moduleAddr // suppress unused variable warning
+
+	// Create and store user token metadata
+	userToken := types.UserToken{
+		Denom:                denom,
+		Creator:              msg.Creator,
+		CurrentSupply:        cosmossdk_io_math.NewInt(0),
+		FounderTokensClaimed: cosmossdk_io_math.NewInt(0),
+		LbpActive:            false,
+		LbpStartTime:         0,
+	}
+
+	k.SetUserToken(ctx, userToken)
+
+	// Automatically create N$/UserToken pool
+	err = k.createNuahUserTokenPool(ctx, denom, msg.Creator)
+	if err != nil {
+		// Log error but don't fail token creation
+		ctx.Logger().Error("Failed to create N$/UserToken pool", "denom", denom, "error", err)
+	}
+
+	// Emit optimized event with pre-computed decimals string
+	decimalsStr := fmt.Sprintf("%d", msg.Decimals)
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			"create_user_token",
+			sdk.NewAttribute("creator", msg.Creator),
+			sdk.NewAttribute("denom", denom),
+			sdk.NewAttribute("subdenom", msg.Subdenom),
+			sdk.NewAttribute("name", msg.Name),
+			sdk.NewAttribute("symbol", msg.Symbol),
+			sdk.NewAttribute("decimals", decimalsStr),
+		),
+	})
+
+	return &types.MsgCreateUserTokenResponse{
+		Denom: denom,
+	}, nil
+}
+
+func (k msgServer) BuyTokens(goCtx context.Context, msg *types.MsgBuyTokens) (*types.MsgBuyTokensResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Validate input - msg.Amount is the payment amount in N$
+	if msg.Amount.Amount.IsZero() || msg.Amount.Amount.IsNegative() {
+		return nil, fmt.Errorf("invalid payment amount: %s", msg.Amount.Amount.String())
+	}
+
+	// Get user token to verify it exists
+	userToken, found := k.GetUserToken(ctx, msg.Denom)
+	if !found {
+		return nil, types.ErrTokenNotFound
+	}
+
+	// Get current supply
+	currentSupply, err := k.GetTokenSupply(ctx, msg.Denom)
+	if err != nil {
+		// Fallback to stored supply
+		currentSupply = userToken.CurrentSupply
+	}
+
+	// Calculate how many tokens can be bought with the payment amount
+	// Use optimized batch calculation instead of iterative approach
+	tokensReceived := k.CalculateTokensFromPayment(ctx, currentSupply, msg.Amount.Amount)
+
+	// Check if tokens received meets minimum requirement
+	if tokensReceived.LT(msg.MinTokens) {
+		return nil, fmt.Errorf("tokens received %s is less than minimum %s", tokensReceived.String(), msg.MinTokens.String())
+	}
+
+	// Transfer payment from buyer to module
+	buyerAddr, err := sdk.AccAddressFromBech32(msg.Buyer)
+	if err != nil {
+		return nil, fmt.Errorf("invalid buyer address: %w", err)
+	}
+
+	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
+	if moduleAddr == nil {
+		return nil, fmt.Errorf("module address not found")
+	}
+
+	err = k.bankKeeper.SendCoins(ctx, buyerAddr, moduleAddr, sdk.NewCoins(msg.Amount))
+	if err != nil {
+		return nil, fmt.Errorf("failed to transfer payment: %w", err)
+	}
+
+	// Mint tokens to buyer via tokenfactory
+	tokensToMint := sdk.NewCoin(msg.Denom, tokensReceived)
+	err = k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(tokensToMint))
+	if err != nil {
+		return nil, fmt.Errorf("failed to mint tokens: %w", err)
+	}
+
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, buyerAddr, sdk.NewCoins(tokensToMint))
+	if err != nil {
+		return nil, fmt.Errorf("failed to send minted tokens: %w", err)
+	}
+
+	// Update supply tracking in store
+	userToken.CurrentSupply = userToken.CurrentSupply.Add(tokensReceived)
+	k.SetUserToken(ctx, userToken)
+
+	// Emit optimized event with pre-computed strings
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			"buy_tokens",
+			sdk.NewAttribute("buyer", msg.Buyer),
+			sdk.NewAttribute("denom", msg.Denom),
+			sdk.NewAttribute("payment_amount", msg.Amount.Amount.String()),
+			sdk.NewAttribute("tokens_received", tokensReceived.String()),
+			sdk.NewAttribute("new_supply", userToken.CurrentSupply.String()),
+		),
+	})
+
+	return &types.MsgBuyTokensResponse{
+		TokensReceived: tokensReceived,
+	}, nil
+}
+
+func (k msgServer) SellTokens(goCtx context.Context, msg *types.MsgSellTokens) (*types.MsgSellTokensResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Validate input
+	if msg.Amount.Amount.IsZero() || msg.Amount.Amount.IsNegative() {
+		return nil, fmt.Errorf("invalid token amount: %s", msg.Amount.Amount.String())
+	}
+
+	// Get user token to verify it exists
+	userToken, found := k.GetUserToken(ctx, msg.Amount.Denom)
+	if !found {
+		return nil, types.ErrTokenNotFound
+	}
+
+	// Get current supply from store
+	currentSupply, err := k.GetTokenSupply(ctx, msg.Amount.Denom)
+	if err != nil {
+		// Fallback to stored supply
+		currentSupply = userToken.CurrentSupply
+	}
+
+	// Validate seller has enough tokens
+	sellerAddr, err := sdk.AccAddressFromBech32(msg.Seller)
+	if err != nil {
+		return nil, fmt.Errorf("invalid seller address: %w", err)
+	}
+
+	sellerBalance := k.bankKeeper.GetBalance(ctx, sellerAddr, msg.Amount.Denom)
+	if sellerBalance.Amount.LT(msg.Amount.Amount) {
+		return nil, fmt.Errorf("insufficient tokens to sell: available %s, requested %s", sellerBalance.Amount.String(), msg.Amount.Amount.String())
+	}
+
+	// Calculate total payout using optimized mathematical approach
+	totalPayout := k.CalculatePayoutFromTokens(ctx, currentSupply, msg.Amount.Amount)
+
+	// Check if payout meets minimum price
+	if totalPayout.LT(msg.MinPrice) {
+		return nil, fmt.Errorf("price received %s is less than minimum price %s", totalPayout.String(), msg.MinPrice.String())
+	}
+
+	// Burn tokens from seller
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, sellerAddr, types.ModuleName, sdk.NewCoins(msg.Amount))
+	if err != nil {
+		return nil, fmt.Errorf("failed to send tokens to module: %w", err)
+	}
+
+	err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(msg.Amount))
+	if err != nil {
+		return nil, fmt.Errorf("failed to burn tokens: %w", err)
+	}
+
+	// Transfer payout from module to seller
+	payoutCoin := sdk.NewCoin("unuah", totalPayout) // N$ denomination
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, sellerAddr, sdk.NewCoins(payoutCoin))
+	if err != nil {
+		return nil, fmt.Errorf("failed to send payout: %w", err)
+	}
+
+	// Update supply tracking in store
+	userToken.CurrentSupply = userToken.CurrentSupply.Sub(msg.Amount.Amount)
+	k.SetUserToken(ctx, userToken)
+
+	// Emit optimized event
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			"sell_tokens",
+			sdk.NewAttribute("seller", msg.Seller),
+			sdk.NewAttribute("denom", msg.Amount.Denom),
+			sdk.NewAttribute("tokens_sold", msg.Amount.Amount.String()),
+			sdk.NewAttribute("payout_received", totalPayout.String()),
+			sdk.NewAttribute("new_supply", userToken.CurrentSupply.String()),
+		),
+	})
+
+	return &types.MsgSellTokensResponse{
+		PriceReceived: totalPayout,
+	}, nil
+}
+
+func (k msgServer) ClaimFounderTokens(goCtx context.Context, msg *types.MsgClaimFounderTokens) (*types.MsgClaimFounderTokensResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Validate input
+	if msg.Amount.IsZero() || msg.Amount.IsNegative() {
+		return nil, fmt.Errorf("invalid amount: %s", msg.Amount.String())
+	}
+
+	// Claim founder tokens through keeper
+	err := k.Keeper.ClaimFounderTokens(ctx, msg.Denom, msg.Claimer, msg.Amount)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get params for founder tranche price
+	params := k.GetParams(ctx)
+	founderPrice := params.FounderTranchePrice
+
+	// Calculate total cost (amount * founder_tranche_price)
+	totalCost := founderPrice.MulInt(msg.Amount).TruncateInt()
+
+	// Transfer payment from claimer to module
+	claimerAddr, err := sdk.AccAddressFromBech32(msg.Claimer)
+	if err != nil {
+		return nil, fmt.Errorf("invalid claimer address: %w", err)
+	}
+
+	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
+	if moduleAddr == nil {
+		return nil, fmt.Errorf("module address not found")
+	}
+
+	paymentCoin := sdk.NewCoin("unuah", totalCost) // N$ denomination
+	err = k.bankKeeper.SendCoins(ctx, claimerAddr, moduleAddr, sdk.NewCoins(paymentCoin))
+	if err != nil {
+		return nil, fmt.Errorf("failed to transfer payment: %w", err)
+	}
+
+	// Mint founder tokens to claimer
+	founderTokens := sdk.NewCoin(msg.Denom, msg.Amount)
+	err = k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(founderTokens))
+	if err != nil {
+		return nil, fmt.Errorf("failed to mint founder tokens: %w", err)
+	}
+
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, claimerAddr, sdk.NewCoins(founderTokens))
+	if err != nil {
+		return nil, fmt.Errorf("failed to send founder tokens: %w", err)
+	}
+
+	// Emit event
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			"claim_founder_tokens",
+			sdk.NewAttribute("claimer", msg.Claimer),
+			sdk.NewAttribute("denom", msg.Denom),
+			sdk.NewAttribute("amount", msg.Amount.String()),
+			sdk.NewAttribute("total_cost", totalCost.String()),
+			sdk.NewAttribute("founder_price", founderPrice.String()),
+		),
+	)
+
+	return &types.MsgClaimFounderTokensResponse{}, nil
+}
+
+func (k msgServer) StartLBP(goCtx context.Context, msg *types.MsgStartLBP) (*types.MsgStartLBPResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Get user token
+	userToken, found := k.GetUserToken(ctx, msg.Denom)
+	if !found {
+		return nil, types.ErrTokenNotFound
+	}
+
+	// Check if creator is the token creator
+	if userToken.Creator != msg.Creator {
+		return nil, types.ErrUnauthorized
+	}
+
+	// Check if LBP is already active
+	if userToken.LbpActive {
+		return nil, fmt.Errorf("LBP already active for token %s", msg.Denom)
+	}
+
+	// Create LBP pool with 90/10 initial weights (90% N$, 10% UserToken)
+	// Pool will transition to 50/50 over 72 hours
+	startTime := ctx.BlockTime()
+	endTime := startTime.Add(72 * time.Hour)
+
+	// Initial weights: 90% N$, 10% UserToken
+	initialWeights := []cosmossdk_io_math.Int{
+		cosmossdk_io_math.NewInt(900), // 90% for N$
+		cosmossdk_io_math.NewInt(100), // 10% for UserToken
+	}
+
+	// Target weights: 50% N$, 50% UserToken
+	targetWeights := []cosmossdk_io_math.Int{
+		cosmossdk_io_math.NewInt(500), // 50% for N$
+		cosmossdk_io_math.NewInt(500), // 50% for UserToken
+	}
+
+	// Pool assets
+	poolAssets := []balancertypes.PoolAsset{
+		{
+			Token:  sdk.NewCoin("unuah", cosmossdk_io_math.NewInt(1000000)), // 1M N$ initial liquidity
+			Weight: initialWeights[0],
+		},
+		{
+			Token:  sdk.NewCoin(msg.Denom, cosmossdk_io_math.NewInt(100000)), // 100K UserToken initial liquidity
+			Weight: initialWeights[1],
+		},
+	}
+
+	// Smooth weight change parameters
+	smoothWeightChangeParams := &balancertypes.SmoothWeightChangeParams{
+		StartTime:          startTime,
+		Duration:           72 * time.Hour,
+		InitialPoolWeights: poolAssets,
+		TargetPoolWeights: []balancertypes.PoolAsset{
+			{
+				Token:  sdk.NewCoin("unuah", cosmossdk_io_math.NewInt(1000000)),
+				Weight: targetWeights[0],
+			},
+			{
+				Token:  sdk.NewCoin(msg.Denom, cosmossdk_io_math.NewInt(100000)),
+				Weight: targetWeights[1],
+			},
+		},
+	}
+
+	// Create balancer pool with LBP parameters
+	poolParams := balancertypes.PoolParams{
+		SwapFee:                  cosmossdk_io_math.LegacyNewDecWithPrec(3, 3), // 0.3% swap fee
+		ExitFee:                  cosmossdk_io_math.LegacyNewDecWithPrec(0, 3), // 0% exit fee
+		SmoothWeightChangeParams: smoothWeightChangeParams,
+	}
+
+	// Create LBP pool using poolmanager
+
+	// Create the balancer pool message
+	createPoolMsg := balancertypes.NewMsgCreateBalancerPool(
+		sdk.MustAccAddressFromBech32(msg.Creator),
+		poolParams,
+		poolAssets,
+		msg.Creator, // Pool governor
+	)
+
+	// Create pool through poolmanager
+	poolId, err := k.poolManagerKeeper.CreatePool(ctx, createPoolMsg)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create LBP pool")
+	}
+
+	// Update user token with LBP info
+	userToken.LbpActive = true
+	userToken.LbpStartTime = startTime.Unix()
+	k.SetUserToken(ctx, userToken)
+
+	// Emit event
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			"start_lbp",
+			sdk.NewAttribute("creator", msg.Creator),
+			sdk.NewAttribute("denom", msg.Denom),
+			sdk.NewAttribute("pool_id", fmt.Sprintf("%d", poolId)),
+			sdk.NewAttribute("start_time", startTime.String()),
+			sdk.NewAttribute("end_time", endTime.String()),
+			sdk.NewAttribute("initial_weights", fmt.Sprintf("%d/%d", initialWeights[0], initialWeights[1])),
+			sdk.NewAttribute("target_weights", fmt.Sprintf("%d/%d", targetWeights[0], targetWeights[1])),
+			sdk.NewAttribute("duration", "72h"),
+		),
+	)
+
+	return &types.MsgStartLBPResponse{}, nil
+}
+
+func (k msgServer) CreateVestingAccount(goCtx context.Context, msg *types.MsgCreateVestingAccount) (*types.MsgCreateVestingAccountResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Validate creator address
+	creatorAddr, err := sdk.AccAddressFromBech32(msg.Creator)
+	if err != nil {
+		return nil, errors.Wrapf(types.ErrInvalidAddress, "invalid creator address: %s", err)
+	}
+
+	// Validate to_address
+	toAddr, err := sdk.AccAddressFromBech32(msg.ToAddress)
+	if err != nil {
+		return nil, errors.Wrapf(types.ErrInvalidAddress, "invalid to_address: %s", err)
+	}
+
+	// Validate end_time is in the future
+	if msg.EndTime <= ctx.BlockTime().Unix() {
+		return nil, errors.Wrapf(types.ErrInvalidRequest, "end_time must be in the future")
+	}
+
+	// Validate amount is not empty
+	if len(msg.Amount) == 0 {
+		return nil, errors.Wrapf(types.ErrInvalidRequest, "amount cannot be empty")
+	}
+
+	// Check if account already exists
+	if k.accountKeeper.HasAccount(ctx, toAddr) {
+		return nil, errors.Wrapf(types.ErrInvalidRequest, "account %s already exists", msg.ToAddress)
+	}
+
+	// Create base account first using AccountKeeper to get proper account number
+	accountI := k.accountKeeper.NewAccountWithAddress(ctx, toAddr)
+	baseAccount, ok := accountI.(*authtypes.BaseAccount)
+	if !ok {
+		return nil, errors.Wrapf(types.ErrInvalidRequest, "failed to cast account to BaseAccount")
+	}
+
+	// Create vesting account based on type
+	var vestingAccount sdk.AccountI
+	if msg.Delayed {
+		// Create delayed vesting account
+		baseVestingAccount, err := vestingtypes.NewBaseVestingAccount(baseAccount, msg.Amount, msg.EndTime)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to create base vesting account")
+		}
+		vestingAccount = vestingtypes.NewDelayedVestingAccountRaw(baseVestingAccount)
+	} else {
+		// Create continuous vesting account
+		baseVestingAccount, err := vestingtypes.NewBaseVestingAccount(baseAccount, msg.Amount, msg.EndTime)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to create base vesting account")
+		}
+		vestingAccount = vestingtypes.NewContinuousVestingAccountRaw(baseVestingAccount, ctx.BlockTime().Unix())
+	}
+
+	// Set the vesting account
+	k.accountKeeper.SetAccount(ctx, vestingAccount)
+
+	// Transfer tokens from creator to vesting account
+	err = k.bankKeeper.SendCoins(ctx, creatorAddr, toAddr, msg.Amount)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to send coins to vesting account")
+	}
+
+	// Emit event
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			"create_vesting_account",
+			sdk.NewAttribute("creator", msg.Creator),
+			sdk.NewAttribute("to_address", msg.ToAddress),
+			sdk.NewAttribute("amount", sdk.NewCoins(msg.Amount...).String()),
+			sdk.NewAttribute("end_time", fmt.Sprintf("%d", msg.EndTime)),
+			sdk.NewAttribute("delayed", fmt.Sprintf("%t", msg.Delayed)),
+		),
+	)
+
+	return &types.MsgCreateVestingAccountResponse{}, nil
+}
+
+// createNuahUserTokenPool creates a basic N$/UserToken pool for trading
+func (k msgServer) createNuahUserTokenPool(ctx sdk.Context, userTokenDenom string, creator string) error {
+	// Define initial pool assets with equal weights (50/50)
+	poolAssets := []balancertypes.PoolAsset{
+		{
+			Token:  sdk.NewCoin("unuah", cosmossdk_io_math.NewInt(1000000)), // 1M N$ initial liquidity
+			Weight: cosmossdk_io_math.NewInt(500),                           // 50%
+		},
+		{
+			Token:  sdk.NewCoin(userTokenDenom, cosmossdk_io_math.NewInt(1000000)), // 1M UserToken initial liquidity
+			Weight: cosmossdk_io_math.NewInt(500),                                  // 50%
+		},
+	}
+
+	// Pool parameters
+	poolParams := balancertypes.PoolParams{
+		SwapFee: cosmossdk_io_math.LegacyNewDecWithPrec(3, 3), // 0.3% swap fee
+		ExitFee: cosmossdk_io_math.LegacyNewDecWithPrec(0, 3), // 0% exit fee
+	}
+
+	// Create the balancer pool
+	pool, err := balancertypes.NewBalancerPool(
+		0, // pool ID will be assigned by gamm keeper
+		poolParams,
+		poolAssets,
+		"", // future governor
+		ctx.BlockTime(),
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed to create balancer pool")
+	}
+
+	// TODO: Implement pool creation
+	// This will be implemented when integrating with Osmosis pools
+	_ = pool // Avoid unused variable error
+
+	return nil
+}

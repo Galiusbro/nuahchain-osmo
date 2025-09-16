@@ -1,0 +1,56 @@
+syntax = "proto3";
+package osmosis.usertoken.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/usertoken/types";
+
+// GenesisState defines the usertoken module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  repeated UserToken user_tokens = 2;
+}
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "osmosis/x/usertoken/Params";
+  option (gogoproto.goproto_stringer) = false;
+
+  string founder_tranche_price = 1 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  string founder_tranche_amount = 2 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+  string bonding_curve_start_price = 3 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  string bonding_curve_end_price = 4 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  string bonding_curve_max_supply = 5 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// UserToken defines a user-created token.
+message UserToken {
+  string denom = 1;
+  string creator = 2;
+  string current_supply = 3 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+  string founder_tokens_claimed = 4 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+  bool lbp_active = 5;
+  int64 lbp_start_time = 6;
+}

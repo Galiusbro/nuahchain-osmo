@@ -120,6 +120,8 @@ import (
 	txfeestypes "github.com/osmosis-labs/osmosis/v30/x/txfees/types"
 	usdoraclekeeper "github.com/osmosis-labs/osmosis/v30/x/usdoracle/keeper"
 	usdoracletypes "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types"
+	usertokenkeeper "github.com/osmosis-labs/osmosis/v30/x/usertoken/keeper"
+	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
 	valsetpref "github.com/osmosis-labs/osmosis/v30/x/valset-pref"
 	valsetpreftypes "github.com/osmosis-labs/osmosis/v30/x/valset-pref/types"
 	epochskeeper "github.com/osmosis-labs/osmosis/x/epochs/keeper"
@@ -193,6 +195,7 @@ type AppKeepers struct {
 	USDOracleKeeper              *usdoraclekeeper.Keeper
 	ExchangeKeeper               *exchangekeeper.Keeper
 	PegKeeperKeeper              *pegkeeperkeeper.Keeper
+	UserTokenKeeper              *usertokenkeeper.Keeper
 
 	// IBC modules
 	// transfer module
@@ -631,6 +634,19 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 		*appKeepers.USDOracleKeeper,
 	)
 	appKeepers.PegKeeperKeeper = pegKeeperKeeper
+
+	// Initialize UserToken keeper
+	userTokenKeeper := usertokenkeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[usertokentypes.StoreKey],
+		appKeepers.keys[usertokentypes.MemStoreKey],
+		*appKeepers.TokenFactoryKeeper,
+		appKeepers.BankKeeper,
+		appKeepers.AccountKeeper,
+		appKeepers.GAMMKeeper,
+		appKeepers.PoolManagerKeeper,
+	)
+	appKeepers.UserTokenKeeper = userTokenKeeper
 
 	appKeepers.SuperfluidKeeper = superfluidkeeper.NewKeeper(
 		appKeepers.keys[superfluidtypes.StoreKey], appKeepers.GetSubspace(superfluidtypes.ModuleName),

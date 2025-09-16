@@ -10,45 +10,48 @@ option go_package = "github.com/osmosis-labs/osmosis/v30/x/exchange/types";
 message Params {
   // enabled defines if the exchange module is enabled
   bool enabled = 1;
-  
+
   // admin is the address that can update parameters
   string admin = 2;
-  
+
   // min_exchange_amount_usd is the minimum USD value for exchange (e.g., $10)
   string min_exchange_amount_usd = 3 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
-  
+
   // max_exchange_amount_usd is the maximum USD value for exchange (e.g., $100k)
   string max_exchange_amount_usd = 4 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
-  
+
   // daily_limit_usd is the daily exchange limit per address (e.g., $1M)
   string daily_limit_usd = 5 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
-  
+
   // price_deviation_threshold is the maximum allowed deviation between Oracle and TWAP prices
   string price_deviation_threshold = 6 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
-  
+
   // treasury_addresses are the addresses where exchanged tokens are sent
   repeated string treasury_addresses = 7;
-  
+
   // exchange_fee is the fee percentage for exchanges
   string exchange_fee = 8 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
+
+  // supported_tokens is the list of token denominations that can be exchanged
+  repeated string supported_tokens = 9;
 }

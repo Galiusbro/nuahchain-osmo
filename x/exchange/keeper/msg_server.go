@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"strconv"
-
 	"cosmossdk.io/errors"
 	"cosmossdk.io/math"
 
@@ -41,6 +39,18 @@ func (k msgServer) ExchangeTokens(ctx sdk.Context, msg *types.MsgExchangeTokens)
 	// Check if token is supported by USD Oracle
 	if !k.usdOracleKeeper.IsTokenSupported(ctx, msg.TokenIn.Denom) {
 		return nil, errors.Wrapf(types.ErrUnsupportedToken, "token %s is not supported", msg.TokenIn.Denom)
+	}
+
+	// Check if token is in the supported tokens registry
+	isSupported := false
+	for _, supportedToken := range params.SupportedTokens {
+		if supportedToken == msg.TokenIn.Denom {
+			isSupported = true
+			break
+		}
+	}
+	if !isSupported {
+		return nil, errors.Wrapf(types.ErrUnsupportedToken, "token %s is not in supported tokens registry", msg.TokenIn.Denom)
 	}
 
 	// Get current exchange rate with price deviation check
@@ -182,9 +192,8 @@ func (k msgServer) ExchangeTokens(ctx sdk.Context, msg *types.MsgExchangeTokens)
 
 // UpdateParams handles parameter updates
 func (k msgServer) UpdateParams(ctx sdk.Context, msg *types.MsgUpdateParams) (*types.MsgUpdateParamsResponse, error) {
-
-	if k.GetAuthority() != msg.Authority {
-		return nil, errors.Wrapf(types.ErrInvalidSigner, "invalid authority; expected %s, got %s", k.GetAuthority(), msg.Authority)
+	if k.authority != msg.Authority {
+		return nil, errors.Wrapf(types.ErrInvalidAuthority, "invalid authority; expected %s, got %s", k.authority, msg.Authority)
 	}
 
 	if err := msg.Params.Validate(); err != nil {
@@ -195,14 +204,73 @@ func (k msgServer) UpdateParams(ctx sdk.Context, msg *types.MsgUpdateParams) (*t
 		return nil, err
 	}
 
-	// Emit event
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			"update_params",
-			sdk.NewAttribute("authority", msg.Authority),
-			sdk.NewAttribute("enabled", strconv.FormatBool(msg.Params.Enabled)),
-		),
-	)
-
 	return &types.MsgUpdateParamsResponse{}, nil
+}
+
+// AddSupportedToken handles adding a new supported token to the registry
+func (k msgServer) AddSupportedToken(ctx sdk.Context, msg *types.MsgAddSupportedToken) (*types.MsgAddSupportedTokenResponse, error) {
+	if k.authority != msg.Authority {
+		return nil, errors.Wrapf(types.ErrInvalidAuthority, "invalid authority; expected %s, got %s", k.authority, msg.Authority)
+	}
+
+	// Get current parameters
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if token is already supported
+	for _, supportedToken := range params.SupportedTokens {
+		if supportedToken == msg.Denom {
+			return nil, errors.Wrapf(types.ErrTokenAlreadySupported, "token %s is already supported", msg.Denom)
+		}
+	}
+
+	// Add the new token to supported tokens list
+	params.SupportedTokens = append(params.SupportedTokens, msg.Denom)
+
+	// Update parameters
+	if err := k.SetParams(ctx, params); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgAddSupportedTokenResponse{}, nil
+}
+
+// RemoveSupportedToken handles removing a supported token from the registry
+func (k msgServer) RemoveSupportedToken(ctx sdk.Context, msg *types.MsgRemoveSupportedToken) (*types.MsgRemoveSupportedTokenResponse, error) {
+	if k.authority != msg.Authority {
+		return nil, errors.Wrapf(types.ErrInvalidAuthority, "invalid authority; expected %s, got %s", k.authority, msg.Authority)
+	}
+
+	// Get current parameters
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Find and remove the token from supported tokens list
+	found := false
+	newSupportedTokens := make([]string, 0, len(params.SupportedTokens))
+	for _, supportedToken := range params.SupportedTokens {
+		if supportedToken != msg.Denom {
+			newSupportedTokens = append(newSupportedTokens, supportedToken)
+		} else {
+			found = true
+		}
+	}
+
+	if !found {
+		return nil, errors.Wrapf(types.ErrTokenNotSupported, "token %s is not in supported tokens registry", msg.Denom)
+	}
+
+	// Update supported tokens list
+	params.SupportedTokens = newSupportedTokens
+
+	// Update parameters
+	if err := k.SetParams(ctx, params); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgRemoveSupportedTokenResponse{}, nil
 }

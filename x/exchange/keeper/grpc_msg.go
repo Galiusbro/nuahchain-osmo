@@ -34,3 +34,15 @@ func (m grpcMsgServer) UpdateParams(goCtx context.Context, msg *types.MsgUpdateP
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	return m.msgServer.UpdateParams(ctx, msg)
 }
+
+// AddSupportedToken handles adding a new supported token to the registry
+func (m grpcMsgServer) AddSupportedToken(goCtx context.Context, msg *types.MsgAddSupportedToken) (*types.MsgAddSupportedTokenResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	return m.msgServer.AddSupportedToken(ctx, msg)
+}
+
+// RemoveSupportedToken handles removing a supported token from the registry
+func (m grpcMsgServer) RemoveSupportedToken(goCtx context.Context, msg *types.MsgRemoveSupportedToken) (*types.MsgRemoveSupportedTokenResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	return m.msgServer.RemoveSupportedToken(ctx, msg)
+}

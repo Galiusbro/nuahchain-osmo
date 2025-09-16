@@ -50,6 +50,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 		DailyLimitUsd:           math.LegacyNewDec(1000000),      // $1M daily limit
 		ExchangeFee:             math.LegacyNewDecWithPrec(1, 3), // 0.1% fee
 		PriceDeviationThreshold: math.LegacyNewDecWithPrec(2, 2), // 2% threshold
+		SupportedTokens:         []string{"ibc/ETH", "ibc/BTC", "ibc/USDC", "ibc/ATOM", "uosmo"}, // Match USD Oracle tokens
 	}
 	err := s.keeper.SetParams(s.ctx, params)
 	s.Require().NoError(err)

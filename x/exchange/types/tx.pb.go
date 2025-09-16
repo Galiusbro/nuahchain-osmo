@@ -215,50 +215,242 @@ func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
+// MsgAddSupportedToken defines the message for adding a supported token
+type MsgAddSupportedToken struct {
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	Denom     string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *MsgAddSupportedToken) Reset()         { *m = MsgAddSupportedToken{} }
+func (m *MsgAddSupportedToken) String() string { return proto.CompactTextString(m) }
+func (*MsgAddSupportedToken) ProtoMessage()    {}
+func (*MsgAddSupportedToken) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9f7cea9c00ccf65a, []int{4}
+}
+func (m *MsgAddSupportedToken) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgAddSupportedToken) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgAddSupportedToken.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgAddSupportedToken) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgAddSupportedToken.Merge(m, src)
+}
+func (m *MsgAddSupportedToken) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgAddSupportedToken) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgAddSupportedToken.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgAddSupportedToken proto.InternalMessageInfo
+
+func (m *MsgAddSupportedToken) GetAuthority() string {
+	if m != nil {
+		return m.Authority
+	}
+	return ""
+}
+
+func (m *MsgAddSupportedToken) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// MsgAddSupportedTokenResponse defines the response for MsgAddSupportedToken
+type MsgAddSupportedTokenResponse struct {
+}
+
+func (m *MsgAddSupportedTokenResponse) Reset()         { *m = MsgAddSupportedTokenResponse{} }
+func (m *MsgAddSupportedTokenResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgAddSupportedTokenResponse) ProtoMessage()    {}
+func (*MsgAddSupportedTokenResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9f7cea9c00ccf65a, []int{5}
+}
+func (m *MsgAddSupportedTokenResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgAddSupportedTokenResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgAddSupportedTokenResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgAddSupportedTokenResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgAddSupportedTokenResponse.Merge(m, src)
+}
+func (m *MsgAddSupportedTokenResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgAddSupportedTokenResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgAddSupportedTokenResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgAddSupportedTokenResponse proto.InternalMessageInfo
+
+// MsgRemoveSupportedToken defines the message for removing a supported token
+type MsgRemoveSupportedToken struct {
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	Denom     string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *MsgRemoveSupportedToken) Reset()         { *m = MsgRemoveSupportedToken{} }
+func (m *MsgRemoveSupportedToken) String() string { return proto.CompactTextString(m) }
+func (*MsgRemoveSupportedToken) ProtoMessage()    {}
+func (*MsgRemoveSupportedToken) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9f7cea9c00ccf65a, []int{6}
+}
+func (m *MsgRemoveSupportedToken) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgRemoveSupportedToken) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgRemoveSupportedToken.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgRemoveSupportedToken) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgRemoveSupportedToken.Merge(m, src)
+}
+func (m *MsgRemoveSupportedToken) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgRemoveSupportedToken) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgRemoveSupportedToken.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgRemoveSupportedToken proto.InternalMessageInfo
+
+func (m *MsgRemoveSupportedToken) GetAuthority() string {
+	if m != nil {
+		return m.Authority
+	}
+	return ""
+}
+
+func (m *MsgRemoveSupportedToken) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// MsgRemoveSupportedTokenResponse defines the response for MsgRemoveSupportedToken
+type MsgRemoveSupportedTokenResponse struct {
+}
+
+func (m *MsgRemoveSupportedTokenResponse) Reset()         { *m = MsgRemoveSupportedTokenResponse{} }
+func (m *MsgRemoveSupportedTokenResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgRemoveSupportedTokenResponse) ProtoMessage()    {}
+func (*MsgRemoveSupportedTokenResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9f7cea9c00ccf65a, []int{7}
+}
+func (m *MsgRemoveSupportedTokenResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgRemoveSupportedTokenResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgRemoveSupportedTokenResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgRemoveSupportedTokenResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgRemoveSupportedTokenResponse.Merge(m, src)
+}
+func (m *MsgRemoveSupportedTokenResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgRemoveSupportedTokenResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgRemoveSupportedTokenResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgRemoveSupportedTokenResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*MsgExchangeTokens)(nil), "osmosis.exchange.v1beta1.MsgExchangeTokens")
 	proto.RegisterType((*MsgExchangeTokensResponse)(nil), "osmosis.exchange.v1beta1.MsgExchangeTokensResponse")
 	proto.RegisterType((*MsgUpdateParams)(nil), "osmosis.exchange.v1beta1.MsgUpdateParams")
 	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "osmosis.exchange.v1beta1.MsgUpdateParamsResponse")
+	proto.RegisterType((*MsgAddSupportedToken)(nil), "osmosis.exchange.v1beta1.MsgAddSupportedToken")
+	proto.RegisterType((*MsgAddSupportedTokenResponse)(nil), "osmosis.exchange.v1beta1.MsgAddSupportedTokenResponse")
+	proto.RegisterType((*MsgRemoveSupportedToken)(nil), "osmosis.exchange.v1beta1.MsgRemoveSupportedToken")
+	proto.RegisterType((*MsgRemoveSupportedTokenResponse)(nil), "osmosis.exchange.v1beta1.MsgRemoveSupportedTokenResponse")
 }
 
 func init() { proto.RegisterFile("osmosis/exchange/v1beta1/tx.proto", fileDescriptor_9f7cea9c00ccf65a) }
 
 var fileDescriptor_9f7cea9c00ccf65a = []byte{
-	// 528 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x53, 0x41, 0x6f, 0xd3, 0x30,
-	0x14, 0xae, 0x19, 0x74, 0x9b, 0x99, 0x40, 0x8b, 0x80, 0xb5, 0x11, 0xca, 0x4a, 0x25, 0xa4, 0xd1,
-	0xa9, 0xf6, 0xb2, 0x72, 0xea, 0x81, 0x43, 0x11, 0x48, 0x3d, 0x74, 0xa0, 0x0a, 0x2e, 0x5c, 0x2a,
-	0x27, 0xb5, 0x12, 0x6b, 0x8b, 0x1d, 0xc5, 0x4e, 0xd5, 0xdd, 0x10, 0x47, 0x4e, 0xfc, 0x06, 0x7e,
-	0x41, 0x0f, 0xfc, 0x88, 0x1d, 0x27, 0x4e, 0x88, 0xc3, 0x84, 0xda, 0x43, 0x39, 0xf1, 0x1b, 0x50,
-	0x62, 0x67, 0x85, 0x55, 0x45, 0xec, 0x92, 0xf8, 0xf9, 0x7d, 0xef, 0xf3, 0xf7, 0xbe, 0x67, 0xc3,
-	0x47, 0x42, 0x46, 0x42, 0x32, 0x89, 0xe9, 0xd8, 0x0f, 0x09, 0x0f, 0x28, 0x1e, 0xb9, 0x1e, 0x55,
-	0xc4, 0xc5, 0x6a, 0x8c, 0xe2, 0x44, 0x28, 0x61, 0x55, 0x0c, 0x04, 0x15, 0x10, 0x64, 0x20, 0xf6,
-	0xbd, 0x40, 0x04, 0x22, 0x07, 0xe1, 0x6c, 0xa5, 0xf1, 0x76, 0xd5, 0xcf, 0x0b, 0x06, 0x3a, 0xa1,
-	0x03, 0x93, 0x72, 0x74, 0x84, 0x3d, 0x22, 0x17, 0x07, 0xf9, 0x82, 0x71, 0x93, 0x7f, 0xbc, 0x52,
-	0x4d, 0x4c, 0x12, 0x12, 0x15, 0x34, 0xdb, 0x24, 0x62, 0x5c, 0xe0, 0xfc, 0x6b, 0xb6, 0x76, 0x0c,
-	0x73, 0x24, 0x03, 0x3c, 0x72, 0xb3, 0x9f, 0x4e, 0xd4, 0x7f, 0x02, 0xb8, 0xdd, 0x93, 0xc1, 0x0b,
-	0x43, 0xf8, 0x46, 0x1c, 0x53, 0x2e, 0xad, 0x07, 0xb0, 0x2c, 0x29, 0x1f, 0xd2, 0xa4, 0x02, 0x6a,
-	0x60, 0x6f, 0xb3, 0x6f, 0x22, 0xab, 0x0d, 0x37, 0x54, 0x86, 0x18, 0x30, 0x5e, 0xb9, 0x51, 0x03,
-	0x7b, 0xb7, 0x0f, 0xab, 0xc8, 0x74, 0x90, 0x69, 0x2e, 0x3a, 0x47, 0xcf, 0x05, 0xe3, 0x9d, 0x9b,
-	0x67, 0x17, 0xbb, 0xa5, 0xfe, 0x7a, 0x5e, 0xd0, 0xe5, 0x56, 0x0f, 0x6e, 0x45, 0x8c, 0x0f, 0x78,
-	0x4a, 0xc2, 0x81, 0x48, 0x55, 0x65, 0x2d, 0x63, 0xee, 0xec, 0x67, 0xa0, 0xef, 0x17, 0xbb, 0xf7,
-	0x35, 0x8d, 0x1c, 0x1e, 0x23, 0x26, 0x70, 0x44, 0x54, 0x88, 0xba, 0x5c, 0x7d, 0xfd, 0xd2, 0x84,
-	0x86, 0xbf, 0xcb, 0x55, 0x1f, 0x46, 0x8c, 0x1f, 0xa5, 0x24, 0x7c, 0x95, 0xaa, 0xf6, 0xc1, 0x87,
-	0xf9, 0xa4, 0x61, 0x74, 0x7d, 0x9c, 0x4f, 0x1a, 0xb5, 0x25, 0x6f, 0x8a, 0x45, 0x33, 0x57, 0x20,
-	0xeb, 0x3e, 0xac, 0x2e, 0x75, 0xda, 0xa7, 0x32, 0x16, 0x5c, 0x52, 0xeb, 0x25, 0xdc, 0xb8, 0x54,
-	0x06, 0xae, 0xaf, 0x6c, 0x9d, 0x6b, 0x59, 0xf5, 0xcf, 0x00, 0xde, 0xed, 0xc9, 0xe0, 0x6d, 0x3c,
-	0x24, 0x8a, 0xbe, 0xce, 0xa7, 0x62, 0x3d, 0x84, 0x9b, 0x24, 0x55, 0xa1, 0x48, 0x98, 0x3a, 0x35,
-	0x86, 0x2e, 0x36, 0xac, 0x67, 0xb0, 0xac, 0xa7, 0x67, 0x1c, 0xad, 0xa1, 0x55, 0x17, 0x0a, 0x69,
-	0x3e, 0x63, 0xac, 0xa9, 0x6a, 0xbb, 0x99, 0x11, 0x0b, 0xbe, 0xcc, 0x0b, 0x67, 0xc9, 0x8b, 0x34,
-	0xd7, 0xd3, 0xd4, 0x25, 0xf5, 0x2a, 0xdc, 0xb9, 0xa2, 0xb1, 0xf0, 0xe1, 0xf0, 0x17, 0x80, 0x6b,
-	0x3d, 0x19, 0x58, 0x09, 0xbc, 0x73, 0xe5, 0x4e, 0xec, 0xaf, 0xd6, 0xb5, 0x64, 0xab, 0xdd, 0xba,
-	0x06, 0xf8, 0x72, 0x06, 0x27, 0x70, 0xeb, 0x2f, 0xdf, 0x9e, 0xfc, 0x93, 0xe4, 0x4f, 0xa8, 0xed,
-	0xfe, 0x37, 0xb4, 0x38, 0xcd, 0xbe, 0xf5, 0x7e, 0x3e, 0x69, 0x80, 0xce, 0xd1, 0xd9, 0xd4, 0x01,
-	0xe7, 0x53, 0x07, 0xfc, 0x98, 0x3a, 0xe0, 0xd3, 0xcc, 0x29, 0x9d, 0xcf, 0x9c, 0xd2, 0xb7, 0x99,
-	0x53, 0x7a, 0xf7, 0x34, 0x60, 0x2a, 0x4c, 0x3d, 0xe4, 0x8b, 0x08, 0x1b, 0xf6, 0xe6, 0x09, 0xf1,
-	0x64, 0x11, 0xe0, 0x51, 0xeb, 0x00, 0x8f, 0x17, 0x1e, 0xab, 0xd3, 0x98, 0x4a, 0xaf, 0x9c, 0xbf,
-	0xab, 0xd6, 0xef, 0x00, 0x00, 0x00, 0xff, 0xff, 0xce, 0xdc, 0xf6, 0x37, 0x3a, 0x04, 0x00, 0x00,
+	// 652 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x94, 0xcf, 0x6e, 0xd3, 0x40,
+	0x10, 0xc6, 0xb3, 0x94, 0xfe, 0x5b, 0x2a, 0x50, 0xad, 0x40, 0x13, 0xab, 0x72, 0x53, 0x0b, 0x44,
+	0x69, 0x15, 0xbb, 0x69, 0x11, 0x88, 0x1c, 0x90, 0x28, 0x02, 0xa9, 0x87, 0x14, 0x64, 0xe0, 0xc2,
+	0x25, 0xda, 0xc4, 0x2b, 0xdb, 0x6a, 0xbd, 0x6b, 0x79, 0xd7, 0x51, 0x2b, 0x2e, 0x08, 0xb8, 0xc0,
+	0x89, 0x67, 0xe0, 0x09, 0x7a, 0xe0, 0x21, 0x7a, 0xac, 0x38, 0x21, 0x0e, 0x15, 0x6a, 0x0f, 0xe1,
+	0xcc, 0x13, 0x20, 0xef, 0xae, 0x13, 0xa8, 0x93, 0x40, 0x24, 0x2e, 0x89, 0xc7, 0xfb, 0xcd, 0x37,
+	0xbf, 0x99, 0x9d, 0x04, 0x2e, 0x53, 0x16, 0x52, 0x16, 0x30, 0x1b, 0xef, 0xb7, 0x7d, 0x44, 0x3c,
+	0x6c, 0x77, 0x6a, 0x2d, 0xcc, 0x51, 0xcd, 0xe6, 0xfb, 0x56, 0x14, 0x53, 0x4e, 0xb5, 0x92, 0x92,
+	0x58, 0x99, 0xc4, 0x52, 0x12, 0xbd, 0xe8, 0x51, 0x8f, 0x0a, 0x91, 0x9d, 0x3e, 0x49, 0xbd, 0x5e,
+	0x6e, 0x8b, 0x84, 0xa6, 0x3c, 0x90, 0x81, 0x3a, 0x32, 0x64, 0x64, 0xb7, 0x10, 0xeb, 0x17, 0x6a,
+	0xd3, 0x80, 0xa8, 0xf3, 0x1b, 0x43, 0x69, 0x22, 0x14, 0xa3, 0x30, 0xb3, 0x99, 0x47, 0x61, 0x40,
+	0xa8, 0x2d, 0x3e, 0xd5, 0xab, 0x05, 0xe5, 0x1c, 0x32, 0xcf, 0xee, 0xd4, 0xd2, 0x2f, 0x79, 0x60,
+	0xfe, 0x00, 0x70, 0xbe, 0xc1, 0xbc, 0x47, 0xca, 0xf0, 0x39, 0xdd, 0xc5, 0x84, 0x69, 0xd7, 0xe0,
+	0x14, 0xc3, 0xc4, 0xc5, 0x71, 0x09, 0x54, 0xc0, 0xca, 0xac, 0xa3, 0x22, 0xad, 0x0e, 0x67, 0x78,
+	0xaa, 0x68, 0x06, 0xa4, 0x74, 0xa1, 0x02, 0x56, 0x2e, 0x6d, 0x94, 0x2d, 0xd5, 0x41, 0xca, 0x9c,
+	0x75, 0x6e, 0x3d, 0xa4, 0x01, 0xd9, 0xba, 0x78, 0x74, 0xb2, 0x54, 0x70, 0xa6, 0x45, 0xc2, 0x36,
+	0xd1, 0x1a, 0x70, 0x2e, 0x0c, 0x48, 0x93, 0x24, 0xc8, 0x6f, 0xd2, 0x84, 0x97, 0x26, 0x52, 0xe7,
+	0xad, 0xb5, 0x54, 0xf4, 0xed, 0x64, 0xe9, 0xaa, 0xb4, 0x61, 0xee, 0xae, 0x15, 0x50, 0x3b, 0x44,
+	0xdc, 0xb7, 0xb6, 0x09, 0xff, 0xf2, 0xb9, 0x0a, 0x95, 0xff, 0x36, 0xe1, 0x0e, 0x0c, 0x03, 0xb2,
+	0x93, 0x20, 0xff, 0x49, 0xc2, 0xeb, 0xeb, 0x6f, 0xba, 0x87, 0xab, 0x8a, 0xeb, 0x43, 0xf7, 0x70,
+	0xb5, 0x92, 0x9b, 0x4d, 0xf6, 0x50, 0x15, 0x04, 0xcc, 0x6c, 0xc3, 0x72, 0xae, 0x53, 0x07, 0xb3,
+	0x88, 0x12, 0x86, 0xb5, 0xc7, 0x70, 0xa6, 0x47, 0x06, 0xc6, 0x27, 0x9b, 0x26, 0x12, 0xcb, 0xfc,
+	0x04, 0xe0, 0x95, 0x06, 0xf3, 0x5e, 0x44, 0x2e, 0xe2, 0xf8, 0xa9, 0xb8, 0x15, 0x6d, 0x11, 0xce,
+	0xa2, 0x84, 0xfb, 0x34, 0x0e, 0xf8, 0x81, 0x1a, 0x68, 0xff, 0x85, 0x76, 0x1f, 0x4e, 0xc9, 0xdb,
+	0x53, 0x13, 0xad, 0x58, 0xc3, 0x16, 0xca, 0x92, 0x7e, 0x6a, 0xb0, 0x2a, 0xab, 0x5e, 0x4b, 0x07,
+	0xd1, 0xf7, 0x4b, 0x67, 0x61, 0xe4, 0x66, 0x91, 0x08, 0x9e, 0xaa, 0x4c, 0x31, 0xcb, 0x70, 0xe1,
+	0x1c, 0x63, 0x36, 0x07, 0xf3, 0x2d, 0x80, 0xc5, 0x06, 0xf3, 0x1e, 0xb8, 0xee, 0xb3, 0x24, 0x8a,
+	0x68, 0xcc, 0xb1, 0x2b, 0x26, 0xf5, 0x97, 0x26, 0x8a, 0x70, 0xd2, 0xc5, 0x84, 0x86, 0xa2, 0x87,
+	0x59, 0x47, 0x06, 0xf5, 0xbb, 0x79, 0xb4, 0xeb, 0x39, 0x34, 0xe4, 0xba, 0x55, 0x96, 0xd5, 0x92,
+	0x77, 0x65, 0x1a, 0x70, 0x71, 0x10, 0x44, 0x8f, 0xf2, 0x3d, 0x10, 0x1d, 0x38, 0x38, 0xa4, 0x1d,
+	0xfc, 0x1f, 0x40, 0xeb, 0x79, 0xd0, 0x9b, 0x39, 0xd0, 0x58, 0x54, 0xcb, 0xb1, 0x2e, 0xc3, 0xa5,
+	0x21, 0x28, 0x19, 0xee, 0xc6, 0xcf, 0x09, 0x38, 0xd1, 0x60, 0x9e, 0x16, 0xc3, 0xcb, 0xe7, 0x7e,
+	0x68, 0x6b, 0xc3, 0x2f, 0x3b, 0xb7, 0xab, 0xfa, 0xe6, 0x18, 0xe2, 0xde, 0x62, 0xef, 0xc1, 0xb9,
+	0x3f, 0x96, 0xf1, 0xd6, 0x48, 0x93, 0xdf, 0xa5, 0x7a, 0xed, 0x9f, 0xa5, 0xbd, 0x6a, 0xaf, 0xe0,
+	0x7c, 0x7e, 0x75, 0xac, 0x91, 0x3e, 0x39, 0xbd, 0x7e, 0x67, 0x3c, 0x7d, 0xaf, 0xf8, 0x3b, 0x00,
+	0x8b, 0x03, 0x57, 0x62, 0x74, 0x23, 0x83, 0x52, 0xf4, 0x7b, 0x63, 0xa7, 0x64, 0x18, 0xfa, 0xe4,
+	0xeb, 0xee, 0xe1, 0x2a, 0xd8, 0xda, 0x39, 0x3a, 0x35, 0xc0, 0xf1, 0xa9, 0x01, 0xbe, 0x9f, 0x1a,
+	0xe0, 0xe3, 0x99, 0x51, 0x38, 0x3e, 0x33, 0x0a, 0x5f, 0xcf, 0x8c, 0xc2, 0xcb, 0xdb, 0x5e, 0xc0,
+	0xfd, 0xa4, 0x65, 0xb5, 0x69, 0x68, 0xab, 0x2a, 0xd5, 0x3d, 0xd4, 0x62, 0x59, 0x60, 0x77, 0x36,
+	0xd7, 0xed, 0xfd, 0xfe, 0xe2, 0xf1, 0x83, 0x08, 0xb3, 0xd6, 0x94, 0xf8, 0xc3, 0xde, 0xfc, 0x15,
+	0x00, 0x00, 0xff, 0xff, 0xce, 0x26, 0xa1, 0x45, 0x93, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -277,6 +469,10 @@ type MsgClient interface {
 	ExchangeTokens(ctx context.Context, in *MsgExchangeTokens, opts ...grpc.CallOption) (*MsgExchangeTokensResponse, error)
 	// UpdateParams updates the exchange module parameters
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
+	// AddSupportedToken adds a token to the supported tokens registry
+	AddSupportedToken(ctx context.Context, in *MsgAddSupportedToken, opts ...grpc.CallOption) (*MsgAddSupportedTokenResponse, error)
+	// RemoveSupportedToken removes a token from the supported tokens registry
+	RemoveSupportedToken(ctx context.Context, in *MsgRemoveSupportedToken, opts ...grpc.CallOption) (*MsgRemoveSupportedTokenResponse, error)
 }
 
 type msgClient struct {
@@ -305,12 +501,34 @@ func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts 
 	return out, nil
 }
 
+func (c *msgClient) AddSupportedToken(ctx context.Context, in *MsgAddSupportedToken, opts ...grpc.CallOption) (*MsgAddSupportedTokenResponse, error) {
+	out := new(MsgAddSupportedTokenResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.exchange.v1beta1.Msg/AddSupportedToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) RemoveSupportedToken(ctx context.Context, in *MsgRemoveSupportedToken, opts ...grpc.CallOption) (*MsgRemoveSupportedTokenResponse, error) {
+	out := new(MsgRemoveSupportedTokenResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.exchange.v1beta1.Msg/RemoveSupportedToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// ExchangeTokens exchanges tokens for N$ (Nuah Dollar)
 	ExchangeTokens(context.Context, *MsgExchangeTokens) (*MsgExchangeTokensResponse, error)
 	// UpdateParams updates the exchange module parameters
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
+	// AddSupportedToken adds a token to the supported tokens registry
+	AddSupportedToken(context.Context, *MsgAddSupportedToken) (*MsgAddSupportedTokenResponse, error)
+	// RemoveSupportedToken removes a token from the supported tokens registry
+	RemoveSupportedToken(context.Context, *MsgRemoveSupportedToken) (*MsgRemoveSupportedTokenResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -322,6 +540,12 @@ func (*UnimplementedMsgServer) ExchangeTokens(ctx context.Context, req *MsgExcha
 }
 func (*UnimplementedMsgServer) UpdateParams(ctx context.Context, req *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateParams not implemented")
+}
+func (*UnimplementedMsgServer) AddSupportedToken(ctx context.Context, req *MsgAddSupportedToken) (*MsgAddSupportedTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddSupportedToken not implemented")
+}
+func (*UnimplementedMsgServer) RemoveSupportedToken(ctx context.Context, req *MsgRemoveSupportedToken) (*MsgRemoveSupportedTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveSupportedToken not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -364,6 +588,42 @@ func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_AddSupportedToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgAddSupportedToken)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).AddSupportedToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.exchange.v1beta1.Msg/AddSupportedToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).AddSupportedToken(ctx, req.(*MsgAddSupportedToken))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_RemoveSupportedToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRemoveSupportedToken)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).RemoveSupportedToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.exchange.v1beta1.Msg/RemoveSupportedToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).RemoveSupportedToken(ctx, req.(*MsgRemoveSupportedToken))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "osmosis.exchange.v1beta1.Msg",
 	HandlerType: (*MsgServer)(nil),
@@ -375,6 +635,14 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateParams",
 			Handler:    _Msg_UpdateParams_Handler,
+		},
+		{
+			MethodName: "AddSupportedToken",
+			Handler:    _Msg_AddSupportedToken_Handler,
+		},
+		{
+			MethodName: "RemoveSupportedToken",
+			Handler:    _Msg_RemoveSupportedToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -527,6 +795,126 @@ func (m *MsgUpdateParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgAddSupportedToken) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgAddSupportedToken) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgAddSupportedToken) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgAddSupportedTokenResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgAddSupportedTokenResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgAddSupportedTokenResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgRemoveSupportedToken) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgRemoveSupportedToken) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgRemoveSupportedToken) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgRemoveSupportedTokenResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgRemoveSupportedTokenResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgRemoveSupportedTokenResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -582,6 +970,58 @@ func (m *MsgUpdateParams) Size() (n int) {
 }
 
 func (m *MsgUpdateParamsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgAddSupportedToken) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgAddSupportedTokenResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgRemoveSupportedToken) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgRemoveSupportedTokenResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -971,6 +1411,334 @@ func (m *MsgUpdateParamsResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: MsgUpdateParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgAddSupportedToken) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgAddSupportedToken: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgAddSupportedToken: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgAddSupportedTokenResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgAddSupportedTokenResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgAddSupportedTokenResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgRemoveSupportedToken) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgRemoveSupportedToken: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgRemoveSupportedToken: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgRemoveSupportedTokenResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgRemoveSupportedTokenResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgRemoveSupportedTokenResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

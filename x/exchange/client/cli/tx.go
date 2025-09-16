@@ -155,6 +155,7 @@ $ %s tx %s update-params cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn true admi
 				math.LegacyNewDecWithPrec(2, 2), // priceDeviationThreshold - 2%
 				exchangeFee,
 				treasuryAddresses,
+				[]string{}, // supportedTokens - empty by default
 			)
 
 			msg := types.NewMsgUpdateParams(authority, params)

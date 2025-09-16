@@ -19,6 +19,12 @@ service Msg {
 
   // UpdateParams updates the exchange module parameters
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+
+  // AddSupportedToken adds a token to the supported tokens registry
+  rpc AddSupportedToken(MsgAddSupportedToken) returns (MsgAddSupportedTokenResponse);
+
+  // RemoveSupportedToken removes a token from the supported tokens registry
+  rpc RemoveSupportedToken(MsgRemoveSupportedToken) returns (MsgRemoveSupportedTokenResponse);
 }
 
 // MsgExchangeTokens defines the message for exchanging tokens to N$
@@ -55,3 +61,27 @@ message MsgUpdateParams {
 
 // MsgUpdateParamsResponse defines the response for MsgUpdateParams
 message MsgUpdateParamsResponse {}
+
+// MsgAddSupportedToken defines the message for adding a supported token
+message MsgAddSupportedToken {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/exchange/add-supported-token";
+
+  string authority = 1;
+  string denom = 2;
+}
+
+// MsgAddSupportedTokenResponse defines the response for MsgAddSupportedToken
+message MsgAddSupportedTokenResponse {}
+
+// MsgRemoveSupportedToken defines the message for removing a supported token
+message MsgRemoveSupportedToken {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/exchange/remove-supported-token";
+
+  string authority = 1;
+  string denom = 2;
+}
+
+// MsgRemoveSupportedTokenResponse defines the response for MsgRemoveSupportedToken
+message MsgRemoveSupportedTokenResponse {}

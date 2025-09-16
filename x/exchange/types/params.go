@@ -18,6 +18,7 @@ var (
 	KeyPriceDeviationThreshold = []byte("PriceDeviationThreshold")
 	KeyTreasuryAddresses       = []byte("TreasuryAddresses")
 	KeyExchangeFee             = []byte("ExchangeFee")
+	KeySupportedTokens         = []byte("SupportedTokens")
 )
 
 // Default parameter values
@@ -30,6 +31,7 @@ var (
 	DefaultPriceDeviationThreshold = math.LegacyNewDecWithPrec(2, 2) // 2%
 	DefaultTreasuryAddresses       = []string{}
 	DefaultExchangeFee             = math.LegacyNewDecWithPrec(1, 3) // 0.1%
+	DefaultSupportedTokens         = []string{"ueth", "ubtc", "uusdc", "uusdt", "uatom", "uosmo", "usol"}
 )
 
 // NewParams creates a new Params instance
@@ -42,6 +44,7 @@ func NewParams(
 	priceDeviationThreshold,
 	exchangeFee math.LegacyDec,
 	treasuryAddresses []string,
+	supportedTokens []string,
 ) Params {
 	return Params{
 		Enabled:                 enabled,
@@ -52,6 +55,7 @@ func NewParams(
 		PriceDeviationThreshold: priceDeviationThreshold,
 		TreasuryAddresses:       treasuryAddresses,
 		ExchangeFee:             exchangeFee,
+		SupportedTokens:         supportedTokens,
 	}
 }
 
@@ -66,6 +70,7 @@ func DefaultParams() Params {
 		DefaultPriceDeviationThreshold,
 		DefaultExchangeFee,
 		DefaultTreasuryAddresses,
+		DefaultSupportedTokens,
 	)
 }
 
@@ -108,6 +113,10 @@ func (p Params) Validate() error {
 		return err
 	}
 
+	if err := validateSupportedTokens(p.SupportedTokens); err != nil {
+		return err
+	}
+
 	// Validate that min < max
 	if p.MinExchangeAmountUsd.GTE(p.MaxExchangeAmountUsd) {
 		return fmt.Errorf("min exchange amount (%s) must be less than max exchange amount (%s)",
@@ -128,6 +137,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyPriceDeviationThreshold, &p.PriceDeviationThreshold, validatePriceDeviationThreshold),
 		paramtypes.NewParamSetPair(KeyTreasuryAddresses, &p.TreasuryAddresses, validateTreasuryAddresses),
 		paramtypes.NewParamSetPair(KeyExchangeFee, &p.ExchangeFee, validateExchangeFee),
+		paramtypes.NewParamSetPair(KeySupportedTokens, &p.SupportedTokens, validateSupportedTokens),
 	}
 }
 
@@ -232,6 +242,31 @@ func validateExchangeFee(i interface{}) error {
 
 	if fee.IsNegative() || fee.GT(math.LegacyOneDec()) {
 		return fmt.Errorf("exchange fee must be between 0 and 1: %s", fee)
+	}
+
+	return nil
+}
+
+func validateSupportedTokens(i interface{}) error {
+	v, ok := i.([]string)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if len(v) == 0 {
+		return fmt.Errorf("supported tokens list cannot be empty")
+	}
+
+	// Check for duplicates
+	seen := make(map[string]bool)
+	for _, token := range v {
+		if token == "" {
+			return fmt.Errorf("supported token denomination cannot be empty")
+		}
+		if seen[token] {
+			return fmt.Errorf("duplicate token denomination: %s", token)
+		}
+		seen[token] = true
 	}
 
 	return nil

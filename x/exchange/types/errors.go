@@ -22,4 +22,7 @@ var (
 	ErrOracleDataStale            = errors.Register(ModuleName, 1113, "oracle data is stale")
 	ErrTWAPDataNotAvailable       = errors.Register(ModuleName, 1114, "TWAP data not available")
 	ErrInvalidParams              = errors.Register(ModuleName, 1115, "invalid module parameters")
+	ErrInvalidAuthority           = errors.Register(ModuleName, 1116, "invalid authority for governance message")
+	ErrTokenAlreadySupported      = errors.Register(ModuleName, 1117, "token is already in supported tokens registry")
+	ErrTokenNotSupported          = errors.Register(ModuleName, 1118, "token is not in supported tokens registry")
 )

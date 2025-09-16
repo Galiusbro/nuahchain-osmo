@@ -1,0 +1,76 @@
+syntax = "proto3";
+package osmosis.usertoken.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "osmosis/usertoken/v1beta1/genesis.proto";
+import "amino/amino.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/usertoken/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/osmosis/usertoken/v1beta1/params";
+  }
+
+  // UserToken queries a user token by denom.
+  rpc UserToken(QueryUserTokenRequest) returns (QueryUserTokenResponse) {
+    option (google.api.http).get = "/osmosis/usertoken/v1beta1/user_token/{denom}";
+  }
+
+  // UserTokens queries all user tokens.
+  rpc UserTokens(QueryUserTokensRequest) returns (QueryUserTokensResponse) {
+    option (google.api.http).get = "/osmosis/usertoken/v1beta1/user_tokens";
+  }
+
+  // BondingCurvePrice queries the current bonding curve price for a token.
+  rpc BondingCurvePrice(QueryBondingCurvePriceRequest) returns (QueryBondingCurvePriceResponse) {
+    option (google.api.http).get = "/osmosis/usertoken/v1beta1/bonding_curve_price/{denom}";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+// QueryUserTokenRequest is request type for the Query/UserToken RPC method.
+message QueryUserTokenRequest {
+  string denom = 1;
+}
+
+// QueryUserTokenResponse is response type for the Query/UserToken RPC method.
+message QueryUserTokenResponse {
+  UserToken user_token = 1;
+}
+
+// QueryUserTokensRequest is request type for the Query/UserTokens RPC method.
+message QueryUserTokensRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryUserTokensResponse is response type for the Query/UserTokens RPC method.
+message QueryUserTokensResponse {
+  repeated UserToken user_tokens = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryBondingCurvePriceRequest is request type for the Query/BondingCurvePrice RPC method.
+message QueryBondingCurvePriceRequest {
+  string denom = 1;
+}
+
+// QueryBondingCurvePriceResponse is response type for the Query/BondingCurvePrice RPC method.
+message QueryBondingCurvePriceResponse {
+  string price = 1 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
