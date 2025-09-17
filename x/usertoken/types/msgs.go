@@ -8,11 +8,14 @@ import (
 )
 
 const (
-	TypeMsgCreateUserToken    = "create_user_token"
-	TypeMsgBuyTokens          = "buy_tokens"
-	TypeMsgSellTokens         = "sell_tokens"
-	TypeMsgClaimFounderTokens = "claim_founder_tokens"
-	TypeMsgStartLBP           = "start_lbp"
+	TypeMsgCreateUserToken       = "create_user_token"
+	TypeMsgBuyTokens             = "buy_tokens"
+	TypeMsgSellTokens            = "sell_tokens"
+	TypeMsgClaimFounderTokens    = "claim_founder_tokens"
+	TypeMsgBuyFounderTokens      = "buy_founder_tokens"
+	TypeMsgStartLBP              = "start_lbp"
+	TypeMsgCreateReferralProgram = "create_referral_program"
+	TypeMsgActivateReferral      = "activate_referral"
 )
 
 // Message type assertions will be handled by protobuf generation
@@ -98,6 +101,90 @@ func (msg *MsgCreateUserToken) ValidateBasic() error {
 	return nil
 }
 
+// MsgCreateReferralProgram
+func NewMsgCreateReferralProgram(creator, tokenDenom string) *MsgCreateReferralProgram {
+	return &MsgCreateReferralProgram{
+		Creator:    creator,
+		TokenDenom: tokenDenom,
+	}
+}
+
+func (msg *MsgCreateReferralProgram) Route() string {
+	return RouterKey
+}
+
+func (msg *MsgCreateReferralProgram) Type() string {
+	return TypeMsgCreateReferralProgram
+}
+
+func (msg *MsgCreateReferralProgram) GetSigners() []sdk.AccAddress {
+	creator, err := sdk.AccAddressFromBech32(msg.Creator)
+	if err != nil {
+		panic(err)
+	}
+	return []sdk.AccAddress{creator}
+}
+
+func (msg *MsgCreateReferralProgram) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+func (msg *MsgCreateReferralProgram) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Creator)
+	if err != nil {
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+	}
+
+	if msg.TokenDenom == "" {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "token denom cannot be empty")
+	}
+
+	return nil
+}
+
+// MsgActivateReferral
+func NewMsgActivateReferral(referralCode, referee string) *MsgActivateReferral {
+	return &MsgActivateReferral{
+		ReferralCode: referralCode,
+		Referee:      referee,
+	}
+}
+
+func (msg *MsgActivateReferral) Route() string {
+	return RouterKey
+}
+
+func (msg *MsgActivateReferral) Type() string {
+	return TypeMsgActivateReferral
+}
+
+func (msg *MsgActivateReferral) GetSigners() []sdk.AccAddress {
+	referee, err := sdk.AccAddressFromBech32(msg.Referee)
+	if err != nil {
+		panic(err)
+	}
+	return []sdk.AccAddress{referee}
+}
+
+func (msg *MsgActivateReferral) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+func (msg *MsgActivateReferral) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Referee)
+	if err != nil {
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid referee address (%s)", err)
+	}
+
+	if msg.ReferralCode == "" {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "referral code cannot be empty")
+	}
+
+	return nil
+}
+
 func NewMsgBuyTokens(buyer, denom string, amount sdk.Coin, minTokens string) *MsgBuyTokens {
 	minTokensInt, _ := math.NewIntFromString(minTokens)
 	return &MsgBuyTokens{
@@ -138,6 +225,8 @@ func (msg *MsgBuyTokens) ValidateBasic() error {
 	if !msg.Amount.IsValid() || msg.Amount.IsZero() {
 		return errorsmod.Wrap(sdkerrors.ErrInvalidCoins, "invalid amount")
 	}
+
+
 
 	return nil
 }
@@ -217,11 +306,46 @@ func (msg *MsgClaimFounderTokens) GetSignBytes() []byte {
 }
 
 func (msg *MsgClaimFounderTokens) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Claimer)
-	if err != nil {
+	if _, err := sdk.AccAddressFromBech32(msg.Claimer); err != nil {
 		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid claimer address (%s)", err)
 	}
+	return nil
+}
 
+func NewMsgBuyFounderTokens(buyer, denom string) *MsgBuyFounderTokens {
+	return &MsgBuyFounderTokens{
+		Buyer: buyer,
+		Denom: denom,
+	}
+}
+
+func (msg *MsgBuyFounderTokens) Route() string {
+	return RouterKey
+}
+
+func (msg *MsgBuyFounderTokens) Type() string {
+	return TypeMsgBuyFounderTokens
+}
+
+func (msg *MsgBuyFounderTokens) GetSigners() []sdk.AccAddress {
+	buyer, err := sdk.AccAddressFromBech32(msg.Buyer)
+	if err != nil {
+		panic(err)
+	}
+	return []sdk.AccAddress{buyer}
+}
+
+func (msg *MsgBuyFounderTokens) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+func (msg *MsgBuyFounderTokens) ValidateBasic() error {
+	if _, err := sdk.AccAddressFromBech32(msg.Buyer); err != nil {
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid buyer address (%s)", err)
+	}
+	if msg.Denom == "" {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "denom cannot be empty")
+	}
 	return nil
 }
 

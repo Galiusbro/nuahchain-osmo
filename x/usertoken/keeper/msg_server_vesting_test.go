@@ -22,7 +22,7 @@ type VestingTestSuite struct {
 
 func (suite *VestingTestSuite) SetupTest() {
 	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper)
+	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
 }
 
 func TestVestingTestSuite(t *testing.T) {
@@ -32,13 +32,13 @@ func TestVestingTestSuite(t *testing.T) {
 func (suite *VestingTestSuite) TestCreateVestingAccount() {
 	// Setup fresh context for this test
 	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper)
-	
+	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+
 	// Fund the creator account with tokens
 	creatorAddr, _ := sdk.AccAddressFromBech32("nuah1uwjmdjzspz2xa2g60dh6hq2h30jjmufutf099d")
 	fundCoins := sdk.NewCoins(sdk.NewCoin("factory/nuah1uwjmdjzspz2xa2g60dh6hq2h30jjmufutf099d/mytoken", sdkmath.NewInt(10000000)))
 	suite.FundAcc(creatorAddr, fundCoins)
-	
+
 	testCases := []struct {
 		name        string
 		msg         *types.MsgCreateVestingAccount
@@ -125,8 +125,8 @@ func (suite *VestingTestSuite) TestCreateVestingAccount() {
 func (suite *VestingTestSuite) TestCreateVestingAccountValidation() {
 	// Setup fresh context for this test
 	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper)
-	
+	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+
 	// Test message validation
 	msg := &types.MsgCreateVestingAccount{
 		Creator:   "nuah1uwjmdjzspz2xa2g60dh6hq2h30jjmufutf099d",
@@ -155,13 +155,13 @@ func (suite *VestingTestSuite) TestCreateVestingAccountValidation() {
 func (suite *VestingTestSuite) TestCreateVestingAccountEvents() {
 	// Setup fresh context for this test
 	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper)
-	
+	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+
 	// Fund the creator account with tokens
 	creatorAddr, _ := sdk.AccAddressFromBech32("nuah1uwjmdjzspz2xa2g60dh6hq2h30jjmufutf099d")
 	fundCoins := sdk.NewCoins(sdk.NewCoin("factory/nuah1uwjmdjzspz2xa2g60dh6hq2h30jjmufutf099d/mytoken", sdkmath.NewInt(10000000)))
 	suite.FundAcc(creatorAddr, fundCoins)
-	
+
 	// Test that proper events are emitted
 	msg := &types.MsgCreateVestingAccount{
 		Creator:   "nuah1uwjmdjzspz2xa2g60dh6hq2h30jjmufutf099d",

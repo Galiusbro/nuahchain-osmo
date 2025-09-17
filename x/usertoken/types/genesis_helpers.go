@@ -22,6 +22,10 @@ func DefaultParams() Params {
 		BondingCurveStartPrice: math.LegacyMustNewDecFromStr("0.0002"),  // 0.0002 N$
 		BondingCurveEndPrice:   math.LegacyMustNewDecFromStr("1.0"),     // 1.0 N$
 		BondingCurveMaxSupply:  math.NewInt(30_000_000),                 // 30M tokens
+		MinCreatorPurchase:     math.LegacyMustNewDecFromStr("500"),     // 500 N$ minimum
+		AiCeoWallet:            "",                                      // Will be set during chain initialization
+		ReferralWallet:         "",                                      // Will be set during chain initialization
+		PlatformFeeWallet:      "",                                      // Will be set during chain initialization
 	}
 }
 
@@ -50,6 +54,10 @@ func (p Params) Validate() error {
 	if p.BondingCurveStartPrice.GTE(p.BondingCurveEndPrice) {
 		return fmt.Errorf("bonding curve start price must be less than end price: %s >= %s", p.BondingCurveStartPrice, p.BondingCurveEndPrice)
 	}
+	if p.MinCreatorPurchase.IsNegative() {
+		return fmt.Errorf("minimum creator purchase cannot be negative: %s", p.MinCreatorPurchase)
+	}
+	// Note: Wallet addresses can be empty strings initially and will be validated when set
 	return nil
 }
 

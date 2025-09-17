@@ -97,3 +97,40 @@ func (q queryServer) BondingCurvePrice(goCtx context.Context, req *types.QueryBo
 		Price: price,
 	}, nil
 }
+
+func (q queryServer) ReferralProgram(goCtx context.Context, req *types.QueryReferralProgramRequest) (*types.QueryReferralProgramResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	if req.TokenDenom == "" {
+		return nil, status.Error(codes.InvalidArgument, "token denom cannot be empty")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Get referral program from store
+	referralProgram, found := q.GetReferralProgram(ctx, req.TokenDenom)
+	if !found {
+		return nil, status.Error(codes.NotFound, "referral program not found")
+	}
+
+	return &types.QueryReferralProgramResponse{
+		ReferralProgram: &referralProgram,
+	}, nil
+}
+
+func (q queryServer) ReferralPrograms(goCtx context.Context, req *types.QueryReferralProgramsRequest) (*types.QueryReferralProgramsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Get all referral programs from store
+	referralPrograms := q.GetAllReferralPrograms(ctx)
+
+	return &types.QueryReferralProgramsResponse{
+		ReferralPrograms: referralPrograms,
+	}, nil
+}

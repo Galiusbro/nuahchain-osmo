@@ -118,7 +118,7 @@ func (am AppModule) Name() string {
 // RegisterServices registers a gRPC query service to respond to the
 // module-specific gRPC queries.
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
+	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper, am.keeper.GetAuthority()))
 	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQueryServerImpl(am.keeper))
 }
 
@@ -145,6 +145,12 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 
 // ConsensusVersion implements AppModule/ConsensusVersion.
 func (AppModule) ConsensusVersion() uint64 { return 1 }
+
+// EndBlock executes all ABCI EndBlock logic respective to the usertoken module.
+func (am AppModule) EndBlock(ctx sdk.Context) []abci.ValidatorUpdate {
+	am.keeper.EndBlocker(ctx)
+	return []abci.ValidatorUpdate{}
+}
 
 // AppModuleSimulation functions
 

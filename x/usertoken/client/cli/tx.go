@@ -30,6 +30,8 @@ func GetTxCmd() *cobra.Command {
 	cmd.AddCommand(CmdClaimFounderTokens())
 	cmd.AddCommand(CmdStartLBP())
 	cmd.AddCommand(CmdCreateVestingAccount())
+	cmd.AddCommand(CmdCreateReferralProgram())
+	cmd.AddCommand(CmdActivateReferral())
 
 	return cmd
 }
@@ -56,6 +58,60 @@ func CmdCreateUserToken() *cobra.Command {
 				args[1],          // name
 				args[2],          // symbol
 				uint32(decimals), // decimals
+			)
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdCreateReferralProgram() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "create-referral-program [token-denom]",
+		Short: "Create a new referral program for a token",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgCreateReferralProgram(
+				clientCtx.GetFromAddress().String(),
+				args[0], // token denom
+			)
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdActivateReferral() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "activate-referral [referral-code] [referee-address]",
+		Short: "Activate a referral link",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgActivateReferral(
+				args[0], // referral code
+				args[1], // referee address
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

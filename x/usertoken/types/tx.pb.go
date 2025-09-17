@@ -446,6 +446,97 @@ func (m *MsgClaimFounderTokensResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgClaimFounderTokensResponse proto.InternalMessageInfo
 
+// MsgBuyFounderTokens allows founder to buy 10M tokens at special price
+type MsgBuyFounderTokens struct {
+	Buyer string `protobuf:"bytes,1,opt,name=buyer,proto3" json:"buyer,omitempty"`
+	Denom string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *MsgBuyFounderTokens) Reset()         { *m = MsgBuyFounderTokens{} }
+func (m *MsgBuyFounderTokens) String() string { return proto.CompactTextString(m) }
+func (*MsgBuyFounderTokens) ProtoMessage()    {}
+func (*MsgBuyFounderTokens) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a4810bd18efc821, []int{8}
+}
+func (m *MsgBuyFounderTokens) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgBuyFounderTokens) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgBuyFounderTokens.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgBuyFounderTokens) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgBuyFounderTokens.Merge(m, src)
+}
+func (m *MsgBuyFounderTokens) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgBuyFounderTokens) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgBuyFounderTokens.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgBuyFounderTokens proto.InternalMessageInfo
+
+func (m *MsgBuyFounderTokens) GetBuyer() string {
+	if m != nil {
+		return m.Buyer
+	}
+	return ""
+}
+
+func (m *MsgBuyFounderTokens) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// MsgBuyFounderTokensResponse defines the response structure for executing a MsgBuyFounderTokens message.
+type MsgBuyFounderTokensResponse struct {
+	TokensReceived cosmossdk_io_math.Int `protobuf:"bytes,1,opt,name=tokens_received,json=tokensReceived,proto3,customtype=cosmossdk.io/math.Int" json:"tokens_received"`
+}
+
+func (m *MsgBuyFounderTokensResponse) Reset()         { *m = MsgBuyFounderTokensResponse{} }
+func (m *MsgBuyFounderTokensResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgBuyFounderTokensResponse) ProtoMessage()    {}
+func (*MsgBuyFounderTokensResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a4810bd18efc821, []int{9}
+}
+func (m *MsgBuyFounderTokensResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgBuyFounderTokensResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgBuyFounderTokensResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgBuyFounderTokensResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgBuyFounderTokensResponse.Merge(m, src)
+}
+func (m *MsgBuyFounderTokensResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgBuyFounderTokensResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgBuyFounderTokensResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgBuyFounderTokensResponse proto.InternalMessageInfo
+
 // MsgStartLBP starts LBP for a token
 type MsgStartLBP struct {
 	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
@@ -456,7 +547,7 @@ func (m *MsgStartLBP) Reset()         { *m = MsgStartLBP{} }
 func (m *MsgStartLBP) String() string { return proto.CompactTextString(m) }
 func (*MsgStartLBP) ProtoMessage()    {}
 func (*MsgStartLBP) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1a4810bd18efc821, []int{8}
+	return fileDescriptor_1a4810bd18efc821, []int{10}
 }
 func (m *MsgStartLBP) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -507,7 +598,7 @@ func (m *MsgStartLBPResponse) Reset()         { *m = MsgStartLBPResponse{} }
 func (m *MsgStartLBPResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgStartLBPResponse) ProtoMessage()    {}
 func (*MsgStartLBPResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1a4810bd18efc821, []int{9}
+	return fileDescriptor_1a4810bd18efc821, []int{11}
 }
 func (m *MsgStartLBPResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -549,7 +640,7 @@ func (m *MsgCreateVestingAccount) Reset()         { *m = MsgCreateVestingAccount
 func (m *MsgCreateVestingAccount) String() string { return proto.CompactTextString(m) }
 func (*MsgCreateVestingAccount) ProtoMessage()    {}
 func (*MsgCreateVestingAccount) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1a4810bd18efc821, []int{10}
+	return fileDescriptor_1a4810bd18efc821, []int{12}
 }
 func (m *MsgCreateVestingAccount) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -621,7 +712,7 @@ func (m *MsgCreateVestingAccountResponse) Reset()         { *m = MsgCreateVestin
 func (m *MsgCreateVestingAccountResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgCreateVestingAccountResponse) ProtoMessage()    {}
 func (*MsgCreateVestingAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1a4810bd18efc821, []int{11}
+	return fileDescriptor_1a4810bd18efc821, []int{13}
 }
 func (m *MsgCreateVestingAccountResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -650,6 +741,279 @@ func (m *MsgCreateVestingAccountResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgCreateVestingAccountResponse proto.InternalMessageInfo
 
+// MsgUpdateParams is the message type for updating module parameters
+type MsgUpdateParams struct {
+	// Authority is the address that controls the module (governance module account)
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// Params defines the parameters to update
+	Params Params `protobuf:"bytes,2,opt,name=params,proto3" json:"params"`
+}
+
+func (m *MsgUpdateParams) Reset()         { *m = MsgUpdateParams{} }
+func (m *MsgUpdateParams) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateParams) ProtoMessage()    {}
+func (*MsgUpdateParams) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a4810bd18efc821, []int{14}
+}
+func (m *MsgUpdateParams) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgUpdateParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgUpdateParams.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgUpdateParams) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateParams.Merge(m, src)
+}
+func (m *MsgUpdateParams) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgUpdateParams) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateParams.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgUpdateParams proto.InternalMessageInfo
+
+func (m *MsgUpdateParams) GetAuthority() string {
+	if m != nil {
+		return m.Authority
+	}
+	return ""
+}
+
+func (m *MsgUpdateParams) GetParams() Params {
+	if m != nil {
+		return m.Params
+	}
+	return Params{}
+}
+
+// MsgUpdateParamsResponse is the response type for MsgUpdateParams
+type MsgUpdateParamsResponse struct {
+}
+
+func (m *MsgUpdateParamsResponse) Reset()         { *m = MsgUpdateParamsResponse{} }
+func (m *MsgUpdateParamsResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateParamsResponse) ProtoMessage()    {}
+func (*MsgUpdateParamsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a4810bd18efc821, []int{15}
+}
+func (m *MsgUpdateParamsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgUpdateParamsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgUpdateParamsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgUpdateParamsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateParamsResponse.Merge(m, src)
+}
+func (m *MsgUpdateParamsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateParamsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
+
+// MsgCreateReferralProgram creates a new referral program for a token
+type MsgCreateReferralProgram struct {
+	Creator    string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	TokenDenom string `protobuf:"bytes,2,opt,name=token_denom,json=tokenDenom,proto3" json:"token_denom,omitempty"`
+}
+
+func (m *MsgCreateReferralProgram) Reset()         { *m = MsgCreateReferralProgram{} }
+func (m *MsgCreateReferralProgram) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateReferralProgram) ProtoMessage()    {}
+func (*MsgCreateReferralProgram) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a4810bd18efc821, []int{16}
+}
+func (m *MsgCreateReferralProgram) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateReferralProgram) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateReferralProgram.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateReferralProgram) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateReferralProgram.Merge(m, src)
+}
+func (m *MsgCreateReferralProgram) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateReferralProgram) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateReferralProgram.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateReferralProgram proto.InternalMessageInfo
+
+func (m *MsgCreateReferralProgram) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgCreateReferralProgram) GetTokenDenom() string {
+	if m != nil {
+		return m.TokenDenom
+	}
+	return ""
+}
+
+// MsgCreateReferralProgramResponse defines the response structure for executing a MsgCreateReferralProgram message.
+type MsgCreateReferralProgramResponse struct {
+}
+
+func (m *MsgCreateReferralProgramResponse) Reset()         { *m = MsgCreateReferralProgramResponse{} }
+func (m *MsgCreateReferralProgramResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateReferralProgramResponse) ProtoMessage()    {}
+func (*MsgCreateReferralProgramResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a4810bd18efc821, []int{17}
+}
+func (m *MsgCreateReferralProgramResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateReferralProgramResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateReferralProgramResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateReferralProgramResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateReferralProgramResponse.Merge(m, src)
+}
+func (m *MsgCreateReferralProgramResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateReferralProgramResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateReferralProgramResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateReferralProgramResponse proto.InternalMessageInfo
+
+// MsgActivateReferral activates a referral link
+type MsgActivateReferral struct {
+	ReferralCode string `protobuf:"bytes,1,opt,name=referral_code,json=referralCode,proto3" json:"referral_code,omitempty"`
+	Referee      string `protobuf:"bytes,2,opt,name=referee,proto3" json:"referee,omitempty"`
+}
+
+func (m *MsgActivateReferral) Reset()         { *m = MsgActivateReferral{} }
+func (m *MsgActivateReferral) String() string { return proto.CompactTextString(m) }
+func (*MsgActivateReferral) ProtoMessage()    {}
+func (*MsgActivateReferral) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a4810bd18efc821, []int{18}
+}
+func (m *MsgActivateReferral) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgActivateReferral) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgActivateReferral.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgActivateReferral) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgActivateReferral.Merge(m, src)
+}
+func (m *MsgActivateReferral) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgActivateReferral) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgActivateReferral.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgActivateReferral proto.InternalMessageInfo
+
+func (m *MsgActivateReferral) GetReferralCode() string {
+	if m != nil {
+		return m.ReferralCode
+	}
+	return ""
+}
+
+func (m *MsgActivateReferral) GetReferee() string {
+	if m != nil {
+		return m.Referee
+	}
+	return ""
+}
+
+// MsgActivateReferralResponse defines the response structure for executing a MsgActivateReferral message.
+type MsgActivateReferralResponse struct {
+	TokensReceived cosmossdk_io_math.Int `protobuf:"bytes,1,opt,name=tokens_received,json=tokensReceived,proto3,customtype=cosmossdk.io/math.Int" json:"tokens_received"`
+}
+
+func (m *MsgActivateReferralResponse) Reset()         { *m = MsgActivateReferralResponse{} }
+func (m *MsgActivateReferralResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgActivateReferralResponse) ProtoMessage()    {}
+func (*MsgActivateReferralResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a4810bd18efc821, []int{19}
+}
+func (m *MsgActivateReferralResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgActivateReferralResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgActivateReferralResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgActivateReferralResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgActivateReferralResponse.Merge(m, src)
+}
+func (m *MsgActivateReferralResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgActivateReferralResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgActivateReferralResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgActivateReferralResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*MsgCreateUserToken)(nil), "osmosis.usertoken.v1beta1.MsgCreateUserToken")
 	proto.RegisterType((*MsgCreateUserTokenResponse)(nil), "osmosis.usertoken.v1beta1.MsgCreateUserTokenResponse")
@@ -659,10 +1023,18 @@ func init() {
 	proto.RegisterType((*MsgSellTokensResponse)(nil), "osmosis.usertoken.v1beta1.MsgSellTokensResponse")
 	proto.RegisterType((*MsgClaimFounderTokens)(nil), "osmosis.usertoken.v1beta1.MsgClaimFounderTokens")
 	proto.RegisterType((*MsgClaimFounderTokensResponse)(nil), "osmosis.usertoken.v1beta1.MsgClaimFounderTokensResponse")
+	proto.RegisterType((*MsgBuyFounderTokens)(nil), "osmosis.usertoken.v1beta1.MsgBuyFounderTokens")
+	proto.RegisterType((*MsgBuyFounderTokensResponse)(nil), "osmosis.usertoken.v1beta1.MsgBuyFounderTokensResponse")
 	proto.RegisterType((*MsgStartLBP)(nil), "osmosis.usertoken.v1beta1.MsgStartLBP")
 	proto.RegisterType((*MsgStartLBPResponse)(nil), "osmosis.usertoken.v1beta1.MsgStartLBPResponse")
 	proto.RegisterType((*MsgCreateVestingAccount)(nil), "osmosis.usertoken.v1beta1.MsgCreateVestingAccount")
 	proto.RegisterType((*MsgCreateVestingAccountResponse)(nil), "osmosis.usertoken.v1beta1.MsgCreateVestingAccountResponse")
+	proto.RegisterType((*MsgUpdateParams)(nil), "osmosis.usertoken.v1beta1.MsgUpdateParams")
+	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "osmosis.usertoken.v1beta1.MsgUpdateParamsResponse")
+	proto.RegisterType((*MsgCreateReferralProgram)(nil), "osmosis.usertoken.v1beta1.MsgCreateReferralProgram")
+	proto.RegisterType((*MsgCreateReferralProgramResponse)(nil), "osmosis.usertoken.v1beta1.MsgCreateReferralProgramResponse")
+	proto.RegisterType((*MsgActivateReferral)(nil), "osmosis.usertoken.v1beta1.MsgActivateReferral")
+	proto.RegisterType((*MsgActivateReferralResponse)(nil), "osmosis.usertoken.v1beta1.MsgActivateReferralResponse")
 }
 
 func init() {
@@ -670,66 +1042,84 @@ func init() {
 }
 
 var fileDescriptor_1a4810bd18efc821 = []byte{
-	// 935 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x96, 0x4d, 0x6f, 0x1b, 0x45,
-	0x18, 0xc7, 0xb3, 0x49, 0x9d, 0xd8, 0x4f, 0x49, 0x2b, 0x16, 0x87, 0x3a, 0x0b, 0x75, 0xca, 0x22,
-	0x95, 0x28, 0x65, 0x77, 0x93, 0x94, 0xaa, 0x60, 0x71, 0xa9, 0x23, 0x21, 0x8a, 0x88, 0xa8, 0xb6,
-	0x81, 0x03, 0x17, 0x6b, 0x5f, 0x86, 0xcd, 0x28, 0xbb, 0x33, 0xd6, 0xce, 0xd8, 0xd4, 0xb7, 0x0a,
-	0x09, 0x0e, 0x20, 0x21, 0x3e, 0x06, 0xc7, 0x1c, 0xf2, 0x19, 0x50, 0x8f, 0x55, 0x4f, 0x88, 0x43,
-	0x41, 0xc9, 0x21, 0x5f, 0x03, 0xcd, 0xcb, 0x6e, 0x9c, 0xd8, 0x49, 0xec, 0x20, 0x2e, 0xc9, 0xce,
-	0x33, 0xff, 0xe7, 0x65, 0x7e, 0xbb, 0xcf, 0x33, 0x06, 0x9b, 0xb2, 0x8c, 0x32, 0xcc, 0xbc, 0x1e,
-	0x43, 0x39, 0xa7, 0x7b, 0x88, 0x78, 0xfd, 0x8d, 0x10, 0xf1, 0x60, 0xc3, 0xe3, 0xcf, 0xdc, 0x6e,
-	0x4e, 0x39, 0x35, 0x97, 0xb5, 0xc6, 0x2d, 0x35, 0xae, 0xd6, 0x58, 0x6f, 0x06, 0x19, 0x26, 0xd4,
-	0x93, 0x7f, 0x95, 0xda, 0xba, 0x15, 0x49, 0xb9, 0x97, 0xb1, 0xc4, 0xeb, 0x6f, 0x88, 0x7f, 0x7a,
-	0x63, 0x59, 0x6d, 0x74, 0xe4, 0xca, 0x53, 0x0b, 0xbd, 0x55, 0x4f, 0x68, 0x42, 0x95, 0x5d, 0x3c,
-	0x69, 0x6b, 0x53, 0x47, 0x0a, 0x03, 0x86, 0xca, 0xaa, 0x22, 0x8a, 0x89, 0xda, 0xb7, 0x0f, 0x0d,
-	0x30, 0xb7, 0x59, 0xb2, 0x95, 0xa3, 0x80, 0xa3, 0xaf, 0x19, 0xca, 0x77, 0x44, 0x6d, 0xe6, 0x26,
-	0x2c, 0x44, 0xc2, 0x44, 0xf3, 0x86, 0x71, 0xc7, 0x58, 0xad, 0xb5, 0x1b, 0xaf, 0x0e, 0x9c, 0xba,
-	0xce, 0xf7, 0x28, 0x8e, 0x73, 0xc4, 0xd8, 0x53, 0x9e, 0x63, 0x92, 0xf8, 0x85, 0xd0, 0xb4, 0xa0,
-	0xca, 0x7a, 0x61, 0x8c, 0x08, 0xcd, 0x1a, 0xb3, 0xc2, 0xc9, 0x2f, 0xd7, 0xa6, 0x09, 0xd7, 0x48,
-	0x90, 0xa1, 0xc6, 0x9c, 0xb4, 0xcb, 0x67, 0xf3, 0x6d, 0x98, 0x67, 0x83, 0x2c, 0xa4, 0x69, 0xe3,
-	0x9a, 0xb4, 0xea, 0x95, 0x88, 0x13, 0xa3, 0x08, 0x67, 0x41, 0xca, 0x1a, 0x95, 0x3b, 0xc6, 0xea,
-	0xa2, 0x5f, 0xae, 0x5b, 0x1f, 0xfd, 0x70, 0xbc, 0xbf, 0x56, 0x64, 0xfc, 0xf9, 0x78, 0x7f, 0xed,
-	0xfd, 0x51, 0xf6, 0x72, 0x17, 0x39, 0xc2, 0xe0, 0x48, 0x8b, 0xbd, 0x09, 0xd6, 0xe8, 0x19, 0x7d,
-	0xc4, 0xba, 0x94, 0x30, 0x64, 0xd6, 0xa1, 0xa2, 0x8a, 0x96, 0x27, 0xf5, 0xd5, 0xc2, 0xfe, 0x65,
-	0x16, 0xde, 0xd8, 0x66, 0x49, 0xbb, 0x37, 0x90, 0x6a, 0x66, 0xba, 0x50, 0x09, 0x7b, 0x03, 0x74,
-	0x39, 0x10, 0x25, 0x3b, 0x09, 0x3b, 0x3b, 0x14, 0xd6, 0xfc, 0x14, 0xe6, 0x83, 0x8c, 0xf6, 0x08,
-	0x97, 0x28, 0xae, 0x6f, 0x2e, 0xbb, 0x3a, 0x86, 0x78, 0x41, 0xc5, 0x27, 0xe1, 0x6e, 0x51, 0x4c,
-	0xda, 0xb5, 0x17, 0xaf, 0x57, 0x66, 0x7e, 0x3f, 0xde, 0x5f, 0x33, 0x7c, 0xed, 0x63, 0x7e, 0x01,
-	0x90, 0x61, 0xd2, 0x91, 0xa7, 0x62, 0x0a, 0x5b, 0xfb, 0x9e, 0x90, 0xfd, 0xf5, 0x7a, 0x65, 0x49,
-	0x05, 0x62, 0xf1, 0x9e, 0x8b, 0xa9, 0x97, 0x05, 0x7c, 0xd7, 0x7d, 0x4c, 0xf8, 0xab, 0x03, 0x07,
-	0x74, 0x86, 0xc7, 0x84, 0xfb, 0xb5, 0x0c, 0x13, 0x75, 0x9e, 0xd6, 0x3d, 0x81, 0x52, 0xd5, 0x2a,
-	0x40, 0xbe, 0x3b, 0x0a, 0x32, 0xec, 0x0d, 0x14, 0x40, 0x66, 0xa7, 0x50, 0x1f, 0x86, 0x51, 0xb2,
-	0xdb, 0x81, 0x9b, 0x4a, 0xd1, 0xc9, 0x51, 0x84, 0x70, 0x1f, 0xc5, 0x1a, 0xcf, 0x54, 0x55, 0xdd,
-	0xe0, 0x3a, 0xaa, 0x0a, 0x61, 0xff, 0x3a, 0x0b, 0x8b, 0xdb, 0x2c, 0x79, 0x8a, 0xd2, 0x54, 0xc3,
-	0x5f, 0x87, 0x79, 0x86, 0xd2, 0x74, 0x02, 0xfa, 0x5a, 0xf7, 0xbf, 0xe0, 0xff, 0x1c, 0x04, 0xbf,
-	0x4e, 0x37, 0xc7, 0x11, 0xba, 0x0a, 0xfd, 0x6a, 0x86, 0xc9, 0x13, 0xe1, 0xdc, 0x72, 0x04, 0x7c,
-	0x5d, 0xaa, 0xa0, 0x7f, 0x7b, 0x94, 0xbe, 0xd8, 0x2c, 0xf0, 0xef, 0xc1, 0xd2, 0x29, 0x1e, 0x25,
-	0x7f, 0x1f, 0x6e, 0xc8, 0x6a, 0xfe, 0x13, 0xfe, 0x45, 0x19, 0xa2, 0xa4, 0xff, 0xb7, 0x21, 0xb3,
-	0x6d, 0xa5, 0x01, 0xce, 0x3e, 0xa3, 0x3d, 0x12, 0xeb, 0x86, 0x61, 0x72, 0x2a, 0x08, 0x2b, 0x9a,
-	0x64, 0x2a, 0x28, 0xe1, 0x39, 0xef, 0x61, 0xeb, 0xd4, 0x7b, 0x98, 0xb2, 0x5e, 0xed, 0xda, 0x7a,
-	0xa8, 0x86, 0x81, 0x4a, 0x24, 0x28, 0xde, 0x1d, 0x33, 0x0c, 0xc4, 0xae, 0xf3, 0x9d, 0x3a, 0x46,
-	0x81, 0x73, 0x05, 0x6e, 0x8f, 0x3d, 0x60, 0x81, 0xd5, 0xfe, 0xd1, 0x80, 0xeb, 0x02, 0x38, 0x0f,
-	0x72, 0xfe, 0x65, 0xfb, 0xc9, 0x95, 0xc6, 0xe1, 0xd8, 0x83, 0xb7, 0x3e, 0x3c, 0x3b, 0xc0, 0xde,
-	0x19, 0xf3, 0xe6, 0x45, 0x5a, 0x27, 0x0d, 0xbb, 0xf6, 0x12, 0xbc, 0x35, 0x54, 0x46, 0x59, 0xde,
-	0xc1, 0x2c, 0xdc, 0x2a, 0x07, 0xda, 0x37, 0x88, 0x71, 0x4c, 0x92, 0x47, 0x51, 0x24, 0xbf, 0xd1,
-	0xab, 0x94, 0xfa, 0x10, 0x80, 0xd3, 0x4e, 0xa0, 0x36, 0x55, 0xbd, 0x17, 0xb8, 0xd5, 0x38, 0xd5,
-	0x86, 0x53, 0xed, 0x34, 0x37, 0x75, 0x3b, 0x2d, 0x43, 0x15, 0x91, 0xb8, 0xc3, 0x71, 0xa6, 0xba,
-	0x69, 0xce, 0x5f, 0x40, 0x24, 0xde, 0xc1, 0x19, 0x32, 0x1b, 0xb0, 0x10, 0xa3, 0x34, 0x18, 0xa0,
-	0x58, 0x5e, 0x01, 0x55, 0xbf, 0x58, 0xb6, 0x3e, 0x39, 0x0b, 0x70, 0xf5, 0xdc, 0x1b, 0xa0, 0xaf,
-	0xc8, 0x38, 0x81, 0x42, 0x63, 0xbf, 0x07, 0x2b, 0xe7, 0x50, 0x2b, 0xc8, 0x6e, 0xfe, 0x51, 0x81,
-	0xb9, 0x6d, 0x96, 0x98, 0xdf, 0xc3, 0xcd, 0xb3, 0x57, 0xa2, 0xe3, 0x9e, 0x7b, 0x85, 0xbb, 0xa3,
-	0xb7, 0x8b, 0xf5, 0x60, 0x2a, 0x79, 0xd9, 0xd0, 0x08, 0x6a, 0x27, 0x57, 0xce, 0x07, 0x17, 0xc7,
-	0x28, 0x85, 0x96, 0x37, 0xa1, 0xb0, 0x4c, 0xb3, 0x0b, 0x30, 0x34, 0x5d, 0x57, 0x2f, 0x76, 0x3f,
-	0x51, 0x5a, 0xeb, 0x93, 0x2a, 0xcb, 0x4c, 0xcf, 0x0d, 0x30, 0xc7, 0x8c, 0x92, 0x4b, 0x02, 0x8d,
-	0x7a, 0x58, 0x1f, 0x4f, 0xeb, 0x51, 0x96, 0x10, 0x42, 0xb5, 0xec, 0xe4, 0xbb, 0x97, 0x1c, 0x40,
-	0xeb, 0x2c, 0x77, 0x32, 0x5d, 0x99, 0xe3, 0x27, 0x03, 0xea, 0xe3, 0xfb, 0x71, 0x92, 0xef, 0xe0,
-	0xb4, 0x8f, 0xd5, 0x9a, 0xde, 0xa7, 0x28, 0xc4, 0xaa, 0x3c, 0x17, 0x3d, 0xd6, 0xfe, 0xea, 0xc5,
-	0x61, 0xd3, 0x78, 0x79, 0xd8, 0x34, 0xfe, 0x39, 0x6c, 0x1a, 0xbf, 0x1d, 0x35, 0x67, 0x5e, 0x1e,
-	0x35, 0x67, 0xfe, 0x3c, 0x6a, 0xce, 0x7c, 0xfb, 0x20, 0xc1, 0x7c, 0xb7, 0x17, 0xba, 0x11, 0xcd,
-	0x3c, 0x9d, 0xc6, 0x49, 0x83, 0x90, 0x15, 0x0b, 0xaf, 0x7f, 0x7f, 0xdd, 0x7b, 0x36, 0xd4, 0x4d,
-	0x7c, 0xd0, 0x45, 0x2c, 0x9c, 0x97, 0xbf, 0x17, 0xef, 0xff, 0x1b, 0x00, 0x00, 0xff, 0xff, 0x06,
-	0x45, 0xa0, 0x99, 0xed, 0x0a, 0x00, 0x00,
+	// 1229 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x57, 0xcf, 0x6f, 0x1b, 0xc5,
+	0x17, 0xcf, 0x26, 0x4d, 0x1a, 0xbf, 0x34, 0xed, 0xf7, 0xbb, 0x24, 0xd4, 0xd9, 0x52, 0xbb, 0xdd,
+	0xa2, 0x36, 0xa4, 0xec, 0x6e, 0xe3, 0xd0, 0x16, 0x0c, 0x97, 0x38, 0x15, 0xa2, 0x88, 0x88, 0xc8,
+	0x4d, 0x39, 0x70, 0xb1, 0xd6, 0xde, 0xe9, 0x66, 0x95, 0xdd, 0x1d, 0x6b, 0x67, 0x6c, 0x6a, 0x4e,
+	0x15, 0x12, 0x48, 0x80, 0x84, 0xfa, 0x47, 0x70, 0x40, 0xe2, 0x92, 0x43, 0x4e, 0x5c, 0xb9, 0xf4,
+	0x58, 0xf5, 0x84, 0x38, 0x14, 0x94, 0x1c, 0xf2, 0x6f, 0xa0, 0xf9, 0xb1, 0x13, 0xff, 0x8c, 0xed,
+	0x40, 0x2e, 0xad, 0xe7, 0xcd, 0xe7, 0xbd, 0xf7, 0x79, 0x9f, 0x79, 0xfb, 0x66, 0x02, 0x26, 0x26,
+	0x11, 0x26, 0x01, 0x71, 0x1a, 0x04, 0x25, 0x14, 0xef, 0xa2, 0xd8, 0x69, 0xae, 0x56, 0x11, 0x75,
+	0x57, 0x1d, 0xfa, 0xd4, 0xae, 0x27, 0x98, 0x62, 0x7d, 0x49, 0x62, 0x6c, 0x85, 0xb1, 0x25, 0xc6,
+	0xf8, 0xbf, 0x1b, 0x05, 0x31, 0x76, 0xf8, 0xbf, 0x02, 0x6d, 0x5c, 0xae, 0x71, 0xb8, 0x13, 0x11,
+	0xdf, 0x69, 0xae, 0xb2, 0xff, 0xe4, 0xc6, 0x92, 0xd8, 0xa8, 0xf0, 0x95, 0x23, 0x16, 0x72, 0x6b,
+	0xc1, 0xc7, 0x3e, 0x16, 0x76, 0xf6, 0x4b, 0x5a, 0x73, 0x32, 0x52, 0xd5, 0x25, 0x48, 0xb1, 0xaa,
+	0xe1, 0x20, 0x96, 0xfb, 0xb7, 0x06, 0x73, 0xf7, 0x51, 0x8c, 0x18, 0x63, 0x0e, 0x34, 0x0f, 0x34,
+	0xd0, 0x37, 0x89, 0xbf, 0x91, 0x20, 0x97, 0xa2, 0xc7, 0x04, 0x25, 0xdb, 0x0c, 0xac, 0x17, 0xe0,
+	0x7c, 0x8d, 0x99, 0x70, 0x92, 0xd5, 0xae, 0x69, 0xcb, 0x99, 0x52, 0xf6, 0xd5, 0xbe, 0xb5, 0x20,
+	0x89, 0xad, 0x7b, 0x5e, 0x82, 0x08, 0x79, 0x44, 0x93, 0x20, 0xf6, 0xcb, 0x29, 0x50, 0x37, 0x60,
+	0x96, 0x34, 0xaa, 0x1e, 0x8a, 0x71, 0x94, 0x9d, 0x64, 0x4e, 0x65, 0xb5, 0xd6, 0x75, 0x38, 0x17,
+	0xbb, 0x11, 0xca, 0x4e, 0x71, 0x3b, 0xff, 0xad, 0xbf, 0x09, 0x33, 0xa4, 0x15, 0x55, 0x71, 0x98,
+	0x3d, 0xc7, 0xad, 0x72, 0xc5, 0xe2, 0x78, 0xa8, 0x16, 0x44, 0x6e, 0x48, 0xb2, 0xd3, 0xd7, 0xb4,
+	0xe5, 0xf9, 0xb2, 0x5a, 0x17, 0xdf, 0xfb, 0xe6, 0x68, 0x6f, 0x25, 0xcd, 0xf8, 0xc3, 0xd1, 0xde,
+	0xca, 0x8d, 0xde, 0x42, 0xf9, 0x2e, 0xb2, 0x98, 0xc1, 0xe2, 0x16, 0xb3, 0x00, 0x46, 0x6f, 0x8d,
+	0x65, 0x44, 0xea, 0x38, 0x26, 0x48, 0x5f, 0x80, 0x69, 0x41, 0x9a, 0x57, 0x5a, 0x16, 0x0b, 0xf3,
+	0xc7, 0x49, 0xb8, 0xb0, 0x49, 0xfc, 0x52, 0xa3, 0xc5, 0xd1, 0x44, 0xb7, 0x61, 0xba, 0xda, 0x68,
+	0xa1, 0xe1, 0x82, 0x08, 0xd8, 0x71, 0xd8, 0xc9, 0xb6, 0xb0, 0xfa, 0x47, 0x30, 0xe3, 0x46, 0xb8,
+	0x11, 0x53, 0x2e, 0xc5, 0x5c, 0x61, 0xc9, 0x96, 0x31, 0xd8, 0x49, 0xa6, 0xbd, 0x63, 0x6f, 0xe0,
+	0x20, 0x2e, 0x65, 0x5e, 0xbc, 0xce, 0x4f, 0xfc, 0x72, 0xb4, 0xb7, 0xa2, 0x95, 0xa5, 0x8f, 0xfe,
+	0x29, 0x40, 0x14, 0xc4, 0x15, 0x5e, 0x15, 0x11, 0xb2, 0x95, 0x6e, 0x33, 0xd8, 0x9f, 0xaf, 0xf3,
+	0x8b, 0x22, 0x10, 0xf1, 0x76, 0xed, 0x00, 0x3b, 0x91, 0x4b, 0x77, 0xec, 0x87, 0x31, 0x7d, 0xb5,
+	0x6f, 0x81, 0xcc, 0xf0, 0x30, 0xa6, 0xe5, 0x4c, 0x14, 0xc4, 0xa2, 0x9e, 0xe2, 0x6d, 0x26, 0xa5,
+	0xe0, 0xca, 0x84, 0x7c, 0xab, 0x57, 0xc8, 0x6a, 0xa3, 0x25, 0x04, 0x24, 0x66, 0x08, 0x0b, 0xed,
+	0x62, 0x28, 0xed, 0xb6, 0xe1, 0x92, 0x40, 0x54, 0x12, 0x54, 0x43, 0x41, 0x13, 0x79, 0x52, 0x9e,
+	0xb1, 0x58, 0x5d, 0xa4, 0x32, 0xaa, 0x08, 0x61, 0xfe, 0x34, 0x09, 0xf3, 0x9b, 0xc4, 0x7f, 0x84,
+	0xc2, 0x50, 0x8a, 0x7f, 0x07, 0x66, 0x08, 0x0a, 0xc3, 0x11, 0xd4, 0x97, 0xb8, 0x33, 0x91, 0xff,
+	0x13, 0x60, 0xfa, 0x55, 0xea, 0x49, 0x50, 0x43, 0xa7, 0x51, 0x7f, 0x36, 0x0a, 0xe2, 0x2d, 0xe6,
+	0x5c, 0xb4, 0x98, 0xf8, 0x92, 0x2a, 0x53, 0xff, 0x6a, 0xaf, 0xfa, 0x6c, 0x33, 0x95, 0x7f, 0x17,
+	0x16, 0x3b, 0xf4, 0x50, 0xfa, 0x97, 0xe1, 0x22, 0x67, 0xf3, 0xaf, 0xe4, 0x9f, 0xe7, 0x21, 0x94,
+	0xfa, 0x7f, 0x69, 0x3c, 0xdb, 0x46, 0xe8, 0x06, 0xd1, 0xc7, 0xb8, 0x11, 0x7b, 0xf2, 0x83, 0x21,
+	0x7c, 0x2a, 0x30, 0x2b, 0x1a, 0x65, 0x2a, 0x08, 0xe0, 0x80, 0x73, 0xd8, 0xe8, 0x38, 0x87, 0x31,
+	0xf9, 0x4a, 0xd7, 0xe2, 0x7d, 0x31, 0x0c, 0x44, 0x22, 0xa6, 0xe2, 0xcd, 0x3e, 0xc3, 0x80, 0xed,
+	0x5a, 0x4f, 0x44, 0x19, 0xa9, 0x9c, 0x79, 0xb8, 0xda, 0xb7, 0xc0, 0x54, 0x56, 0xf3, 0xb9, 0x06,
+	0x6f, 0x88, 0x7e, 0xef, 0x14, 0xe0, 0x3f, 0x99, 0x01, 0xc5, 0xb5, 0xce, 0x2f, 0xef, 0xed, 0xfe,
+	0x5f, 0x5e, 0x17, 0x67, 0x02, 0x57, 0xfa, 0x30, 0x3a, 0xe3, 0x0f, 0xf1, 0x5b, 0x0d, 0xe6, 0x58,
+	0xe3, 0x51, 0x37, 0xa1, 0x9f, 0x95, 0xb6, 0x4e, 0x75, 0x2d, 0xf4, 0xd7, 0xe0, 0xdd, 0xee, 0x41,
+	0x7e, 0xa5, 0xcf, 0x17, 0xc0, 0xd2, 0x5a, 0x61, 0xb5, 0x6e, 0x2e, 0xf2, 0xe3, 0x48, 0x69, 0xa8,
+	0x63, 0xda, 0x9f, 0x84, 0xcb, 0x6a, 0xb0, 0x7f, 0x81, 0x08, 0x0d, 0x62, 0x7f, 0xbd, 0x56, 0xe3,
+	0xdf, 0xea, 0x69, 0xa8, 0xde, 0x07, 0xa0, 0xb8, 0xe2, 0x8a, 0x4d, 0xc1, 0xf7, 0x04, 0xb7, 0x0c,
+	0xc5, 0xd2, 0xd0, 0x31, 0x56, 0xa6, 0xc6, 0x1e, 0x2b, 0x4b, 0x30, 0x8b, 0x62, 0xaf, 0x42, 0x83,
+	0x48, 0x4c, 0x95, 0xa9, 0xf2, 0x79, 0x14, 0x7b, 0xdb, 0x41, 0x84, 0xf4, 0x2c, 0x9c, 0xf7, 0x50,
+	0xe8, 0xb6, 0x90, 0xc7, 0xaf, 0xc2, 0xd9, 0x72, 0xba, 0x2c, 0x7e, 0xd0, 0x2d, 0xe0, 0xf2, 0xc0,
+	0x9b, 0xb0, 0x29, 0x94, 0xb1, 0x5c, 0x21, 0x8d, 0x79, 0x1d, 0xf2, 0x03, 0x54, 0x53, 0xca, 0xfe,
+	0xae, 0xc1, 0xa5, 0x4d, 0xe2, 0x3f, 0xae, 0x7b, 0x2e, 0x45, 0x5b, 0x6e, 0xe2, 0x46, 0x44, 0xbf,
+	0x07, 0x19, 0xb7, 0x41, 0x77, 0x70, 0x12, 0xd0, 0xd6, 0x50, 0x4d, 0x8f, 0xa1, 0xfa, 0x03, 0x98,
+	0xa9, 0xf3, 0x08, 0x5c, 0xd1, 0xb9, 0xc2, 0x75, 0x7b, 0xe0, 0xa3, 0xc9, 0x16, 0xa9, 0x3a, 0x44,
+	0x12, 0xbe, 0xc5, 0x02, 0xab, 0xf7, 0x38, 0x2a, 0xab, 0x38, 0xdf, 0x5b, 0x71, 0x83, 0x13, 0xb6,
+	0x84, 0x8f, 0xb9, 0xc4, 0xdb, 0xa3, 0xbd, 0x08, 0x55, 0xe0, 0xaf, 0x1a, 0x64, 0x95, 0x08, 0x65,
+	0xf4, 0x04, 0x25, 0x89, 0x1b, 0x6e, 0x25, 0xd8, 0x4f, 0xdc, 0xe8, 0x54, 0xbd, 0x93, 0x87, 0x39,
+	0x4e, 0xa1, 0xd2, 0xde, 0xec, 0xc0, 0x4d, 0x0f, 0x78, 0xc7, 0x17, 0xbb, 0x0f, 0xec, 0x9d, 0x81,
+	0x07, 0x96, 0x48, 0x3e, 0x56, 0x5d, 0x10, 0x32, 0x4d, 0xb8, 0x36, 0x88, 0xac, 0xaa, 0xe8, 0x67,
+	0x31, 0xb3, 0xd6, 0x6b, 0x34, 0x68, 0xb6, 0xc1, 0xf4, 0x1b, 0x30, 0x9f, 0xc6, 0xab, 0xd4, 0xb0,
+	0x87, 0xe4, 0x33, 0xe7, 0x42, 0x6a, 0xdc, 0xc0, 0x1e, 0x62, 0x15, 0xf3, 0x35, 0x42, 0x43, 0xdb,
+	0x3e, 0x05, 0xca, 0xb7, 0x98, 0x5c, 0x0d, 0x78, 0x8b, 0xb9, 0x92, 0x8d, 0x2a, 0x49, 0xce, 0xb1,
+	0x6e, 0x96, 0x67, 0x3b, 0xc7, 0x0a, 0xbf, 0x65, 0x60, 0x6a, 0x93, 0xf8, 0xfa, 0x57, 0x70, 0xa9,
+	0xfb, 0xa5, 0x6b, 0x9d, 0xd0, 0x8d, 0xbd, 0x8f, 0x46, 0xe3, 0xee, 0x58, 0x70, 0x55, 0x16, 0x82,
+	0xcc, 0xf1, 0x4b, 0xf2, 0xd6, 0xc9, 0x31, 0x14, 0xd0, 0x70, 0x46, 0x04, 0xaa, 0x34, 0x3b, 0x00,
+	0x6d, 0x8f, 0xa6, 0xe5, 0x93, 0xdd, 0x8f, 0x91, 0xc6, 0x9d, 0x51, 0x91, 0x2a, 0xd3, 0x33, 0x0d,
+	0xf4, 0x3e, 0x2f, 0x84, 0x21, 0x81, 0x7a, 0x3d, 0x8c, 0xf7, 0xc7, 0xf5, 0x50, 0x14, 0xbe, 0x86,
+	0xff, 0xf5, 0x5e, 0xd0, 0x43, 0x15, 0xeb, 0xcc, 0x7e, 0x6f, 0x3c, 0xbc, 0xca, 0x5d, 0x85, 0x59,
+	0x75, 0x29, 0xde, 0x1c, 0x22, 0x9e, 0xc4, 0x19, 0xf6, 0x68, 0x38, 0x95, 0xe3, 0x3b, 0x0d, 0x16,
+	0xfa, 0x5f, 0x6d, 0xa3, 0xf4, 0x60, 0xa7, 0x8f, 0x51, 0x1c, 0xdf, 0x47, 0x11, 0x89, 0xe1, 0x42,
+	0xc7, 0x45, 0xb0, 0x72, 0x72, 0xac, 0x76, 0xac, 0x51, 0x18, 0x1d, 0xab, 0xf2, 0x7d, 0xaf, 0xc1,
+	0x62, 0xff, 0xc1, 0xbc, 0x36, 0x4a, 0x15, 0x5d, 0x4e, 0xc6, 0x87, 0xa7, 0x70, 0x6a, 0x6f, 0xb2,
+	0x9e, 0x89, 0x3a, 0xe4, 0x20, 0xbb, 0xf1, 0xc3, 0x9a, 0x6c, 0xd0, 0x2c, 0x34, 0xa6, 0x9f, 0xb1,
+	0x1b, 0xb0, 0xf4, 0xf9, 0x8b, 0x83, 0x9c, 0xf6, 0xf2, 0x20, 0xa7, 0xfd, 0x7d, 0x90, 0xd3, 0x9e,
+	0x1f, 0xe6, 0x26, 0x5e, 0x1e, 0xe6, 0x26, 0xfe, 0x38, 0xcc, 0x4d, 0x7c, 0x79, 0xd7, 0x0f, 0xe8,
+	0x4e, 0xa3, 0x6a, 0xd7, 0x70, 0xe4, 0xc8, 0x14, 0x56, 0xe8, 0x56, 0x49, 0xba, 0x70, 0x9a, 0x6b,
+	0x77, 0x9c, 0xa7, 0x6d, 0xe3, 0x98, 0xb6, 0xea, 0x88, 0x54, 0x67, 0xf8, 0x9f, 0xfe, 0x6b, 0xff,
+	0x04, 0x00, 0x00, 0xff, 0xff, 0x18, 0xc4, 0x58, 0xd9, 0xe1, 0x10, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -752,10 +1142,19 @@ type MsgClient interface {
 	SellTokens(ctx context.Context, in *MsgSellTokens, opts ...grpc.CallOption) (*MsgSellTokensResponse, error)
 	// ClaimFounderTokens claims founder tokens
 	ClaimFounderTokens(ctx context.Context, in *MsgClaimFounderTokens, opts ...grpc.CallOption) (*MsgClaimFounderTokensResponse, error)
+	// BuyFounderTokens allows founder to buy 10M tokens at special price
+	BuyFounderTokens(ctx context.Context, in *MsgBuyFounderTokens, opts ...grpc.CallOption) (*MsgBuyFounderTokensResponse, error)
 	// StartLBP starts LBP for a token
 	StartLBP(ctx context.Context, in *MsgStartLBP, opts ...grpc.CallOption) (*MsgStartLBPResponse, error)
 	// CreateVestingAccount creates a vesting account for token distribution
 	CreateVestingAccount(ctx context.Context, in *MsgCreateVestingAccount, opts ...grpc.CallOption) (*MsgCreateVestingAccountResponse, error)
+	// UpdateParams updates the parameters of the usertoken module.
+	// Can only be called by the governance module.
+	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
+	// CreateReferralProgram creates a new referral program for a token
+	CreateReferralProgram(ctx context.Context, in *MsgCreateReferralProgram, opts ...grpc.CallOption) (*MsgCreateReferralProgramResponse, error)
+	// ActivateReferral activates a referral link
+	ActivateReferral(ctx context.Context, in *MsgActivateReferral, opts ...grpc.CallOption) (*MsgActivateReferralResponse, error)
 }
 
 type msgClient struct {
@@ -802,6 +1201,15 @@ func (c *msgClient) ClaimFounderTokens(ctx context.Context, in *MsgClaimFounderT
 	return out, nil
 }
 
+func (c *msgClient) BuyFounderTokens(ctx context.Context, in *MsgBuyFounderTokens, opts ...grpc.CallOption) (*MsgBuyFounderTokensResponse, error) {
+	out := new(MsgBuyFounderTokensResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usertoken.v1beta1.Msg/BuyFounderTokens", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *msgClient) StartLBP(ctx context.Context, in *MsgStartLBP, opts ...grpc.CallOption) (*MsgStartLBPResponse, error) {
 	out := new(MsgStartLBPResponse)
 	err := c.cc.Invoke(ctx, "/osmosis.usertoken.v1beta1.Msg/StartLBP", in, out, opts...)
@@ -820,6 +1228,33 @@ func (c *msgClient) CreateVestingAccount(ctx context.Context, in *MsgCreateVesti
 	return out, nil
 }
 
+func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error) {
+	out := new(MsgUpdateParamsResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usertoken.v1beta1.Msg/UpdateParams", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) CreateReferralProgram(ctx context.Context, in *MsgCreateReferralProgram, opts ...grpc.CallOption) (*MsgCreateReferralProgramResponse, error) {
+	out := new(MsgCreateReferralProgramResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usertoken.v1beta1.Msg/CreateReferralProgram", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) ActivateReferral(ctx context.Context, in *MsgActivateReferral, opts ...grpc.CallOption) (*MsgActivateReferralResponse, error) {
+	out := new(MsgActivateReferralResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usertoken.v1beta1.Msg/ActivateReferral", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// CreateUserToken creates a new user token
@@ -830,10 +1265,19 @@ type MsgServer interface {
 	SellTokens(context.Context, *MsgSellTokens) (*MsgSellTokensResponse, error)
 	// ClaimFounderTokens claims founder tokens
 	ClaimFounderTokens(context.Context, *MsgClaimFounderTokens) (*MsgClaimFounderTokensResponse, error)
+	// BuyFounderTokens allows founder to buy 10M tokens at special price
+	BuyFounderTokens(context.Context, *MsgBuyFounderTokens) (*MsgBuyFounderTokensResponse, error)
 	// StartLBP starts LBP for a token
 	StartLBP(context.Context, *MsgStartLBP) (*MsgStartLBPResponse, error)
 	// CreateVestingAccount creates a vesting account for token distribution
 	CreateVestingAccount(context.Context, *MsgCreateVestingAccount) (*MsgCreateVestingAccountResponse, error)
+	// UpdateParams updates the parameters of the usertoken module.
+	// Can only be called by the governance module.
+	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
+	// CreateReferralProgram creates a new referral program for a token
+	CreateReferralProgram(context.Context, *MsgCreateReferralProgram) (*MsgCreateReferralProgramResponse, error)
+	// ActivateReferral activates a referral link
+	ActivateReferral(context.Context, *MsgActivateReferral) (*MsgActivateReferralResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -852,11 +1296,23 @@ func (*UnimplementedMsgServer) SellTokens(ctx context.Context, req *MsgSellToken
 func (*UnimplementedMsgServer) ClaimFounderTokens(ctx context.Context, req *MsgClaimFounderTokens) (*MsgClaimFounderTokensResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClaimFounderTokens not implemented")
 }
+func (*UnimplementedMsgServer) BuyFounderTokens(ctx context.Context, req *MsgBuyFounderTokens) (*MsgBuyFounderTokensResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BuyFounderTokens not implemented")
+}
 func (*UnimplementedMsgServer) StartLBP(ctx context.Context, req *MsgStartLBP) (*MsgStartLBPResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StartLBP not implemented")
 }
 func (*UnimplementedMsgServer) CreateVestingAccount(ctx context.Context, req *MsgCreateVestingAccount) (*MsgCreateVestingAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateVestingAccount not implemented")
+}
+func (*UnimplementedMsgServer) UpdateParams(ctx context.Context, req *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateParams not implemented")
+}
+func (*UnimplementedMsgServer) CreateReferralProgram(ctx context.Context, req *MsgCreateReferralProgram) (*MsgCreateReferralProgramResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateReferralProgram not implemented")
+}
+func (*UnimplementedMsgServer) ActivateReferral(ctx context.Context, req *MsgActivateReferral) (*MsgActivateReferralResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ActivateReferral not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -935,6 +1391,24 @@ func _Msg_ClaimFounderTokens_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_BuyFounderTokens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgBuyFounderTokens)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).BuyFounderTokens(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.usertoken.v1beta1.Msg/BuyFounderTokens",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).BuyFounderTokens(ctx, req.(*MsgBuyFounderTokens))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Msg_StartLBP_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MsgStartLBP)
 	if err := dec(in); err != nil {
@@ -971,6 +1445,60 @@ func _Msg_CreateVestingAccount_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgUpdateParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).UpdateParams(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.usertoken.v1beta1.Msg/UpdateParams",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).UpdateParams(ctx, req.(*MsgUpdateParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_CreateReferralProgram_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCreateReferralProgram)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).CreateReferralProgram(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.usertoken.v1beta1.Msg/CreateReferralProgram",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).CreateReferralProgram(ctx, req.(*MsgCreateReferralProgram))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_ActivateReferral_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgActivateReferral)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).ActivateReferral(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.usertoken.v1beta1.Msg/ActivateReferral",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).ActivateReferral(ctx, req.(*MsgActivateReferral))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "osmosis.usertoken.v1beta1.Msg",
 	HandlerType: (*MsgServer)(nil),
@@ -992,12 +1520,28 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_ClaimFounderTokens_Handler,
 		},
 		{
+			MethodName: "BuyFounderTokens",
+			Handler:    _Msg_BuyFounderTokens_Handler,
+		},
+		{
 			MethodName: "StartLBP",
 			Handler:    _Msg_StartLBP_Handler,
 		},
 		{
 			MethodName: "CreateVestingAccount",
 			Handler:    _Msg_CreateVestingAccount_Handler,
+		},
+		{
+			MethodName: "UpdateParams",
+			Handler:    _Msg_UpdateParams_Handler,
+		},
+		{
+			MethodName: "CreateReferralProgram",
+			Handler:    _Msg_CreateReferralProgram_Handler,
+		},
+		{
+			MethodName: "ActivateReferral",
+			Handler:    _Msg_ActivateReferral_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1340,6 +1884,76 @@ func (m *MsgClaimFounderTokensResponse) MarshalToSizedBuffer(dAtA []byte) (int, 
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgBuyFounderTokens) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgBuyFounderTokens) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgBuyFounderTokens) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Buyer) > 0 {
+		i -= len(m.Buyer)
+		copy(dAtA[i:], m.Buyer)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Buyer)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgBuyFounderTokensResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgBuyFounderTokensResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgBuyFounderTokensResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size := m.TokensReceived.Size()
+		i -= size
+		if _, err := m.TokensReceived.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
 func (m *MsgStartLBP) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1489,6 +2103,199 @@ func (m *MsgCreateVestingAccountResponse) MarshalToSizedBuffer(dAtA []byte) (int
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgUpdateParams) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgUpdateParams) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgUpdateParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.Params.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x12
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgUpdateParamsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgUpdateParamsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgUpdateParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgCreateReferralProgram) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateReferralProgram) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateReferralProgram) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.TokenDenom) > 0 {
+		i -= len(m.TokenDenom)
+		copy(dAtA[i:], m.TokenDenom)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.TokenDenom)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgCreateReferralProgramResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateReferralProgramResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateReferralProgramResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgActivateReferral) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgActivateReferral) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgActivateReferral) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Referee) > 0 {
+		i -= len(m.Referee)
+		copy(dAtA[i:], m.Referee)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Referee)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ReferralCode) > 0 {
+		i -= len(m.ReferralCode)
+		copy(dAtA[i:], m.ReferralCode)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.ReferralCode)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgActivateReferralResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgActivateReferralResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgActivateReferralResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size := m.TokensReceived.Size()
+		i -= size
+		if _, err := m.TokensReceived.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -1633,6 +2440,34 @@ func (m *MsgClaimFounderTokensResponse) Size() (n int) {
 	return n
 }
 
+func (m *MsgBuyFounderTokens) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Buyer)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgBuyFounderTokensResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.TokensReceived.Size()
+	n += 1 + l + sovTx(uint64(l))
+	return n
+}
+
 func (m *MsgStartLBP) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1694,6 +2529,84 @@ func (m *MsgCreateVestingAccountResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
+	return n
+}
+
+func (m *MsgUpdateParams) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = m.Params.Size()
+	n += 1 + l + sovTx(uint64(l))
+	return n
+}
+
+func (m *MsgUpdateParamsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgCreateReferralProgram) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.TokenDenom)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgCreateReferralProgramResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgActivateReferral) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ReferralCode)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Referee)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgActivateReferralResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.TokensReceived.Size()
+	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
@@ -2710,6 +3623,204 @@ func (m *MsgClaimFounderTokensResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *MsgBuyFounderTokens) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgBuyFounderTokens: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgBuyFounderTokens: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Buyer", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Buyer = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgBuyFounderTokensResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgBuyFounderTokensResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgBuyFounderTokensResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TokensReceived", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.TokensReceived.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *MsgStartLBP) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -3090,6 +4201,533 @@ func (m *MsgCreateVestingAccountResponse) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: MsgCreateVestingAccountResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUpdateParams) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUpdateParams: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUpdateParams: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Params", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUpdateParamsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUpdateParamsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUpdateParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateReferralProgram) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateReferralProgram: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateReferralProgram: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TokenDenom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TokenDenom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateReferralProgramResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateReferralProgramResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateReferralProgramResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgActivateReferral) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgActivateReferral: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgActivateReferral: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReferralCode", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReferralCode = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Referee", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Referee = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgActivateReferralResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgActivateReferralResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgActivateReferralResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TokensReceived", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.TokensReceived.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])

@@ -26,6 +26,8 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 	cmd.AddCommand(CmdQueryUserToken())
 	cmd.AddCommand(CmdQueryUserTokens())
 	cmd.AddCommand(CmdQueryBondingCurvePrice())
+	cmd.AddCommand(CmdQueryReferralProgram())
+	cmd.AddCommand(CmdQueryReferralPrograms())
 
 	return cmd
 }
@@ -44,6 +46,62 @@ func CmdQueryParams() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.Params(cmd.Context(), &types.QueryParamsRequest{})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdQueryReferralProgram() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "referral-program [token-denom]",
+		Short: "Query a referral program by token denomination",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.ReferralProgram(cmd.Context(), &types.QueryReferralProgramRequest{
+				TokenDenom: args[0],
+			})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdQueryReferralPrograms() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "referral-programs",
+		Short: "Query all referral programs",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.ReferralPrograms(cmd.Context(), &types.QueryReferralProgramsRequest{})
 			if err != nil {
 				return err
 			}
