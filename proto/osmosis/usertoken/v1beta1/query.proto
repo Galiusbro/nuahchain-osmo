@@ -7,7 +7,7 @@ import "cosmos/base/query/v1beta1/pagination.proto";
 import "osmosis/usertoken/v1beta1/genesis.proto";
 import "amino/amino.proto";
 
-option go_package = "github.com/osmosis-labs/osmosis/v30/x/usertoken/types";
+option go_package = "github.com/osmosis-labs/osmosis/v25/x/usertoken/types";
 
 // Query defines the gRPC querier service.
 service Query {
@@ -26,9 +26,19 @@ service Query {
     option (google.api.http).get = "/osmosis/usertoken/v1beta1/user_tokens";
   }
 
-  // BondingCurvePrice queries the current bonding curve price for a token.
+  // BondingCurvePrice queries the current price of a token on the bonding curve.
   rpc BondingCurvePrice(QueryBondingCurvePriceRequest) returns (QueryBondingCurvePriceResponse) {
     option (google.api.http).get = "/osmosis/usertoken/v1beta1/bonding_curve_price/{denom}";
+  }
+
+  // ReferralPrograms queries all referral programs.
+  rpc ReferralPrograms(QueryReferralProgramsRequest) returns (QueryReferralProgramsResponse) {
+    option (google.api.http).get = "/osmosis/usertoken/v1beta1/referral_programs";
+  }
+
+  // ReferralActivations queries referral activations for a user.
+  rpc ReferralActivations(QueryReferralActivationsRequest) returns (QueryReferralActivationsResponse) {
+    option (google.api.http).get = "/osmosis/usertoken/v1beta1/referral_activations/{user}";
   }
 }
 
@@ -73,4 +83,27 @@ message QueryBondingCurvePriceResponse {
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
+}
+
+// QueryReferralProgramsRequest is request type for the Query/ReferralPrograms RPC method.
+message QueryReferralProgramsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryReferralProgramsResponse is response type for the Query/ReferralPrograms RPC method.
+message QueryReferralProgramsResponse {
+  repeated ReferralProgram referral_programs = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryReferralActivationsRequest is request type for the Query/ReferralActivations RPC method.
+message QueryReferralActivationsRequest {
+  string user = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryReferralActivationsResponse is response type for the Query/ReferralActivations RPC method.
+message QueryReferralActivationsResponse {
+  repeated ReferralActivation referral_activations = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

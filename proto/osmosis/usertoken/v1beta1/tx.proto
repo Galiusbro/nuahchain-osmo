@@ -1,13 +1,13 @@
 syntax = "proto3";
+
 package osmosis.usertoken.v1beta1;
 
 import "amino/amino.proto";
 import "cosmos/msg/v1/msg.proto";
-import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
-option go_package = "github.com/osmosis-labs/osmosis/v30/x/usertoken/types";
+option go_package = "github.com/osmosis-labs/osmosis/v25/x/usertoken/types";
 
 // Msg defines the Msg service.
 service Msg {
@@ -30,6 +30,12 @@ service Msg {
 
   // CreateVestingAccount creates a vesting account for token distribution
   rpc CreateVestingAccount(MsgCreateVestingAccount) returns (MsgCreateVestingAccountResponse);
+
+  // CreateReferralProgram creates a new referral program
+  rpc CreateReferralProgram(MsgCreateReferralProgram) returns (MsgCreateReferralProgramResponse);
+
+  // ActivateReferral activates a referral
+  rpc ActivateReferral(MsgActivateReferral) returns (MsgActivateReferralResponse);
 }
 
 // MsgCreateUserToken creates a new user token
@@ -37,11 +43,14 @@ message MsgCreateUserToken {
   option (cosmos.msg.v1.signer) = "creator";
   option (amino.name) = "osmosis/usertoken/create-user-token";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string subdenom = 2;
-  string name = 3;
-  string symbol = 4;
-  uint32 decimals = 5;
+  string creator = 1;
+  string name = 2;
+  string symbol = 3;
+  string description = 4;
+  string max_supply = 5 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+  string reserve_ratio = 6 [(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
+  string initial_price = 7 [(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
+  string founder_percentage = 8 [(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
 }
 
 // MsgCreateUserTokenResponse defines the response structure for executing a MsgCreateUserToken message.
@@ -54,15 +63,15 @@ message MsgBuyTokens {
   option (cosmos.msg.v1.signer) = "buyer";
   option (amino.name) = "osmosis/usertoken/buy-tokens";
 
-  string buyer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string buyer = 1;
   string denom = 2;
   cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
-  string min_tokens = 4 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+  string min_tokens = 4 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }
 
 // MsgBuyTokensResponse defines the response structure for executing a MsgBuyTokens message.
 message MsgBuyTokensResponse {
-  string tokens_received = 1 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+  string tokens_received = 1 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }
 
 // MsgSellTokens sells tokens through bonding curve
@@ -70,15 +79,15 @@ message MsgSellTokens {
   option (cosmos.msg.v1.signer) = "seller";
   option (amino.name) = "osmosis/usertoken/sell-tokens";
 
-  string seller = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string seller = 1;
   string denom = 2;
   cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
-  string min_price = 4 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+  string min_price = 4 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }
 
 // MsgSellTokensResponse defines the response structure for executing a MsgSellTokens message.
 message MsgSellTokensResponse {
-  string price_received = 1 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+  string price_received = 1 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }
 
 // MsgClaimFounderTokens claims founder tokens
@@ -86,9 +95,9 @@ message MsgClaimFounderTokens {
   option (cosmos.msg.v1.signer) = "claimer";
   option (amino.name) = "osmosis/usertoken/claim-founder-tokens";
 
-  string claimer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string claimer = 1;
   string denom = 2;
-  string amount = 3 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+  string amount = 3 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }
 
 // MsgClaimFounderTokensResponse defines the response structure for executing a MsgClaimFounderTokens message.
@@ -99,7 +108,7 @@ message MsgStartLBP {
   option (cosmos.msg.v1.signer) = "creator";
   option (amino.name) = "osmosis/usertoken/start-lbp";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string creator = 1;
   string denom = 2;
 }
 
@@ -111,8 +120,8 @@ message MsgCreateVestingAccount {
   option (cosmos.msg.v1.signer) = "creator";
   option (amino.name) = "osmosis/usertoken/create-vesting-account";
 
-  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string to_address = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string creator = 1;
+  string to_address = 2;
   repeated cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
   int64 end_time = 4;
   bool delayed = 5;
@@ -120,3 +129,35 @@ message MsgCreateVestingAccount {
 
 // MsgCreateVestingAccountResponse defines the response structure for executing a MsgCreateVestingAccount message.
 message MsgCreateVestingAccountResponse {}
+
+// MsgCreateReferralProgram creates a new referral program
+message MsgCreateReferralProgram {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "osmosis/usertoken/create-referral-program";
+
+  string creator = 1;
+  string name = 2;
+  string description = 3;
+  string reward_percentage = 4 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// MsgCreateReferralProgramResponse defines the response structure for executing a MsgCreateReferralProgram message.
+message MsgCreateReferralProgramResponse {
+  string program_id = 1;
+}
+
+// MsgActivateReferral activates a referral
+message MsgActivateReferral {
+  option (cosmos.msg.v1.signer) = "referee";
+  option (amino.name) = "osmosis/usertoken/activate-referral";
+
+  string referee = 1;
+  string referrer = 2;
+  string program_id = 3;
+}
+
+// MsgActivateReferralResponse defines the response structure for executing a MsgActivateReferral message.
+message MsgActivateReferralResponse {}

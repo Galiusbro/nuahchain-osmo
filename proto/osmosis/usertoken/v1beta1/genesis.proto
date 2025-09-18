@@ -1,56 +1,92 @@
 syntax = "proto3";
+
 package osmosis.usertoken.v1beta1;
 
 import "gogoproto/gogo.proto";
 import "amino/amino.proto";
 
-option go_package = "github.com/osmosis-labs/osmosis/v30/x/usertoken/types";
-
-// GenesisState defines the usertoken module's genesis state.
-message GenesisState {
-  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
-  repeated UserToken user_tokens = 2;
-}
+option go_package = "github.com/osmosis-labs/osmosis/v25/x/usertoken/types";
 
 // Params defines the parameters for the module.
 message Params {
   option (amino.name) = "osmosis/x/usertoken/Params";
   option (gogoproto.goproto_stringer) = false;
 
-  string founder_tranche_price = 1 [
-    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-    (gogoproto.nullable) = false
-  ];
-  string founder_tranche_amount = 2 [
-    (gogoproto.customtype) = "cosmossdk.io/math.Int",
-    (gogoproto.nullable) = false
-  ];
-  string bonding_curve_start_price = 3 [
-    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-    (gogoproto.nullable) = false
-  ];
-  string bonding_curve_end_price = 4 [
-    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-    (gogoproto.nullable) = false
-  ];
-  string bonding_curve_max_supply = 5 [
+  // creation_fee is the fee required to create a new user token
+  string creation_fee = 1 [
     (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.nullable) = false
   ];
 }
 
-// UserToken defines a user-created token.
+// GenesisState defines the usertoken module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+
+  // user_tokens defines all the user tokens.
+  repeated UserToken user_tokens = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+
+  // referral_programs defines all the referral programs.
+  repeated ReferralProgram referral_programs = 3 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+
+  // referral_activations defines all the referral activations.
+  repeated ReferralActivation referral_activations = 4 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+// UserToken defines a user token
 message UserToken {
   string denom = 1;
   string creator = 2;
-  string current_supply = 3 [
+  string name = 3;
+  string symbol = 4;
+  string description = 5;
+  string max_supply = 6 [
     (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.nullable) = false
   ];
-  string founder_tokens_claimed = 4 [
+  string current_supply = 7 [
     (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.nullable) = false
   ];
-  bool lbp_active = 5;
-  int64 lbp_start_time = 6;
+  string reserve_ratio = 8 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  string initial_price = 9 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  string founder_percentage = 10 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  string founder_tokens_claimed = 11 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+  bool lbp_active = 12;
+  int64 lbp_start_time = 13;
+}
+
+// ReferralProgram defines a referral program
+message ReferralProgram {
+  string id = 1;
+  string creator = 2;
+  string name = 3;
+  string description = 4;
+  string reward_percentage = 5 [
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+  bool active = 6;
+  int64 created_at = 7;
+}
+
+// ReferralActivation defines a referral activation
+message ReferralActivation {
+  string referrer = 1;
+  string referee = 2;
+  string program_id = 3;
+  int64 activated_at = 4;
 }
