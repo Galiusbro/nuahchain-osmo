@@ -9,8 +9,11 @@ import (
 // DefaultGenesis returns the default usertoken genesis state
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
-		Params:     DefaultParams(),
-		UserTokens: []*UserToken{},
+		Params:                  DefaultParams(),
+		UserTokens:              []UserToken{},
+		ReferralPrograms:        []ReferralProgram{},
+		ReferralActivations:     []ReferralActivation{},
+		UserReferralQuotas:      []UserReferralQuota{},
 	}
 }
 

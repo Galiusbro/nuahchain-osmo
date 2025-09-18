@@ -11,6 +11,7 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	icq "github.com/cosmos/ibc-apps/modules/async-icq/v8"
 	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
+	exchangetypes "github.com/osmosis-labs/osmosis/v30/x/exchange/types"
 	limitedaccount "github.com/osmosis-labs/osmosis/v30/x/limitedaccount"
 	limitedaccounttypes "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/types"
 	"github.com/osmosis-labs/osmosis/v30/x/pegkeeper"
@@ -19,7 +20,6 @@ import (
 	usdoracletypes "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types"
 	"github.com/osmosis-labs/osmosis/v30/x/usertoken"
 	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
-	exchangetypes "github.com/osmosis-labs/osmosis/v30/x/exchange/types"
 
 	ibcwasm "github.com/cosmos/ibc-go/modules/light-clients/08-wasm"
 	ibcwasmtypes "github.com/cosmos/ibc-go/modules/light-clients/08-wasm/types"

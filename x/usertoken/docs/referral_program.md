@@ -12,8 +12,8 @@ The Referral Program is a feature within the usertoken module that allows token 
 type ReferralProgram struct {
     Creator        string // Address of the program creator
     TokenDenom     string // Token denomination for the program
-    AvailableLinks uint64 // Number of available referral links
-    UsedLinks      uint64 // Number of used referral links
+    AvailableLinks uint32 // Number of available referral links
+    UsedLinks      uint32 // Number of used referral links
     LastResetTime  int64  // Unix timestamp of last reset
     IsActive       bool   // Whether the program is active
 }
@@ -232,8 +232,8 @@ msg := types.NewMsgCreateReferralProgram(
 // Verify program exists
 program, found := keeper.GetReferralProgram(ctx, "factory/osmo1creator123.../testtoken")
 require.True(t, found)
-require.Equal(t, uint64(3), program.AvailableLinks)
-require.Equal(t, uint64(0), program.UsedLinks)
+require.Equal(t, uint32(3), program.AvailableLinks)
+require.Equal(t, uint32(0), program.UsedLinks)
 require.True(t, program.IsActive)
 ```
 
@@ -252,8 +252,8 @@ require.Equal(t, "osmo1user456...", activation.Referee)
 
 // Check updated program state
 program, _ := keeper.GetReferralProgram(ctx, "factory/osmo1creator123.../testtoken")
-require.Equal(t, uint64(3), program.AvailableLinks)
-require.Equal(t, uint64(1), program.UsedLinks)
+require.Equal(t, uint32(3), program.AvailableLinks)
+require.Equal(t, uint32(1), program.UsedLinks)
 ```
 
 #### Scenario 3: Weekly Link Replenishment
@@ -270,8 +270,8 @@ for i := 0; i < 3; i++ {
 
 // Verify all links used
 program, _ := keeper.GetReferralProgram(ctx, "factory/osmo1creator123.../testtoken")
-require.Equal(t, uint64(3), program.AvailableLinks)
-require.Equal(t, uint64(3), program.UsedLinks)
+require.Equal(t, uint32(3), program.AvailableLinks)
+require.Equal(t, uint32(3), program.UsedLinks)
 
 // Simulate weekly reset (after 7 days)
 ctx = ctx.WithBlockTime(ctx.BlockTime().Add(7 * 24 * time.Hour))
@@ -279,8 +279,12 @@ keeper.ProcessWeeklyReset(ctx)
 
 // Verify link replenishment (+3 new links)
 program, _ = keeper.GetReferralProgram(ctx, "factory/osmo1creator123.../testtoken")
-require.Equal(t, uint64(6), program.AvailableLinks) // 3 + 3 new
-require.Equal(t, uint64(3), program.UsedLinks)      // previous activations remain
+require.Equal(t, uint32(6), program.AvailableLinks) // 3 + 3 new
+require.Equal(t, uint32(0), program.UsedLinks)      // reset to 0
+
+// Note: For UserReferralQuota, UsedSlots are NOT reset and carry over:
+// Before reset: TotalSlots = 6, UsedSlots = 6
+// After reset:  TotalSlots = 9, UsedSlots = 6 (carries over, not reset to 0)
 ```
 
 ## Best Practices

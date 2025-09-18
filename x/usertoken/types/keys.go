@@ -28,6 +28,8 @@ var (
 	ReferralProgramKeyPrefix = []byte{0x03}
 	// ReferralActivationKeyPrefix is the prefix to retrieve all ReferralActivation
 	ReferralActivationKeyPrefix = []byte{0x04}
+	// UserReferralQuotaKeyPrefix is the prefix to retrieve all UserReferralQuota
+	UserReferralQuotaKeyPrefix = []byte{0x05}
 )
 
 // UserTokenKey returns the store key to retrieve a UserToken from the index fields
@@ -48,4 +50,9 @@ func ReferralProgramKey(tokenDenom string) []byte {
 // ReferralActivationKey returns the store key to retrieve a ReferralActivation from the link ID
 func ReferralActivationKey(linkId string) []byte {
 	return append(ReferralActivationKeyPrefix, []byte(linkId)...)
+}
+
+// UserReferralQuotaKey returns the store key to retrieve a UserReferralQuota from the user address
+func UserReferralQuotaKey(user string) []byte {
+	return append(UserReferralQuotaKeyPrefix, []byte(user)...)
 }

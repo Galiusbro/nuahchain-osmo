@@ -431,15 +431,73 @@ func (k Keeper) calculatePriceIntegral(startPrice math.LegacyDec, linearCoeff ma
 }
 
 func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
+	// Convert slices of pointers to slices of values
+	userTokens := make([]types.UserToken, 0)
+	for _, token := range k.GetAllUserTokens(ctx) {
+		userTokens = append(userTokens, *token)
+	}
+
+	referralPrograms := make([]types.ReferralProgram, 0)
+	for _, program := range k.GetAllReferralPrograms(ctx) {
+		referralPrograms = append(referralPrograms, *program)
+	}
+
+	referralActivations := make([]types.ReferralActivation, 0)
+	for _, activation := range k.GetAllReferralActivations(ctx) {
+		referralActivations = append(referralActivations, *activation)
+	}
+
+	userReferralQuotas := make([]types.UserReferralQuota, 0)
+	for _, quota := range k.GetAllUserReferralQuotas(ctx) {
+		userReferralQuotas = append(userReferralQuotas, *quota)
+	}
+
 	return &types.GenesisState{
 		Params:              k.GetParams(ctx),
-		UserTokens:          k.GetAllUserTokens(ctx),
-		ReferralPrograms:    k.GetAllReferralPrograms(ctx),
-		ReferralActivations: k.GetAllReferralActivations(ctx),
+		UserTokens:          userTokens,
+		ReferralPrograms:    referralPrograms,
+		ReferralActivations: referralActivations,
+		UserReferralQuotas:  userReferralQuotas,
 	}
 }
 
 // Referral Program functions
+
+// GetUserReferralQuota retrieves a user's referral quota
+func (k Keeper) GetUserReferralQuota(ctx sdk.Context, user string) (types.UserReferralQuota, bool) {
+	store := ctx.KVStore(k.storeKey)
+	bz := store.Get(types.UserReferralQuotaKey(user))
+	if bz == nil {
+		return types.UserReferralQuota{}, false
+	}
+
+	var quota types.UserReferralQuota
+	k.cdc.MustUnmarshal(bz, &quota)
+	return quota, true
+}
+
+// SetUserReferralQuota stores a user's referral quota
+func (k Keeper) SetUserReferralQuota(ctx sdk.Context, quota types.UserReferralQuota) {
+	store := ctx.KVStore(k.storeKey)
+	bz := k.cdc.MustMarshal(&quota)
+	store.Set(types.UserReferralQuotaKey(quota.User), bz)
+}
+
+// GetAllUserReferralQuotas returns all user referral quotas
+func (k Keeper) GetAllUserReferralQuotas(ctx sdk.Context) []*types.UserReferralQuota {
+	store := ctx.KVStore(k.storeKey)
+	iterator := storetypes.KVStorePrefixIterator(store, types.UserReferralQuotaKeyPrefix)
+	defer iterator.Close()
+
+	var quotas []*types.UserReferralQuota
+	for ; iterator.Valid(); iterator.Next() {
+		var quota types.UserReferralQuota
+		k.cdc.MustUnmarshal(iterator.Value(), &quota)
+		quotas = append(quotas, &quota)
+	}
+
+	return quotas
+}
 
 // GetReferralProgram retrieves a referral program by token denom
 func (k Keeper) GetReferralProgram(ctx sdk.Context, tokenDenom string) (types.ReferralProgram, bool) {
@@ -525,6 +583,18 @@ func (k Keeper) ResetWeeklyLimits(ctx sdk.Context) {
 		program.UsedLinks = 0
 		program.LastResetTime = ctx.BlockTime().Unix()
 		k.SetReferralProgram(ctx, *program)
+	}
+
+	// Process user referral quotas - expand only if fully utilized
+	quotas := k.GetAllUserReferralQuotas(ctx)
+	for _, quota := range quotas {
+		// If user used all available slots, expand by 3
+		if quota.UsedSlots >= quota.TotalSlots {
+			quota.TotalSlots += 3
+		}
+		// Don't reset used slots - they carry over to show actual usage
+		quota.LastResetTime = ctx.BlockTime().Unix()
+		k.SetUserReferralQuota(ctx, *quota)
 	}
 }
 

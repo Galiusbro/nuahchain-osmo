@@ -768,8 +768,8 @@ func (suite *MsgServerTestSuite) TestCreateReferralProgram() {
 	suite.Require().True(found)
 	suite.Require().Equal(creator.String(), referralProgram.Creator)
 	suite.Require().Equal(tokenDenom, referralProgram.TokenDenom)
-	suite.Require().Equal(uint64(3), referralProgram.AvailableLinks)
-	suite.Require().Equal(uint64(0), referralProgram.UsedLinks)
+	suite.Require().Equal(uint32(3), referralProgram.AvailableLinks)
+	suite.Require().Equal(uint32(0), referralProgram.UsedLinks)
 	suite.Require().True(referralProgram.IsActive)
 }
 
@@ -881,8 +881,8 @@ func (suite *MsgServerTestSuite) TestWeeklyLinkReplenishment() {
 	// Verify program state - only 1 link should be used since only first activation succeeded
 	program, found := suite.App.UserTokenKeeper.GetReferralProgram(suite.Ctx, tokenDenom)
 	suite.Require().True(found)
-	suite.Require().Equal(uint64(3), program.AvailableLinks)
-	suite.Require().Equal(uint64(1), program.UsedLinks) // Only 1 successful activation
+	suite.Require().Equal(uint32(3), program.AvailableLinks)
+	suite.Require().Equal(uint32(1), program.UsedLinks) // Only 1 successful activation
 
 	// Simulate weekly reset (after 7 days)
 	suite.Ctx = suite.Ctx.WithBlockTime(suite.Ctx.BlockTime().Add(7 * 24 * time.Hour))
@@ -891,8 +891,8 @@ func (suite *MsgServerTestSuite) TestWeeklyLinkReplenishment() {
 	// Verify link replenishment - since not all links were used, no new links added
 	program, found = suite.App.UserTokenKeeper.GetReferralProgram(suite.Ctx, tokenDenom)
 	suite.Require().True(found)
-	suite.Require().Equal(uint64(3), program.AvailableLinks) // No change since not fully utilized
-	suite.Require().Equal(uint64(0), program.UsedLinks)      // reset to 0
+	suite.Require().Equal(uint32(3), program.AvailableLinks) // No change since not fully utilized
+	suite.Require().Equal(uint32(0), program.UsedLinks)      // reset to 0
 }
 
 func (suite *MsgServerTestSuite) TestWeeklyLinkReplenishmentFullUtilization() {
@@ -944,8 +944,8 @@ func (suite *MsgServerTestSuite) TestWeeklyLinkReplenishmentFullUtilization() {
 	// Verify all links used
 	program, found = suite.App.UserTokenKeeper.GetReferralProgram(suite.Ctx, tokenDenom)
 	suite.Require().True(found)
-	suite.Require().Equal(uint64(3), program.AvailableLinks)
-	suite.Require().Equal(uint64(3), program.UsedLinks)
+	suite.Require().Equal(uint32(3), program.AvailableLinks)
+	suite.Require().Equal(uint32(3), program.UsedLinks)
 
 	// Simulate weekly reset (after 7 days)
 	suite.Ctx = suite.Ctx.WithBlockTime(suite.Ctx.BlockTime().Add(7 * 24 * time.Hour))
@@ -954,8 +954,8 @@ func (suite *MsgServerTestSuite) TestWeeklyLinkReplenishmentFullUtilization() {
 	// Verify link replenishment (+3 new links because all were used)
 	program, found = suite.App.UserTokenKeeper.GetReferralProgram(suite.Ctx, tokenDenom)
 	suite.Require().True(found)
-	suite.Require().Equal(uint64(6), program.AvailableLinks) // 3 + 3 new
-	suite.Require().Equal(uint64(0), program.UsedLinks)      // reset to 0
+	suite.Require().Equal(uint32(6), program.AvailableLinks) // 3 + 3 new
+	suite.Require().Equal(uint32(0), program.UsedLinks)      // reset to 0
 }
 
 func (suite *MsgServerTestSuite) TestSellTokens() {
@@ -1145,4 +1145,181 @@ func (suite *MsgServerTestSuite) TestSellTokensMinPriceNotMet() {
 	suite.Require().Error(err)
 	suite.Require().Contains(err.Error(), "price received")
 	suite.Require().Contains(err.Error(), "is less than minimum price")
+}
+
+func (suite *MsgServerTestSuite) TestUserReferralQuotaWeeklyReset() {
+	// Setup fresh context for this test
+	suite.Setup()
+	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+
+	creator := suite.TestAccs[0]
+
+	// Create initial user referral quota
+	quota := types.UserReferralQuota{
+		User:          creator.String(),
+		TotalSlots:    6,
+		UsedSlots:     6, // Fully utilized
+		LastResetTime: suite.Ctx.BlockTime().Unix(),
+	}
+	suite.App.UserTokenKeeper.SetUserReferralQuota(suite.Ctx, quota)
+
+	// Verify initial state
+	storedQuota, found := suite.App.UserTokenKeeper.GetUserReferralQuota(suite.Ctx, creator.String())
+	suite.Require().True(found)
+	suite.Require().Equal(uint32(6), storedQuota.TotalSlots)
+	suite.Require().Equal(uint32(6), storedQuota.UsedSlots)
+
+	// Simulate weekly reset (after 7 days)
+	suite.Ctx = suite.Ctx.WithBlockTime(suite.Ctx.BlockTime().Add(7 * 24 * time.Hour))
+	suite.App.UserTokenKeeper.ProcessWeeklyReset(suite.Ctx)
+
+	// Verify quota expansion - should get +3 slots since fully utilized
+	updatedQuota, found := suite.App.UserTokenKeeper.GetUserReferralQuota(suite.Ctx, creator.String())
+	suite.Require().True(found)
+	suite.Require().Equal(uint32(9), updatedQuota.TotalSlots) // 6 + 3 expansion
+	suite.Require().Equal(uint32(6), updatedQuota.UsedSlots)  // NOT reset - carries over
+
+	// Verify available slots calculation
+	availableSlots := updatedQuota.TotalSlots - updatedQuota.UsedSlots
+	suite.Require().Equal(uint32(3), availableSlots) // 9 - 6 = 3 available
+}
+
+func (suite *MsgServerTestSuite) TestUserReferralQuotaPartialUtilization() {
+	// Setup fresh context for this test
+	suite.Setup()
+	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+
+	creator := suite.TestAccs[0]
+
+	// Create user referral quota with partial utilization
+	quota := types.UserReferralQuota{
+		User:          creator.String(),
+		TotalSlots:    6,
+		UsedSlots:     4, // Partially utilized (4 out of 6)
+		LastResetTime: suite.Ctx.BlockTime().Unix(),
+	}
+	suite.App.UserTokenKeeper.SetUserReferralQuota(suite.Ctx, quota)
+
+	// Simulate weekly reset (after 7 days)
+	suite.Ctx = suite.Ctx.WithBlockTime(suite.Ctx.BlockTime().Add(7 * 24 * time.Hour))
+	suite.App.UserTokenKeeper.ProcessWeeklyReset(suite.Ctx)
+
+	// Verify NO quota expansion since not fully utilized
+	updatedQuota, found := suite.App.UserTokenKeeper.GetUserReferralQuota(suite.Ctx, creator.String())
+	suite.Require().True(found)
+	suite.Require().Equal(uint32(6), updatedQuota.TotalSlots) // No change
+	suite.Require().Equal(uint32(4), updatedQuota.UsedSlots)  // NOT reset - carries over
+
+	// Verify available slots calculation
+	availableSlots := updatedQuota.TotalSlots - updatedQuota.UsedSlots
+	suite.Require().Equal(uint32(2), availableSlots) // 6 - 4 = 2 available
+}
+
+func (suite *MsgServerTestSuite) TestUserReferralQuotaMultipleExpansions() {
+	// Setup fresh context for this test
+	suite.Setup()
+	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+
+	creator := suite.TestAccs[0]
+
+	// Create initial user referral quota
+	quota := types.UserReferralQuota{
+		User:          creator.String(),
+		TotalSlots:    6,
+		UsedSlots:     6, // Fully utilized
+		LastResetTime: suite.Ctx.BlockTime().Unix(),
+	}
+	suite.App.UserTokenKeeper.SetUserReferralQuota(suite.Ctx, quota)
+
+	// First weekly reset - should expand
+	suite.Ctx = suite.Ctx.WithBlockTime(suite.Ctx.BlockTime().Add(7 * 24 * time.Hour))
+	suite.App.UserTokenKeeper.ProcessWeeklyReset(suite.Ctx)
+
+	// Verify first expansion
+	updatedQuota, found := suite.App.UserTokenKeeper.GetUserReferralQuota(suite.Ctx, creator.String())
+	suite.Require().True(found)
+	suite.Require().Equal(uint32(9), updatedQuota.TotalSlots) // 6 + 3
+	suite.Require().Equal(uint32(6), updatedQuota.UsedSlots)  // Carries over
+
+	// Simulate using all new slots (create 3 more programs to reach 9 used)
+	updatedQuota.UsedSlots = 9
+	suite.App.UserTokenKeeper.SetUserReferralQuota(suite.Ctx, updatedQuota)
+
+	// Second weekly reset - should expand again
+	suite.Ctx = suite.Ctx.WithBlockTime(suite.Ctx.BlockTime().Add(7 * 24 * time.Hour))
+	suite.App.UserTokenKeeper.ProcessWeeklyReset(suite.Ctx)
+
+	// Verify second expansion
+	finalQuota, found := suite.App.UserTokenKeeper.GetUserReferralQuota(suite.Ctx, creator.String())
+	suite.Require().True(found)
+	suite.Require().Equal(uint32(12), finalQuota.TotalSlots) // 9 + 3
+	suite.Require().Equal(uint32(9), finalQuota.UsedSlots)   // Carries over
+
+	// Verify available slots
+	availableSlots := finalQuota.TotalSlots - finalQuota.UsedSlots
+	suite.Require().Equal(uint32(3), availableSlots) // 12 - 9 = 3 available
+}
+
+func (suite *MsgServerTestSuite) TestCreateReferralProgramQuotaLimits() {
+	// Setup fresh context for this test
+	suite.Setup()
+	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+
+	creator := suite.TestAccs[0]
+
+	// Create user referral quota with limited slots
+	quota := types.UserReferralQuota{
+		User:          creator.String(),
+		TotalSlots:    3,
+		UsedSlots:     2, // 2 out of 3 used, 1 available
+		LastResetTime: suite.Ctx.BlockTime().Unix(),
+	}
+	suite.App.UserTokenKeeper.SetUserReferralQuota(suite.Ctx, quota)
+
+	// Should succeed - 1 slot available
+	tokenDenom1 := "factory/" + creator.String() + "/token1"
+	msgCreate1 := types.NewMsgCreateReferralProgram(creator.String(), tokenDenom1)
+	_, err := suite.msgServer.CreateReferralProgram(suite.Ctx, msgCreate1)
+	suite.Require().NoError(err)
+
+	// Verify quota updated
+	updatedQuota, found := suite.App.UserTokenKeeper.GetUserReferralQuota(suite.Ctx, creator.String())
+	suite.Require().True(found)
+	suite.Require().Equal(uint32(3), updatedQuota.TotalSlots)
+	suite.Require().Equal(uint32(3), updatedQuota.UsedSlots) // Now fully used
+
+	// Should fail - no slots available
+	tokenDenom2 := "factory/" + creator.String() + "/token2"
+	msgCreate2 := types.NewMsgCreateReferralProgram(creator.String(), tokenDenom2)
+	_, err = suite.msgServer.CreateReferralProgram(suite.Ctx, msgCreate2)
+	suite.Require().Error(err)
+	suite.Require().Contains(err.Error(), "no available referral slots remaining: 3/3 used")
+}
+
+func (suite *MsgServerTestSuite) TestCreateReferralProgramNewUserInitialization() {
+	// Setup fresh context for this test
+	suite.Setup()
+	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+
+	creator := suite.TestAccs[0]
+
+	// Verify no quota exists initially
+	_, found := suite.App.UserTokenKeeper.GetUserReferralQuota(suite.Ctx, creator.String())
+	suite.Require().False(found)
+
+	// Create first referral program - should initialize quota
+	tokenDenom := "factory/" + creator.String() + "/token1"
+	msgCreate := types.NewMsgCreateReferralProgram(creator.String(), tokenDenom)
+	_, err := suite.msgServer.CreateReferralProgram(suite.Ctx, msgCreate)
+	suite.Require().NoError(err)
+
+	// Verify quota was initialized and updated
+	quota, found := suite.App.UserTokenKeeper.GetUserReferralQuota(suite.Ctx, creator.String())
+	suite.Require().True(found)
+	suite.Require().Equal(uint32(3), quota.TotalSlots) // Initial 3 slots
+	suite.Require().Equal(uint32(1), quota.UsedSlots)  // 1 used for the program we just created
+
+	// Verify available slots
+	availableSlots := quota.TotalSlots - quota.UsedSlots
+	suite.Require().Equal(uint32(2), availableSlots) // 3 - 1 = 2 available
 }

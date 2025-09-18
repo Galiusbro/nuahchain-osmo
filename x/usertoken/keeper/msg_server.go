@@ -68,18 +68,22 @@ func (k msgServer) CreateUserToken(goCtx context.Context, msg *types.MsgCreateUs
 	}
 
 	// Create and store user token metadata
-	currentTime := ctx.BlockTime().Unix()
-	founderOfferExpiry := ctx.BlockTime().AddDate(0, 0, 7).Unix() // 7 days from creation
+	params := k.GetParams(ctx)
+	maxSupply := params.BondingCurveMaxSupply
 
 	userToken := types.UserToken{
-		Denom:                 denom,
-		Creator:               msg.Creator,
-		CurrentSupply:         totalSupply,
-		FounderTokensClaimed:  cosmossdk_io_math.NewInt(0),
-		LbpActive:             false,
-		LbpStartTime:          0,
-		CreatedAt:             currentTime,
-		FounderOfferExpiresAt: founderOfferExpiry,
+		Denom:                denom,
+		Creator:              msg.Creator,
+		Name:                 msg.Name,
+		Symbol:               msg.Symbol,
+		MaxSupply:            maxSupply,
+		CurrentSupply:        totalSupply,                                  // 100M tokens minted and distributed
+		ReserveRatio:         cosmossdk_io_math.LegacyNewDecWithPrec(5, 1), // 0.5
+		InitialPrice:         params.BondingCurveStartPrice,
+		FounderPercentage:    cosmossdk_io_math.LegacyNewDecWithPrec(1, 1), // 0.1 (10%)
+		FounderTokensClaimed: cosmossdk_io_math.NewInt(0),
+		LbpActive:            false,
+		LbpStartTime:         0,
 	}
 
 	k.SetUserToken(ctx, userToken)
@@ -299,9 +303,10 @@ func (k msgServer) BuyFounderTokens(goCtx context.Context, msg *types.MsgBuyFoun
 		return nil, fmt.Errorf("founder tokens already claimed")
 	}
 
-	// Check if founder offer has expired
+	// Check if founder offer has expired (7 days from token creation)
 	currentTime := ctx.BlockTime().Unix()
-	if currentTime >= userToken.FounderOfferExpiresAt {
+	founderOfferExpiry := ctx.BlockTime().AddDate(0, 0, 7).Unix() // 7 days from creation
+	if currentTime >= founderOfferExpiry {
 		// Founder offer has expired, automatically transfer tokens to AI CEO
 		err := k.TransferExpiredFounderTokensToAiCeo(ctx, msg.Denom)
 		if err != nil {
@@ -789,6 +794,29 @@ func (k msgServer) CreateReferralProgram(goCtx context.Context, msg *types.MsgCr
 		return nil, errors.Wrapf(types.ErrInvalidAddress, "invalid creator address: %s", err)
 	}
 
+	// Check if user has available quota slots
+	quota, found := k.GetUserReferralQuota(ctx, msg.Creator)
+	if !found {
+		// Initialize quota for new user with 3 slots
+		quota = types.UserReferralQuota{
+			User:          msg.Creator,
+			TotalSlots:    3,
+			UsedSlots:     0,
+			LastResetTime: ctx.BlockTime().Unix(),
+		}
+	}
+
+	// Check if user has available slots
+	if quota.UsedSlots >= quota.TotalSlots {
+		return nil, errors.Wrapf(types.ErrInvalidRequest, "no available referral slots remaining: %d/%d used", quota.UsedSlots, quota.TotalSlots)
+	}
+
+	// Check if referral program already exists for this token
+	_, found = k.GetReferralProgram(ctx, msg.TokenDenom)
+	if found {
+		return nil, errors.Wrapf(types.ErrInvalidRequest, "referral program already exists for token: %s", msg.TokenDenom)
+	}
+
 	// Create referral program
 	program := types.ReferralProgram{
 		Creator:        msg.Creator,
@@ -798,6 +826,10 @@ func (k msgServer) CreateReferralProgram(goCtx context.Context, msg *types.MsgCr
 		LastResetTime:  ctx.BlockTime().Unix(),
 		IsActive:       true,
 	}
+
+	// Update user quota
+	quota.UsedSlots++
+	k.SetUserReferralQuota(ctx, quota)
 
 	// Store the program
 	k.SetReferralProgram(ctx, program)
@@ -829,6 +861,11 @@ func (k msgServer) ActivateReferral(goCtx context.Context, msg *types.MsgActivat
 		return nil, errors.Wrapf(types.ErrInvalidRequest, "referral already activated for this user")
 	}
 
+	// Check if program has available links
+	if program.UsedLinks >= program.AvailableLinks {
+		return nil, errors.Wrapf(types.ErrInvalidRequest, "no available referral links remaining")
+	}
+
 	// Create activation record
 	activation := types.ReferralActivation{
 		ReferralCode:   msg.ReferralCode,
@@ -844,6 +881,37 @@ func (k msgServer) ActivateReferral(goCtx context.Context, msg *types.MsgActivat
 	// Update program usage
 	program.UsedLinks++
 	k.SetReferralProgram(ctx, program)
+
+	// Reward both participants with 1 token each
+	rewardAmount := cosmossdk_io_math.NewInt(1000000) // 1 token with 6 decimals
+	rewardCoin := sdk.NewCoin(program.TokenDenom, rewardAmount)
+
+	// Mint tokens for rewards (2 tokens total)
+	totalRewardAmount := rewardAmount.Mul(cosmossdk_io_math.NewInt(2)) // 2 tokens
+	totalRewardCoin := sdk.NewCoin(program.TokenDenom, totalRewardAmount)
+	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(totalRewardCoin)); err != nil {
+		return nil, errors.Wrapf(err, "failed to mint reward coins")
+	}
+
+	// Send reward to referrer
+	referrerAddr, err := sdk.AccAddressFromBech32(activation.Referrer)
+	if err != nil {
+		return nil, errors.Wrapf(types.ErrInvalidAddress, "invalid referrer address: %s", err)
+	}
+
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, referrerAddr, sdk.NewCoins(rewardCoin)); err != nil {
+		return nil, errors.Wrapf(err, "failed to send reward coins to referrer")
+	}
+
+	// Send reward to referee
+	refereeAddr, err := sdk.AccAddressFromBech32(activation.Referee)
+	if err != nil {
+		return nil, errors.Wrapf(types.ErrInvalidAddress, "invalid referee address: %s", err)
+	}
+
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, refereeAddr, sdk.NewCoins(rewardCoin)); err != nil {
+		return nil, errors.Wrapf(err, "failed to send reward coins to referee")
+	}
 
 	return &types.MsgActivateReferralResponse{}, nil
 }
@@ -923,9 +991,10 @@ func (k msgServer) TransferExpiredFounderTokensToAiCeo(ctx sdk.Context, denom st
 		return fmt.Errorf("user token not found: %s", denom)
 	}
 
-	// Check if founder offer has expired
+	// Check if founder offer has expired (7 days from token creation)
 	currentTime := ctx.BlockTime().Unix()
-	if currentTime < userToken.FounderOfferExpiresAt {
+	founderOfferExpiry := ctx.BlockTime().AddDate(0, 0, 7).Unix() // 7 days from creation
+	if currentTime < founderOfferExpiry {
 		return fmt.Errorf("founder offer has not expired yet")
 	}
 
@@ -964,7 +1033,7 @@ func (k msgServer) TransferExpiredFounderTokensToAiCeo(ctx sdk.Context, denom st
 			sdk.NewAttribute("ai_ceo_wallet", params.AiCeoWallet),
 			sdk.NewAttribute("amount", founderOfferAmount.String()),
 			sdk.NewAttribute("reason", "founder_offer_expired"),
-			sdk.NewAttribute("expired_at", fmt.Sprintf("%d", userToken.FounderOfferExpiresAt)),
+			sdk.NewAttribute("expired_at", fmt.Sprintf("%d", founderOfferExpiry)),
 		),
 	)
 
