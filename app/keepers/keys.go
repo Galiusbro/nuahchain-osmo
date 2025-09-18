@@ -8,6 +8,7 @@ import (
 
 	protorevtypes "github.com/osmosis-labs/osmosis/v30/x/protorev/types"
 	twaptypes "github.com/osmosis-labs/osmosis/v30/x/twap/types"
+	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
 )
 
 // GenerateKeys generates new keys (KV Store, Transient store, and memory store).
@@ -20,7 +21,7 @@ func (appKeepers *AppKeepers) GenerateKeys() {
 	appKeepers.tkeys = storetypes.NewTransientStoreKeys(paramstypes.TStoreKey, twaptypes.TransientStoreKey, protorevtypes.TransientStoreKey)
 
 	// MemKeys are for information that is stored only in RAM.
-	appKeepers.memKeys = storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
+	appKeepers.memKeys = storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey, usertokentypes.MemStoreKey)
 }
 
 // GetSubspace gets existing substore from keeper.

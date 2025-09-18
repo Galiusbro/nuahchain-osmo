@@ -68,6 +68,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/txfees"
 	txfeesclient "github.com/osmosis-labs/osmosis/v30/x/txfees/client"
 	"github.com/osmosis-labs/osmosis/v30/x/usdoracle"
+	"github.com/osmosis-labs/osmosis/v30/x/usertoken"
 	valsetprefmodule "github.com/osmosis-labs/osmosis/v30/x/valset-pref/valpref-module"
 	"github.com/osmosis-labs/osmosis/x/epochs"
 	ibc_hooks "github.com/osmosis-labs/osmosis/x/ibc-hooks"
@@ -143,6 +144,7 @@ func NewAppModuleBasics(cdc codec.Codec) module.BasicManager {
 		limitedaccount.AppModuleBasic{},
 		pegkeeper.NewAppModuleBasic(cdc),
 		usdoracle.AppModuleBasic{},
+		usertoken.AppModuleBasic{},
 	)
 }
 
@@ -214,4 +216,5 @@ var AppModuleBasics = module.NewBasicManager(
 	limitedaccount.AppModuleBasic{},
 	pegkeeper.AppModuleBasic{},
 	usdoracle.AppModuleBasic{},
+	usertoken.AppModuleBasic{},
 )

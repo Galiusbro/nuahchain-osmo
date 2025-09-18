@@ -1033,5 +1033,6 @@ func KVStoreKeys() []string {
 		usdoracletypes.StoreKey,
 		exchangetypes.StoreKey,
 		pegkeepertypes.StoreKey,
+		usertokentypes.StoreKey,
 	}
 }

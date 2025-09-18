@@ -17,6 +17,8 @@ import (
 	pegkeepertypes "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/types"
 	"github.com/osmosis-labs/osmosis/v30/x/usdoracle"
 	usdoracletypes "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types"
+	"github.com/osmosis-labs/osmosis/v30/x/usertoken"
+	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
 	exchangetypes "github.com/osmosis-labs/osmosis/v30/x/exchange/types"
 
 	ibcwasm "github.com/cosmos/ibc-go/modules/light-clients/08-wasm"
@@ -154,6 +156,7 @@ var moduleAccountPermissions = map[string][]string{
 	limitedaccounttypes.ModuleName:           nil,
 	usdoracletypes.ModuleName:                nil,
 	pegkeepertypes.ModuleName:                nil,
+	usertokentypes.ModuleName:                {authtypes.Minter, authtypes.Burner},
 	exchangetypes.ModuleName:                 {authtypes.Minter, authtypes.Burner},
 }
 
@@ -226,6 +229,7 @@ func appModules(
 		limitedaccount.NewAppModule(appCodec, *app.LimitedAccountKeeper),
 		usdoracle.NewAppModule(appCodec, *app.USDOracleKeeper),
 		pegkeeper.NewAppModule(appCodec, *app.PegKeeperKeeper),
+		usertoken.NewAppModule(appCodec, *app.UserTokenKeeper),
 	}
 }
 
@@ -322,6 +326,7 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		packetforwardtypes.ModuleName,
 		cosmwasmpooltypes.ModuleName,
 		auctiontypes.ModuleName,
+		usertokentypes.ModuleName,
 		usdoracletypes.ModuleName,
 		pegkeepertypes.ModuleName,
 	}
