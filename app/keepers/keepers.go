@@ -640,6 +640,7 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 		appCodec,
 		appKeepers.keys[usertokentypes.StoreKey],
 		appKeepers.keys[usertokentypes.MemStoreKey],
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 		*appKeepers.TokenFactoryKeeper,
 		appKeepers.BankKeeper,
 		appKeepers.AccountKeeper,
