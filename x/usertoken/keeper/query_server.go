@@ -134,3 +134,30 @@ func (q queryServer) ReferralPrograms(goCtx context.Context, req *types.QueryRef
 		ReferralPrograms: referralPrograms,
 	}, nil
 }
+
+func (q queryServer) ReferralActivations(goCtx context.Context, req *types.QueryReferralActivationsRequest) (*types.QueryReferralActivationsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	if req.User == "" {
+		return nil, status.Error(codes.InvalidArgument, "user cannot be empty")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Get all referral activations from store
+	allActivations := q.GetAllReferralActivations(ctx)
+	
+	// Filter by user if specified
+	var referralActivations []*types.ReferralActivation
+	for _, activation := range allActivations {
+		if activation.Referee == req.User {
+			referralActivations = append(referralActivations, activation)
+		}
+	}
+
+	return &types.QueryReferralActivationsResponse{
+		ReferralActivations: referralActivations,
+	}, nil
+}

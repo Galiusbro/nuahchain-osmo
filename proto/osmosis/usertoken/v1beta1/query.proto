@@ -31,6 +31,11 @@ service Query {
     option (google.api.http).get = "/osmosis/usertoken/v1beta1/bonding_curve_price/{denom}";
   }
 
+  // ReferralProgram queries a referral program by token denom.
+  rpc ReferralProgram(QueryReferralProgramRequest) returns (QueryReferralProgramResponse) {
+    option (google.api.http).get = "/osmosis/usertoken/v1beta1/referral_program/{token_denom}";
+  }
+
   // ReferralPrograms queries all referral programs.
   rpc ReferralPrograms(QueryReferralProgramsRequest) returns (QueryReferralProgramsResponse) {
     option (google.api.http).get = "/osmosis/usertoken/v1beta1/referral_programs";
@@ -83,6 +88,16 @@ message QueryBondingCurvePriceResponse {
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
+}
+
+// QueryReferralProgramRequest is request type for the Query/ReferralProgram RPC method.
+message QueryReferralProgramRequest {
+  string token_denom = 1;
+}
+
+// QueryReferralProgramResponse is response type for the Query/ReferralProgram RPC method.
+message QueryReferralProgramResponse {
+  ReferralProgram referral_program = 1;
 }
 
 // QueryReferralProgramsRequest is request type for the Query/ReferralPrograms RPC method.

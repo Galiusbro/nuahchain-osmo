@@ -6,6 +6,7 @@ import "amino/amino.proto";
 import "cosmos/msg/v1/msg.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "osmosis/usertoken/v1beta1/genesis.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v30/x/usertoken/types";
 
@@ -25,11 +26,17 @@ service Msg {
   // ClaimFounderTokens claims founder tokens
   rpc ClaimFounderTokens(MsgClaimFounderTokens) returns (MsgClaimFounderTokensResponse);
 
+  // BuyFounderTokens buys founder tokens
+  rpc BuyFounderTokens(MsgBuyFounderTokens) returns (MsgBuyFounderTokensResponse);
+
   // StartLBP starts LBP for a token
   rpc StartLBP(MsgStartLBP) returns (MsgStartLBPResponse);
 
   // CreateVestingAccount creates a vesting account for token distribution
   rpc CreateVestingAccount(MsgCreateVestingAccount) returns (MsgCreateVestingAccountResponse);
+
+  // UpdateParams updates the module parameters
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
 
   // CreateReferralProgram creates a new referral program
   rpc CreateReferralProgram(MsgCreateReferralProgram) returns (MsgCreateReferralProgramResponse);
@@ -44,13 +51,10 @@ message MsgCreateUserToken {
   option (amino.name) = "osmosis/usertoken/create-user-token";
 
   string creator = 1;
-  string name = 2;
-  string symbol = 3;
-  string description = 4;
-  string max_supply = 5 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
-  string reserve_ratio = 6 [(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
-  string initial_price = 7 [(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
-  string founder_percentage = 8 [(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
+  string subdenom = 2;
+  string name = 3;
+  string symbol = 4;
+  uint32 decimals = 5;
 }
 
 // MsgCreateUserTokenResponse defines the response structure for executing a MsgCreateUserToken message.
@@ -103,6 +107,20 @@ message MsgClaimFounderTokens {
 // MsgClaimFounderTokensResponse defines the response structure for executing a MsgClaimFounderTokens message.
 message MsgClaimFounderTokensResponse {}
 
+// MsgBuyFounderTokens buys founder tokens
+message MsgBuyFounderTokens {
+  option (cosmos.msg.v1.signer) = "buyer";
+  option (amino.name) = "osmosis/usertoken/buy-founder-tokens";
+
+  string buyer = 1;
+  string denom = 2;
+}
+
+// MsgBuyFounderTokensResponse defines the response structure for executing a MsgBuyFounderTokens message.
+message MsgBuyFounderTokensResponse {
+  string tokens_received = 1 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+}
+
 // MsgStartLBP starts LBP for a token
 message MsgStartLBP {
   option (cosmos.msg.v1.signer) = "creator";
@@ -130,23 +148,30 @@ message MsgCreateVestingAccount {
 // MsgCreateVestingAccountResponse defines the response structure for executing a MsgCreateVestingAccount message.
 message MsgCreateVestingAccountResponse {}
 
+// MsgUpdateParams updates the module parameters
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/usertoken/update-params";
+
+  string authority = 1;
+  Params params = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a MsgUpdateParams message.
+message MsgUpdateParamsResponse {}
+
 // MsgCreateReferralProgram creates a new referral program
 message MsgCreateReferralProgram {
   option (cosmos.msg.v1.signer) = "creator";
   option (amino.name) = "osmosis/usertoken/create-referral-program";
 
   string creator = 1;
-  string name = 2;
-  string description = 3;
-  string reward_percentage = 4 [
-    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-    (gogoproto.nullable) = false
-  ];
+  string token_denom = 2;
 }
 
 // MsgCreateReferralProgramResponse defines the response structure for executing a MsgCreateReferralProgram message.
 message MsgCreateReferralProgramResponse {
-  string program_id = 1;
+  string referral_code = 1;
 }
 
 // MsgActivateReferral activates a referral
@@ -154,9 +179,8 @@ message MsgActivateReferral {
   option (cosmos.msg.v1.signer) = "referee";
   option (amino.name) = "osmosis/usertoken/activate-referral";
 
-  string referee = 1;
-  string referrer = 2;
-  string program_id = 3;
+  string referral_code = 1;
+  string referee = 2;
 }
 
 // MsgActivateReferralResponse defines the response structure for executing a MsgActivateReferral message.
