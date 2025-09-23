@@ -85,7 +85,7 @@ pools:
       denom: factory/nuah14k38ajalnef2yauznt4q7ep893djkl4vm54mcs/mytoken2
     weight: "1073741824000000"            # 50% weight
   - token:
-      amount: "1000000"                    # NUAH liquidity  
+      amount: "1000000"                    # NUAH liquidity
       denom: unuah
     weight: "1073741824000000"            # 50% weight
   pool_params:
@@ -189,7 +189,7 @@ Pools use the **Constant Product Formula**: `x * y = k`
 
 Where:
 - `x` = Amount of token A
-- `y` = Amount of token B  
+- `y` = Amount of token B
 - `k` = Constant product
 
 **Price Calculation:**
@@ -342,7 +342,7 @@ Fee_APR = (Daily_Fees * 365) / TVL * 100%
 
 1. **Fee Tuning**
    - Low fees (0.05-0.1%): High-volume pairs
-   - Medium fees (0.3%): Standard pairs  
+   - Medium fees (0.3%): Standard pairs
    - High fees (1%+): Exotic/risky pairs
 
 2. **Liquidity Management**
@@ -378,7 +378,7 @@ async function swapTokens(amount, minOut) {
       tokenOutMinAmount: minOut
     }
   };
-  
+
   return await client.signAndBroadcast(userAddress, [swapMsg], fee);
 }
 ```
@@ -388,15 +388,15 @@ async function swapTokens(amount, minOut) {
 ```javascript
 async function getTokenPrice(poolId) {
   const pool = await client.query.gamm.pool({ poolId });
-  
+
   const nuahAmount = pool.pool.poolAssets.find(
     asset => asset.token.denom === "unuah"
   ).token.amount;
-  
+
   const tokenAmount = pool.pool.poolAssets.find(
     asset => asset.token.denom.includes("factory")
   ).token.amount;
-  
+
   return nuahAmount / tokenAmount; // Price in NUAH
 }
 ```
@@ -406,7 +406,7 @@ async function getTokenPrice(poolId) {
 ### Flash Loans
 *Coming soon - ability to borrow from pools within single transaction*
 
-### Concentrated Liquidity  
+### Concentrated Liquidity
 *Future feature - capital-efficient liquidity provision*
 
 ### Pool Governance
@@ -434,7 +434,7 @@ nuahd query poolmanager estimate-swap-exact-amount-in \
   --swap-route-pool-ids=1 \
   --swap-route-denoms=OUTPUT_DENOM
 
-# Pool parameters  
+# Pool parameters
 nuahd query gamm pool-params 1
 
 # Total pool shares
@@ -451,7 +451,7 @@ nuahd tx poolmanager swap-exact-amount-in AMOUNT MIN_OUT \
   --swap-route-pool-ids=POOL_ID \
   --swap-route-denoms=OUTPUT_DENOM
 
-# Swap exact amount out  
+# Swap exact amount out
 nuahd tx poolmanager swap-exact-amount-out MAX_IN AMOUNT_OUT \
   --swap-route-pool-ids=POOL_ID \
   --swap-route-denoms=INPUT_DENOM
@@ -466,16 +466,16 @@ nuahd tx gamm exit-pool POOL_ID LP_SHARES "MIN1,MIN2"
 ## 🎉 Success Story: Our Pool
 
 **What We Achieved:**
-✅ **Created Pool ID 1** with 1M NUAH + 500K MyToken2 liquidity  
-✅ **Executed 3 successful trades** with automatic price updates  
-✅ **Generated trading fees** for liquidity providers  
-✅ **Demonstrated price discovery** (2.0 → 2.11 NUAH per token)  
-✅ **Proved bidirectional trading** (buy & sell functionality)  
-✅ **Established market making** infrastructure  
+✅ **Created Pool ID 1** with 1M NUAH + 500K MyToken2 liquidity
+✅ **Executed 3 successful trades** with automatic price updates
+✅ **Generated trading fees** for liquidity providers
+✅ **Demonstrated price discovery** (2.0 → 2.11 NUAH per token)
+✅ **Proved bidirectional trading** (buy & sell functionality)
+✅ **Established market making** infrastructure
 
 **Pool Performance:**
 - **Initial TVL**: ~$2,000 equivalent
-- **Trading Volume**: 160,000+ unuah 
+- **Trading Volume**: 160,000+ unuah
 - **Fee Generation**: ~480 unuah earned
 - **Price Stability**: Minimal slippage
 - **Uptime**: 100% availability
@@ -483,7 +483,7 @@ nuahd tx gamm exit-pool POOL_ID LP_SHARES "MIN1,MIN2"
 ## 🌟 Best Practices Summary
 
 1. **Start Small**: Test with minimal amounts first
-2. **Balanced Ratios**: Use appropriate weight distributions  
+2. **Balanced Ratios**: Use appropriate weight distributions
 3. **Reasonable Fees**: 0.1-1% depending on pair volatility
 4. **Monitor Health**: Track metrics and rebalance as needed
 5. **Risk Management**: Understand impermanent loss implications
@@ -496,7 +496,7 @@ nuahd tx gamm exit-pool POOL_ID LP_SHARES "MIN1,MIN2"
 
 **Next Steps:**
 - Monitor pool performance
-- Optimize fee structures  
+- Optimize fee structures
 - Add more liquidity pairs
 - Build trading interfaces
 - Integrate with DeFi protocols

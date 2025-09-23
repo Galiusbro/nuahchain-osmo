@@ -1,0 +1,297 @@
+Вот максимально подробная документация для деплоя, управления и тестирования Mars Protocol в формате README.md, полностью на основе фактической истории cli-команд и workflow из вашего файла истории. Отражены все реальные шаги и best practice из чата.[9]
+
+***
+
+# Mars Protocol — Деплой и эксплуатация
+
+Mars Protocol — современный протокол для DeFi управления активами, кредитования и автоматизации на Cosmos SDK с поддержкой CosmWasm-контрактов.
+
+***
+
+## Содержание
+
+- Пререквизиты
+- Установка и сборка
+- Сборка WASM-контрактов (Rust-optimizer)
+- Деплой и инициализация через Yarn
+- Основные команды управления
+- Проведение тестов
+- Использование CLI-команд для работы с сетью
+- Проверка и диагностика
+- Типовые проблемы и их решение
+
+***
+
+## Пререквизиты
+
+- Node.js (рекомендовано последняя LTS)
+- Yarn (`npm i -g yarn`)
+- Docker (для сборки wasm-контрактов и run-платформы)
+- Rust + cargo-make (`cargo install cargo-make`)
+- Git
+- MacOS/Linux (ARM/Intel) или Windows
+
+***
+
+## Установка и сборка
+
+```bash
+# Клонирование репозитория
+git clone <url-репозитория>
+cd <project-folder>
+
+# Установка всех зависимостей (только yarn!)
+yarn install
+
+# Сборка TypeScript/JS-скриптов
+yarn build
+```
+***
+
+## Сборка WASM-контрактов (Rust)
+
+```bash
+# Сборка всех wasm-контрактов через rust-optimizer (cargo-make)
+cargo make rust-optimizer
+```
+- После сборки артефакты с sha256 хешами появятся в каталоге build/artifacts.
+- Для ARM-систем предусмотрен отдельный профиль и сборка внутри Docker-контейнера.
+
+***
+
+## Деплой и инициализация: весь workflow на Yarn
+
+**Весь деплой, работа с сетью и автотесты производить исключительно через yarn-команды!**
+
+| Операция               | Yarn команда                   | Краткое описание                         |
+|------------------------|-------------------------------|-------------------------------------------|
+| Установка зависимостей | `yarn install`                | Все JS/TS-пакеты                         |
+| Сборка проекта         | `yarn build`                  | Сборка deployment/interaction скриптов    |
+| Деплой devnet          | `yarn deployosmosis-devnet`   | Деплой wasm-контрактов в devnet           |
+| Автотесты              | `yarn test`                   | Прогон всех автотестов                    |
+
+**Пример полного цикла:**
+
+```bash
+yarn install
+cargo make rust-optimizer
+yarn build
+yarn deployosmosis-devnet
+yarn test
+```
+***
+
+## Основные команды CLI для интеграции и проверки
+
+- **Ключи аккаунтов, балансы:**
+    ```
+    .buildnuahd keys list
+    .buildnuahd query bank balances <addr>
+    ```
+
+- **Инфо о node и chain:**
+    ```
+    .buildnuahd status
+    .buildnuahd status | jq .NodeInfo.network
+    ```
+
+- **Деплой, инициализация и управление контрактами (через скрипты + CLI):**
+    ```
+    yarn deployosmosis-devnet        # деплой-контрактов
+    .buildnuahd tx wasm instantiate <code_id> --label <label> ...
+    .buildnuahd query wasm list-contract-by-code <code_id>
+    ```
+
+- **Примеры транзакций на контракты:**
+    ```
+    .buildnuahd tx wasm execute <contract_address> deposit --amount 1000000unuah --from <from> ...
+    .buildnuahd tx wasm execute <contract_address> borrowdenomunuah,amount100000 --from <from> ...
+    ```
+
+- **Работа с Address Provider и Incentives:**
+    ```
+    .buildnuahd tx wasm execute <addr_provider_address> setaddressaddresstypeincentives,address<incentives_address> --from deployer ...
+    .buildnuahd query wasm contract-state smart <addr_provider_address> alladdresses
+    ```
+
+***
+
+## Тестирование и диагностика
+
+- Для проверки сетевой конфигурации, работы аккаунтов, состояния контрактов:
+    ```
+    yarn test
+    .buildnuahd query bank balances <address>
+    ```
+
+- Для unit/integration-тестов Rust из директории контрактов:
+    ```
+    cargo test
+    ```
+
+***
+
+## Работа с genesis, сетью и node
+
+- Инициализация сети:
+    ```
+    .buildnuahd init test-node --chain-id nuahchain-1
+    ```
+- Добавление начальных аккаунтов:
+    ```
+    .buildnuahd add-genesis-account <address> 10000000000unuah
+    ```
+- Запуск сети:
+    ```
+    .buildnuahd start --rpc.laddr tcp://0.0.0.0:26657
+    ```
+
+***
+
+## Примечания и best practice
+
+- Не использовать npm, запуск только через yarn.
+- Все параметры деплоя, адреса и codeId контракта фиксировать в текстовом файле (`marscontractsaddresses.txt`).
+- При обновлении config-и network genesis редактировать JSON через jq или редактор.
+- Для ARM-систем может понадобиться отдельный Docker-профиль для сборки wasm.
+
+***
+
+## Типовые проблемы
+
+- Ошибки сборки wasm — убедитесь в правильной настройке Rust (в т.ч. через docker).
+- Скрипты не работают — убедитесь, что запуск строго через yarn.
+- Ошибки с контрактными вызовами — проверьте правильность codeId, адресов и параметров в командах.
+
+***
+
+## Пример деплоя и работы с контрактом (Red Bank):
+
+```bash
+# Инициализация пары активов
+.buildnuahd tx wasm execute <redbank_address> initassetdenomunuah,paramsreservefactor0.1,... --from deployer ...
+
+# Депозит
+.buildnuahd tx wasm execute <redbank_address> deposit --amount 1000000unuah --from deployer ...
+
+# Borrow
+.buildnuahd tx wasm execute <redbank_address> borrowdenomunuah,amount1000000 --from deployer ...
+```
+***
+
+## Источник: cli-лог-файл и рабочая история команды на devnet, тестаменты и скрипты.[9]
+
+***
+
+Этот README.md можно использовать как полноценный справочник для инженера, разворачивающего или тестирующего Mars Protocol на своем devnet или локальной инфраструктуре. Всё workflow на yarn, все контрагенты, деплой и тесты строго по стандарту истории, доказанному реальным логом cli-команд.[9]
+
+[1](https://github.com/mars-protocol/whitepaper)
+[2](https://docs.marsprotocol.io)
+[3](https://docs.cosmos.network)
+[4](https://evm.cosmos.network/docs/sdk/v0.47/build)
+[5](https://docs.thorchain.org/technology/cosmos-sdk)
+[6](https://docs.wardenprotocol.org/learn/cosmos-modules)
+[7](https://interchaininfo.zone/resources/the-neutron-mars-protocol-acquisition-the-full-scoop)
+[8](https://members.delphidigital.io/reports/cosmos-the-evolution-of-ibc)
+[9](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/76505018/99d09b36-025e-414f-a887-307c6945e0f5/history.txt)
+
+Вот полный подробный тестовый сценарий займа (borrow) в Mars Protocol через Red Bank, по истории команд из лога :[1]
+
+***
+
+# Интеграционный тест займа через Red Bank (Mars Protocol)
+
+## 1. Предварительные шаги
+
+- Контракты Mars Protocol и Red Bank должны быть уже задеплоены и инициализированы.
+- Для теста применяется denom `unuah`.
+
+***
+
+## 2. Инициализация рынка и параметров актива
+
+```bash
+.buildnuahd tx wasm execute <redbank_address> \
+  initassetdenomunuah,paramsreservefactor0.1,interestratemodellinearoptimalutilizationrate0.8,base0.0,slope10.1,slope23.0,borrowenabledtrue,depositenabledtrue,liquidationthreshold0.8,liquidationbonus0.1,maxloantovalue0.7,depositcap1000000000000,closefactor0.5 \
+  --from deployer --keyring-backend test --chain-id nuahchain-test --gas auto --gas-adjustment 1.5 --fees 600unuah --yes
+```
+Параметры: разрешены депозиты и займы, настроенные лимиты, ставки и резерв.[1]
+
+***
+
+## 3. Депозит средств
+
+```bash
+.buildnuahd tx wasm execute <redbank_address> \
+  deposit --amount 1000000unuah \
+  --from deployer --keyring-backend test --chain-id nuahchain-test --gas auto --gas-adjustment 1.5 --fees 600unuah --yes
+```
+Пользователь вносит депозит на сумму 1,000,000 unuah (можно сделать несколько депонентов).[1]
+
+***
+
+## 4. Проверка баланса депонента
+
+```bash
+.buildnuahd query bank balances <deployer_address>
+```
+Убедиться, что средства ушли с аккаунта и отразились на контракте Red Bank.[1]
+
+***
+
+## 5. Совершение займа (borrow)
+
+```bash
+.buildnuahd tx wasm execute <redbank_address> \
+  borrowdenomunuah,amount500000 \
+  --from deployer --keyring-backend test --chain-id nuahchain-test --gas auto --gas-adjustment 1.5 --fees 3000unuah --yes
+```
+Пользователь берет заем на 500,000 unuah, используя залог из депозита.[1]
+
+***
+
+## 6. Проверка баланса и состояния кредита
+
+```bash
+.buildnuahd query bank balances <deployer_address>
+.buildnuahd query wasm contract-state smart <redbank_address> marketdenomunuah
+```
+Проверить, что средства заема поступили, и посмотреть параметры/статус на контракте.[1]
+
+***
+
+## 7. Погашение займа
+
+```bash
+.buildnuahd tx wasm execute <redbank_address> \
+  repaydenomunuah --amount 500000unuah \
+  --from deployer --keyring-backend test --chain-id nuahchain-test --gas auto --gas-adjustment 1.5 --fees 3000unuah --yes
+```
+Клиент возвращает заем.[1]
+
+***
+
+## 8. Завершение и получение баланса после погашения
+
+```bash
+.buildnuahd query bank balances <deployer_address>
+```
+Финальный баланс должен отразиться корректно, заем считается закрытым.[1]
+
+***
+
+## 9. Проверка health factor
+
+- При попытке вывода средств/withdraw обязательно убедитесь, что health factor > 1 (иначе контракт не даст вывести депозит):
+```bash
+.buildnuahd tx wasm execute <redbank_address> \
+  withdrawdenomunuah,amount1000000 \
+  --from deployer --keyring-backend test --chain-id nuahchain-test --gas auto --gas-adjustment 1.5 --fees 3000unuah --yes
+```
+Контракт может отклонить транзакцию по риску.[1]
+
+***
+
+Весь цикл теста можно многократно повторять с разными параметрами займа, депозита или asset params, используя те же команды. Каждый шаг логируется и диагностируется через .buildnuahd и query/messages.[1]
+
+[1](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/76505018/99d09b36-025e-414f-a887-307c6945e0f5/history.txt)

@@ -1,0 +1,215 @@
+Here is the most detailed, practical guide to deploying, operating, and testing Mars Protocol based on the actual CLI history and workflow from your session. It reflects real steps and best practices proven by logs.
+
+---
+
+# Mars Protocol — Deploy and Operations (English)
+
+Mars Protocol is a modern DeFi protocol for asset management, lending, and automation on Cosmos SDK with CosmWasm smart contracts.
+
+---
+
+## Table of Contents
+- Prerequisites
+- Install and Build
+- Build WASM Contracts (Rust optimizer)
+- Deploy and Initialize via Yarn
+- Core Management Commands
+- Testing
+- Using CLI with the network
+- Verification and Diagnostics
+- Typical Issues and Fixes
+
+---
+
+## Prerequisites
+- Node.js (latest LTS recommended)
+- Yarn (npm i -g yarn)
+- Docker (for WASM builds and runtime)
+- Rust + cargo-make (cargo install cargo-make)
+- Git
+- macOS/Linux (ARM/Intel) or Windows
+
+---
+
+## Install and Build
+```bash
+# Clone the repository
+git clone <repo-url>
+cd <project-folder>
+
+# Install dependencies (use yarn only)
+yarn install
+
+# Build TS/JS scripts
+yarn build
+```
+
+---
+
+## Build WASM Contracts (Rust)
+```bash
+# Build all wasm contracts using rust-optimizer (cargo-make)
+cargo make rust-optimizer
+```
+Notes:
+- After build, artifacts with sha256 hashes appear in build/artifacts.
+- For ARM systems, use the dedicated profile and Docker-based build.
+
+---
+
+## Deploy and Initialize: Yarn-first workflow
+Always use yarn commands for deployment, network work, and tests.
+
+| Operation               | Yarn command                | Description                          |
+|-------------------------|-----------------------------|--------------------------------------|
+| Install deps            | `yarn install`              | All JS/TS packages                   |
+| Build project           | `yarn build`                | Build deployment/interaction scripts |
+| Deploy to devnet        | `yarn deployosmosis-devnet` | Deploy wasm contracts to devnet      |
+| Run tests               | `yarn test`                 | Run all tests                        |
+
+Example end-to-end cycle:
+```bash
+yarn install
+cargo make rust-optimizer
+yarn build
+yarn deployosmosis-devnet
+yarn test
+```
+
+---
+
+## Core CLI Commands for Integration and Checks
+- Accounts and balances
+```bash
+./build/nuahd keys list
+./build/nuahd query bank balances <address>
+```
+
+- Node and chain info
+```bash
+./build/nuahd status
+./build/nuahd status | jq .NodeInfo.network
+```
+
+- Contracts deploy/instantiate/manage (via scripts + CLI)
+```bash
+yarn deployosmosis-devnet
+./build/nuahd tx wasm instantiate <code_id> --label <label> ...
+./build/nuahd query wasm list-contract-by-code <code_id>
+```
+
+- Contract transaction examples
+```bash
+./build/nuahd tx wasm execute <contract_address> deposit --amount 1000000unuah --from <from> ...
+./build/nuahd tx wasm execute <contract_address> borrow denom unuah, amount 100000 ...
+```
+
+- Address Provider / Incentives examples
+```bash
+./build/nuahd tx wasm execute <addr_provider> setaddress address_type incentives, address <incentives_addr> --from deployer ...
+./build/nuahd query wasm contract-state smart <addr_provider> alladdresses
+```
+
+---
+
+## Testing and Diagnostics
+- To check network config, accounts, contract state:
+```bash
+yarn test
+./build/nuahd query bank balances <address>
+```
+
+- Rust unit/integration tests from contracts directory:
+```bash
+cargo test
+```
+
+---
+
+## Genesis, Network and Node
+- Initialize a network
+```bash
+./build/nuahd init test-node --chain-id nuahchain-1
+```
+- Add genesis accounts
+```bash
+./build/nuahd add-genesis-account <address> 10000000000unuah
+```
+- Start the node
+```bash
+./build/nuahd start --rpc.laddr tcp://0.0.0.0:26657
+```
+
+---
+
+## Notes and Best Practices
+- Do not use npm; use yarn only.
+- Record all deploy parameters, addresses and code IDs in a text file (e.g., marscontractsaddresses.txt).
+- When updating config and network genesis, edit JSON via jq or a proper editor.
+- On ARM hosts, you may need a dedicated Docker profile for WASM builds.
+
+---
+
+## Typical Issues
+- WASM build errors: verify Rust toolchain and Docker setup.
+- Scripts failing: ensure you run via yarn only.
+- Contract call errors: re-check code_id, addresses, and message parameters.
+
+---
+
+## Example: Red Bank (Mars Protocol) quick flow
+
+1) Initialize asset/market params
+```bash
+./build/nuahd tx wasm execute <redbank_address> \
+  initasset denom unuah, params reserve_factor 0.1, interest_rate_model linear, optimal_utilization_rate 0.8, base 0.0, slope1 0.1, slope2 3.0, borrow_enabled true, deposit_enabled true, liquidation_threshold 0.8, liquidation_bonus 0.1, max_loan_to_value 0.7, deposit_cap 1000000000000, close_factor 0.5 \
+  --from deployer --keyring-backend test --chain-id nuahchain-test --gas auto --gas-adjustment 1.5 --fees 600unuah --yes
+```
+
+2) Deposit
+```bash
+./build/nuahd tx wasm execute <redbank_address> \
+  deposit --amount 1000000unuah \
+  --from deployer --keyring-backend test --chain-id nuahchain-test --gas auto --gas-adjustment 1.5 --fees 600unuah --yes
+```
+
+3) Borrow
+```bash
+./build/nuahd tx wasm execute <redbank_address> \
+  borrow denom unuah, amount 500000 \
+  --from deployer --keyring-backend test --chain-id nuahchain-test --gas auto --gas-adjustment 1.5 --fees 3000unuah --yes
+```
+
+4) Check balance and market state
+```bash
+./build/nuahd query bank balances <deployer_address>
+./build/nuahd query wasm contract-state smart <redbank_address> market denom unuah
+```
+
+5) Repay
+```bash
+./build/nuahd tx wasm execute <redbank_address> \
+  repay denom unuah --amount 500000unuah \
+  --from deployer --keyring-backend test --chain-id nuahchain-test --gas auto --gas-adjustment 1.5 --fees 3000unuah --yes
+```
+
+6) Withdraw note (risk management)
+```bash
+./build/nuahd tx wasm execute <redbank_address> \
+  withdraw denom unuah, amount 1000000 \
+  --from deployer --keyring-backend test --chain-id nuahchain-test --gas auto --gas-adjustment 1.5 --fees 3000unuah --yes
+```
+The contract may reject if Health Factor would fall below 1 after withdrawal.
+
+---
+
+## References
+1) https://github.com/mars-protocol/whitepaper
+2) https://docs.marsprotocol.io
+3) https://docs.cosmos.network
+4) https://evm.cosmos.network/docs/sdk/v0.47/build
+5) https://docs.thorchain.org/technology/cosmos-sdk
+6) https://docs.wardenprotocol.org/learn/cosmos-modules
+7) https://interchaininfo.zone/resources/the-neutron-mars-protocol-acquisition-the-full-scoop
+8) https://members.delphidigital.io/reports/cosmos-the-evolution-of-ibc
+9) (CLI history source) https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/76505018/99d09b36-025e-414f-a887-307c6945e0f5/history.txt

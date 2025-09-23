@@ -278,7 +278,9 @@ func (k Keeper) DistributeTokenPurchasePayment(ctx sdk.Context, denom string, to
 		creatorAddr, err := sdk.AccAddressFromBech32(userToken.Creator)
 		if err == nil {
 			creatorCoin := sdk.NewCoin("unuah", creatorAmount)
-			k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, creatorAddr, sdk.NewCoins(creatorCoin))
+			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, creatorAddr, sdk.NewCoins(creatorCoin)); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -287,7 +289,9 @@ func (k Keeper) DistributeTokenPurchasePayment(ctx sdk.Context, denom string, to
 		referralAddr, err := sdk.AccAddressFromBech32(params.ReferralWallet)
 		if err == nil {
 			referralCoin := sdk.NewCoin("unuah", referralAmount)
-			k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, referralAddr, sdk.NewCoins(referralCoin))
+			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, referralAddr, sdk.NewCoins(referralCoin)); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -296,7 +300,9 @@ func (k Keeper) DistributeTokenPurchasePayment(ctx sdk.Context, denom string, to
 		aiCeoAddr, err := sdk.AccAddressFromBech32(params.AiCeoWallet)
 		if err == nil {
 			aiCeoCoin := sdk.NewCoin("unuah", aiCeoAmount)
-			k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aiCeoAddr, sdk.NewCoins(aiCeoCoin))
+			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aiCeoAddr, sdk.NewCoins(aiCeoCoin)); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -305,7 +311,9 @@ func (k Keeper) DistributeTokenPurchasePayment(ctx sdk.Context, denom string, to
 		platformFeeAddr, err := sdk.AccAddressFromBech32(params.PlatformFeeWallet)
 		if err == nil {
 			platformFeeCoin := sdk.NewCoin("unuah", platformFeeAmount)
-			k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, platformFeeAddr, sdk.NewCoins(platformFeeCoin))
+			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, platformFeeAddr, sdk.NewCoins(platformFeeCoin)); err != nil {
+				return err
+			}
 		}
 	}
 

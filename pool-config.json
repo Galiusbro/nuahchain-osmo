@@ -1,7 +1,0 @@
-{
-  "weights": "1000000unuah,1000000factory/nuah14k38ajalnef2yauznt4q7ep893djkl4vm54mcs/mytoken2",
-  "initial-deposit": "1000000unuah,500000factory/nuah14k38ajalnef2yauznt4q7ep893djkl4vm54mcs/mytoken2",
-  "swap-fee": "0.003",
-  "exit-fee": "0.000",
-  "future-governor": ""
-}
