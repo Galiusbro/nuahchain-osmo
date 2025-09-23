@@ -104,6 +104,11 @@ func (s *IntegrationTestSuite) TestStartE2E() {
 		s.LargeWasmUpload()
 	})
 
+	s.T().Run("InsuranceLifecycle", func(t *testing.T) {
+		t.Parallel()
+		s.InsuranceLifecycle()
+	})
+
 	s.T().Run("StableSwap", func(t *testing.T) {
 		t.Parallel()
 		s.StableSwap()

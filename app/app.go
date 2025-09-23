@@ -163,6 +163,7 @@ import (
 	poolincentivesclient "github.com/osmosis-labs/osmosis/v30/x/pool-incentives/client"
 	poolmanagerclient "github.com/osmosis-labs/osmosis/v30/x/poolmanager/client"
 	superfluidclient "github.com/osmosis-labs/osmosis/v30/x/superfluid/client"
+	treasurytypes "github.com/osmosis-labs/osmosis/v30/x/treasury/types"
 	txfeesclient "github.com/osmosis-labs/osmosis/v30/x/txfees/client"
 )
 
@@ -176,7 +177,10 @@ var (
 	maccPerms = moduleAccountPermissions
 
 	// module accounts that are allowed to receive tokens.
-	allowedReceivingModAcc = map[string]bool{protorevtypes.ModuleName: true}
+	allowedReceivingModAcc = map[string]bool{
+		protorevtypes.ModuleName: true,
+		treasurytypes.ModuleName: true,
+	}
 
 	// TODO: Refactor wasm items into a wasm.go file
 	// WasmProposalsEnabled enables all x/wasm proposals when it's value is "true"

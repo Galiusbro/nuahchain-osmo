@@ -36,12 +36,7 @@ import (
 
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 
-	claimstypes "github.com/osmosis-labs/osmosis/v30/x/claims/types"
-	policytypes "github.com/osmosis-labs/osmosis/v30/x/policy/types"
-	premiumtypes "github.com/osmosis-labs/osmosis/v30/x/premium/types"
-	rolestypes "github.com/osmosis-labs/osmosis/v30/x/roles/types"
 	smartaccount "github.com/osmosis-labs/osmosis/v30/x/smart-account"
-	treasurytypes "github.com/osmosis-labs/osmosis/v30/x/treasury/types"
 
 	"github.com/skip-mev/block-sdk/v2/x/auction"
 

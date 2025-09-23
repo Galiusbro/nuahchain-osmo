@@ -1,0 +1,62 @@
+=============== Sep 23, 2025 (UTC) ===============
+18:37:44.196536 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:37:44.342726 db@open opening
+18:37:44.383242 version@stat F·[] S·0B[] Sc·[]
+18:37:44.384982 db@janitor F·1 G·0
+18:37:44.385105 db@open done T·20.845791ms
+L·Level Q·SeqNum T·TimeElapsed
+18:37:44.344154 rename CURRENT.0: rename /osmosis/.osmosisd/data/application.db/CURRENT.0 /osmosis/.osmosisd/data/application.db/CURRENT: no such file or directory
+=============== Sep 23, 2025 (UTC) ===============
+18:37:44.388454 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:37:44.392453 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:37:44.721575 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:37:44.728276 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:37:44.882042 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:37:44.890912 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:37:44.963113 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:37:44.964549 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:37:54.107517 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:37:54.111006 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:37:54.153635 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:37:54.156665 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:37:54.358273 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:37:54.359273 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:37:54.804741 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:37:54.809383 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:37:54.884622 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:37:54.885764 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:37:55.114642 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:37:55.115841 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:37:55.214237 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:37:55.215599 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:38:05.141955 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:38:05.170317 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:38:05.271172 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:38:05.272804 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:38:06.157885 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:38:06.159259 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:38:06.258618 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:38:06.260305 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:38:10.208084 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:38:10.208800 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:38:10.920494 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:38:10.923824 CURRENT: missing target file: MANIFEST-000000
+=============== Sep 23, 2025 (UTC) ===============
+18:38:11.064171 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+18:38:11.077555 CURRENT: missing target file: MANIFEST-000000

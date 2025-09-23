@@ -50,8 +50,23 @@ func (k Keeper) GetParams(ctx sdk.Context) types.Params {
 		return types.DefaultParams()
 	}
 
+	// store := ctx.KVStore(k.storeKey)
+	// if !store.Has(types.KeyAuthority) {
+	// 	params := types.DefaultParams()
+	// 	if params.Authority == "" {
+	// 		params.Authority = k.authority
+	// 	}
+	// 	return params
+	// }
+
 	var params types.Params
-	k.paramstore.GetParamSet(ctx, &params)
+	// Check if parameters exist in the store before trying to get them
+	if k.paramstore.Has(ctx, types.KeyAuthority) {
+		k.paramstore.GetParamSet(ctx, &params)
+	} else {
+		// If no parameters exist, return default params with keeper's authority
+		params = types.DefaultParams()
+	}
 
 	if params.Authority == "" {
 		params.Authority = k.authority

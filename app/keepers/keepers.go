@@ -963,7 +963,7 @@ func (appKeepers *AppKeepers) initParamsKeeper(appCodec codec.BinaryCodec, legac
 	paramsKeeper.Subspace(pegkeepertypes.ModuleName)
 	paramsKeeper.Subspace(usdoracletypes.ModuleName).WithKeyTable(usdoracletypes.ParamKeyTable())
 	paramsKeeper.Subspace(exchangetypes.ModuleName).WithKeyTable(exchangetypes.ParamKeyTable())
-	paramsKeeper.Subspace(rolestypes.ModuleName)
+	paramsKeeper.Subspace(rolestypes.ModuleName).WithKeyTable(rolestypes.ParamKeyTable())
 	paramsKeeper.Subspace(policytypes.ModuleName)
 	paramsKeeper.Subspace(premiumtypes.ModuleName)
 	paramsKeeper.Subspace(claimstypes.ModuleName)

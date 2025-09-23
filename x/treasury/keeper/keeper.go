@@ -148,7 +148,7 @@ func (k Keeper) DepositToTreasury(ctx sdk.Context, depositor sdk.AccAddress, poo
 	}
 
 	if k.bankKeeper != nil {
-		if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, depositor, types.ModuleName, sdk.NewCoins(amount)); err != nil {
+		if err := k.bankKeeper.SendCoinsFromAccountToModule(sdk.WrapSDKContext(ctx), depositor, types.ModuleName, sdk.NewCoins(amount)); err != nil {
 			return err
 		}
 	}
@@ -373,7 +373,7 @@ func (k Keeper) performWithdrawal(ctx sdk.Context, poolID string, recipient sdk.
 	k.setPoolBalance(ctx, poolID, newBalance)
 
 	if k.bankKeeper != nil {
-		if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, recipient, sdk.NewCoins(amount)); err != nil {
+		if err := k.bankKeeper.SendCoinsFromModuleToAccount(sdk.WrapSDKContext(ctx), types.ModuleName, recipient, sdk.NewCoins(amount)); err != nil {
 			// revert balance update if transfer fails
 			k.setPoolBalance(ctx, poolID, current)
 			return err

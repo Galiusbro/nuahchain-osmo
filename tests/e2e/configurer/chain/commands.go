@@ -21,8 +21,11 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/tests/e2e/initialization"
 	"github.com/osmosis-labs/osmosis/v30/tests/e2e/util"
 
+	claimstypes "github.com/osmosis-labs/osmosis/v30/x/claims/types"
 	ibcratelimittypes "github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit/types"
 	lockuptypes "github.com/osmosis-labs/osmosis/v30/x/lockup/types"
+	policytypes "github.com/osmosis-labs/osmosis/v30/x/policy/types"
+	premiumtypes "github.com/osmosis-labs/osmosis/v30/x/premium/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -52,6 +55,143 @@ func (n *NodeConfig) SetMaxPoolPointsPerTx(maxPoolPoints int, from string) {
 	cmd := []string{"nuahd", "tx", "protorev", "set-max-pool-points-per-tx", fmt.Sprintf("%d", maxPoolPoints), fmt.Sprintf("--from=%s", from), "--gas=700000", "--fees=7000uosmo"}
 	_, _, err := n.containerManager.ExecTxCmd(n.t, n.chainId, n.Name, cmd)
 	require.NoError(n.t, err)
+}
+
+func (n *NodeConfig) AssignRoles(authorityWallet, authorityAddr, targetAddr string, roles ...string) {
+	n.LogActionF("assigning roles %v to %s", roles, targetAddr)
+	cmd := []string{"nuahd", "tx", "roles", "assign", authorityAddr, targetAddr}
+	cmd = append(cmd, roles...)
+	cmd = append(cmd, fmt.Sprintf("--from=%s", authorityWallet))
+	_, _, err := n.containerManager.ExecTxCmd(n.t, n.chainId, n.Name, cmd)
+	require.NoError(n.t, err)
+}
+
+func (n *NodeConfig) CreateTreasuryPool(authorityWallet, authorityAddr, poolID, description, manager string, policyTypes []string) {
+	n.LogActionF("creating treasury pool %s", poolID)
+	cmd := []string{"nuahd", "tx", "treasury", "create-pool", authorityAddr, poolID}
+	if description != "" {
+		cmd = append(cmd, fmt.Sprintf("--description=%s", description))
+	}
+	if manager != "" {
+		cmd = append(cmd, fmt.Sprintf("--manager=%s", manager))
+	}
+	for _, p := range policyTypes {
+		cmd = append(cmd, fmt.Sprintf("--policy-type=%s", p))
+	}
+	cmd = append(cmd, fmt.Sprintf("--from=%s", authorityWallet))
+	_, _, err := n.containerManager.ExecTxCmd(n.t, n.chainId, n.Name, cmd)
+	require.NoError(n.t, err)
+}
+
+func (n *NodeConfig) TreasuryDeposit(depositorWallet, depositorAddr, poolID, amount string) {
+	n.LogActionF("depositing %s into treasury pool %s", amount, poolID)
+	cmd := []string{"nuahd", "tx", "treasury", "deposit", depositorAddr, poolID, amount, fmt.Sprintf("--from=%s", depositorWallet)}
+	_, _, err := n.containerManager.ExecTxCmd(n.t, n.chainId, n.Name, cmd)
+	require.NoError(n.t, err)
+}
+
+func (n *NodeConfig) CreatePolicy(authorityWallet, ownerAddr, policyType, treasuryPoolID string, attributes map[string]string, tags []string, startUnix, endUnix int64) uint64 {
+	n.LogActionF("creating policy of type %s for %s", policyType, ownerAddr)
+	cmd := []string{"nuahd", "tx", "policy", "create", ownerAddr, policyType}
+	for k, v := range attributes {
+		cmd = append(cmd, fmt.Sprintf("--attribute=%s=%s", k, v))
+	}
+	if startUnix > 0 {
+		cmd = append(cmd, fmt.Sprintf("--start=%d", startUnix))
+	}
+	if endUnix > 0 {
+		cmd = append(cmd, fmt.Sprintf("--end=%d", endUnix))
+	}
+	if treasuryPoolID != "" {
+		cmd = append(cmd, fmt.Sprintf("--treasury-pool=%s", treasuryPoolID))
+	}
+	for _, tag := range tags {
+		cmd = append(cmd, fmt.Sprintf("--tags=%s", tag))
+	}
+	cmd = append(cmd, fmt.Sprintf("--from=%s", authorityWallet))
+	resp, _, err := n.containerManager.ExecTxCmd(n.t, n.chainId, n.Name, cmd)
+	require.NoError(n.t, err)
+
+	policyID, err := extractUintAttributeFromResponse(resp.String(), policytypes.AttributeKeyPolicyID)
+	require.NoError(n.t, err)
+	n.LogActionF("created policy %d", policyID)
+	return policyID
+}
+
+func (n *NodeConfig) CreatePremiumPlan(authorityWallet, authorityAddr string, policyID uint64, payerAddr, amount string, periodSeconds, maxPayments uint64, scheduleType, treasuryPoolID string) uint64 {
+	n.LogActionF("creating premium plan for policy %d", policyID)
+	cmd := []string{"nuahd", "tx", "premium", "create-plan", authorityAddr, fmt.Sprintf("%d", policyID), payerAddr, amount,
+		fmt.Sprintf("--period=%d", periodSeconds),
+		fmt.Sprintf("--max-payments=%d", maxPayments),
+		fmt.Sprintf("--schedule-type=%s", scheduleType),
+	}
+	if treasuryPoolID != "" {
+		cmd = append(cmd, fmt.Sprintf("--treasury-pool=%s", treasuryPoolID))
+	}
+	cmd = append(cmd, fmt.Sprintf("--from=%s", authorityWallet))
+	resp, _, err := n.containerManager.ExecTxCmd(n.t, n.chainId, n.Name, cmd)
+	require.NoError(n.t, err)
+
+	planID, err := extractUintAttributeFromResponse(resp.String(), premiumtypes.AttributeKeyPlanID)
+	require.NoError(n.t, err)
+	n.LogActionF("created premium plan %d", planID)
+	return planID
+}
+
+func (n *NodeConfig) RecordPremiumPayment(payerWallet, payerAddr string, planID uint64, amount string) {
+	n.LogActionF("recording premium payment %s for plan %d", amount, planID)
+	cmd := []string{"nuahd", "tx", "premium", "record-payment", payerAddr, fmt.Sprintf("%d", planID), amount, fmt.Sprintf("--from=%s", payerWallet)}
+	_, _, err := n.containerManager.ExecTxCmd(n.t, n.chainId, n.Name, cmd)
+	require.NoError(n.t, err)
+}
+
+func (n *NodeConfig) SubmitClaim(claimantWallet, claimantAddr string, policyID uint64, amount, description string, evidence []string) uint64 {
+	n.LogActionF("submitting claim for policy %d", policyID)
+	cmd := []string{"nuahd", "tx", "claims", "submit", claimantAddr, fmt.Sprintf("%d", policyID), amount}
+	if description != "" {
+		cmd = append(cmd, fmt.Sprintf("--description=%s", description))
+	}
+	for _, uri := range evidence {
+		cmd = append(cmd, fmt.Sprintf("--evidence=%s", uri))
+	}
+	cmd = append(cmd, fmt.Sprintf("--from=%s", claimantWallet))
+	resp, _, err := n.containerManager.ExecTxCmd(n.t, n.chainId, n.Name, cmd)
+	require.NoError(n.t, err)
+
+	claimID, err := extractUintAttributeFromResponse(resp.String(), claimstypes.AttributeKeyClaimID)
+	require.NoError(n.t, err)
+	n.LogActionF("submitted claim %d", claimID)
+	return claimID
+}
+
+func (n *NodeConfig) ReviewClaim(authorityWallet, authorityAddr string, claimID uint64, decision, reason string) {
+	n.LogActionF("reviewing claim %d with decision %s", claimID, decision)
+	cmd := []string{"nuahd", "tx", "claims", "review", authorityAddr, fmt.Sprintf("%d", claimID), decision}
+	if reason != "" {
+		cmd = append(cmd, fmt.Sprintf("--reason=%s", reason))
+	}
+	cmd = append(cmd, fmt.Sprintf("--from=%s", authorityWallet))
+	_, _, err := n.containerManager.ExecTxCmd(n.t, n.chainId, n.Name, cmd)
+	require.NoError(n.t, err)
+}
+
+func (n *NodeConfig) ExecuteClaimPayout(authorityWallet, authorityAddr string, claimID uint64, recipientAddr string) {
+	n.LogActionF("executing payout for claim %d", claimID)
+	cmd := []string{"nuahd", "tx", "claims", "execute-payout", authorityAddr, fmt.Sprintf("%d", claimID), recipientAddr, fmt.Sprintf("--from=%s", authorityWallet)}
+	_, _, err := n.containerManager.ExecTxCmd(n.t, n.chainId, n.Name, cmd)
+	require.NoError(n.t, err)
+}
+
+func (n *NodeConfig) QueryClaim(claimID uint64) claimstypes.Claim {
+	cmd := []string{"nuahd", "query", "claims", "claim", fmt.Sprintf("%d", claimID), "-o", "json"}
+	out, _, err := n.containerManager.ExecCmd(n.t, n.Name, cmd, "", false, false)
+	require.NoError(n.t, err)
+
+	var resp struct {
+		Claim claimstypes.Claim `json:"claim"`
+	}
+	require.NoError(n.t, json.Unmarshal(out.Bytes(), &resp))
+	return resp.Claim
 }
 
 func (n *NodeConfig) CreateBalancerPool(poolFile, from string) uint64 {
@@ -959,6 +1099,17 @@ func extractCodeIdFromResponse(response string) (int, error) {
 	}
 
 	return codeId, nil
+}
+
+func extractUintAttributeFromResponse(response, attribute string) (uint64, error) {
+	response = formatNonJsonResponse(response)
+	pattern := fmt.Sprintf(`%s value: "(\d+)"`, attribute)
+	r := regexp.MustCompile(pattern)
+	matches := r.FindStringSubmatch(response)
+	if len(matches) < 2 {
+		return 0, fmt.Errorf("%s not found", attribute)
+	}
+	return strconv.ParseUint(matches[1], 10, 64)
 }
 
 func pullMnemonicFromResponse(response string) (string, error) {
