@@ -1,0 +1,13 @@
+syntax = "proto3";
+package osmosis.treasury.v1beta1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/treasury/types";
+
+// Params defines the configurable parameters for the treasury module.
+message Params {
+  string authority = 1;
+  string default_pool_id = 2;
+  bool enable_ibc_withdrawals = 3;
+}

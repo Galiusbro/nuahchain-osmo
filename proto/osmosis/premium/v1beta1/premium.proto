@@ -1,0 +1,55 @@
+syntax = "proto3";
+package osmosis.premium.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/premium/types";
+
+// PremiumPlanStatus enumerates the state of a premium plan.
+enum PremiumPlanStatus {
+  PREMIUM_PLAN_STATUS_UNSPECIFIED = 0;
+  PREMIUM_PLAN_STATUS_ACTIVE = 1;
+  PREMIUM_PLAN_STATUS_SUSPENDED = 2;
+  PREMIUM_PLAN_STATUS_COMPLETED = 3;
+  PREMIUM_PLAN_STATUS_CANCELLED = 4;
+}
+
+// PremiumSchedule defines an abstract schedule configuration.
+message PremiumSchedule {
+  string schedule_type = 1;
+  uint64 period_seconds = 2;
+  uint64 max_payments = 3;
+}
+
+// PremiumPlan tracks premium obligations for a policy.
+message PremiumPlan {
+  uint64 id = 1;
+  uint64 policy_id = 2;
+  string payer = 3;
+  cosmos.base.v1beta1.Coin amount = 4 [ (gogoproto.nullable) = false ];
+  PremiumSchedule schedule = 5 [ (gogoproto.nullable) = false ];
+  PremiumPlanStatus status = 6;
+  google.protobuf.Timestamp next_due_time = 7 [ (gogoproto.stdtime) = true ];
+  uint64 payments_made = 8;
+  google.protobuf.Timestamp last_payment_time = 9 [ (gogoproto.stdtime) = true ];
+  string treasury_pool_id = 10;
+}
+
+// PremiumPayment records an executed premium payment.
+message PremiumPayment {
+  uint64 id = 1;
+  uint64 plan_id = 2;
+  string payer = 3;
+  cosmos.base.v1beta1.Coin amount = 4 [ (gogoproto.nullable) = false ];
+  google.protobuf.Timestamp paid_at = 5 [ (gogoproto.stdtime) = true ];
+  string tx_hash = 6;
+}
+
+// PremiumOverdue tracks overdue status.
+message PremiumOverdue {
+  uint64 plan_id = 1;
+  google.protobuf.Timestamp due_at = 2 [ (gogoproto.stdtime) = true ];
+  string reason = 3;
+}

@@ -1,0 +1,36 @@
+syntax = "proto3";
+package osmosis.roles.v1beta1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/roles/types";
+
+// Role enumerates the supported insurance roles.
+enum Role {
+  ROLE_UNSPECIFIED = 0;
+  ROLE_INSURER = 1;
+  ROLE_POLICY_HOLDER = 2;
+  ROLE_CLAIMS_REVIEWER = 3;
+  ROLE_ORACLE = 4;
+  ROLE_TREASURY_MANAGER = 5;
+}
+
+// RoleBinding pairs an address with a set of roles.
+message RoleBinding {
+  string address = 1;
+  repeated Role roles = 2;
+}
+
+// RoleGrantEvent records a new role assignment.
+message RoleGrantEvent {
+  string authority = 1;
+  string address = 2;
+  Role role = 3;
+}
+
+// RoleRevokeEvent records a role removal.
+message RoleRevokeEvent {
+  string authority = 1;
+  string address = 2;
+  Role role = 3;
+}

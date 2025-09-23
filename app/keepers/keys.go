@@ -6,7 +6,10 @@ import (
 
 	storetypes "cosmossdk.io/store/types"
 
+	policytypes "github.com/osmosis-labs/osmosis/v30/x/policy/types"
+	premiumtypes "github.com/osmosis-labs/osmosis/v30/x/premium/types"
 	protorevtypes "github.com/osmosis-labs/osmosis/v30/x/protorev/types"
+	rolestypes "github.com/osmosis-labs/osmosis/v30/x/roles/types"
 	twaptypes "github.com/osmosis-labs/osmosis/v30/x/twap/types"
 	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
 )
@@ -21,7 +24,13 @@ func (appKeepers *AppKeepers) GenerateKeys() {
 	appKeepers.tkeys = storetypes.NewTransientStoreKeys(paramstypes.TStoreKey, twaptypes.TransientStoreKey, protorevtypes.TransientStoreKey)
 
 	// MemKeys are for information that is stored only in RAM.
-	appKeepers.memKeys = storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey, usertokentypes.MemStoreKey)
+	appKeepers.memKeys = storetypes.NewMemoryStoreKeys(
+		capabilitytypes.MemStoreKey,
+		usertokentypes.MemStoreKey,
+		rolestypes.MemStoreKey,
+		policytypes.MemStoreKey,
+		premiumtypes.MemStoreKey,
+	)
 }
 
 // GetSubspace gets existing substore from keeper.

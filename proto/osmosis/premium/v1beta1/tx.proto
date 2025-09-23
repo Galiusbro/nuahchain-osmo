@@ -1,0 +1,66 @@
+syntax = "proto3";
+package osmosis.premium.v1beta1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "gogoproto/gogo.proto";
+import "osmosis/premium/v1beta1/premium.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/premium/types";
+
+service Msg {
+  rpc CreatePremiumPlan(MsgCreatePremiumPlan) returns (MsgCreatePremiumPlanResponse) {
+    option (google.api.http).post = "/osmosis/premium/v1beta1/plans";
+  };
+  rpc RecordPremiumPayment(MsgRecordPremiumPayment) returns (MsgRecordPremiumPaymentResponse) {
+    option (google.api.http).post = "/osmosis/premium/v1beta1/plans/{plan_id}/payments";
+  };
+  rpc MarkPremiumOverdue(MsgMarkPremiumOverdue) returns (MsgMarkPremiumOverdueResponse) {
+    option (google.api.http).post = "/osmosis/premium/v1beta1/plans/{plan_id}/overdue";
+  };
+}
+
+message MsgCreatePremiumPlan {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/premium/create-plan";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  uint64 policy_id = 2;
+  string payer = 3 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  cosmos.base.v1beta1.Coin amount = 4 [ (gogoproto.nullable) = false ];
+  PremiumSchedule schedule = 5 [ (gogoproto.nullable) = false ];
+  string treasury_pool_id = 6;
+}
+
+message MsgCreatePremiumPlanResponse {
+  uint64 plan_id = 1;
+}
+
+message MsgRecordPremiumPayment {
+  option (cosmos.msg.v1.signer) = "payer";
+  option (amino.name) = "osmosis/premium/record-payment";
+
+  string payer = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  uint64 plan_id = 2;
+  cosmos.base.v1beta1.Coin amount = 3 [ (gogoproto.nullable) = false ];
+}
+
+message MsgRecordPremiumPaymentResponse {
+  uint64 payment_id = 1;
+  google.protobuf.Timestamp next_due_time = 2 [ (gogoproto.stdtime) = true ];
+}
+
+message MsgMarkPremiumOverdue {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/premium/mark-overdue";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  uint64 plan_id = 2;
+  string reason = 3;
+}
+
+message MsgMarkPremiumOverdueResponse {}

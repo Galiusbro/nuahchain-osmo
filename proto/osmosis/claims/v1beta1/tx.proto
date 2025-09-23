@@ -1,0 +1,82 @@
+syntax = "proto3";
+package osmosis.claims.v1beta1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "osmosis/claims/v1beta1/claim.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/claims/types";
+
+service Msg {
+  rpc SubmitClaim(MsgSubmitClaim) returns (MsgSubmitClaimResponse) {
+    option (google.api.http).post = "/osmosis/claims/v1beta1/claims";
+  };
+  rpc ReviewClaim(MsgReviewClaim) returns (MsgReviewClaimResponse) {
+    option (google.api.http).post = "/osmosis/claims/v1beta1/claims/{claim_id}/review";
+  };
+  rpc AddClaimEvidence(MsgAddClaimEvidence) returns (MsgAddClaimEvidenceResponse) {
+    option (google.api.http).post = "/osmosis/claims/v1beta1/claims/{claim_id}/evidence";
+  };
+  rpc ExecuteClaimPayout(MsgExecuteClaimPayout) returns (MsgExecuteClaimPayoutResponse) {
+    option (google.api.http).post = "/osmosis/claims/v1beta1/claims/{claim_id}/payout";
+  };
+}
+
+message MsgSubmitClaim {
+  option (cosmos.msg.v1.signer) = "claimant";
+  option (amino.name) = "osmosis/claims/submit-claim";
+
+  string claimant = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  uint64 policy_id = 2;
+  cosmos.base.v1beta1.Coin amount = 3 [ (gogoproto.nullable) = false ];
+  string description = 4;
+  repeated ClaimEvidence evidence = 5 [ (gogoproto.nullable) = false ];
+}
+
+message MsgSubmitClaimResponse {
+  uint64 claim_id = 1;
+}
+
+message MsgReviewClaim {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/claims/review-claim";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  uint64 claim_id = 2;
+  ClaimStatus decision = 3;
+  string reason = 4;
+}
+
+message MsgReviewClaimResponse {
+  Claim claim = 1;
+}
+
+message MsgAddClaimEvidence {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/claims/add-evidence";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  uint64 claim_id = 2;
+  ClaimEvidence evidence = 3 [ (gogoproto.nullable) = false ];
+}
+
+message MsgAddClaimEvidenceResponse {
+  Claim claim = 1;
+}
+
+message MsgExecuteClaimPayout {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/claims/execute-payout";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  uint64 claim_id = 2;
+  string payout_address = 3 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+message MsgExecuteClaimPayoutResponse {
+  Claim claim = 1;
+}

@@ -1,0 +1,16 @@
+syntax = "proto3";
+package osmosis.treasury.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "osmosis/treasury/v1beta1/params.proto";
+import "osmosis/treasury/v1beta1/treasury.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/treasury/types";
+
+// GenesisState defines the treasury module's genesis state.
+message GenesisState {
+  Params params = 1 [ (gogoproto.nullable) = false ];
+  repeated TreasuryPool pools = 2 [ (gogoproto.nullable) = false ];
+  repeated PoolBalance balances = 3 [ (gogoproto.nullable) = false ];
+  repeated PoolReserves reserves = 4 [ (gogoproto.nullable) = false ];
+}

@@ -11,11 +11,21 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	icq "github.com/cosmos/ibc-apps/modules/async-icq/v8"
 	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
+	claims "github.com/osmosis-labs/osmosis/v30/x/claims"
+	claimstypes "github.com/osmosis-labs/osmosis/v30/x/claims/types"
 	exchangetypes "github.com/osmosis-labs/osmosis/v30/x/exchange/types"
 	limitedaccount "github.com/osmosis-labs/osmosis/v30/x/limitedaccount"
 	limitedaccounttypes "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/types"
 	"github.com/osmosis-labs/osmosis/v30/x/pegkeeper"
 	pegkeepertypes "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/types"
+	policy "github.com/osmosis-labs/osmosis/v30/x/policy"
+	policytypes "github.com/osmosis-labs/osmosis/v30/x/policy/types"
+	premium "github.com/osmosis-labs/osmosis/v30/x/premium"
+	premiumtypes "github.com/osmosis-labs/osmosis/v30/x/premium/types"
+	roles "github.com/osmosis-labs/osmosis/v30/x/roles"
+	rolestypes "github.com/osmosis-labs/osmosis/v30/x/roles/types"
+	"github.com/osmosis-labs/osmosis/v30/x/treasury"
+	treasurytypes "github.com/osmosis-labs/osmosis/v30/x/treasury/types"
 	"github.com/osmosis-labs/osmosis/v30/x/usdoracle"
 	usdoracletypes "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types"
 	"github.com/osmosis-labs/osmosis/v30/x/usertoken"
@@ -157,6 +167,7 @@ var moduleAccountPermissions = map[string][]string{
 	usdoracletypes.ModuleName:                nil,
 	pegkeepertypes.ModuleName:                nil,
 	usertokentypes.ModuleName:                {authtypes.Minter, authtypes.Burner},
+	treasurytypes.ModuleName:                 nil,
 	exchangetypes.ModuleName:                 {authtypes.Minter, authtypes.Burner},
 }
 
@@ -227,6 +238,11 @@ func appModules(
 		smartaccount.NewAppModule(appCodec, *app.SmartAccountKeeper),
 		freeaccount.NewAppModule(appCodec, *app.FreeAccountKeeper),
 		limitedaccount.NewAppModule(appCodec, *app.LimitedAccountKeeper),
+		roles.NewAppModule(appCodec, *app.RolesKeeper),
+		policy.NewAppModule(appCodec, *app.PolicyKeeper),
+		premium.NewAppModule(appCodec, *app.PremiumKeeper),
+		treasury.NewAppModule(appCodec, *app.TreasuryKeeper),
+		claims.NewAppModule(appCodec, *app.ClaimsKeeper),
 		usdoracle.NewAppModule(appCodec, *app.USDOracleKeeper),
 		pegkeeper.NewAppModule(appCodec, *app.PegKeeperKeeper),
 		usertoken.NewAppModule(appCodec, *app.UserTokenKeeper),
@@ -329,6 +345,11 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		usertokentypes.ModuleName,
 		usdoracletypes.ModuleName,
 		pegkeepertypes.ModuleName,
+		rolestypes.ModuleName,
+		policytypes.ModuleName,
+		premiumtypes.ModuleName,
+		treasurytypes.ModuleName,
+		claimstypes.ModuleName,
 	}
 }
 

@@ -36,11 +36,17 @@ import (
 
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 
+	claimstypes "github.com/osmosis-labs/osmosis/v30/x/claims/types"
+	policytypes "github.com/osmosis-labs/osmosis/v30/x/policy/types"
+	premiumtypes "github.com/osmosis-labs/osmosis/v30/x/premium/types"
+	rolestypes "github.com/osmosis-labs/osmosis/v30/x/roles/types"
 	smartaccount "github.com/osmosis-labs/osmosis/v30/x/smart-account"
+	treasurytypes "github.com/osmosis-labs/osmosis/v30/x/treasury/types"
 
 	"github.com/skip-mev/block-sdk/v2/x/auction"
 
 	_ "github.com/osmosis-labs/osmosis/v30/client/docs/statik"
+	claims "github.com/osmosis-labs/osmosis/v30/x/claims"
 	clclient "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/client"
 	concentratedliquidity "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/clmodule"
 	cwpoolclient "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/client"
@@ -56,14 +62,18 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/lockup"
 	"github.com/osmosis-labs/osmosis/v30/x/mint"
 	"github.com/osmosis-labs/osmosis/v30/x/pegkeeper"
+	policy "github.com/osmosis-labs/osmosis/v30/x/policy"
 	poolincentives "github.com/osmosis-labs/osmosis/v30/x/pool-incentives"
 	poolincentivesclient "github.com/osmosis-labs/osmosis/v30/x/pool-incentives/client"
 	poolmanagerclient "github.com/osmosis-labs/osmosis/v30/x/poolmanager/client"
 	poolmanager "github.com/osmosis-labs/osmosis/v30/x/poolmanager/module"
+	premium "github.com/osmosis-labs/osmosis/v30/x/premium"
 	"github.com/osmosis-labs/osmosis/v30/x/protorev"
+	roles "github.com/osmosis-labs/osmosis/v30/x/roles"
 	superfluid "github.com/osmosis-labs/osmosis/v30/x/superfluid"
 	superfluidclient "github.com/osmosis-labs/osmosis/v30/x/superfluid/client"
 	"github.com/osmosis-labs/osmosis/v30/x/tokenfactory"
+	treasury "github.com/osmosis-labs/osmosis/v30/x/treasury"
 	"github.com/osmosis-labs/osmosis/v30/x/twap/twapmodule"
 	"github.com/osmosis-labs/osmosis/v30/x/txfees"
 	txfeesclient "github.com/osmosis-labs/osmosis/v30/x/txfees/client"
@@ -143,6 +153,11 @@ func NewAppModuleBasics(cdc codec.Codec) module.BasicManager {
 		freeaccount.AppModuleBasic{},
 		limitedaccount.AppModuleBasic{},
 		pegkeeper.NewAppModuleBasic(cdc),
+		roles.AppModuleBasic{},
+		policy.AppModuleBasic{},
+		premium.AppModuleBasic{},
+		treasury.AppModuleBasic{},
+		claims.AppModuleBasic{},
 		usdoracle.AppModuleBasic{},
 		usertoken.AppModuleBasic{},
 	)
@@ -215,6 +230,11 @@ var AppModuleBasics = module.NewBasicManager(
 	freeaccount.AppModuleBasic{},
 	limitedaccount.AppModuleBasic{},
 	pegkeeper.AppModuleBasic{},
+	roles.AppModuleBasic{},
+	policy.AppModuleBasic{},
+	premium.AppModuleBasic{},
+	treasury.AppModuleBasic{},
+	claims.AppModuleBasic{},
 	usdoracle.AppModuleBasic{},
 	usertoken.AppModuleBasic{},
 )

@@ -1,0 +1,28 @@
+syntax = "proto3";
+package osmosis.treasury.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/treasury/types";
+
+// TreasuryPool represents an insurance risk pool.
+message TreasuryPool {
+  string id = 1;
+  string description = 2;
+  string manager = 3;
+  repeated string policy_types = 4;
+}
+
+// PoolBalance tracks the aggregated balances held for a pool per denomination.
+message PoolBalance {
+  string pool_id = 1;
+  cosmos.base.v1beta1.Coin balance = 2 [ (gogoproto.nullable) = false ];
+}
+
+// PoolReserves describes reserve targets for a pool.
+message PoolReserves {
+  string pool_id = 1;
+  string denom = 2;
+  string min_reserve_ratio = 3;
+}

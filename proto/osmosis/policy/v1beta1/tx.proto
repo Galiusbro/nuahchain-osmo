@@ -1,0 +1,78 @@
+syntax = "proto3";
+package osmosis.policy.v1beta1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "osmosis/policy/v1beta1/policy.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/policy/types";
+
+service Msg {
+  rpc CreatePolicy(MsgCreatePolicy) returns (MsgCreatePolicyResponse) {
+    option (google.api.http).post = "/osmosis/policy/v1beta1/policies";
+  };
+  rpc UpdatePolicyAttributes(MsgUpdatePolicyAttributes) returns (MsgUpdatePolicyAttributesResponse) {
+    option (google.api.http).post = "/osmosis/policy/v1beta1/policies/{policy_id}/attributes";
+  };
+  rpc CancelPolicy(MsgCancelPolicy) returns (MsgCancelPolicyResponse) {
+    option (google.api.http).post = "/osmosis/policy/v1beta1/policies/{policy_id}/cancel";
+  };
+  rpc UpdatePolicyStatus(MsgUpdatePolicyStatus) returns (MsgUpdatePolicyStatusResponse) {
+    option (google.api.http).post = "/osmosis/policy/v1beta1/policies/{policy_id}/status";
+  };
+}
+
+message MsgCreatePolicy {
+  option (cosmos.msg.v1.signer) = "owner";
+  option (amino.name) = "osmosis/policy/create-policy";
+
+  string owner = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string policy_type = 2;
+  repeated PolicyAttribute attributes = 3 [ (gogoproto.nullable) = false ];
+  string treasury_pool_id = 4;
+  google.protobuf.Timestamp start_time = 5 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp end_time = 6 [(gogoproto.stdtime) = true];
+  repeated string tags = 7;
+}
+
+message MsgCreatePolicyResponse {
+  uint64 policy_id = 1;
+}
+
+message MsgUpdatePolicyAttributes {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/policy/update-policy-attributes";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  uint64 policy_id = 2;
+  repeated PolicyAttribute attributes = 3 [ (gogoproto.nullable) = false ];
+  bool replace = 4;
+}
+
+message MsgUpdatePolicyAttributesResponse {}
+
+message MsgCancelPolicy {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/policy/cancel-policy";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  uint64 policy_id = 2;
+  string reason = 3;
+}
+
+message MsgCancelPolicyResponse {}
+
+message MsgUpdatePolicyStatus {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/policy/update-policy-status";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  uint64 policy_id = 2;
+  PolicyStatus status = 3;
+}
+
+message MsgUpdatePolicyStatusResponse {}

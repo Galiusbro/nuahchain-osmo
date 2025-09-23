@@ -1,0 +1,48 @@
+syntax = "proto3";
+package osmosis.policy.v1beta1;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "osmosis/policy/v1beta1/policy.proto";
+import "osmosis/policy/v1beta1/params.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/policy/types";
+
+service Query {
+  rpc Policy(QueryPolicyRequest) returns (QueryPolicyResponse) {
+    option (google.api.http).get = "/osmosis/policy/v1beta1/policies/{policy_id}";
+  };
+
+  rpc Policies(QueryPoliciesRequest) returns (QueryPoliciesResponse) {
+    option (google.api.http).get = "/osmosis/policy/v1beta1/policies";
+  };
+
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/osmosis/policy/v1beta1/params";
+  };
+}
+
+message QueryPolicyRequest {
+  uint64 policy_id = 1;
+}
+
+message QueryPolicyResponse {
+  Policy policy = 1;
+}
+
+message QueryPoliciesRequest {
+  PolicyFilter filter = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+message QueryPoliciesResponse {
+  repeated Policy policies = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryParamsRequest {}
+
+message QueryParamsResponse {
+  Params params = 1;
+}

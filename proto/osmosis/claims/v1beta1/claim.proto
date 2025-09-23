@@ -1,0 +1,47 @@
+syntax = "proto3";
+package osmosis.claims.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/claims/types";
+
+// ClaimStatus enumerates the state of a claim.
+enum ClaimStatus {
+  CLAIM_STATUS_UNSPECIFIED = 0;
+  CLAIM_STATUS_PENDING = 1;
+  CLAIM_STATUS_APPROVED = 2;
+  CLAIM_STATUS_REJECTED = 3;
+  CLAIM_STATUS_PAID = 4;
+}
+
+// ClaimEvidence links off-chain evidence supporting a claim.
+message ClaimEvidence {
+  string uri = 1;
+  string notes = 2;
+}
+
+// ClaimDecision captures the review outcome for a claim.
+message ClaimDecision {
+  string reviewer = 1;
+  ClaimStatus status = 2;
+  string reason = 3;
+  google.protobuf.Timestamp decided_at = 4 [ (gogoproto.stdtime) = true ];
+}
+
+// Claim represents a payout request tied to a policy.
+message Claim {
+  uint64 id = 1;
+  uint64 policy_id = 2;
+  string claimant = 3;
+  string reporter = 4;
+  cosmos.base.v1beta1.Coin amount = 5 [ (gogoproto.nullable) = false ];
+  string description = 6;
+  repeated ClaimEvidence evidence = 7 [ (gogoproto.nullable) = false ];
+  ClaimStatus status = 8;
+  ClaimDecision decision = 9;
+  google.protobuf.Timestamp submitted_at = 10 [ (gogoproto.stdtime) = true ];
+  google.protobuf.Timestamp resolved_at = 11 [ (gogoproto.stdtime) = true ];
+  string treasury_pool_id = 12;
+}

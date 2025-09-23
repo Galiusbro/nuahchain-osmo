@@ -1,0 +1,90 @@
+syntax = "proto3";
+package osmosis.treasury.v1beta1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "osmosis/treasury/v1beta1/treasury.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/treasury/types";
+
+service Msg {
+  rpc CreateTreasuryPool(MsgCreateTreasuryPool) returns (MsgCreateTreasuryPoolResponse) {
+    option (google.api.http).post = "/osmosis/treasury/v1beta1/pools";
+  };
+  rpc UpdateTreasuryPool(MsgUpdateTreasuryPool) returns (MsgUpdateTreasuryPoolResponse) {
+    option (google.api.http).post = "/osmosis/treasury/v1beta1/pools/{pool_id}";
+  };
+  rpc DepositToTreasury(MsgDepositToTreasury) returns (MsgDepositToTreasuryResponse) {
+    option (google.api.http).post = "/osmosis/treasury/v1beta1/pools/{pool_id}/deposit";
+  };
+  rpc WithdrawFromTreasury(MsgWithdrawFromTreasury) returns (MsgWithdrawFromTreasuryResponse) {
+    option (google.api.http).post = "/osmosis/treasury/v1beta1/pools/{pool_id}/withdraw";
+  };
+  rpc SetPoolReserves(MsgSetPoolReserves) returns (MsgSetPoolReservesResponse) {
+    option (google.api.http).post = "/osmosis/treasury/v1beta1/pools/{pool_id}/reserves";
+  };
+}
+
+message MsgCreateTreasuryPool {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/treasury/create-pool";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string pool_id = 2;
+  string description = 3;
+  string manager = 4 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  repeated string policy_types = 5;
+}
+
+message MsgCreateTreasuryPoolResponse {}
+
+message MsgUpdateTreasuryPool {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/treasury/update-pool";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string pool_id = 2;
+  string description = 3;
+  string manager = 4 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  repeated string policy_types = 5;
+}
+
+message MsgUpdateTreasuryPoolResponse {}
+
+message MsgDepositToTreasury {
+  option (cosmos.msg.v1.signer) = "depositor";
+  option (amino.name) = "osmosis/treasury/deposit";
+
+  string depositor = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string pool_id = 2;
+  cosmos.base.v1beta1.Coin amount = 3 [ (gogoproto.nullable) = false ];
+}
+
+message MsgDepositToTreasuryResponse {}
+
+message MsgWithdrawFromTreasury {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/treasury/withdraw";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string pool_id = 2;
+  string recipient = 3 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  cosmos.base.v1beta1.Coin amount = 4 [ (gogoproto.nullable) = false ];
+}
+
+message MsgWithdrawFromTreasuryResponse {}
+
+message MsgSetPoolReserves {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "osmosis/treasury/set-reserves";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string pool_id = 2;
+  repeated PoolReserves reserves = 3 [ (gogoproto.nullable) = false ];
+}
+
+message MsgSetPoolReservesResponse {}

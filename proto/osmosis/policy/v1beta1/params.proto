@@ -1,0 +1,13 @@
+syntax = "proto3";
+package osmosis.policy.v1beta1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/policy/types";
+
+// Params defines the configurable parameters for the policy module.
+message Params {
+  repeated string allowed_policy_types = 1;
+  uint64 default_policy_duration_days = 2;
+  string default_treasury_pool_id = 3;
+}

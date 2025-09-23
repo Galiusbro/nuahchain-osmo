@@ -44,6 +44,8 @@ import (
 	icacontrollertypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/controller/types"
 
 	appparams "github.com/osmosis-labs/osmosis/v30/app/params"
+	claimskeeper "github.com/osmosis-labs/osmosis/v30/x/claims/keeper"
+	claimstypes "github.com/osmosis-labs/osmosis/v30/x/claims/types"
 	"github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool"
 	cosmwasmpooltypes "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/types"
 	downtimedetector "github.com/osmosis-labs/osmosis/v30/x/downtime-detector"
@@ -53,9 +55,17 @@ import (
 	ibcratelimittypes "github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit/types"
 	pegkeeperkeeper "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/keeper"
 	pegkeepertypes "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/types"
+	policykeeper "github.com/osmosis-labs/osmosis/v30/x/policy/keeper"
+	policytypes "github.com/osmosis-labs/osmosis/v30/x/policy/types"
 	"github.com/osmosis-labs/osmosis/v30/x/poolmanager"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v30/x/poolmanager/types"
+	premiumkeeper "github.com/osmosis-labs/osmosis/v30/x/premium/keeper"
+	premiumtypes "github.com/osmosis-labs/osmosis/v30/x/premium/types"
 	"github.com/osmosis-labs/osmosis/v30/x/protorev"
+	roleskeeper "github.com/osmosis-labs/osmosis/v30/x/roles/keeper"
+	rolestypes "github.com/osmosis-labs/osmosis/v30/x/roles/types"
+	treasurykeeper "github.com/osmosis-labs/osmosis/v30/x/treasury/keeper"
+	treasurytypes "github.com/osmosis-labs/osmosis/v30/x/treasury/types"
 	ibchooks "github.com/osmosis-labs/osmosis/x/ibc-hooks"
 	ibchookskeeper "github.com/osmosis-labs/osmosis/x/ibc-hooks/keeper"
 	ibchookstypes "github.com/osmosis-labs/osmosis/x/ibc-hooks/types"
@@ -196,6 +206,11 @@ type AppKeepers struct {
 	ExchangeKeeper               *exchangekeeper.Keeper
 	PegKeeperKeeper              *pegkeeperkeeper.Keeper
 	UserTokenKeeper              *usertokenkeeper.Keeper
+	RolesKeeper                  *roleskeeper.Keeper
+	PolicyKeeper                 *policykeeper.Keeper
+	PremiumKeeper                *premiumkeeper.Keeper
+	ClaimsKeeper                 *claimskeeper.Keeper
+	TreasuryKeeper               *treasurykeeper.Keeper
 
 	// IBC modules
 	// transfer module
@@ -649,6 +664,50 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 	)
 	appKeepers.UserTokenKeeper = userTokenKeeper
 
+	rolesKeeper := roleskeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[rolestypes.StoreKey],
+		appKeepers.GetSubspace(rolestypes.ModuleName),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+	appKeepers.RolesKeeper = &rolesKeeper
+
+	treasuryKeeper := treasurykeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[treasurytypes.StoreKey],
+		appKeepers.GetSubspace(treasurytypes.ModuleName),
+		appKeepers.BankKeeper,
+		appKeepers.RolesKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+	appKeepers.TreasuryKeeper = &treasuryKeeper
+
+	policyKeeper := policykeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[policytypes.StoreKey],
+		appKeepers.GetSubspace(policytypes.ModuleName),
+		appKeepers.RolesKeeper,
+	)
+	appKeepers.PolicyKeeper = &policyKeeper
+
+	premiumKeeper := premiumkeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[premiumtypes.StoreKey],
+		appKeepers.GetSubspace(premiumtypes.ModuleName),
+		appKeepers.RolesKeeper,
+	)
+	appKeepers.PremiumKeeper = &premiumKeeper
+
+	claimsKeeper := claimskeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[claimstypes.StoreKey],
+		appKeepers.GetSubspace(claimstypes.ModuleName),
+		appKeepers.RolesKeeper,
+		appKeepers.PolicyKeeper,
+		appKeepers.TreasuryKeeper,
+	)
+	appKeepers.ClaimsKeeper = &claimsKeeper
+
 	appKeepers.SuperfluidKeeper = superfluidkeeper.NewKeeper(
 		appKeepers.keys[superfluidtypes.StoreKey], appKeepers.GetSubspace(superfluidtypes.ModuleName),
 		*appKeepers.AccountKeeper, appKeepers.BankKeeper, appKeepers.StakingKeeper, appKeepers.DistrKeeper, appKeepers.EpochsKeeper, appKeepers.LockupKeeper, appKeepers.GAMMKeeper, appKeepers.IncentivesKeeper,
@@ -904,6 +963,11 @@ func (appKeepers *AppKeepers) initParamsKeeper(appCodec codec.BinaryCodec, legac
 	paramsKeeper.Subspace(pegkeepertypes.ModuleName)
 	paramsKeeper.Subspace(usdoracletypes.ModuleName).WithKeyTable(usdoracletypes.ParamKeyTable())
 	paramsKeeper.Subspace(exchangetypes.ModuleName).WithKeyTable(exchangetypes.ParamKeyTable())
+	paramsKeeper.Subspace(rolestypes.ModuleName)
+	paramsKeeper.Subspace(policytypes.ModuleName)
+	paramsKeeper.Subspace(premiumtypes.ModuleName)
+	paramsKeeper.Subspace(claimstypes.ModuleName)
+	paramsKeeper.Subspace(treasurytypes.ModuleName)
 
 	return paramsKeeper
 }
@@ -1033,6 +1097,11 @@ func KVStoreKeys() []string {
 		usdoracletypes.StoreKey,
 		exchangetypes.StoreKey,
 		pegkeepertypes.StoreKey,
+		rolestypes.StoreKey,
+		policytypes.StoreKey,
+		premiumtypes.StoreKey,
+		claimstypes.StoreKey,
+		treasurytypes.StoreKey,
 		usertokentypes.StoreKey,
 	}
 }

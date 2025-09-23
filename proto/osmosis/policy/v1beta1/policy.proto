@@ -1,0 +1,43 @@
+syntax = "proto3";
+package osmosis.policy.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/policy/types";
+
+// PolicyStatus enumerates supported policy lifecycle states.
+enum PolicyStatus {
+  POLICY_STATUS_UNSPECIFIED = 0;
+  POLICY_STATUS_ACTIVE = 1;
+  POLICY_STATUS_EXPIRED = 2;
+  POLICY_STATUS_CLAIMED = 3;
+  POLICY_STATUS_CANCELLED = 4;
+}
+
+// PolicyAttribute stores a dynamic key/value pair for policy metadata.
+message PolicyAttribute {
+  string key = 1;
+  string value = 2;
+}
+
+// Policy models an insurance policy record.
+message Policy {
+  uint64 id = 1;
+  string owner = 2;
+  string policy_type = 3;
+  PolicyStatus status = 4;
+  google.protobuf.Timestamp start_time = 5 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp end_time = 6 [(gogoproto.stdtime) = true];
+  repeated PolicyAttribute attributes = 7 [(gogoproto.nullable) = false];
+  string treasury_pool_id = 8;
+  uint64 premium_plan_id = 9;
+  repeated string tags = 10;
+}
+
+// PolicyFilter allows querying policies by optional attributes.
+message PolicyFilter {
+  string owner = 1;
+  string policy_type = 2;
+  PolicyStatus status = 3;
+}

@@ -1,0 +1,63 @@
+syntax = "proto3";
+package osmosis.premium.v1beta1;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "osmosis/premium/v1beta1/premium.proto";
+import "osmosis/premium/v1beta1/params.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/premium/types";
+
+service Query {
+  rpc PremiumPlan(QueryPremiumPlanRequest) returns (QueryPremiumPlanResponse) {
+    option (google.api.http).get = "/osmosis/premium/v1beta1/plans/{plan_id}";
+  };
+
+  rpc PremiumPlans(QueryPremiumPlansRequest) returns (QueryPremiumPlansResponse) {
+    option (google.api.http).get = "/osmosis/premium/v1beta1/plans";
+  };
+
+  rpc PremiumPayments(QueryPremiumPaymentsRequest) returns (QueryPremiumPaymentsResponse) {
+    option (google.api.http).get = "/osmosis/premium/v1beta1/plans/{plan_id}/payments";
+  };
+
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/osmosis/premium/v1beta1/params";
+  };
+}
+
+message QueryPremiumPlanRequest {
+  uint64 plan_id = 1;
+}
+
+message QueryPremiumPlanResponse {
+  PremiumPlan plan = 1;
+}
+
+message QueryPremiumPlansRequest {
+  uint64 policy_id = 1;
+  string payer = 2;
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+message QueryPremiumPlansResponse {
+  repeated PremiumPlan plans = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryPremiumPaymentsRequest {
+  uint64 plan_id = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+message QueryPremiumPaymentsResponse {
+  repeated PremiumPayment payments = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryParamsRequest {}
+
+message QueryParamsResponse {
+  Params params = 1;
+}

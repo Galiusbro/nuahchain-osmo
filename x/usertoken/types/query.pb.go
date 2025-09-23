@@ -386,96 +386,6 @@ func (m *QueryBondingCurvePriceResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryBondingCurvePriceResponse proto.InternalMessageInfo
 
-// QueryReferralProgramRequest is request type for the Query/ReferralProgram RPC method.
-type QueryReferralProgramRequest struct {
-	TokenDenom string `protobuf:"bytes,1,opt,name=token_denom,json=tokenDenom,proto3" json:"token_denom,omitempty"`
-}
-
-func (m *QueryReferralProgramRequest) Reset()         { *m = QueryReferralProgramRequest{} }
-func (m *QueryReferralProgramRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryReferralProgramRequest) ProtoMessage()    {}
-func (*QueryReferralProgramRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_26dd89774309555b, []int{8}
-}
-func (m *QueryReferralProgramRequest) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryReferralProgramRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryReferralProgramRequest.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryReferralProgramRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryReferralProgramRequest.Merge(m, src)
-}
-func (m *QueryReferralProgramRequest) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryReferralProgramRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryReferralProgramRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryReferralProgramRequest proto.InternalMessageInfo
-
-func (m *QueryReferralProgramRequest) GetTokenDenom() string {
-	if m != nil {
-		return m.TokenDenom
-	}
-	return ""
-}
-
-// QueryReferralProgramResponse is response type for the Query/ReferralProgram RPC method.
-type QueryReferralProgramResponse struct {
-	ReferralProgram *ReferralProgram `protobuf:"bytes,1,opt,name=referral_program,json=referralProgram,proto3" json:"referral_program,omitempty"`
-}
-
-func (m *QueryReferralProgramResponse) Reset()         { *m = QueryReferralProgramResponse{} }
-func (m *QueryReferralProgramResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryReferralProgramResponse) ProtoMessage()    {}
-func (*QueryReferralProgramResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_26dd89774309555b, []int{9}
-}
-func (m *QueryReferralProgramResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryReferralProgramResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryReferralProgramResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryReferralProgramResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryReferralProgramResponse.Merge(m, src)
-}
-func (m *QueryReferralProgramResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryReferralProgramResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryReferralProgramResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryReferralProgramResponse proto.InternalMessageInfo
-
-func (m *QueryReferralProgramResponse) GetReferralProgram() *ReferralProgram {
-	if m != nil {
-		return m.ReferralProgram
-	}
-	return nil
-}
-
 // QueryReferralProgramsRequest is request type for the Query/ReferralPrograms RPC method.
 type QueryReferralProgramsRequest struct {
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -485,7 +395,7 @@ func (m *QueryReferralProgramsRequest) Reset()         { *m = QueryReferralProgr
 func (m *QueryReferralProgramsRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryReferralProgramsRequest) ProtoMessage()    {}
 func (*QueryReferralProgramsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_26dd89774309555b, []int{10}
+	return fileDescriptor_26dd89774309555b, []int{8}
 }
 func (m *QueryReferralProgramsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -531,7 +441,7 @@ func (m *QueryReferralProgramsResponse) Reset()         { *m = QueryReferralProg
 func (m *QueryReferralProgramsResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryReferralProgramsResponse) ProtoMessage()    {}
 func (*QueryReferralProgramsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_26dd89774309555b, []int{11}
+	return fileDescriptor_26dd89774309555b, []int{9}
 }
 func (m *QueryReferralProgramsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -574,6 +484,112 @@ func (m *QueryReferralProgramsResponse) GetPagination() *query.PageResponse {
 	return nil
 }
 
+// QueryReferralActivationsRequest is request type for the Query/ReferralActivations RPC method.
+type QueryReferralActivationsRequest struct {
+	User       string             `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Pagination *query.PageRequest `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryReferralActivationsRequest) Reset()         { *m = QueryReferralActivationsRequest{} }
+func (m *QueryReferralActivationsRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryReferralActivationsRequest) ProtoMessage()    {}
+func (*QueryReferralActivationsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_26dd89774309555b, []int{10}
+}
+func (m *QueryReferralActivationsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryReferralActivationsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryReferralActivationsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryReferralActivationsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryReferralActivationsRequest.Merge(m, src)
+}
+func (m *QueryReferralActivationsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryReferralActivationsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryReferralActivationsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryReferralActivationsRequest proto.InternalMessageInfo
+
+func (m *QueryReferralActivationsRequest) GetUser() string {
+	if m != nil {
+		return m.User
+	}
+	return ""
+}
+
+func (m *QueryReferralActivationsRequest) GetPagination() *query.PageRequest {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+// QueryReferralActivationsResponse is response type for the Query/ReferralActivations RPC method.
+type QueryReferralActivationsResponse struct {
+	ReferralActivations []*ReferralActivation `protobuf:"bytes,1,rep,name=referral_activations,json=referralActivations,proto3" json:"referral_activations,omitempty"`
+	Pagination          *query.PageResponse   `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryReferralActivationsResponse) Reset()         { *m = QueryReferralActivationsResponse{} }
+func (m *QueryReferralActivationsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryReferralActivationsResponse) ProtoMessage()    {}
+func (*QueryReferralActivationsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_26dd89774309555b, []int{11}
+}
+func (m *QueryReferralActivationsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryReferralActivationsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryReferralActivationsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryReferralActivationsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryReferralActivationsResponse.Merge(m, src)
+}
+func (m *QueryReferralActivationsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryReferralActivationsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryReferralActivationsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryReferralActivationsResponse proto.InternalMessageInfo
+
+func (m *QueryReferralActivationsResponse) GetReferralActivations() []*ReferralActivation {
+	if m != nil {
+		return m.ReferralActivations
+	}
+	return nil
+}
+
+func (m *QueryReferralActivationsResponse) GetPagination() *query.PageResponse {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "osmosis.usertoken.v1beta1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "osmosis.usertoken.v1beta1.QueryParamsResponse")
@@ -583,10 +599,10 @@ func init() {
 	proto.RegisterType((*QueryUserTokensResponse)(nil), "osmosis.usertoken.v1beta1.QueryUserTokensResponse")
 	proto.RegisterType((*QueryBondingCurvePriceRequest)(nil), "osmosis.usertoken.v1beta1.QueryBondingCurvePriceRequest")
 	proto.RegisterType((*QueryBondingCurvePriceResponse)(nil), "osmosis.usertoken.v1beta1.QueryBondingCurvePriceResponse")
-	proto.RegisterType((*QueryReferralProgramRequest)(nil), "osmosis.usertoken.v1beta1.QueryReferralProgramRequest")
-	proto.RegisterType((*QueryReferralProgramResponse)(nil), "osmosis.usertoken.v1beta1.QueryReferralProgramResponse")
 	proto.RegisterType((*QueryReferralProgramsRequest)(nil), "osmosis.usertoken.v1beta1.QueryReferralProgramsRequest")
 	proto.RegisterType((*QueryReferralProgramsResponse)(nil), "osmosis.usertoken.v1beta1.QueryReferralProgramsResponse")
+	proto.RegisterType((*QueryReferralActivationsRequest)(nil), "osmosis.usertoken.v1beta1.QueryReferralActivationsRequest")
+	proto.RegisterType((*QueryReferralActivationsResponse)(nil), "osmosis.usertoken.v1beta1.QueryReferralActivationsResponse")
 }
 
 func init() {
@@ -594,57 +610,58 @@ func init() {
 }
 
 var fileDescriptor_26dd89774309555b = []byte{
-	// 791 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x96, 0xcf, 0x4f, 0x13, 0x4d,
-	0x18, 0xc7, 0xbb, 0xbc, 0x81, 0xbc, 0x7d, 0x38, 0x00, 0xf3, 0xf2, 0xbe, 0xaf, 0x16, 0x2c, 0xb2,
-	0x28, 0x20, 0xb1, 0x33, 0xfc, 0x10, 0x84, 0x98, 0x90, 0x58, 0x50, 0x2f, 0x26, 0x62, 0x23, 0x31,
-	0x91, 0x98, 0x3a, 0x2d, 0xc3, 0xb2, 0x81, 0xee, 0x2c, 0x3b, 0x5b, 0x22, 0x21, 0x5c, 0xfc, 0x0b,
-	0x8c, 0xfe, 0x09, 0x1e, 0xd4, 0x9b, 0x77, 0xe3, 0xc1, 0x83, 0x09, 0x47, 0x12, 0x2f, 0xc6, 0x03,
-	0x31, 0x60, 0xe2, 0xbf, 0x61, 0x76, 0x66, 0xba, 0x6d, 0xb7, 0xf4, 0x97, 0xe1, 0x42, 0x96, 0xd9,
-	0xe7, 0xfb, 0x3c, 0x9f, 0xef, 0xcc, 0xec, 0x37, 0x85, 0xab, 0x5c, 0x14, 0xb8, 0xb0, 0x05, 0x29,
-	0x0a, 0xe6, 0xf9, 0x7c, 0x8b, 0x39, 0x64, 0x77, 0x2a, 0xc7, 0x7c, 0x3a, 0x45, 0x76, 0x8a, 0xcc,
-	0xdb, 0xc3, 0xae, 0xc7, 0x7d, 0x8e, 0x2e, 0xea, 0x32, 0x1c, 0x96, 0x61, 0x5d, 0x96, 0xe8, 0xb7,
-	0xb8, 0xc5, 0x65, 0x15, 0x09, 0x9e, 0x94, 0x20, 0x31, 0x68, 0x71, 0x6e, 0x6d, 0x33, 0x42, 0x5d,
-	0x9b, 0x50, 0xc7, 0xe1, 0x3e, 0xf5, 0x6d, 0xee, 0x08, 0xfd, 0x76, 0x22, 0x2f, 0xfb, 0x91, 0x1c,
-	0x15, 0x4c, 0xcd, 0x09, 0xa7, 0xba, 0xd4, 0xb2, 0x1d, 0x59, 0xac, 0x6b, 0xc7, 0xea, 0x13, 0x5a,
-	0xcc, 0x61, 0x01, 0x94, 0x2a, 0xec, 0xa3, 0x05, 0xdb, 0xe1, 0x44, 0xfe, 0x55, 0x4b, 0x66, 0x3f,
-	0xa0, 0x87, 0x41, 0xf7, 0x15, 0xea, 0xd1, 0x82, 0xc8, 0xb0, 0x9d, 0x22, 0x13, 0xbe, 0xb9, 0x06,
-	0xff, 0x54, 0xad, 0x0a, 0x97, 0x3b, 0x82, 0xa1, 0x65, 0xe8, 0x72, 0xe5, 0xca, 0x05, 0xe3, 0xb2,
-	0x31, 0xde, 0x3d, 0x3d, 0x8c, 0xeb, 0x9a, 0xc6, 0x4a, 0x9a, 0x8e, 0x1f, 0x1e, 0x0f, 0xc5, 0xde,
-	0xfd, 0xfa, 0x30, 0x61, 0x64, 0xb4, 0xd6, 0x4c, 0xc1, 0xbf, 0xb2, 0xf9, 0xaa, 0x60, 0xde, 0xa3,
-	0x40, 0xa3, 0xa7, 0xa2, 0x7e, 0xe8, 0x5c, 0x67, 0x0e, 0x2f, 0xc8, 0xee, 0xf1, 0x8c, 0xfa, 0xc7,
-	0x7c, 0x0a, 0xff, 0x45, 0xcb, 0x35, 0xce, 0x12, 0x40, 0x30, 0x37, 0x2b, 0x07, 0x6b, 0xa4, 0x2b,
-	0x0d, 0x90, 0xca, 0x1d, 0xe2, 0xc5, 0xd2, 0xa3, 0xf9, 0x2c, 0xda, 0xbe, 0xb4, 0x09, 0xe8, 0x2e,
-	0x40, 0x79, 0xab, 0x75, 0xfb, 0x51, 0xac, 0xce, 0x05, 0x07, 0xe7, 0x82, 0xd5, 0xf9, 0x97, 0x1d,
-	0x5b, 0x4c, 0x6b, 0x33, 0x15, 0x4a, 0xf3, 0xbd, 0x01, 0xff, 0xd7, 0x8c, 0xd0, 0x16, 0xee, 0x40,
-	0x77, 0xd9, 0x42, 0xb0, 0xad, 0x7f, 0xb5, 0xec, 0x01, 0x42, 0x0f, 0x02, 0xdd, 0xab, 0x42, 0xed,
-	0x90, 0xa8, 0x63, 0x4d, 0x51, 0x15, 0x43, 0x15, 0xeb, 0x2c, 0x5c, 0x92, 0xa8, 0x69, 0xee, 0xac,
-	0xdb, 0x8e, 0xb5, 0x54, 0xf4, 0x76, 0xd9, 0x8a, 0x67, 0xe7, 0x59, 0xe3, 0x33, 0x5a, 0x83, 0x64,
-	0x3d, 0x99, 0x36, 0xba, 0x00, 0x9d, 0x6e, 0xb0, 0xa0, 0x74, 0xe9, 0x91, 0xe0, 0x5a, 0x7c, 0x3f,
-	0x1e, 0x1a, 0x50, 0x8c, 0x62, 0x7d, 0x0b, 0xdb, 0x9c, 0x14, 0xa8, 0xbf, 0x89, 0xef, 0x33, 0x8b,
-	0xe6, 0xf7, 0x96, 0x59, 0x3e, 0xa3, 0x14, 0xe6, 0x22, 0x0c, 0xc8, 0xe6, 0x19, 0xb6, 0xc1, 0x3c,
-	0x8f, 0x6e, 0xaf, 0x78, 0xdc, 0xf2, 0x68, 0xa1, 0x44, 0x34, 0x04, 0xdd, 0x72, 0x8b, 0xb2, 0x95,
-	0x5c, 0x20, 0x97, 0x96, 0x25, 0x5c, 0x11, 0x06, 0xcf, 0xd6, 0x6b, 0xb4, 0x55, 0xe8, 0xf5, 0xf4,
-	0xab, 0xac, 0xab, 0xde, 0xe9, 0xd3, 0x9e, 0x68, 0x70, 0x10, 0xd1, 0x6e, 0x3d, 0x5e, 0xf5, 0x82,
-	0xb9, 0x71, 0xf6, 0xd8, 0x73, 0xbf, 0x5e, 0x9f, 0x0d, 0x7d, 0x66, 0xb5, 0x83, 0xb4, 0xc1, 0xc7,
-	0xd0, 0x17, 0x35, 0x58, 0xba, 0x6a, 0xed, 0x38, 0xec, 0x8d, 0x38, 0x3c, 0xbf, 0x6b, 0x37, 0xfd,
-	0xe9, 0x6f, 0xe8, 0x94, 0x1e, 0xd0, 0x2b, 0x03, 0xba, 0x54, 0x74, 0xa0, 0x54, 0x03, 0xb6, 0xda,
-	0xcc, 0x4a, 0xe0, 0x56, 0xcb, 0xd5, 0x7c, 0xf3, 0xda, 0x8b, 0xaf, 0x3f, 0x5f, 0x77, 0x8c, 0xa0,
-	0x61, 0x52, 0x3f, 0x3e, 0x55, 0x62, 0xa1, 0xb7, 0x06, 0xc4, 0xc3, 0x0f, 0x0f, 0x4d, 0x36, 0x1b,
-	0x14, 0x0d, 0xb6, 0xc4, 0x54, 0x1b, 0x0a, 0x4d, 0x37, 0x2b, 0xe9, 0x08, 0x4a, 0x35, 0xa0, 0x2b,
-	0x27, 0x07, 0xd9, 0x97, 0x97, 0xff, 0x00, 0xbd, 0x31, 0x00, 0xca, 0x31, 0x83, 0x5a, 0x1f, 0x1c,
-	0x6e, 0xe3, 0x74, 0x3b, 0x12, 0x0d, 0x8b, 0x25, 0xec, 0x38, 0x1a, 0x6d, 0x09, 0x56, 0xa0, 0x43,
-	0x03, 0xfa, 0x6a, 0xa2, 0x02, 0xcd, 0x37, 0x9b, 0x5c, 0x2f, 0x94, 0x12, 0x0b, 0x7f, 0xa0, 0xd4,
-	0xe8, 0x8b, 0x12, 0x7d, 0x1e, 0xcd, 0x35, 0x40, 0xcf, 0x29, 0x75, 0x36, 0x1f, 0xc8, 0xb3, 0x32,
-	0x94, 0xc2, 0x0d, 0xff, 0x62, 0x40, 0x4f, 0xe4, 0x43, 0x41, 0x73, 0xcd, 0x70, 0xce, 0x4e, 0xb2,
-	0xc4, 0xcd, 0xb6, 0x75, 0xda, 0xc4, 0x6d, 0x69, 0xe2, 0x16, 0x5a, 0x68, 0x60, 0x22, 0x9a, 0x00,
-	0x64, 0xbf, 0x22, 0x35, 0x0f, 0xd0, 0x47, 0x03, 0x7a, 0xa3, 0x01, 0x82, 0xda, 0x05, 0x0a, 0x2f,
-	0xd1, 0x7c, 0xfb, 0x42, 0x6d, 0xe5, 0x86, 0xb4, 0x82, 0xd1, 0xf5, 0x36, 0xac, 0x88, 0xf4, 0x83,
-	0xc3, 0x93, 0xa4, 0x71, 0x74, 0x92, 0x34, 0x7e, 0x9c, 0x24, 0x8d, 0x97, 0xa7, 0xc9, 0xd8, 0xd1,
-	0x69, 0x32, 0xf6, 0xed, 0x34, 0x19, 0x7b, 0x32, 0x6b, 0xd9, 0xfe, 0x66, 0x31, 0x87, 0xf3, 0xbc,
-	0x50, 0xea, 0x98, 0xda, 0xa6, 0x39, 0x11, 0xb6, 0xdf, 0x9d, 0x99, 0x24, 0xcf, 0x2b, 0x86, 0xf8,
-	0x7b, 0x2e, 0x13, 0xb9, 0x2e, 0xf9, 0xeb, 0x68, 0xe6, 0x77, 0x00, 0x00, 0x00, 0xff, 0xff, 0xdb,
-	0x06, 0x6e, 0x97, 0xfd, 0x09, 0x00, 0x00,
+	// 804 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0x4d, 0x4f, 0x14, 0x4b,
+	0x14, 0x9d, 0xe2, 0x3d, 0xc8, 0x9b, 0xcb, 0x06, 0x8a, 0x79, 0x7e, 0x8c, 0x38, 0x40, 0xa3, 0x80,
+	0xc4, 0xe9, 0xe6, 0x43, 0x14, 0x34, 0x31, 0x71, 0x40, 0xdd, 0x98, 0x88, 0x1d, 0x8d, 0x89, 0xc4,
+	0x0c, 0x35, 0x43, 0xd1, 0x74, 0x60, 0xba, 0x9a, 0xae, 0x9e, 0x89, 0x84, 0xb0, 0xf1, 0x17, 0x18,
+	0xfd, 0x09, 0x2e, 0xd4, 0x9d, 0x7b, 0x57, 0x6e, 0x0c, 0x1b, 0x0d, 0x89, 0x1b, 0xe3, 0x82, 0x18,
+	0x30, 0xf1, 0x6f, 0x98, 0xae, 0xaa, 0xe9, 0x66, 0x66, 0x98, 0x2f, 0xc2, 0x86, 0x14, 0x55, 0xf7,
+	0xdc, 0x73, 0xce, 0xbd, 0x9d, 0x93, 0x81, 0xcb, 0x8c, 0x17, 0x18, 0xb7, 0xb9, 0x51, 0xe4, 0xd4,
+	0xf3, 0xd9, 0x3a, 0x75, 0x8c, 0xd2, 0x64, 0x8e, 0xfa, 0x64, 0xd2, 0xd8, 0x2c, 0x52, 0x6f, 0x4b,
+	0x77, 0x3d, 0xe6, 0x33, 0x7c, 0x5e, 0x95, 0xe9, 0x61, 0x99, 0xae, 0xca, 0x92, 0x09, 0x8b, 0x59,
+	0x4c, 0x54, 0x19, 0xc1, 0x49, 0x02, 0x92, 0xfd, 0x16, 0x63, 0xd6, 0x06, 0x35, 0x88, 0x6b, 0x1b,
+	0xc4, 0x71, 0x98, 0x4f, 0x7c, 0x9b, 0x39, 0x5c, 0xbd, 0x8e, 0xe7, 0x45, 0x3f, 0x23, 0x47, 0x38,
+	0x95, 0x3c, 0x21, 0xab, 0x4b, 0x2c, 0xdb, 0x11, 0xc5, 0xaa, 0x76, 0xb4, 0xbe, 0x42, 0x8b, 0x3a,
+	0x34, 0x10, 0x25, 0x0b, 0x7b, 0x49, 0xc1, 0x76, 0x98, 0x21, 0xfe, 0xca, 0x2b, 0x2d, 0x01, 0xf8,
+	0x51, 0xd0, 0x7d, 0x91, 0x78, 0xa4, 0xc0, 0x4d, 0xba, 0x59, 0xa4, 0xdc, 0xd7, 0x96, 0xa0, 0xaf,
+	0xe2, 0x96, 0xbb, 0xcc, 0xe1, 0x14, 0x2f, 0x40, 0x97, 0x2b, 0x6e, 0xce, 0xa1, 0x41, 0x34, 0xd6,
+	0x3d, 0x35, 0xa4, 0xd7, 0x35, 0xad, 0x4b, 0x68, 0x26, 0xbe, 0xbb, 0x3f, 0x10, 0x7b, 0xff, 0xe7,
+	0xe3, 0x38, 0x32, 0x15, 0x56, 0x4b, 0xc3, 0xff, 0xa2, 0xf9, 0x13, 0x4e, 0xbd, 0xc7, 0x01, 0x46,
+	0xb1, 0xe2, 0x04, 0x74, 0xae, 0x50, 0x87, 0x15, 0x44, 0xf7, 0xb8, 0x29, 0xff, 0xd1, 0x9e, 0xc3,
+	0x99, 0xea, 0x72, 0x25, 0x67, 0x1e, 0x20, 0xe0, 0xcd, 0x0a, 0x62, 0x25, 0xe9, 0x52, 0x03, 0x49,
+	0x51, 0x87, 0x78, 0xb1, 0x7c, 0xd4, 0x96, 0xab, 0xdb, 0x97, 0x87, 0x80, 0xef, 0x01, 0x44, 0xa3,
+	0x56, 0xed, 0x47, 0x74, 0xb9, 0x17, 0x3d, 0xd8, 0x8b, 0x2e, 0xf7, 0x1f, 0x39, 0xb6, 0xa8, 0xc2,
+	0x9a, 0x47, 0x90, 0xda, 0x07, 0x04, 0x67, 0x6b, 0x28, 0x94, 0x85, 0xbb, 0xd0, 0x1d, 0x59, 0x08,
+	0xc6, 0xfa, 0x4f, 0xcb, 0x1e, 0x20, 0xf4, 0xc0, 0xf1, 0xfd, 0x0a, 0xa9, 0x1d, 0x42, 0xea, 0x68,
+	0x53, 0xa9, 0x52, 0x43, 0x85, 0xd6, 0x19, 0xb8, 0x28, 0xa4, 0x66, 0x98, 0xb3, 0x62, 0x3b, 0xd6,
+	0x7c, 0xd1, 0x2b, 0xd1, 0x45, 0xcf, 0xce, 0xd3, 0xc6, 0x3b, 0x5a, 0x82, 0x54, 0x3d, 0x98, 0x32,
+	0x3a, 0x07, 0x9d, 0x6e, 0x70, 0x21, 0x71, 0x99, 0xe1, 0xe0, 0xb3, 0xf8, 0xb9, 0x3f, 0x70, 0x41,
+	0x6a, 0xe4, 0x2b, 0xeb, 0xba, 0xcd, 0x8c, 0x02, 0xf1, 0xd7, 0xf4, 0x07, 0xd4, 0x22, 0xf9, 0xad,
+	0x05, 0x9a, 0x37, 0x25, 0x42, 0x5b, 0x85, 0x7e, 0xd1, 0xdc, 0xa4, 0xab, 0xd4, 0xf3, 0xc8, 0xc6,
+	0xa2, 0xc7, 0xac, 0x23, 0x1f, 0xeb, 0xa9, 0xed, 0xe9, 0x33, 0x52, 0xe6, 0x6b, 0x89, 0x94, 0x89,
+	0xa7, 0xd0, 0xeb, 0xa9, 0xb7, 0xac, 0xab, 0x1e, 0xd5, 0xce, 0xc6, 0x1b, 0xec, 0xac, 0xaa, 0x9f,
+	0xd9, 0xe3, 0x55, 0x11, 0x9c, 0xde, 0xfe, 0x76, 0x60, 0xa0, 0xc2, 0xc2, 0x9d, 0xbc, 0x6f, 0x97,
+	0x64, 0xb0, 0x94, 0xc7, 0x85, 0xe1, 0xdf, 0x40, 0xa2, 0x5a, 0xa0, 0x38, 0x57, 0x8d, 0xb0, 0xe3,
+	0xc4, 0x23, 0xfc, 0x8a, 0x60, 0xb0, 0x3e, 0xbf, 0x9a, 0xe2, 0x32, 0x24, 0xc2, 0x29, 0x92, 0xe8,
+	0x5d, 0x0d, 0x32, 0xdd, 0xc2, 0x20, 0xa3, 0xae, 0x66, 0x9f, 0x57, 0xcb, 0x74, 0x6a, 0xe3, 0x9c,
+	0xfa, 0xf2, 0x1f, 0x74, 0x0a, 0x3f, 0xf8, 0x35, 0x82, 0x2e, 0x19, 0x69, 0xb8, 0x91, 0xc2, 0xda,
+	0x2c, 0x4d, 0xea, 0xad, 0x96, 0x4b, 0x7e, 0xed, 0xca, 0xcb, 0xef, 0xbf, 0xdf, 0x74, 0x0c, 0xe3,
+	0x21, 0xa3, 0x7e, 0xac, 0xcb, 0x24, 0xc5, 0xef, 0x10, 0xc4, 0xc3, 0x40, 0xc0, 0x13, 0xcd, 0x88,
+	0xaa, 0x03, 0x37, 0x39, 0xd9, 0x06, 0x42, 0xa9, 0x9b, 0x11, 0xea, 0x0c, 0x9c, 0x6e, 0xa0, 0x2e,
+	0x4a, 0x34, 0x63, 0x5b, 0xe4, 0xc3, 0x0e, 0x7e, 0x8b, 0x00, 0xa2, 0xf8, 0xc3, 0xad, 0x13, 0x87,
+	0x63, 0x9c, 0x6a, 0x07, 0xa2, 0xc4, 0xea, 0x42, 0xec, 0x18, 0x1e, 0x69, 0x49, 0x2c, 0xc7, 0xbb,
+	0x08, 0x7a, 0x6b, 0x22, 0x0c, 0xcf, 0x36, 0x63, 0xae, 0x17, 0x96, 0xc9, 0xb9, 0x13, 0x20, 0x95,
+	0xf4, 0xdb, 0x42, 0xfa, 0x2c, 0xbe, 0xde, 0x40, 0x7a, 0x4e, 0xa2, 0xb3, 0xf9, 0x00, 0x9e, 0x15,
+	0x61, 0x19, 0x0e, 0xfc, 0x13, 0x82, 0x9e, 0xea, 0x1c, 0xc3, 0x37, 0x9a, 0xe9, 0xa9, 0x13, 0xb1,
+	0xc9, 0xd9, 0xf6, 0x81, 0xca, 0xc7, 0x35, 0xe1, 0x43, 0xc7, 0x57, 0x1b, 0xf8, 0xa8, 0xc9, 0x54,
+	0xfc, 0x0d, 0x41, 0xdf, 0x31, 0x11, 0x82, 0x6f, 0xb6, 0xaa, 0xa3, 0x36, 0xf7, 0x92, 0xb7, 0x4e,
+	0x84, 0x6d, 0x63, 0x1d, 0xc7, 0x85, 0x9a, 0xb1, 0x1d, 0xd4, 0xed, 0x64, 0x1e, 0xee, 0x1e, 0xa4,
+	0xd0, 0xde, 0x41, 0x0a, 0xfd, 0x3a, 0x48, 0xa1, 0x57, 0x87, 0xa9, 0xd8, 0xde, 0x61, 0x2a, 0xf6,
+	0xe3, 0x30, 0x15, 0x7b, 0x36, 0x63, 0xd9, 0xfe, 0x5a, 0x31, 0xa7, 0xe7, 0x59, 0xa1, 0xdc, 0x3b,
+	0xbd, 0x41, 0x72, 0x3c, 0x24, 0x2a, 0x4d, 0x4f, 0x18, 0x2f, 0x8e, 0xd0, 0xf9, 0x5b, 0x2e, 0xe5,
+	0xb9, 0x2e, 0xf1, 0xf3, 0x6d, 0xfa, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xc6, 0x9b, 0x02, 0x51,
+	0x9e, 0x0a, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -665,12 +682,12 @@ type QueryClient interface {
 	UserToken(ctx context.Context, in *QueryUserTokenRequest, opts ...grpc.CallOption) (*QueryUserTokenResponse, error)
 	// UserTokens queries all user tokens.
 	UserTokens(ctx context.Context, in *QueryUserTokensRequest, opts ...grpc.CallOption) (*QueryUserTokensResponse, error)
-	// BondingCurvePrice queries the current bonding curve price for a token.
+	// BondingCurvePrice queries the current price of a token on the bonding curve.
 	BondingCurvePrice(ctx context.Context, in *QueryBondingCurvePriceRequest, opts ...grpc.CallOption) (*QueryBondingCurvePriceResponse, error)
-	// ReferralProgram queries a referral program by token denom.
-	ReferralProgram(ctx context.Context, in *QueryReferralProgramRequest, opts ...grpc.CallOption) (*QueryReferralProgramResponse, error)
 	// ReferralPrograms queries all referral programs.
 	ReferralPrograms(ctx context.Context, in *QueryReferralProgramsRequest, opts ...grpc.CallOption) (*QueryReferralProgramsResponse, error)
+	// ReferralActivations queries referral activations for a user.
+	ReferralActivations(ctx context.Context, in *QueryReferralActivationsRequest, opts ...grpc.CallOption) (*QueryReferralActivationsResponse, error)
 }
 
 type queryClient struct {
@@ -717,18 +734,18 @@ func (c *queryClient) BondingCurvePrice(ctx context.Context, in *QueryBondingCur
 	return out, nil
 }
 
-func (c *queryClient) ReferralProgram(ctx context.Context, in *QueryReferralProgramRequest, opts ...grpc.CallOption) (*QueryReferralProgramResponse, error) {
-	out := new(QueryReferralProgramResponse)
-	err := c.cc.Invoke(ctx, "/osmosis.usertoken.v1beta1.Query/ReferralProgram", in, out, opts...)
+func (c *queryClient) ReferralPrograms(ctx context.Context, in *QueryReferralProgramsRequest, opts ...grpc.CallOption) (*QueryReferralProgramsResponse, error) {
+	out := new(QueryReferralProgramsResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usertoken.v1beta1.Query/ReferralPrograms", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *queryClient) ReferralPrograms(ctx context.Context, in *QueryReferralProgramsRequest, opts ...grpc.CallOption) (*QueryReferralProgramsResponse, error) {
-	out := new(QueryReferralProgramsResponse)
-	err := c.cc.Invoke(ctx, "/osmosis.usertoken.v1beta1.Query/ReferralPrograms", in, out, opts...)
+func (c *queryClient) ReferralActivations(ctx context.Context, in *QueryReferralActivationsRequest, opts ...grpc.CallOption) (*QueryReferralActivationsResponse, error) {
+	out := new(QueryReferralActivationsResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.usertoken.v1beta1.Query/ReferralActivations", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -743,12 +760,12 @@ type QueryServer interface {
 	UserToken(context.Context, *QueryUserTokenRequest) (*QueryUserTokenResponse, error)
 	// UserTokens queries all user tokens.
 	UserTokens(context.Context, *QueryUserTokensRequest) (*QueryUserTokensResponse, error)
-	// BondingCurvePrice queries the current bonding curve price for a token.
+	// BondingCurvePrice queries the current price of a token on the bonding curve.
 	BondingCurvePrice(context.Context, *QueryBondingCurvePriceRequest) (*QueryBondingCurvePriceResponse, error)
-	// ReferralProgram queries a referral program by token denom.
-	ReferralProgram(context.Context, *QueryReferralProgramRequest) (*QueryReferralProgramResponse, error)
 	// ReferralPrograms queries all referral programs.
 	ReferralPrograms(context.Context, *QueryReferralProgramsRequest) (*QueryReferralProgramsResponse, error)
+	// ReferralActivations queries referral activations for a user.
+	ReferralActivations(context.Context, *QueryReferralActivationsRequest) (*QueryReferralActivationsResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -767,11 +784,11 @@ func (*UnimplementedQueryServer) UserTokens(ctx context.Context, req *QueryUserT
 func (*UnimplementedQueryServer) BondingCurvePrice(ctx context.Context, req *QueryBondingCurvePriceRequest) (*QueryBondingCurvePriceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BondingCurvePrice not implemented")
 }
-func (*UnimplementedQueryServer) ReferralProgram(ctx context.Context, req *QueryReferralProgramRequest) (*QueryReferralProgramResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReferralProgram not implemented")
-}
 func (*UnimplementedQueryServer) ReferralPrograms(ctx context.Context, req *QueryReferralProgramsRequest) (*QueryReferralProgramsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReferralPrograms not implemented")
+}
+func (*UnimplementedQueryServer) ReferralActivations(ctx context.Context, req *QueryReferralActivationsRequest) (*QueryReferralActivationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReferralActivations not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -850,24 +867,6 @@ func _Query_BondingCurvePrice_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_ReferralProgram_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryReferralProgramRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).ReferralProgram(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/osmosis.usertoken.v1beta1.Query/ReferralProgram",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).ReferralProgram(ctx, req.(*QueryReferralProgramRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Query_ReferralPrograms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(QueryReferralProgramsRequest)
 	if err := dec(in); err != nil {
@@ -882,6 +881,24 @@ func _Query_ReferralPrograms_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).ReferralPrograms(ctx, req.(*QueryReferralProgramsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_ReferralActivations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryReferralActivationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).ReferralActivations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.usertoken.v1beta1.Query/ReferralActivations",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).ReferralActivations(ctx, req.(*QueryReferralActivationsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -907,12 +924,12 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_BondingCurvePrice_Handler,
 		},
 		{
-			MethodName: "ReferralProgram",
-			Handler:    _Query_ReferralProgram_Handler,
-		},
-		{
 			MethodName: "ReferralPrograms",
 			Handler:    _Query_ReferralPrograms_Handler,
+		},
+		{
+			MethodName: "ReferralActivations",
+			Handler:    _Query_ReferralActivations_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1187,71 +1204,6 @@ func (m *QueryBondingCurvePriceResponse) MarshalToSizedBuffer(dAtA []byte) (int,
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryReferralProgramRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryReferralProgramRequest) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryReferralProgramRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.TokenDenom) > 0 {
-		i -= len(m.TokenDenom)
-		copy(dAtA[i:], m.TokenDenom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.TokenDenom)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryReferralProgramResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryReferralProgramResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryReferralProgramResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.ReferralProgram != nil {
-		{
-			size, err := m.ReferralProgram.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintQuery(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
 func (m *QueryReferralProgramsRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1323,6 +1275,97 @@ func (m *QueryReferralProgramsResponse) MarshalToSizedBuffer(dAtA []byte) (int, 
 		for iNdEx := len(m.ReferralPrograms) - 1; iNdEx >= 0; iNdEx-- {
 			{
 				size, err := m.ReferralPrograms[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryReferralActivationsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryReferralActivationsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryReferralActivationsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.User) > 0 {
+		i -= len(m.User)
+		copy(dAtA[i:], m.User)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.User)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryReferralActivationsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryReferralActivationsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryReferralActivationsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ReferralActivations) > 0 {
+		for iNdEx := len(m.ReferralActivations) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ReferralActivations[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -1449,32 +1492,6 @@ func (m *QueryBondingCurvePriceResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryReferralProgramRequest) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.TokenDenom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryReferralProgramResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.ReferralProgram != nil {
-		l = m.ReferralProgram.Size()
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
 func (m *QueryReferralProgramsRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1496,6 +1513,42 @@ func (m *QueryReferralProgramsResponse) Size() (n int) {
 	_ = l
 	if len(m.ReferralPrograms) > 0 {
 		for _, e := range m.ReferralPrograms {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryReferralActivationsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.User)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryReferralActivationsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.ReferralActivations) > 0 {
+		for _, e := range m.ReferralActivations {
 			l = e.Size()
 			n += 1 + l + sovQuery(uint64(l))
 		}
@@ -2186,174 +2239,6 @@ func (m *QueryBondingCurvePriceResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryReferralProgramRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryReferralProgramRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryReferralProgramRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TokenDenom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TokenDenom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryReferralProgramResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryReferralProgramResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryReferralProgramResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ReferralProgram", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.ReferralProgram == nil {
-				m.ReferralProgram = &ReferralProgram{}
-			}
-			if err := m.ReferralProgram.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
 func (m *QueryReferralProgramsRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -2500,6 +2385,244 @@ func (m *QueryReferralProgramsResponse) Unmarshal(dAtA []byte) error {
 			}
 			m.ReferralPrograms = append(m.ReferralPrograms, &ReferralProgram{})
 			if err := m.ReferralPrograms[len(m.ReferralPrograms)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageResponse{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryReferralActivationsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryReferralActivationsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryReferralActivationsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field User", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.User = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageRequest{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryReferralActivationsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryReferralActivationsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryReferralActivationsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReferralActivations", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReferralActivations = append(m.ReferralActivations, &ReferralActivation{})
+			if err := m.ReferralActivations[len(m.ReferralActivations)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

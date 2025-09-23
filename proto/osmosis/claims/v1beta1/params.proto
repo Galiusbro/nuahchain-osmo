@@ -1,0 +1,12 @@
+syntax = "proto3";
+package osmosis.claims.v1beta1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/claims/types";
+
+// Params defines the configurable parameters for the claims module.
+message Params {
+  uint64 max_open_claims_per_policy = 1;
+  repeated string auto_approval_policy_types = 2;
+}

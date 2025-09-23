@@ -1,0 +1,13 @@
+syntax = "proto3";
+package osmosis.premium.v1beta1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/premium/types";
+
+// Params defines the configurable parameters for the premium module.
+message Params {
+  repeated string allowed_denoms = 1;
+  uint64 payment_grace_period_seconds = 2;
+  bool allow_partial_payments = 3;
+}
