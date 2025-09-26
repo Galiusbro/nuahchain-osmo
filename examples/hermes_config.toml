@@ -1,0 +1,116 @@
+# Hermes IBC Relayer Configuration Example
+# Пример конфигурации IBC релейера Hermes
+
+[global]
+log_level = 'info'
+
+[mode]
+
+[mode.clients]
+enabled = true
+refresh = true
+misbehaviour = true
+
+[mode.connections]
+enabled = false
+
+[mode.channels]
+enabled = false
+
+[mode.packets]
+enabled = false
+
+# NUAH Chain Configuration
+# Конфигурация сети NUAH
+[[chains]]
+id = 'nuahchain-1'
+type = 'CosmosSdk'
+rpc_addr = 'http://localhost:26657'
+grpc_addr = 'http://localhost:9090'
+event_source = { mode = 'push', url = 'ws://localhost:26657/websocket', batch_delay = '500ms' }
+rpc_timeout = '10s'
+account_prefix = 'nuah'
+key_name = 'test-relayer'
+address_type = { derivation = 'cosmos' }
+store_prefix = 'ibc'
+default_gas = 100000
+max_gas = 400000
+gas_price = { price = 0.001, denom = 'unuah' }
+gas_multiplier = 1.1
+max_msg_num = 30
+max_tx_size = 2097152
+clock_drift = '5s'
+max_block_time = '30s'
+trusting_period = '14days'
+trust_threshold = { numerator = '1', denominator = '3' }
+
+# Osmosis Testnet Configuration
+# Конфигурация тестовой сети Osmosis
+[[chains]]
+id = 'osmo-test-5'
+type = 'CosmosSdk'
+rpc_addr = 'https://rpc.testnet.osmosis.zone:443'
+grpc_addr = 'https://grpc.testnet.osmosis.zone:443'
+event_source = { mode = 'push', url = 'wss://rpc.testnet.osmosis.zone:443/websocket', batch_delay = '500ms' }
+rpc_timeout = '10s'
+account_prefix = 'osmo'
+key_name = 'osmosis-relayer'
+address_type = { derivation = 'cosmos' }
+store_prefix = 'ibc'
+default_gas = 100000
+max_gas = 400000
+gas_price = { price = 0.0025, denom = 'uosmo' }
+gas_multiplier = 1.1
+max_msg_num = 30
+max_tx_size = 2097152
+clock_drift = '5s'
+max_block_time = '30s'
+trusting_period = '14days'
+trust_threshold = { numerator = '1', denominator = '3' }
+
+# Alternative Configuration for Local Osmosis Node
+# Альтернативная конфигурация для локального узла Osmosis
+# Uncomment and modify if running local Osmosis node
+# Раскомментируйте и измените для локального узла Osmosis
+
+# [[chains]]
+# id = 'osmosis-local'
+# type = 'CosmosSdk'
+# rpc_addr = 'http://localhost:26657'
+# grpc_addr = 'http://localhost:9090'
+# event_source = { mode = 'push', url = 'ws://localhost:26657/websocket', batch_delay = '500ms' }
+# rpc_timeout = '10s'
+# account_prefix = 'osmo'
+# key_name = 'osmosis-local-relayer'
+# address_type = { derivation = 'cosmos' }
+# store_prefix = 'ibc'
+# default_gas = 100000
+# max_gas = 400000
+# gas_price = { price = 0.0025, denom = 'uosmo' }
+# gas_multiplier = 1.1
+# max_msg_num = 30
+# max_tx_size = 2097152
+# clock_drift = '5s'
+# max_block_time = '30s'
+# trusting_period = '14days'
+# trust_threshold = { numerator = '1', denominator = '3' }
+
+# Configuration Notes / Примечания к конфигурации:
+#
+# 1. Chain IDs must match the actual chain IDs
+#    ID сетей должны соответствовать реальным ID сетей
+#
+# 2. RPC and gRPC addresses must be accessible
+#    RPC и gRPC адреса должны быть доступны
+#
+# 3. Key names must match the keys added to Hermes
+#    Имена ключей должны соответствовать ключам, добавленным в Hermes
+#
+# 4. Gas prices should be appropriate for each network
+#    Цены на газ должны быть подходящими для каждой сети
+#
+# 5. Trusting period should be less than unbonding period
+#    Период доверия должен быть меньше периода разблокировки
+#
+# 6. For production, use secure RPC endpoints with authentication
+#    Для продакшена используйте безопасные RPC эндпоинты с аутентификацией
