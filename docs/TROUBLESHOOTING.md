@@ -131,7 +131,7 @@ error: RPC error: connection refused
    ```bash
    # For local node / Для локального узла
    ps aux | grep nuahd
-
+   
    # Check port availability / Проверьте доступность порта
    netstat -an | grep 26657
    ```
@@ -146,7 +146,7 @@ error: RPC error: connection refused
    ```bash
    # macOS
    sudo pfctl -sr | grep 26657
-
+   
    # Linux
    sudo ufw status | grep 26657
    ```
@@ -253,7 +253,7 @@ error: insufficient funds for gas
    ```bash
    # Get relayer address / Получите адрес релейера
    RELAYER_ADDR=$(hermes --config ~/.hermes_test/config.toml keys list --chain nuahchain-1 | grep -o 'nuah[a-z0-9]*')
-
+   
    # Check balance / Проверьте баланс
    ./build/nuahd query bank balances $RELAYER_ADDR
    ```
@@ -262,7 +262,7 @@ error: insufficient funds for gas
    ```bash
    # For local testnet / Для локального тестнета
    ./build/nuahd tx bank send validator $RELAYER_ADDR 1000000unuah --keyring-backend test --chain-id nuahchain-1 --yes
-
+   
    # For Osmosis testnet, use faucet / Для тестнета Osmosis используйте faucet
    # https://faucet.testnet.osmosis.zone/
    ```

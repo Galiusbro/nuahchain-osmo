@@ -126,7 +126,7 @@ jq '.app_state.bank.denom_metadata = [
         "aliases": ["microNUAH"]
       },
       {
-        "denom": "mnuah", 
+        "denom": "mnuah",
         "exponent": 3,
         "aliases": ["milliNUAH"]
       },
@@ -171,7 +171,7 @@ print_step "Создание genesis транзакции валидатора..
 print_step "Сбор genesis транзакций..."
 ./build/nuahd collect-gentxs
 
-# Шаг 9.5: Валидация genesis файла
+# Шаг 10: Валидация genesis файла
 print_step "Валидация genesis файла..."
 
 # Проверяем JSON структуру
@@ -208,31 +208,10 @@ if ! ./build/nuahd validate-genesis ~/.nuahd/config/genesis.json; then
     exit 1
 fi
 
-print_status "✅ Genesis файл успешно валидирован!"
+print_success "Genesis файл успешно валидирован!"
 
-# # Шаг 10: Валидация genesis (временно отключена)
-# print_step "Пропускаем валидацию genesis файла..."
-# print_warning "⚠️ Валидация genesis временно отключена для обхода ошибок"
-# # if ./build/nuahd validate-genesis; then
-# #     print_status "✅ Genesis файл валиден!"
-# # else
-# #     print_error "❌ Ошибка валидации genesis файла!"
-# #     exit 1
-# # fi
-
-# Шаг 10: Настройка конфигурации для IBC
+# Шаг 11: Настройка конфигурации для IBC
 print_step "Настройка конфигурации для IBC..."
-
-# Обновляем app.toml для IBC
-print_status "Обновление app.toml..."
-sed -i.bak 's/enable = false/enable = true/g' ~/.nuahd/config/app.toml
-sed -i.bak 's/swagger = false/swagger = true/g' ~/.nuahd/config/app.toml
-
-# Настройка безопасных CORS для API
-sed -i.bak 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' ~/.nuahd/config/app.toml
-
-# Настройка gRPC
-sed -i.bak 's/enable = true/enable = true/g' ~/.nuahd/config/app.toml
 
 # Обновление app.toml
 cat >> ~/.nuahd/config/app.toml << EOF

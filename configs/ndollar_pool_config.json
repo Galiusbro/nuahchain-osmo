@@ -1,0 +1,40 @@
+{
+  "pool_type": "balancer",
+  "description": "NUAH/N$ Liquidity Pool - Base trading pair for algorithmic stablecoin",
+  "pool_params": {
+    "swap_fee": "0.003000000000000000",
+    "exit_fee": "0.000000000000000000"
+  },
+  "pool_assets": [
+    {
+      "token": {
+        "denom": "unuah",
+        "amount": "1000000000000"
+      },
+      "weight": "536870912000000",
+      "description": "NUAH - Native token of Nuah Chain"
+    },
+    {
+      "token": {
+        "denom": "factory/{creator_address}/ndollar",
+        "amount": "1000000000000"
+      },
+      "weight": "536870912000000",
+      "description": "N$ - Algorithmic stablecoin targeting 1:1 USD parity"
+    }
+  ],
+  "initial_ratio": "1:1",
+  "target_price": "1 N$ ≈ 1 USD",
+  "features": [
+    "Base trading pair for all user tokens",
+    "Fee abstraction support",
+    "Algorithmic supply management",
+    "Price stability mechanism"
+  ],
+  "metadata": {
+    "created_by": "Nuah Chain Core Team",
+    "version": "1.0.0",
+    "specification": "technical specification v.0.1.1",
+    "last_updated": "2024-01-27"
+  }
+}

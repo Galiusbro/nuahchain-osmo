@@ -290,7 +290,7 @@ Genesis транзакция содержит пустое поле `delegator_a
    ```bash
    # Создать резервную копию
    cp ~/.nuahd/config/genesis.json ~/.nuahd/config/genesis.json.backup
-
+   
    # Исправить delegator_address
    jq '.app_state.genutil.gen_txs[0].body.messages[0].delegator_address = "<correct_address>"' \
       ~/.nuahd/config/genesis.json > /tmp/genesis_fixed.json

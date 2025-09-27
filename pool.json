@@ -1,0 +1,25 @@
+{
+    "@type": "/osmosis.gamm.v1beta1.Pool",
+    "id": "1",
+    "pool_params": {
+        "swap_fee": "0.003000000000000000",
+        "exit_fee": "0.000000000000000000"
+    },
+    "future_pool_governor": "",
+    "pool_assets": [
+        {
+            "token": {
+                "denom": "unuah",
+                "amount": "1000000000"
+            },
+            "weight": "1073741824"
+        },
+        {
+            "token": {
+                "denom": "factory/nuah1656cj9sflarnkjh7pqexjnlnz3wft0tmh7j99r/ndollar",
+                "amount": "1000000000"
+            },
+            "weight": "1073741824"
+        }
+    ]
+}

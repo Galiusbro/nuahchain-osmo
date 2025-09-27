@@ -289,7 +289,7 @@ hermes --config ~/.hermes_test/config.toml start
 
 #### 1. "Insufficient funds" Error
 **Problem:** Relayer account doesn't have enough tokens for transaction fees.
-**Solution:**
+**Solution:** 
 - Fund the relayer account using faucet or direct transfer
 - Check minimum required balance for the network
 

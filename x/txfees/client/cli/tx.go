@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 
 	"github.com/spf13/cobra"
@@ -22,6 +24,10 @@ const FlagFeeTokens = "fee-tokens"
 
 func NewTxCmd() *cobra.Command {
 	txCmd := osmocli.TxIndexCmd(types.ModuleName)
+	txCmd.AddCommand(
+		NewCmdSubmitUpdateFeeTokenProposal(),
+		NewCmdSetFeeTokens(),
+	)
 	return txCmd
 }
 
@@ -124,4 +130,72 @@ func parseFeeTokenRecordsArgsToContent(cmd *cobra.Command) (govtypesv1beta1.Cont
 		Feetokens:   feeTokenRecords,
 	}
 	return content, nil
+}
+
+func NewCmdSetFeeTokens() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "set-fee-tokens [fee-tokens]",
+		Short: "Set fee tokens directly (requires whitelisted sender)",
+		Long: strings.TrimSpace(`Set fee tokens directly using MsgSetFeeTokens.
+The sender must be whitelisted to set fee tokens.
+
+Passing in denom,poolID pairs separated by commas would be parsed automatically to pairs of fee token records.
+Ex) set-fee-tokens factory/nuah1nq8dnllgtyp4wtxfvwgukufewdwgt8zrgee6q0/ndollar,1,uosmo,2
+
+		`),
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			feeTokens, err := parseFeeTokensFromString(args[0])
+			if err != nil {
+				return err
+			}
+
+			msg := &types.MsgSetFeeTokens{
+				FeeTokens: feeTokens,
+				Sender:    clientCtx.GetFromAddress().String(),
+			}
+
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
+}
+
+func parseFeeTokensFromString(feeTokensStr string) ([]types.FeeToken, error) {
+	feeTokens := strings.Split(feeTokensStr, ",")
+
+	if len(feeTokens)%2 != 0 {
+		return nil, errors.New("fee tokens should be a comma separated list of denom and poolId pairs")
+	}
+
+	feeTokenRecords := []types.FeeToken{}
+	i := 0
+	for i < len(feeTokens) {
+		denom := feeTokens[i]
+		poolId, err := strconv.Atoi(feeTokens[i+1])
+		if err != nil {
+			return nil, err
+		}
+
+		feeTokenRecords = append(feeTokenRecords, types.FeeToken{
+			Denom:  denom,
+			PoolID: uint64(poolId),
+		})
+
+		// increase counter by the next 2
+		i = i + 2
+	}
+
+	return feeTokenRecords, nil
 }
