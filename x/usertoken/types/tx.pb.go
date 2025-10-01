@@ -109,7 +109,8 @@ func (m *MsgCreateUserToken) GetDecimals() uint32 {
 	return 0
 }
 
-// MsgCreateUserTokenResponse defines the response structure for executing a MsgCreateUserToken message.
+// MsgCreateUserTokenResponse defines the response structure for executing a
+// MsgCreateUserToken message.
 type MsgCreateUserTokenResponse struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
@@ -216,7 +217,8 @@ func (m *MsgBuyTokens) GetAmount() types.Coin {
 	return types.Coin{}
 }
 
-// MsgBuyTokensResponse defines the response structure for executing a MsgBuyTokens message.
+// MsgBuyTokensResponse defines the response structure for executing a
+// MsgBuyTokens message.
 type MsgBuyTokensResponse struct {
 	TokensReceived cosmossdk_io_math.Int `protobuf:"bytes,1,opt,name=tokens_received,json=tokensReceived,proto3,customtype=cosmossdk.io/math.Int" json:"tokens_received"`
 }
@@ -316,7 +318,8 @@ func (m *MsgSellTokens) GetAmount() types.Coin {
 	return types.Coin{}
 }
 
-// MsgSellTokensResponse defines the response structure for executing a MsgSellTokens message.
+// MsgSellTokensResponse defines the response structure for executing a
+// MsgSellTokens message.
 type MsgSellTokensResponse struct {
 	PriceReceived cosmossdk_io_math.Int `protobuf:"bytes,1,opt,name=price_received,json=priceReceived,proto3,customtype=cosmossdk.io/math.Int" json:"price_received"`
 }
@@ -408,7 +411,8 @@ func (m *MsgClaimFounderTokens) GetDenom() string {
 	return ""
 }
 
-// MsgClaimFounderTokensResponse defines the response structure for executing a MsgClaimFounderTokens message.
+// MsgClaimFounderTokensResponse defines the response structure for executing a
+// MsgClaimFounderTokens message.
 type MsgClaimFounderTokensResponse struct {
 }
 
@@ -498,7 +502,8 @@ func (m *MsgBuyFounderTokens) GetDenom() string {
 	return ""
 }
 
-// MsgBuyFounderTokensResponse defines the response structure for executing a MsgBuyFounderTokens message.
+// MsgBuyFounderTokensResponse defines the response structure for executing a
+// MsgBuyFounderTokens message.
 type MsgBuyFounderTokensResponse struct {
 	TokensReceived cosmossdk_io_math.Int `protobuf:"bytes,1,opt,name=tokens_received,json=tokensReceived,proto3,customtype=cosmossdk.io/math.Int" json:"tokens_received"`
 }
@@ -589,7 +594,8 @@ func (m *MsgStartLBP) GetDenom() string {
 	return ""
 }
 
-// MsgStartLBPResponse defines the response structure for executing a MsgStartLBP message.
+// MsgStartLBPResponse defines the response structure for executing a
+// MsgStartLBP message.
 type MsgStartLBPResponse struct {
 }
 
@@ -703,7 +709,8 @@ func (m *MsgCreateVestingAccount) GetDelayed() bool {
 	return false
 }
 
-// MsgCreateVestingAccountResponse defines the response structure for executing a MsgCreateVestingAccount message.
+// MsgCreateVestingAccountResponse defines the response structure for executing
+// a MsgCreateVestingAccount message.
 type MsgCreateVestingAccountResponse struct {
 }
 
@@ -793,7 +800,8 @@ func (m *MsgUpdateParams) GetParams() Params {
 	return Params{}
 }
 
-// MsgUpdateParamsResponse defines the response structure for executing a MsgUpdateParams message.
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
 type MsgUpdateParamsResponse struct {
 }
 
@@ -883,7 +891,8 @@ func (m *MsgCreateReferralProgram) GetTokenDenom() string {
 	return ""
 }
 
-// MsgCreateReferralProgramResponse defines the response structure for executing a MsgCreateReferralProgram message.
+// MsgCreateReferralProgramResponse defines the response structure for executing
+// a MsgCreateReferralProgram message.
 type MsgCreateReferralProgramResponse struct {
 	ReferralCode string `protobuf:"bytes,1,opt,name=referral_code,json=referralCode,proto3" json:"referral_code,omitempty"`
 }
@@ -981,7 +990,8 @@ func (m *MsgActivateReferral) GetReferee() string {
 	return ""
 }
 
-// MsgActivateReferralResponse defines the response structure for executing a MsgActivateReferral message.
+// MsgActivateReferralResponse defines the response structure for executing a
+// MsgActivateReferral message.
 type MsgActivateReferralResponse struct {
 }
 

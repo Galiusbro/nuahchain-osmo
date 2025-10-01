@@ -10,7 +10,7 @@ option go_package = "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/types";
 // GenesisState defines the pegkeeper module's genesis state
 message GenesisState {
   // params defines the parameters for the module
-  Params params = 1 [(gogoproto.nullable) = false];
+  Params params = 1 [ (gogoproto.nullable) = false ];
 
   // peg_state defines the current peg state
   PegState peg_state = 2;

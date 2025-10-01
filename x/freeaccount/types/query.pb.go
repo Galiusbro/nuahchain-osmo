@@ -31,7 +31,8 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// QueryIsFreeAccountRequest is the request type for the Query/IsFreeAccount RPC method.
+// QueryIsFreeAccountRequest is the request type for the Query/IsFreeAccount RPC
+// method.
 type QueryIsFreeAccountRequest struct {
 	// Address is the address to check
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
@@ -77,7 +78,8 @@ func (m *QueryIsFreeAccountRequest) GetAddress() string {
 	return ""
 }
 
-// QueryIsFreeAccountResponse is the response type for the Query/IsFreeAccount RPC method.
+// QueryIsFreeAccountResponse is the response type for the Query/IsFreeAccount
+// RPC method.
 type QueryIsFreeAccountResponse struct {
 	// IsFree indicates if the account is a free account
 	IsFree bool `protobuf:"varint,1,opt,name=is_free,json=isFree,proto3" json:"is_free,omitempty"`

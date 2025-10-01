@@ -27,13 +27,15 @@ message PegState {
   bool is_active = 6;
 
   // last_adjustment_time is when the last supply adjustment was made
-  google.protobuf.Timestamp last_adjustment_time = 7 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+  google.protobuf.Timestamp last_adjustment_time = 7
+      [ (gogoproto.stdtime) = true, (gogoproto.nullable) = false ];
 }
 
 // SupplyAdjustment represents a historical supply adjustment
 message SupplyAdjustment {
   // timestamp when the adjustment was made
-  google.protobuf.Timestamp timestamp = 1 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+  google.protobuf.Timestamp timestamp = 1
+      [ (gogoproto.stdtime) = true, (gogoproto.nullable) = false ];
 
   // price_before is the price before adjustment
   string price_before = 2;
@@ -41,7 +43,8 @@ message SupplyAdjustment {
   // price_after is the expected price after adjustment
   string price_after = 3;
 
-  // supply_change_amount is the amount of supply change (positive for mint, negative for burn)
+  // supply_change_amount is the amount of supply change (positive for mint,
+  // negative for burn)
   string supply_change_amount = 4;
 
   // supply_change_denom is the denomination of the supply change

@@ -14,14 +14,17 @@ service Query {
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/osmosis/limitedaccount/v1beta1/params";
   }
-  
+
   // LimitedAccount returns the limited account info for a given address.
-  rpc LimitedAccount(QueryLimitedAccountRequest) returns (QueryLimitedAccountResponse) {
-    option (google.api.http).get = "/osmosis/limitedaccount/v1beta1/account/{address}";
+  rpc LimitedAccount(QueryLimitedAccountRequest)
+      returns (QueryLimitedAccountResponse) {
+    option (google.api.http).get =
+        "/osmosis/limitedaccount/v1beta1/account/{address}";
   }
-  
+
   // AllLimitedAccounts returns all limited accounts.
-  rpc AllLimitedAccounts(QueryAllLimitedAccountsRequest) returns (QueryAllLimitedAccountsResponse) {
+  rpc AllLimitedAccounts(QueryAllLimitedAccountsRequest)
+      returns (QueryAllLimitedAccountsResponse) {
     option (google.api.http).get = "/osmosis/limitedaccount/v1beta1/accounts";
   }
 }
@@ -32,32 +35,36 @@ message QueryParamsRequest {}
 // QueryParamsResponse is the response type for the Query/Params RPC method.
 message QueryParamsResponse {
   // params defines the parameters of the module.
-  Params params = 1 [(gogoproto.nullable) = false];
+  Params params = 1 [ (gogoproto.nullable) = false ];
 }
 
-// QueryLimitedAccountRequest is the request type for the Query/LimitedAccount RPC method.
+// QueryLimitedAccountRequest is the request type for the Query/LimitedAccount
+// RPC method.
 message QueryLimitedAccountRequest {
   // address is the account address to query for.
   string address = 1;
 }
 
-// QueryLimitedAccountResponse is the response type for the Query/LimitedAccount RPC method.
+// QueryLimitedAccountResponse is the response type for the Query/LimitedAccount
+// RPC method.
 message QueryLimitedAccountResponse {
   // limited_account contains the limited account info.
   LimitedAccount limited_account = 1;
 }
 
-// QueryAllLimitedAccountsRequest is the request type for the Query/AllLimitedAccounts RPC method.
+// QueryAllLimitedAccountsRequest is the request type for the
+// Query/AllLimitedAccounts RPC method.
 message QueryAllLimitedAccountsRequest {
   // pagination defines an optional pagination for the request.
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
 }
 
-// QueryAllLimitedAccountsResponse is the response type for the Query/AllLimitedAccounts RPC method.
+// QueryAllLimitedAccountsResponse is the response type for the
+// Query/AllLimitedAccounts RPC method.
 message QueryAllLimitedAccountsResponse {
   // limited_accounts contains all the limited accounts.
   repeated LimitedAccount limited_accounts = 1;
-  
+
   // pagination defines the pagination in the response.
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

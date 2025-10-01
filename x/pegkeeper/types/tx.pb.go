@@ -33,7 +33,8 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // MsgUpdateParams is the message type for updating module parameters
 type MsgUpdateParams struct {
-	// Authority is the address that controls the module (governance module account)
+	// Authority is the address that controls the module (governance module
+	// account)
 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
 	// Params defines the parameters to update
 	Params Params `protobuf:"bytes,2,opt,name=params,proto3" json:"params"`

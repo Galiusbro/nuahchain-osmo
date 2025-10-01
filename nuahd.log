@@ -1,0 +1,2 @@
+[90m2:10AM[0m [32mINF[0m [1mOverwriting config.toml and app.toml values with some recommended defaults. To prevent this, set the --reject-config-defaults flag to true.[0m [36mmodule=[0mserver
+Error: failed to initialize database: resource temporarily unavailable

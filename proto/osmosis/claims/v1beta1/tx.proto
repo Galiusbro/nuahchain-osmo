@@ -16,13 +16,18 @@ service Msg {
     option (google.api.http).post = "/osmosis/claims/v1beta1/claims";
   };
   rpc ReviewClaim(MsgReviewClaim) returns (MsgReviewClaimResponse) {
-    option (google.api.http).post = "/osmosis/claims/v1beta1/claims/{claim_id}/review";
+    option (google.api.http).post =
+        "/osmosis/claims/v1beta1/claims/{claim_id}/review";
   };
-  rpc AddClaimEvidence(MsgAddClaimEvidence) returns (MsgAddClaimEvidenceResponse) {
-    option (google.api.http).post = "/osmosis/claims/v1beta1/claims/{claim_id}/evidence";
+  rpc AddClaimEvidence(MsgAddClaimEvidence)
+      returns (MsgAddClaimEvidenceResponse) {
+    option (google.api.http).post =
+        "/osmosis/claims/v1beta1/claims/{claim_id}/evidence";
   };
-  rpc ExecuteClaimPayout(MsgExecuteClaimPayout) returns (MsgExecuteClaimPayoutResponse) {
-    option (google.api.http).post = "/osmosis/claims/v1beta1/claims/{claim_id}/payout";
+  rpc ExecuteClaimPayout(MsgExecuteClaimPayout)
+      returns (MsgExecuteClaimPayoutResponse) {
+    option (google.api.http).post =
+        "/osmosis/claims/v1beta1/claims/{claim_id}/payout";
   };
 }
 
@@ -37,9 +42,7 @@ message MsgSubmitClaim {
   repeated ClaimEvidence evidence = 5 [ (gogoproto.nullable) = false ];
 }
 
-message MsgSubmitClaimResponse {
-  uint64 claim_id = 1;
-}
+message MsgSubmitClaimResponse { uint64 claim_id = 1; }
 
 message MsgReviewClaim {
   option (cosmos.msg.v1.signer) = "authority";
@@ -51,9 +54,7 @@ message MsgReviewClaim {
   string reason = 4;
 }
 
-message MsgReviewClaimResponse {
-  Claim claim = 1;
-}
+message MsgReviewClaimResponse { Claim claim = 1; }
 
 message MsgAddClaimEvidence {
   option (cosmos.msg.v1.signer) = "authority";
@@ -64,9 +65,7 @@ message MsgAddClaimEvidence {
   ClaimEvidence evidence = 3 [ (gogoproto.nullable) = false ];
 }
 
-message MsgAddClaimEvidenceResponse {
-  Claim claim = 1;
-}
+message MsgAddClaimEvidenceResponse { Claim claim = 1; }
 
 message MsgExecuteClaimPayout {
   option (cosmos.msg.v1.signer) = "authority";
@@ -77,6 +76,4 @@ message MsgExecuteClaimPayout {
   string payout_address = 3 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
 }
 
-message MsgExecuteClaimPayoutResponse {
-  Claim claim = 1;
-}
+message MsgExecuteClaimPayoutResponse { Claim claim = 1; }

@@ -16,7 +16,8 @@ message ExchangeRate {
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
-  google.protobuf.Timestamp last_updated = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+  google.protobuf.Timestamp last_updated = 3
+      [ (gogoproto.stdtime) = true, (gogoproto.nullable) = false ];
 }
 
 // ExchangeTransaction represents a completed exchange transaction
@@ -40,7 +41,8 @@ message ExchangeTransaction {
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable) = false
   ];
-  google.protobuf.Timestamp timestamp = 8 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+  google.protobuf.Timestamp timestamp = 8
+      [ (gogoproto.stdtime) = true, (gogoproto.nullable) = false ];
   uint64 block_height = 9;
 }
 

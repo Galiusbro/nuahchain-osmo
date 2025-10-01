@@ -1,0 +1,23 @@
+{
+    "messages": [
+        {
+            "@type": "/osmosis.usertoken.v1beta1.MsgUpdateParams",
+            "authority": "nuah10d07y265gmmuvt4z0w9aw880jnsr700jquznk2",
+            "params": {
+                "founder_tranche_price": "1000000",
+                "founder_tranche_amount": "100000000",
+                "bonding_curve_start_price": "0.000001",
+                "bonding_curve_end_price": "10.0",
+                "bonding_curve_max_supply": "1000000000",
+                "min_creator_purchase": "1.0",
+                "ai_ceo_wallet": "nuah12jy78wlxz09mkxw0fr7f6rzqdjp3qd4p8saevq",
+                "referral_wallet": "nuah1ffz594zsgn6u7jmjfn8mu9h86k7ye698jus2x7",
+                "platform_fee_wallet": "nuah1ze8l4e2qpk78qlgs8zz47fzzx6y2j06h4xwgcs"
+            }
+        }
+    ],
+    "metadata": "Update usertoken module parameters with special wallets",
+    "deposit": "10000000unuah",
+    "title": "Update Usertoken Module Parameters",
+    "summary": "This proposal updates the usertoken module parameters to configure special wallets for AI CEO, Platform fees, and Referral rewards, along with updated token economics parameters."
+}

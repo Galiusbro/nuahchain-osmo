@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"cosmossdk.io/math"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -32,6 +33,74 @@ func GetTxCmd() *cobra.Command {
 	cmd.AddCommand(CmdCreateVestingAccount())
 	cmd.AddCommand(CmdCreateReferralProgram())
 	cmd.AddCommand(CmdActivateReferral())
+	cmd.AddCommand(CmdUpdateParams())
+
+	return cmd
+}
+
+func CmdUpdateParams() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "update-params [founder-tranche-price] [founder-tranche-amount] [bonding-curve-start-price] [bonding-curve-end-price] [bonding-curve-max-supply] [min-creator-purchase] [ai-ceo-wallet] [referral-wallet] [platform-fee-wallet]",
+		Short: "Update module parameters",
+		Args:  cobra.ExactArgs(9),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			founderTranchePrice, err := math.LegacyNewDecFromStr(args[0])
+			if err != nil {
+				return err
+			}
+
+			founderTrancheAmount, ok := math.NewIntFromString(args[1])
+			if !ok {
+				return fmt.Errorf("invalid founder tranche amount: %s", args[1])
+			}
+
+			bondingCurveStartPrice, err := math.LegacyNewDecFromStr(args[2])
+			if err != nil {
+				return err
+			}
+
+			bondingCurveEndPrice, err := math.LegacyNewDecFromStr(args[3])
+			if err != nil {
+				return err
+			}
+
+			bondingCurveMaxSupply, ok := math.NewIntFromString(args[4])
+			if !ok {
+				return fmt.Errorf("invalid bonding curve max supply: %s", args[4])
+			}
+
+			minCreatorPurchase, err := math.LegacyNewDecFromStr(args[5])
+			if err != nil {
+				return err
+			}
+
+			params := types.Params{
+				FounderTranchePrice:    founderTranchePrice,
+				FounderTrancheAmount:   founderTrancheAmount,
+				BondingCurveStartPrice: bondingCurveStartPrice,
+				BondingCurveEndPrice:   bondingCurveEndPrice,
+				BondingCurveMaxSupply:  bondingCurveMaxSupply,
+				MinCreatorPurchase:     minCreatorPurchase,
+				AiCeoWallet:            args[6],
+				ReferralWallet:         args[7],
+				PlatformFeeWallet:      args[8],
+			}
+
+			msg := &types.MsgUpdateParams{
+				Authority: clientCtx.GetFromAddress().String(),
+				Params:    params,
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd
 }

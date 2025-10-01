@@ -24,13 +24,16 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the pegkeeper module.
 type Params struct {
-	// max_deviation_threshold is the maximum allowed price deviation before intervention
+	// max_deviation_threshold is the maximum allowed price deviation before
+	// intervention
 	MaxDeviationThreshold string `protobuf:"bytes,1,opt,name=max_deviation_threshold,json=maxDeviationThreshold,proto3" json:"max_deviation_threshold,omitempty"`
 	// adjustment_factor determines how aggressively to adjust supply
 	AdjustmentFactor string `protobuf:"bytes,2,opt,name=adjustment_factor,json=adjustmentFactor,proto3" json:"adjustment_factor,omitempty"`
-	// min_adjustment_interval is the minimum time between adjustments (in seconds)
+	// min_adjustment_interval is the minimum time between adjustments (in
+	// seconds)
 	MinAdjustmentInterval int64 `protobuf:"varint,3,opt,name=min_adjustment_interval,json=minAdjustmentInterval,proto3" json:"min_adjustment_interval,omitempty"`
-	// max_supply_change_per_adjustment is the maximum supply change per adjustment (as percentage)
+	// max_supply_change_per_adjustment is the maximum supply change per
+	// adjustment (as percentage)
 	MaxSupplyChangePerAdjustment string `protobuf:"bytes,4,opt,name=max_supply_change_per_adjustment,json=maxSupplyChangePerAdjustment,proto3" json:"max_supply_change_per_adjustment,omitempty"`
 	// oracle_module is the module to get price data from
 	OracleModule string `protobuf:"bytes,5,opt,name=oracle_module,json=oracleModule,proto3" json:"oracle_module,omitempty"`

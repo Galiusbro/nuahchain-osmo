@@ -2,7 +2,9 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
+	cosmossdk_io_math "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -53,6 +55,33 @@ func (q queryServer) UserToken(goCtx context.Context, req *types.QueryUserTokenR
 	return &types.QueryUserTokenResponse{UserToken: &userToken}, nil
 }
 
+func (q queryServer) UserTokenMetadata(goCtx context.Context, req *types.QueryUserTokenMetadataRequest) (*types.QueryUserTokenMetadataResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "denom cannot be empty")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Get user token info from store
+	userToken, found := q.GetUserToken(ctx, req.Denom)
+	if !found {
+		return nil, status.Error(codes.NotFound, "user token not found")
+	}
+
+	return &types.QueryUserTokenMetadataResponse{
+		Name:          userToken.Name,
+		Symbol:        userToken.Symbol,
+		Description:   userToken.Description,
+		Creator:       userToken.Creator,
+		MaxSupply:     userToken.MaxSupply,
+		CurrentSupply: userToken.CurrentSupply,
+	}, nil
+}
+
 func (q queryServer) UserTokens(goCtx context.Context, req *types.QueryUserTokensRequest) (*types.QueryUserTokensResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
@@ -80,22 +109,58 @@ func (q queryServer) BondingCurvePrice(goCtx context.Context, req *types.QueryBo
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// Get current supply from token supply or user token store
-	currentSupply, err := q.GetTokenSupply(ctx, req.Denom)
+	// Get bonding curve supply using the correct calculation
+	bondingCurveSupply, err := q.GetBondingCurveSupply(ctx, req.Denom)
 	if err != nil {
-		// If token supply query fails, try to get from user token store
-		userToken, found := q.GetUserToken(ctx, req.Denom)
-		if !found {
-			return nil, status.Error(codes.NotFound, "token not found")
-		}
-		currentSupply = userToken.CurrentSupply
+		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
-	price := q.CalculateBondingCurvePrice(ctx, currentSupply)
+	price := q.CalculateBondingCurvePrice(ctx, req.Denom, bondingCurveSupply)
 
 	return &types.QueryBondingCurvePriceResponse{
 		Price: price,
 	}, nil
+}
+
+func (q queryServer) EstimateTokens(goCtx context.Context, req *types.QueryEstimateTokensRequest) (*types.QueryEstimateTokensResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Validate denom
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "denom cannot be empty")
+	}
+
+	// Parse payment amount from string
+	paymentAmount, ok := cosmossdk_io_math.NewIntFromString(req.PaymentAmount)
+	if !ok {
+		return nil, status.Error(codes.InvalidArgument, "invalid payment amount format")
+	}
+
+	// Validate payment amount
+	if paymentAmount.IsZero() || paymentAmount.IsNegative() {
+		return nil, status.Error(codes.InvalidArgument, "payment amount must be positive")
+	}
+
+	// Check if token exists
+	_, found := q.GetUserToken(ctx, req.Denom)
+	if !found {
+		return nil, status.Error(codes.NotFound, "token not found")
+	}
+
+	// Get current bonding curve supply
+	bondingCurveSupply, err := q.GetBondingCurveSupply(ctx, req.Denom)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to get bonding curve supply: %v", err))
+	}
+
+	// Calculate tokens using the same method as BuyTokens
+	tokensReceived := q.CalculateTokensFromPayment(ctx, req.Denom, bondingCurveSupply, paymentAmount)
+
+	return &types.QueryEstimateTokensResponse{TokensReceived: tokensReceived}, nil
 }
 
 func (q queryServer) ReferralProgram(goCtx context.Context, req *types.QueryReferralProgramRequest) (*types.QueryReferralProgramResponse, error) {
@@ -135,6 +200,34 @@ func (q queryServer) ReferralPrograms(goCtx context.Context, req *types.QueryRef
 	}, nil
 }
 
+func (q queryServer) UserTokensByCreator(goCtx context.Context, req *types.QueryUserTokensByCreatorRequest) (*types.QueryUserTokensByCreatorResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	if req.Creator == "" {
+		return nil, status.Error(codes.InvalidArgument, "creator cannot be empty")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Get all user tokens from store
+	allUserTokens := q.GetAllUserTokens(ctx)
+
+	// Filter by creator
+	var userTokens []*types.UserToken
+	for _, token := range allUserTokens {
+		if token.Creator == req.Creator {
+			userTokens = append(userTokens, token)
+		}
+	}
+
+	return &types.QueryUserTokensByCreatorResponse{
+		UserTokens: userTokens,
+		Pagination: nil, // TODO: implement pagination if needed
+	}, nil
+}
+
 func (q queryServer) ReferralActivations(goCtx context.Context, req *types.QueryReferralActivationsRequest) (*types.QueryReferralActivationsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
@@ -148,7 +241,7 @@ func (q queryServer) ReferralActivations(goCtx context.Context, req *types.Query
 
 	// Get all referral activations from store
 	allActivations := q.GetAllReferralActivations(ctx)
-	
+
 	// Filter by user if specified
 	var referralActivations []*types.ReferralActivation
 	for _, activation := range allActivations {

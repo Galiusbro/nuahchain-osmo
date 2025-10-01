@@ -35,7 +35,8 @@ message Params {
     (gogoproto.nullable) = false
   ];
 
-  // price_deviation_threshold is the maximum allowed deviation between Oracle and TWAP prices
+  // price_deviation_threshold is the maximum allowed deviation between Oracle
+  // and TWAP prices
   string price_deviation_threshold = 6 [
     (cosmos_proto.scalar) = "cosmos.Dec",
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",

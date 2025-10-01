@@ -10,16 +10,20 @@ import "osmosis/treasury/v1beta1/params.proto";
 option go_package = "github.com/osmosis-labs/osmosis/v30/x/treasury/types";
 
 service Query {
-  rpc TreasuryPool(QueryTreasuryPoolRequest) returns (QueryTreasuryPoolResponse) {
+  rpc TreasuryPool(QueryTreasuryPoolRequest)
+      returns (QueryTreasuryPoolResponse) {
     option (google.api.http).get = "/osmosis/treasury/v1beta1/pools/{pool_id}";
   };
 
-  rpc TreasuryPools(QueryTreasuryPoolsRequest) returns (QueryTreasuryPoolsResponse) {
+  rpc TreasuryPools(QueryTreasuryPoolsRequest)
+      returns (QueryTreasuryPoolsResponse) {
     option (google.api.http).get = "/osmosis/treasury/v1beta1/pools";
   };
 
-  rpc PoolBalances(QueryPoolBalancesRequest) returns (QueryPoolBalancesResponse) {
-    option (google.api.http).get = "/osmosis/treasury/v1beta1/pools/{pool_id}/balances";
+  rpc PoolBalances(QueryPoolBalancesRequest)
+      returns (QueryPoolBalancesResponse) {
+    option (google.api.http).get =
+        "/osmosis/treasury/v1beta1/pools/{pool_id}/balances";
   };
 
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
@@ -27,13 +31,9 @@ service Query {
   };
 }
 
-message QueryTreasuryPoolRequest {
-  string pool_id = 1;
-}
+message QueryTreasuryPoolRequest { string pool_id = 1; }
 
-message QueryTreasuryPoolResponse {
-  TreasuryPool pool = 1;
-}
+message QueryTreasuryPoolResponse { TreasuryPool pool = 1; }
 
 message QueryTreasuryPoolsRequest {
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
@@ -44,9 +44,7 @@ message QueryTreasuryPoolsResponse {
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
-message QueryPoolBalancesRequest {
-  string pool_id = 1;
-}
+message QueryPoolBalancesRequest { string pool_id = 1; }
 
 message QueryPoolBalancesResponse {
   repeated PoolBalance balances = 1;
@@ -55,6 +53,4 @@ message QueryPoolBalancesResponse {
 
 message QueryParamsRequest {}
 
-message QueryParamsResponse {
-  Params params = 1;
-}
+message QueryParamsResponse { Params params = 1; }

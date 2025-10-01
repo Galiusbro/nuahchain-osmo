@@ -18,7 +18,8 @@ service Query {
 
   // UserToken queries a user token by denom.
   rpc UserToken(QueryUserTokenRequest) returns (QueryUserTokenResponse) {
-    option (google.api.http).get = "/osmosis/usertoken/v1beta1/user_token/{denom}";
+    option (google.api.http).get =
+        "/osmosis/usertoken/v1beta1/user_token/{denom}";
   }
 
   // UserTokens queries all user tokens.
@@ -26,24 +27,55 @@ service Query {
     option (google.api.http).get = "/osmosis/usertoken/v1beta1/user_tokens";
   }
 
-  // BondingCurvePrice queries the current price of a token on the bonding curve.
-  rpc BondingCurvePrice(QueryBondingCurvePriceRequest) returns (QueryBondingCurvePriceResponse) {
-    option (google.api.http).get = "/osmosis/usertoken/v1beta1/bonding_curve_price/{denom}";
+  // BondingCurvePrice queries the current price of a token on the bonding
+  // curve.
+  rpc BondingCurvePrice(QueryBondingCurvePriceRequest)
+      returns (QueryBondingCurvePriceResponse) {
+    option (google.api.http).get =
+        "/osmosis/usertoken/v1beta1/bonding_curve_price/{denom=**}";
+  }
+
+  // EstimateTokens estimates how many tokens would be received for a given payment amount.
+  rpc EstimateTokens(QueryEstimateTokensRequest)
+      returns (QueryEstimateTokensResponse) {
+    option (google.api.http).get =
+        "/osmosis/usertoken/v1beta1/estimate_tokens";
   }
 
   // ReferralProgram queries a referral program by token denom.
-  rpc ReferralProgram(QueryReferralProgramRequest) returns (QueryReferralProgramResponse) {
-    option (google.api.http).get = "/osmosis/usertoken/v1beta1/referral_program/{token_denom}";
+  rpc ReferralProgram(QueryReferralProgramRequest)
+      returns (QueryReferralProgramResponse) {
+    option (google.api.http).get =
+        "/osmosis/usertoken/v1beta1/referral_program/{token_denom}";
   }
 
   // ReferralPrograms queries all referral programs.
-  rpc ReferralPrograms(QueryReferralProgramsRequest) returns (QueryReferralProgramsResponse) {
-    option (google.api.http).get = "/osmosis/usertoken/v1beta1/referral_programs";
+  rpc ReferralPrograms(QueryReferralProgramsRequest)
+      returns (QueryReferralProgramsResponse) {
+    option (google.api.http).get =
+        "/osmosis/usertoken/v1beta1/referral_programs";
   }
 
   // ReferralActivations queries referral activations for a user.
-  rpc ReferralActivations(QueryReferralActivationsRequest) returns (QueryReferralActivationsResponse) {
-    option (google.api.http).get = "/osmosis/usertoken/v1beta1/referral_activations/{user}";
+  rpc ReferralActivations(QueryReferralActivationsRequest)
+      returns (QueryReferralActivationsResponse) {
+    option (google.api.http).get =
+        "/osmosis/usertoken/v1beta1/referral_activations/{user}";
+  }
+
+  // UserTokensByCreator queries all user tokens created by a specific
+  // creator/wallet.
+  rpc UserTokensByCreator(QueryUserTokensByCreatorRequest)
+      returns (QueryUserTokensByCreatorResponse) {
+    option (google.api.http).get =
+        "/osmosis/usertoken/v1beta1/user_tokens_by_creator/{creator}";
+  }
+
+  // UserTokenMetadata queries metadata for a specific user token by denom.
+  rpc UserTokenMetadata(QueryUserTokenMetadataRequest)
+      returns (QueryUserTokenMetadataResponse) {
+    option (google.api.http).get =
+        "/osmosis/usertoken/v1beta1/user_token_metadata/{denom}";
   }
 }
 
@@ -53,18 +85,15 @@ message QueryParamsRequest {}
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
   // params holds all the parameters of this module.
-  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  Params params = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 }
 
 // QueryUserTokenRequest is request type for the Query/UserToken RPC method.
-message QueryUserTokenRequest {
-  string denom = 1;
-}
+message QueryUserTokenRequest { string denom = 1; }
 
 // QueryUserTokenResponse is response type for the Query/UserToken RPC method.
-message QueryUserTokenResponse {
-  UserToken user_token = 1;
-}
+message QueryUserTokenResponse { UserToken user_token = 1; }
 
 // QueryUserTokensRequest is request type for the Query/UserTokens RPC method.
 message QueryUserTokensRequest {
@@ -77,12 +106,12 @@ message QueryUserTokensResponse {
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
-// QueryBondingCurvePriceRequest is request type for the Query/BondingCurvePrice RPC method.
-message QueryBondingCurvePriceRequest {
-  string denom = 1;
-}
+// QueryBondingCurvePriceRequest is request type for the Query/BondingCurvePrice
+// RPC method.
+message QueryBondingCurvePriceRequest { string denom = 1; }
 
-// QueryBondingCurvePriceResponse is response type for the Query/BondingCurvePrice RPC method.
+// QueryBondingCurvePriceResponse is response type for the
+// Query/BondingCurvePrice RPC method.
 message QueryBondingCurvePriceResponse {
   string price = 1 [
     (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
@@ -90,35 +119,86 @@ message QueryBondingCurvePriceResponse {
   ];
 }
 
-// QueryReferralProgramRequest is request type for the Query/ReferralProgram RPC method.
-message QueryReferralProgramRequest {
-  string token_denom = 1;
+// QueryEstimateTokensRequest is request type for the Query/EstimateTokens RPC method.
+message QueryEstimateTokensRequest {
+  string denom = 1;
+  string payment_amount = 2;
 }
 
-// QueryReferralProgramResponse is response type for the Query/ReferralProgram RPC method.
-message QueryReferralProgramResponse {
-  ReferralProgram referral_program = 1;
+// QueryEstimateTokensResponse is response type for the Query/EstimateTokens RPC method.
+message QueryEstimateTokensResponse {
+  string tokens_received = 1 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
 }
 
-// QueryReferralProgramsRequest is request type for the Query/ReferralPrograms RPC method.
+// QueryReferralProgramRequest is request type for the Query/ReferralProgram RPC
+// method.
+message QueryReferralProgramRequest { string token_denom = 1; }
+
+// QueryReferralProgramResponse is response type for the Query/ReferralProgram
+// RPC method.
+message QueryReferralProgramResponse { ReferralProgram referral_program = 1; }
+
+// QueryReferralProgramsRequest is request type for the Query/ReferralPrograms
+// RPC method.
 message QueryReferralProgramsRequest {
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
 }
 
-// QueryReferralProgramsResponse is response type for the Query/ReferralPrograms RPC method.
+// QueryReferralProgramsResponse is response type for the Query/ReferralPrograms
+// RPC method.
 message QueryReferralProgramsResponse {
   repeated ReferralProgram referral_programs = 1;
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
-// QueryReferralActivationsRequest is request type for the Query/ReferralActivations RPC method.
+// QueryReferralActivationsRequest is request type for the
+// Query/ReferralActivations RPC method.
 message QueryReferralActivationsRequest {
   string user = 1;
   cosmos.base.query.v1beta1.PageRequest pagination = 2;
 }
 
-// QueryReferralActivationsResponse is response type for the Query/ReferralActivations RPC method.
+// QueryReferralActivationsResponse is response type for the
+// Query/ReferralActivations RPC method.
 message QueryReferralActivationsResponse {
   repeated ReferralActivation referral_activations = 1;
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryUserTokensByCreatorRequest is request type for the
+// Query/UserTokensByCreator RPC method.
+message QueryUserTokensByCreatorRequest {
+  string creator = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryUserTokensByCreatorResponse is response type for the
+// Query/UserTokensByCreator RPC method.
+message QueryUserTokensByCreatorResponse {
+  repeated UserToken user_tokens = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryUserTokenMetadataRequest is request type for the Query/UserTokenMetadata
+// RPC method.
+message QueryUserTokenMetadataRequest { string denom = 1; }
+
+// QueryUserTokenMetadataResponse is response type for the
+// Query/UserTokenMetadata RPC method.
+message QueryUserTokenMetadataResponse {
+  string name = 1;
+  string symbol = 2;
+  string description = 3;
+  string creator = 4;
+  string max_supply = 5 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+  string current_supply = 6 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
 }

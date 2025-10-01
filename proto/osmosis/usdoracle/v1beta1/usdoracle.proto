@@ -14,10 +14,8 @@ message USDPrice {
     (gogoproto.nullable) = false
   ];
   // Timestamp when the price was recorded
-  google.protobuf.Timestamp timestamp = 2 [
-    (gogoproto.nullable) = false,
-    (gogoproto.stdtime) = true
-  ];
+  google.protobuf.Timestamp timestamp = 2
+      [ (gogoproto.nullable) = false, (gogoproto.stdtime) = true ];
   // Source of the price data (e.g., "coingecko", "binance")
   string source = 3;
   // Block height when the price was recorded
@@ -72,10 +70,8 @@ message TokenPrice {
     (gogoproto.nullable) = false
   ];
   // Timestamp when the price was recorded
-  google.protobuf.Timestamp timestamp = 3 [
-    (gogoproto.nullable) = false,
-    (gogoproto.stdtime) = true
-  ];
+  google.protobuf.Timestamp timestamp = 3
+      [ (gogoproto.nullable) = false, (gogoproto.stdtime) = true ];
   // Source of the price data (e.g., "coingecko", "binance")
   string source = 4;
   // Block height when the price was recorded
@@ -99,10 +95,8 @@ message PriceAggregation {
   // Individual source prices
   repeated TokenPrice source_prices = 3 [ (gogoproto.nullable) = false ];
   // Timestamp of aggregation
-  google.protobuf.Timestamp timestamp = 4 [
-    (gogoproto.nullable) = false,
-    (gogoproto.stdtime) = true
-  ];
+  google.protobuf.Timestamp timestamp = 4
+      [ (gogoproto.nullable) = false, (gogoproto.stdtime) = true ];
   // Number of sources used in aggregation
   uint32 source_count = 5;
   // Price deviation from previous aggregation
@@ -132,8 +126,6 @@ message PriceUpdate {
     (gogoproto.nullable) = false
   ];
   // Update timestamp
-  google.protobuf.Timestamp timestamp = 5 [
-    (gogoproto.nullable) = false,
-    (gogoproto.stdtime) = true
-  ];
+  google.protobuf.Timestamp timestamp = 5
+      [ (gogoproto.nullable) = false, (gogoproto.stdtime) = true ];
 }

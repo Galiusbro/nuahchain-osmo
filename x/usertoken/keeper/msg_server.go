@@ -48,28 +48,35 @@ func (k msgServer) CreateUserToken(goCtx context.Context, msg *types.MsgCreateUs
 	// For now, we'll skip this step and implement it later
 	_ = moduleAddr // suppress unused variable warning
 
-	// Mint 100M tokens total
-	totalSupply := cosmossdk_io_math.NewInt(100_000_000)
+	// Mint 100M tokens total (convert to base units using declared decimals)
+	scale := cosmossdk_io_math.NewInt(1)
+	for i := uint32(0); i < msg.Decimals; i++ {
+		scale = scale.MulRaw(10)
+	}
+
+	totalSupplyTokens := cosmossdk_io_math.NewInt(100_000_000)
+	totalSupply := totalSupplyTokens.Mul(scale)
+
 	tokensToMint := sdk.NewCoin(denom, totalSupply)
 	err = k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(tokensToMint))
 	if err != nil {
 		return nil, fmt.Errorf("failed to mint tokens: %w", err)
 	}
 
-	// Distribute tokens according to tokenomics:
-	// 30M to bonding curve (stays in module)
-	// 10M to platform
-	// 10M to referral wallet
-	// 40M to AI CEO
-	// 10M reserved for founder offer
-	err = k.distributeInitialTokens(ctx, denom, totalSupply)
+	// Distribute tokens according to tokenomics (convert allocations to base units)
+	err = k.distributeInitialTokens(ctx, denom, totalSupply, scale)
 	if err != nil {
 		return nil, fmt.Errorf("failed to distribute tokens: %w", err)
 	}
 
 	// Create and store user token metadata
 	params := k.GetParams(ctx)
-	maxSupply := params.BondingCurveMaxSupply
+	maxSupply := params.BondingCurveMaxSupply.Mul(scale)
+
+	// Initial circulating supply is 60M tokens (distributed immediately)
+	// 10M platform + 10M referral + 40M AI CEO = 60M circulating
+	// 30M stays in module for bonding curve, 10M reserved for founder
+	initialCirculatingSupply := cosmossdk_io_math.NewInt(60_000_000).Mul(scale)
 
 	userToken := types.UserToken{
 		Denom:                denom,
@@ -77,7 +84,7 @@ func (k msgServer) CreateUserToken(goCtx context.Context, msg *types.MsgCreateUs
 		Name:                 msg.Name,
 		Symbol:               msg.Symbol,
 		MaxSupply:            maxSupply,
-		CurrentSupply:        totalSupply,                                  // 100M tokens minted and distributed
+		CurrentSupply:        initialCirculatingSupply,
 		ReserveRatio:         cosmossdk_io_math.LegacyNewDecWithPrec(5, 1), // 0.5
 		InitialPrice:         params.BondingCurveStartPrice,
 		FounderPercentage:    cosmossdk_io_math.LegacyNewDecWithPrec(1, 1), // 0.1 (10%)
@@ -88,11 +95,15 @@ func (k msgServer) CreateUserToken(goCtx context.Context, msg *types.MsgCreateUs
 
 	k.SetUserToken(ctx, userToken)
 
-	// Automatically create N$/UserToken pool
-	err = k.createNuahUserTokenPool(ctx, denom, msg.Creator)
+	k.ensureTokenMetadata(ctx, userToken, uint32(msg.Decimals))
+
+	// Automatically create base currency/UserToken pool
+	// Use NDollar if available, otherwise fall back to unuah
+	baseCurrency := k.findPreferredBaseCurrency(ctx)
+	err = k.createBaseCurrencyUserTokenPool(ctx, denom, msg.Creator, baseCurrency)
 	if err != nil {
 		// Log error but don't fail token creation
-		ctx.Logger().Error("Failed to create N$/UserToken pool", "denom", denom, "error", err)
+		ctx.Logger().Error("Failed to create base currency/UserToken pool", "denom", denom, "base_currency", baseCurrency, "error", err)
 	}
 
 	// Emit optimized event with pre-computed decimals string
@@ -128,23 +139,53 @@ func (k msgServer) BuyTokens(goCtx context.Context, msg *types.MsgBuyTokens) (*t
 		return nil, types.ErrTokenNotFound
 	}
 
-	// Get bonding curve supply (excludes founder tokens)
+	params := k.GetParams(ctx)
+
+	// Current amount of tokens already sold via bonding curve
 	bondingCurveSupply, err := k.GetBondingCurveSupply(ctx, msg.Denom)
 	if err != nil {
-		// Fallback to stored supply minus founder tokens
-		bondingCurveSupply = userToken.CurrentSupply.Sub(userToken.FounderTokensClaimed)
-		if bondingCurveSupply.IsNegative() {
-			bondingCurveSupply = cosmossdk_io_math.ZeroInt()
-		}
+		return nil, fmt.Errorf("failed to compute bonding curve supply: %w", err)
+	}
+	scaleInt, scaleDec := k.mustGetTokenScaleFactors(ctx, msg.Denom)
+	maxSupplyBase := params.BondingCurveMaxSupply.Mul(scaleInt)
+	remainingCurveCapacity := maxSupplyBase.Sub(bondingCurveSupply)
+
+	if remainingCurveCapacity.IsNegative() || remainingCurveCapacity.IsZero() {
+		return nil, fmt.Errorf("bonding curve is fully exhausted")
 	}
 
-	// Calculate how many tokens can be bought with the payment amount (using 30% for bonding curve)
-	tokensReceived := k.CalculateTokensFromPayment(ctx, bondingCurveSupply, msg.Amount.Amount)
+	// Calculate how many tokens can be bought with the payment amount
+	tokensReceived := k.CalculateTokensFromPayment(ctx, msg.Denom, bondingCurveSupply, msg.Amount.Amount)
+	if !tokensReceived.IsPositive() {
+		return nil, fmt.Errorf("payment too small to purchase any tokens")
+	}
+	if tokensReceived.GT(remainingCurveCapacity) {
+		tokensReceived = remainingCurveCapacity
+	}
 
 	// Check if tokens received meets minimum requirement
 	if tokensReceived.LT(msg.MinTokens) {
 		return nil, fmt.Errorf("tokens received %s is less than minimum %s", tokensReceived.String(), msg.MinTokens.String())
 	}
+
+	// Compute aggregate cost to the curve for logging/validations
+	linearCoeff := cosmossdk_io_math.LegacyZeroDec()
+	priceRange := params.BondingCurveEndPrice.Sub(params.BondingCurveStartPrice)
+	maxSupplyTokens := cosmossdk_io_math.LegacyNewDecFromInt(params.BondingCurveMaxSupply)
+	if !priceRange.IsZero() && !maxSupplyTokens.IsZero() {
+		linearCoeff = priceRange.Quo(maxSupplyTokens)
+	}
+	currentSupplyTokens := cosmossdk_io_math.LegacyNewDecFromInt(bondingCurveSupply).Quo(scaleDec)
+	tokensReceivedTokens := cosmossdk_io_math.LegacyNewDecFromInt(tokensReceived).Quo(scaleDec)
+	costDec := cosmossdk_io_math.LegacyZeroDec()
+	if tokensReceivedTokens.IsPositive() {
+		if linearCoeff.IsZero() {
+			costDec = params.BondingCurveStartPrice.Mul(tokensReceivedTokens)
+		} else {
+			costDec = k.priceIntegralDelta(params.BondingCurveStartPrice, linearCoeff, currentSupplyTokens, tokensReceivedTokens)
+		}
+	}
+	costToCurve := costDec.TruncateInt()
 
 	// Transfer payment from buyer to module
 	buyerAddr, err := sdk.AccAddressFromBech32(msg.Buyer)
@@ -158,16 +199,20 @@ func (k msgServer) BuyTokens(goCtx context.Context, msg *types.MsgBuyTokens) (*t
 		return nil, fmt.Errorf("module address not found")
 	}
 
-	err = k.bankKeeper.SendCoins(ctx, buyerAddr, moduleAddr, sdk.NewCoins(msg.Amount))
+	// Try to find suitable payment currency (NDollar or unuah)
+	paymentDenom, err := k.findPaymentCurrency(ctx, buyerAddr, msg.Amount.Amount)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find suitable payment currency: %w", err)
+	}
+
+	paymentCoin := sdk.NewCoin(paymentDenom, msg.Amount.Amount)
+	err = k.bankKeeper.SendCoins(ctx, buyerAddr, moduleAddr, sdk.NewCoins(paymentCoin))
 	if err != nil {
 		return nil, fmt.Errorf("failed to transfer payment: %w", err)
 	}
 
-	// Distribute payment according to tokenomics
-	err = k.DistributeTokenPurchasePayment(ctx, msg.Denom, msg.Amount.Amount)
-	if err != nil {
-		return nil, fmt.Errorf("failed to distribute payment: %w", err)
-	}
+	// For bonding curve trading, 100% of payment stays in module as curve reserve
+	// Payment distribution (30%/10%/10%/40%/10%) only applies to token creation, not trading
 
 	// Mint tokens to buyer via tokenfactory
 	tokensToMint := sdk.NewCoin(msg.Denom, tokensReceived)
@@ -185,6 +230,8 @@ func (k msgServer) BuyTokens(goCtx context.Context, msg *types.MsgBuyTokens) (*t
 	userToken.CurrentSupply = userToken.CurrentSupply.Add(tokensReceived)
 	k.SetUserToken(ctx, userToken)
 
+	curveSoldAfter := bondingCurveSupply.Add(tokensReceived)
+
 	// Emit optimized event with pre-computed strings
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
@@ -194,6 +241,9 @@ func (k msgServer) BuyTokens(goCtx context.Context, msg *types.MsgBuyTokens) (*t
 			sdk.NewAttribute("payment_amount", msg.Amount.Amount.String()),
 			sdk.NewAttribute("tokens_received", tokensReceived.String()),
 			sdk.NewAttribute("new_supply", userToken.CurrentSupply.String()),
+			sdk.NewAttribute("curve_sold_before", bondingCurveSupply.String()),
+			sdk.NewAttribute("curve_sold_after", curveSoldAfter.String()),
+			sdk.NewAttribute("curve_cost", costToCurve.String()),
 		),
 	})
 
@@ -216,14 +266,19 @@ func (k msgServer) SellTokens(goCtx context.Context, msg *types.MsgSellTokens) (
 		return nil, types.ErrTokenNotFound
 	}
 
-	// Get bonding curve supply (excludes founder tokens)
+	params := k.GetParams(ctx)
+
+	// Current amount of tokens sold via bonding curve
 	bondingCurveSupply, err := k.GetBondingCurveSupply(ctx, msg.Amount.Denom)
 	if err != nil {
-		// Fallback to stored supply minus founder tokens
-		bondingCurveSupply = userToken.CurrentSupply.Sub(userToken.FounderTokensClaimed)
-		if bondingCurveSupply.IsNegative() {
-			bondingCurveSupply = cosmossdk_io_math.ZeroInt()
-		}
+		return nil, fmt.Errorf("failed to compute bonding curve supply: %w", err)
+	}
+	_, scaleDec := k.mustGetTokenScaleFactors(ctx, msg.Amount.Denom)
+	if bondingCurveSupply.IsZero() {
+		return nil, fmt.Errorf("bonding curve has no liquidity to sell into")
+	}
+	if msg.Amount.Amount.GT(bondingCurveSupply) {
+		return nil, fmt.Errorf("requested sale %s exceeds bonding curve supply %s", msg.Amount.Amount.String(), bondingCurveSupply.String())
 	}
 
 	// Validate seller has enough tokens
@@ -238,12 +293,37 @@ func (k msgServer) SellTokens(goCtx context.Context, msg *types.MsgSellTokens) (
 	}
 
 	// Calculate total payout using optimized mathematical approach
-	totalPayout := k.CalculatePayoutFromTokens(ctx, bondingCurveSupply, msg.Amount.Amount)
+	totalPayout := k.CalculatePayoutFromTokens(ctx, msg.Amount.Denom, bondingCurveSupply, msg.Amount.Amount)
+	if totalPayout.IsZero() {
+		return nil, fmt.Errorf("payout is zero for requested sale amount")
+	}
 
 	// Check if payout meets minimum price
 	if totalPayout.LT(msg.MinPrice) {
 		return nil, fmt.Errorf("price received %s is less than minimum price %s", totalPayout.String(), msg.MinPrice.String())
 	}
+
+	linearCoeff := cosmossdk_io_math.LegacyZeroDec()
+	priceRange := params.BondingCurveEndPrice.Sub(params.BondingCurveStartPrice)
+	maxSupplyTokens := cosmossdk_io_math.LegacyNewDecFromInt(params.BondingCurveMaxSupply)
+	if !priceRange.IsZero() && !maxSupplyTokens.IsZero() {
+		linearCoeff = priceRange.Quo(maxSupplyTokens)
+	}
+	currentSupplyTokens := cosmossdk_io_math.LegacyNewDecFromInt(bondingCurveSupply).Quo(scaleDec)
+	tokensToSellTokens := cosmossdk_io_math.LegacyNewDecFromInt(msg.Amount.Amount).Quo(scaleDec)
+	startingSupplyTokens := currentSupplyTokens.Sub(tokensToSellTokens)
+	if startingSupplyTokens.IsNegative() {
+		startingSupplyTokens = cosmossdk_io_math.LegacyZeroDec()
+	}
+	payoutDec := cosmossdk_io_math.LegacyZeroDec()
+	if tokensToSellTokens.IsPositive() {
+		if linearCoeff.IsZero() {
+			payoutDec = params.BondingCurveStartPrice.Mul(tokensToSellTokens)
+		} else {
+			payoutDec = k.priceIntegralDelta(params.BondingCurveStartPrice, linearCoeff, startingSupplyTokens, tokensToSellTokens)
+		}
+	}
+	curveSoldAfter := bondingCurveSupply.Sub(msg.Amount.Amount)
 
 	// Burn tokens from seller
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, sellerAddr, types.ModuleName, sdk.NewCoins(msg.Amount))
@@ -256,8 +336,14 @@ func (k msgServer) SellTokens(goCtx context.Context, msg *types.MsgSellTokens) (
 		return nil, fmt.Errorf("failed to burn tokens: %w", err)
 	}
 
+	// Try to find suitable payout currency (NDollar or unuah) from module reserves
+	payoutDenom, err := k.findPayoutCurrency(ctx, totalPayout)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find suitable payout currency: %w", err)
+	}
+
 	// Transfer payout from module to seller
-	payoutCoin := sdk.NewCoin("unuah", totalPayout) // N$ denomination
+	payoutCoin := sdk.NewCoin(payoutDenom, totalPayout)
 	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, sellerAddr, sdk.NewCoins(payoutCoin))
 	if err != nil {
 		return nil, fmt.Errorf("failed to send payout: %w", err)
@@ -276,6 +362,9 @@ func (k msgServer) SellTokens(goCtx context.Context, msg *types.MsgSellTokens) (
 			sdk.NewAttribute("tokens_sold", msg.Amount.Amount.String()),
 			sdk.NewAttribute("payout_received", totalPayout.String()),
 			sdk.NewAttribute("new_supply", userToken.CurrentSupply.String()),
+			sdk.NewAttribute("curve_sold_before", bondingCurveSupply.String()),
+			sdk.NewAttribute("curve_sold_after", curveSoldAfter.String()),
+			sdk.NewAttribute("curve_payout_dec", payoutDec.String()),
 		),
 	})
 
@@ -315,8 +404,9 @@ func (k msgServer) BuyFounderTokens(goCtx context.Context, msg *types.MsgBuyFoun
 		return nil, fmt.Errorf("founder offer has expired, tokens transferred to AI CEO")
 	}
 
-	// Fixed amount: 10M tokens (already reserved in module)
-	founderTokenAmount := cosmossdk_io_math.NewInt(10_000_000)
+	// Fixed amount: 10M tokens (already reserved in module) in base units
+	scaleInt, _ := k.mustGetTokenScaleFactors(ctx, msg.Denom)
+	founderTokenAmount := cosmossdk_io_math.NewInt(10_000_000).Mul(scaleInt)
 
 	// Fixed price: 500 N$ total (0.00005 N$ per token)
 	totalCost := cosmossdk_io_math.NewInt(500)
@@ -332,7 +422,13 @@ func (k msgServer) BuyFounderTokens(goCtx context.Context, msg *types.MsgBuyFoun
 		return nil, fmt.Errorf("module address not found")
 	}
 
-	paymentCoin := sdk.NewCoin("unuah", totalCost) // N$ denomination
+	// Try to find suitable payment currency (NDollar or unuah)
+	paymentDenom, err := k.findPaymentCurrency(ctx, buyerAddr, totalCost)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find suitable payment currency: %w", err)
+	}
+
+	paymentCoin := sdk.NewCoin(paymentDenom, totalCost)
 	err = k.bankKeeper.SendCoins(ctx, buyerAddr, moduleAddr, sdk.NewCoins(paymentCoin))
 	if err != nil {
 		return nil, fmt.Errorf("failed to transfer payment: %w", err)
@@ -430,7 +526,13 @@ func (k msgServer) ClaimFounderTokens(goCtx context.Context, msg *types.MsgClaim
 		return nil, fmt.Errorf("module address not found")
 	}
 
-	paymentCoin := sdk.NewCoin("unuah", totalCost) // N$ denomination
+	// Try to find suitable payment currency (NDollar or unuah)
+	paymentDenom, err := k.findPaymentCurrency(ctx, claimerAddr, totalCost)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find suitable payment currency: %w", err)
+	}
+
+	paymentCoin := sdk.NewCoin(paymentDenom, totalCost)
 	err = k.bankKeeper.SendCoins(ctx, claimerAddr, moduleAddr, sdk.NewCoins(paymentCoin))
 	if err != nil {
 		return nil, fmt.Errorf("failed to transfer payment: %w", err)
@@ -747,13 +849,13 @@ func (k msgServer) CreateVestingAccount(goCtx context.Context, msg *types.MsgCre
 	return &types.MsgCreateVestingAccountResponse{}, nil
 }
 
-// createNuahUserTokenPool creates a basic N$/UserToken pool for trading
-func (k msgServer) createNuahUserTokenPool(ctx sdk.Context, userTokenDenom string, creator string) error {
+// createBaseCurrencyUserTokenPool creates a basic BaseCurrency/UserToken pool for trading
+func (k msgServer) createBaseCurrencyUserTokenPool(ctx sdk.Context, userTokenDenom string, creator string, baseCurrency string) error {
 	// Define initial pool assets with equal weights (50/50)
 	poolAssets := []balancertypes.PoolAsset{
 		{
-			Token:  sdk.NewCoin("unuah", cosmossdk_io_math.NewInt(1000000)), // 1M N$ initial liquidity
-			Weight: cosmossdk_io_math.NewInt(500),                           // 50%
+			Token:  sdk.NewCoin(baseCurrency, cosmossdk_io_math.NewInt(1000000)), // 1M base currency initial liquidity
+			Weight: cosmossdk_io_math.NewInt(500),                                // 50%
 		},
 		{
 			Token:  sdk.NewCoin(userTokenDenom, cosmossdk_io_math.NewInt(1000000)), // 1M UserToken initial liquidity
@@ -929,15 +1031,15 @@ func (k msgServer) UpdateParams(goCtx context.Context, req *types.MsgUpdateParam
 }
 
 // distributeInitialTokens distributes 100M tokens according to tokenomics
-func (k msgServer) distributeInitialTokens(ctx sdk.Context, denom string, totalSupply cosmossdk_io_math.Int) error {
+func (k msgServer) distributeInitialTokens(ctx sdk.Context, denom string, totalSupply cosmossdk_io_math.Int, scale cosmossdk_io_math.Int) error {
 	params := k.GetParams(ctx)
 
 	// Calculate distribution amounts
-	bondingCurveAmount := cosmossdk_io_math.NewInt(30_000_000) // 30M to bonding curve
-	platformAmount := cosmossdk_io_math.NewInt(10_000_000)     // 10M to platform
-	referralAmount := cosmossdk_io_math.NewInt(10_000_000)     // 10M to referral
-	aiCeoAmount := cosmossdk_io_math.NewInt(40_000_000)        // 40M to AI CEO
-	founderOfferAmount := cosmossdk_io_math.NewInt(10_000_000) // 10M reserved for founder offer
+	bondingCurveAmount := cosmossdk_io_math.NewInt(30_000_000).Mul(scale) // 30M to bonding curve
+	platformAmount := cosmossdk_io_math.NewInt(10_000_000).Mul(scale)     // 10M to platform
+	referralAmount := cosmossdk_io_math.NewInt(10_000_000).Mul(scale)     // 10M to referral
+	aiCeoAmount := cosmossdk_io_math.NewInt(40_000_000).Mul(scale)        // 40M to AI CEO
+	founderOfferAmount := cosmossdk_io_math.NewInt(10_000_000).Mul(scale) // 10M reserved for founder offer
 
 	// 30M stays in module for bonding curve - no transfer needed
 
@@ -999,7 +1101,8 @@ func (k msgServer) TransferExpiredFounderTokensToAiCeo(ctx sdk.Context, denom st
 	}
 
 	// Check if founder tokens are still unclaimed
-	founderOfferAmount := cosmossdk_io_math.NewInt(10_000_000)
+	scaleInt, _ := k.mustGetTokenScaleFactors(ctx, denom)
+	founderOfferAmount := cosmossdk_io_math.NewInt(10_000_000).Mul(scaleInt)
 	if !userToken.FounderTokensClaimed.IsZero() {
 		return fmt.Errorf("founder tokens already claimed")
 	}

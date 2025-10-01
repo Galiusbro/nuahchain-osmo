@@ -6,6 +6,4 @@ import "gogoproto/gogo.proto";
 option go_package = "github.com/osmosis-labs/osmosis/v30/x/roles/types";
 
 // Params defines configuration for the roles module.
-message Params {
-  string authority = 1;
-}
+message Params { string authority = 1; }

@@ -10,11 +10,13 @@ import "osmosis/roles/v1beta1/params.proto";
 option go_package = "github.com/osmosis-labs/osmosis/v30/x/roles/types";
 
 service Query {
-  rpc RolesByAddress(QueryRolesByAddressRequest) returns (QueryRolesByAddressResponse) {
+  rpc RolesByAddress(QueryRolesByAddressRequest)
+      returns (QueryRolesByAddressResponse) {
     option (google.api.http).get = "/osmosis/roles/v1beta1/roles/{address}";
   };
 
-  rpc AllRoleBindings(QueryAllRoleBindingsRequest) returns (QueryAllRoleBindingsResponse) {
+  rpc AllRoleBindings(QueryAllRoleBindingsRequest)
+      returns (QueryAllRoleBindingsResponse) {
     option (google.api.http).get = "/osmosis/roles/v1beta1/roles";
   };
 
@@ -23,13 +25,9 @@ service Query {
   };
 }
 
-message QueryRolesByAddressRequest {
-  string address = 1;
-}
+message QueryRolesByAddressRequest { string address = 1; }
 
-message QueryRolesByAddressResponse {
-  RoleBinding binding = 1;
-}
+message QueryRolesByAddressResponse { RoleBinding binding = 1; }
 
 message QueryAllRoleBindingsRequest {
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
@@ -42,6 +40,4 @@ message QueryAllRoleBindingsResponse {
 
 message QueryParamsRequest {}
 
-message QueryParamsResponse {
-  Params params = 1;
-}
+message QueryParamsResponse { Params params = 1; }

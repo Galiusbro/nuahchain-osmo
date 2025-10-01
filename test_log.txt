@@ -1,0 +1,300 @@
+gp@GALPRIMs-MacBook-Air nuahchain_osmosis %  cd /Users/gp/projects/alex/dollar/nuahchain_osmosis && go test ./x/usertoken/... -v
+?       github.com/osmosis-labs/osmosis/v30/x/usertoken       [no test files]
+?       github.com/osmosis-labs/osmosis/v30/x/usertoken/client/cli    [no test files]
+=== RUN   TestMsgServerTestSuite
+=== RUN   TestMsgServerTestSuite/TestActivateReferral
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestBuyFounderTokens
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestBuyFounderTokensInsufficientFunds
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestBuyTokensBasic
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestBuyTokensExpectedAmounts
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestBuyTokensExpectedAmounts/small_payment
+    test_suite.go:106: Setting up KeeperTestHelper
+    msg_server_test.go:523: Payment: 1000, Tokens received: 128310434117, Curve sold: 128310434117
+=== RUN   TestMsgServerTestSuite/TestBuyTokensExpectedAmounts/full_curve_purchase
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestBuyTokensPaymentDistribution
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestCalculateBondingCurvePrice
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestCalculateBondingCurvePrice/zero_supply
+=== RUN   TestMsgServerTestSuite/TestCalculateBondingCurvePrice/half_max_supply
+=== RUN   TestMsgServerTestSuite/TestCalculateBondingCurvePrice/max_supply
+=== RUN   TestMsgServerTestSuite/TestCalculateBondingCurvePrice/above_max_supply
+=== RUN   TestMsgServerTestSuite/TestCalculatePayoutFromTokens
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestCalculatePayoutFromTokens/sell_tokens_matching_small_purchase
+=== RUN   TestMsgServerTestSuite/TestCalculatePayoutFromTokens/sell_entire_curve
+=== RUN   TestMsgServerTestSuite/TestCalculatePayoutFromTokens/sell_zero_tokens
+=== RUN   TestMsgServerTestSuite/TestCalculateTokensFromPayment
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestCalculateTokensFromPayment/small_payment_at_zero_supply
+=== RUN   TestMsgServerTestSuite/TestCalculateTokensFromPayment/full_curve_purchase
+=== RUN   TestMsgServerTestSuite/TestCalculateTokensFromPayment/clamped_to_remaining_supply
+=== RUN   TestMsgServerTestSuite/TestCalculateTokensFromPayment/zero_payment
+=== RUN   TestMsgServerTestSuite/TestClaimFounderTokensMinimumPurchase
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestClaimFounderTokensSufficientPurchase
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestCreateReferralProgram
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestCreateReferralProgramNewUserInitialization
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestCreateReferralProgramQuotaLimits
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestCreateUserToken
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+    msg_server_test.go:72:
+                Error Trace:    /Users/gp/projects/alex/dollar/nuahchain_osmosis/x/usertoken/keeper/msg_server_test.go:72
+                Error:          Not equal:
+                                expected: math.Int{i:(*big.Int)(0x14001c46340)}
+                                actual  : math.Int{i:(*big.Int)(0x14001c46280)}
+
+                                Diff:
+                                --- Expected
+                                +++ Actual
+                                @@ -4,3 +4,3 @@
+                                   abs: (big.nat) (len=1) {
+                                -   (big.Word) 100000000
+                                +   (big.Word) 70000000000000
+                                   }
+                Test:           TestMsgServerTestSuite/TestCreateUserToken
+=== RUN   TestMsgServerTestSuite/TestCreateUserTokenDuplicateSubdenom
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestCreateUserTokenValidation
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestSellTokens
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestSellTokensExceedsCurveSupply
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestSellTokensExceedsCurveSupply/no_curve_liquidity
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestSellTokensExceedsCurveSupply/sale_exceeds_curve_supply
+    test_suite.go:106: Setting up KeeperTestHelper
+    msg_server_test.go:1323:
+                Error Trace:    /Users/gp/projects/alex/dollar/nuahchain_osmosis/x/usertoken/keeper/msg_server_test.go:1323
+                                                        /Users/gp/go/pkg/mod/github.com/stretchr/testify@v1.10.0/suite/suite.go:115
+                Error:          "payout is zero for requested sale amount" does not contain "exceeds bonding curve supply"
+                Test:           TestMsgServerTestSuite/TestSellTokensExceedsCurveSupply/sale_exceeds_curve_supply
+=== RUN   TestMsgServerTestSuite/TestSellTokensInsufficientBalance
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+    msg_server_test.go:1237:
+                Error Trace:    /Users/gp/projects/alex/dollar/nuahchain_osmosis/x/usertoken/keeper/msg_server_test.go:1237
+                Error:          "bonding curve has no liquidity to sell into" does not contain "insufficient tokens to sell"
+                Test:           TestMsgServerTestSuite/TestSellTokensInsufficientBalance
+=== RUN   TestMsgServerTestSuite/TestSellTokensMinPriceNotMet
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestStartLBP
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestStartLBPValidation
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestUserReferralQuotaMultipleExpansions
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestUserReferralQuotaPartialUtilization
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestUserReferralQuotaWeeklyReset
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestWeeklyLinkReplenishment
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestMsgServerTestSuite/TestWeeklyLinkReplenishmentFullUtilization
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+--- FAIL: TestMsgServerTestSuite (0.54s)
+    --- PASS: TestMsgServerTestSuite/TestActivateReferral (0.06s)
+    --- PASS: TestMsgServerTestSuite/TestBuyFounderTokens (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestBuyFounderTokensInsufficientFunds (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestBuyTokensBasic (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestBuyTokensExpectedAmounts (0.03s)
+        --- PASS: TestMsgServerTestSuite/TestBuyTokensExpectedAmounts/small_payment (0.01s)
+        --- PASS: TestMsgServerTestSuite/TestBuyTokensExpectedAmounts/full_curve_purchase (0.01s)
+    --- PASS: TestMsgServerTestSuite/TestBuyTokensPaymentDistribution (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestCalculateBondingCurvePrice (0.01s)
+        --- PASS: TestMsgServerTestSuite/TestCalculateBondingCurvePrice/zero_supply (0.00s)
+        --- PASS: TestMsgServerTestSuite/TestCalculateBondingCurvePrice/half_max_supply (0.00s)
+        --- PASS: TestMsgServerTestSuite/TestCalculateBondingCurvePrice/max_supply (0.00s)
+        --- PASS: TestMsgServerTestSuite/TestCalculateBondingCurvePrice/above_max_supply (0.00s)
+    --- PASS: TestMsgServerTestSuite/TestCalculatePayoutFromTokens (0.01s)
+        --- PASS: TestMsgServerTestSuite/TestCalculatePayoutFromTokens/sell_tokens_matching_small_purchase (0.00s)
+        --- PASS: TestMsgServerTestSuite/TestCalculatePayoutFromTokens/sell_entire_curve (0.00s)
+        --- PASS: TestMsgServerTestSuite/TestCalculatePayoutFromTokens/sell_zero_tokens (0.00s)
+    --- PASS: TestMsgServerTestSuite/TestCalculateTokensFromPayment (0.01s)
+        --- PASS: TestMsgServerTestSuite/TestCalculateTokensFromPayment/small_payment_at_zero_supply (0.00s)
+        --- PASS: TestMsgServerTestSuite/TestCalculateTokensFromPayment/full_curve_purchase (0.00s)
+        --- PASS: TestMsgServerTestSuite/TestCalculateTokensFromPayment/clamped_to_remaining_supply (0.00s)
+        --- PASS: TestMsgServerTestSuite/TestCalculateTokensFromPayment/zero_payment (0.00s)
+    --- PASS: TestMsgServerTestSuite/TestClaimFounderTokensMinimumPurchase (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestClaimFounderTokensSufficientPurchase (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestCreateReferralProgram (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestCreateReferralProgramNewUserInitialization (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestCreateReferralProgramQuotaLimits (0.02s)
+    --- FAIL: TestMsgServerTestSuite/TestCreateUserToken (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestCreateUserTokenDuplicateSubdenom (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestCreateUserTokenValidation (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestSellTokens (0.02s)
+    --- FAIL: TestMsgServerTestSuite/TestSellTokensExceedsCurveSupply (0.03s)
+        --- PASS: TestMsgServerTestSuite/TestSellTokensExceedsCurveSupply/no_curve_liquidity (0.01s)
+        --- FAIL: TestMsgServerTestSuite/TestSellTokensExceedsCurveSupply/sale_exceeds_curve_supply (0.01s)
+    --- FAIL: TestMsgServerTestSuite/TestSellTokensInsufficientBalance (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestSellTokensMinPriceNotMet (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestStartLBP (0.01s)
+    --- PASS: TestMsgServerTestSuite/TestStartLBPValidation (0.01s)
+    --- PASS: TestMsgServerTestSuite/TestUserReferralQuotaMultipleExpansions (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestUserReferralQuotaPartialUtilization (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestUserReferralQuotaWeeklyReset (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestWeeklyLinkReplenishment (0.02s)
+    --- PASS: TestMsgServerTestSuite/TestWeeklyLinkReplenishmentFullUtilization (0.02s)
+=== RUN   TestUpdateParamsTestSuite
+=== RUN   TestUpdateParamsTestSuite/TestUpdateParams
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestUpdateParamsTestSuite/TestUpdateParams/valid_authority_and_params
+=== RUN   TestUpdateParamsTestSuite/TestUpdateParams/invalid_authority
+=== RUN   TestUpdateParamsTestSuite/TestUpdateParamsChangePrice
+    test_suite.go:106: Setting up KeeperTestHelper
+--- PASS: TestUpdateParamsTestSuite (0.02s)
+    --- PASS: TestUpdateParamsTestSuite/TestUpdateParams (0.01s)
+        --- PASS: TestUpdateParamsTestSuite/TestUpdateParams/valid_authority_and_params (0.00s)
+        --- PASS: TestUpdateParamsTestSuite/TestUpdateParams/invalid_authority (0.00s)
+    --- PASS: TestUpdateParamsTestSuite/TestUpdateParamsChangePrice (0.01s)
+=== RUN   TestVestingTestSuite
+=== RUN   TestVestingTestSuite/TestCreateVestingAccount
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestVestingTestSuite/TestCreateVestingAccount/valid_vesting_account_creation
+=== RUN   TestVestingTestSuite/TestCreateVestingAccount/invalid_from_address
+=== RUN   TestVestingTestSuite/TestCreateVestingAccount/invalid_to_address
+=== RUN   TestVestingTestSuite/TestCreateVestingAccount/empty_amount
+=== RUN   TestVestingTestSuite/TestCreateVestingAccount/end_time_in_the_past
+=== RUN   TestVestingTestSuite/TestCreateVestingAccountEvents
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestVestingTestSuite/TestCreateVestingAccountValidation
+    test_suite.go:106: Setting up KeeperTestHelper
+    test_suite.go:106: Setting up KeeperTestHelper
+--- PASS: TestVestingTestSuite (0.06s)
+    --- PASS: TestVestingTestSuite/TestCreateVestingAccount (0.02s)
+        --- PASS: TestVestingTestSuite/TestCreateVestingAccount/valid_vesting_account_creation (0.00s)
+        --- PASS: TestVestingTestSuite/TestCreateVestingAccount/invalid_from_address (0.00s)
+        --- PASS: TestVestingTestSuite/TestCreateVestingAccount/invalid_to_address (0.00s)
+        --- PASS: TestVestingTestSuite/TestCreateVestingAccount/empty_amount (0.00s)
+        --- PASS: TestVestingTestSuite/TestCreateVestingAccount/end_time_in_the_past (0.00s)
+    --- PASS: TestVestingTestSuite/TestCreateVestingAccountEvents (0.02s)
+    --- PASS: TestVestingTestSuite/TestCreateVestingAccountValidation (0.02s)
+=== RUN   TestQueryServerTestSuite
+=== RUN   TestQueryServerTestSuite/TestBondingCurveSupplyEstimation
+    test_suite.go:106: Setting up KeeperTestHelper
+    query_server_test.go:272:
+                Error Trace:    /Users/gp/projects/alex/dollar/nuahchain_osmosis/x/usertoken/keeper/query_server_test.go:272
+                Error:          Not equal:
+                                expected: math.Int{i:(*big.Int)(0x140048e4ec0)}
+                                actual  : math.Int{i:(*big.Int)(0x140048e4ea0)}
+
+                                Diff:
+                                --- Expected
+                                +++ Actual
+                                @@ -3,5 +3,3 @@
+                                   neg: (bool) false,
+                                -  abs: (big.nat) (len=1) {
+                                -   (big.Word) 5000000
+                                -  }
+                                +  abs: (big.nat) <nil>
+                                  })
+                Test:           TestQueryServerTestSuite/TestBondingCurveSupplyEstimation
+=== RUN   TestQueryServerTestSuite/TestQueryBondingCurvePrice
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestQueryServerTestSuite/TestQueryBondingCurvePrice/valid_request
+=== RUN   TestQueryServerTestSuite/TestQueryBondingCurvePrice/nil_request
+=== RUN   TestQueryServerTestSuite/TestQueryBondingCurvePrice/empty_denom
+=== RUN   TestQueryServerTestSuite/TestQueryBondingCurvePrice/token_not_found
+=== RUN   TestQueryServerTestSuite/TestQueryParams
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestQueryServerTestSuite/TestQueryParams/valid_request
+=== RUN   TestQueryServerTestSuite/TestQueryParams/nil_request
+=== RUN   TestQueryServerTestSuite/TestQueryUserToken
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestQueryServerTestSuite/TestQueryUserToken/valid_request
+=== RUN   TestQueryServerTestSuite/TestQueryUserToken/nil_request
+=== RUN   TestQueryServerTestSuite/TestQueryUserToken/empty_denom
+=== RUN   TestQueryServerTestSuite/TestQueryUserToken/token_not_found
+=== RUN   TestQueryServerTestSuite/TestQueryUserTokens
+    test_suite.go:106: Setting up KeeperTestHelper
+=== RUN   TestQueryServerTestSuite/TestQueryUserTokens/valid_request
+=== RUN   TestQueryServerTestSuite/TestQueryUserTokens/nil_request
+--- FAIL: TestQueryServerTestSuite (0.04s)
+    --- FAIL: TestQueryServerTestSuite/TestBondingCurveSupplyEstimation (0.01s)
+    --- PASS: TestQueryServerTestSuite/TestQueryBondingCurvePrice (0.01s)
+        --- PASS: TestQueryServerTestSuite/TestQueryBondingCurvePrice/valid_request (0.00s)
+        --- PASS: TestQueryServerTestSuite/TestQueryBondingCurvePrice/nil_request (0.00s)
+        --- PASS: TestQueryServerTestSuite/TestQueryBondingCurvePrice/empty_denom (0.00s)
+        --- PASS: TestQueryServerTestSuite/TestQueryBondingCurvePrice/token_not_found (0.00s)
+    --- PASS: TestQueryServerTestSuite/TestQueryParams (0.01s)
+        --- PASS: TestQueryServerTestSuite/TestQueryParams/valid_request (0.00s)
+        --- PASS: TestQueryServerTestSuite/TestQueryParams/nil_request (0.00s)
+    --- PASS: TestQueryServerTestSuite/TestQueryUserToken (0.01s)
+        --- PASS: TestQueryServerTestSuite/TestQueryUserToken/valid_request (0.00s)
+        --- PASS: TestQueryServerTestSuite/TestQueryUserToken/nil_request (0.00s)
+        --- PASS: TestQueryServerTestSuite/TestQueryUserToken/empty_denom (0.00s)
+        --- PASS: TestQueryServerTestSuite/TestQueryUserToken/token_not_found (0.00s)
+    --- PASS: TestQueryServerTestSuite/TestQueryUserTokens (0.01s)
+        --- PASS: TestQueryServerTestSuite/TestQueryUserTokens/valid_request (0.00s)
+        --- PASS: TestQueryServerTestSuite/TestQueryUserTokens/nil_request (0.00s)
+FAIL
+FAIL    github.com/osmosis-labs/osmosis/v30/x/usertoken/keeper  2.733s
+?       github.com/osmosis-labs/osmosis/v30/x/usertoken/simulation      [no test files]
+=== RUN   TestMsgCreateUserToken_ValidateBasic
+=== RUN   TestMsgCreateUserToken_ValidateBasic/valid_message
+=== RUN   TestMsgCreateUserToken_ValidateBasic/invalid_creator_address
+=== RUN   TestMsgCreateUserToken_ValidateBasic/empty_subdenom
+=== RUN   TestMsgCreateUserToken_ValidateBasic/subdenom_too_long
+=== RUN   TestMsgCreateUserToken_ValidateBasic/subdenom_with_invalid_characters
+=== RUN   TestMsgCreateUserToken_ValidateBasic/empty_name
+=== RUN   TestMsgCreateUserToken_ValidateBasic/name_too_long
+=== RUN   TestMsgCreateUserToken_ValidateBasic/empty_symbol
+=== RUN   TestMsgCreateUserToken_ValidateBasic/symbol_too_long
+=== RUN   TestMsgCreateUserToken_ValidateBasic/symbol_with_invalid_characters
+=== RUN   TestMsgCreateUserToken_ValidateBasic/decimals_too_high
+=== RUN   TestMsgCreateUserToken_ValidateBasic/valid_subdenom_with_hyphens
+--- PASS: TestMsgCreateUserToken_ValidateBasic (0.00s)
+    --- PASS: TestMsgCreateUserToken_ValidateBasic/valid_message (0.00s)
+    --- PASS: TestMsgCreateUserToken_ValidateBasic/invalid_creator_address (0.00s)
+    --- PASS: TestMsgCreateUserToken_ValidateBasic/empty_subdenom (0.00s)
+    --- PASS: TestMsgCreateUserToken_ValidateBasic/subdenom_too_long (0.00s)
+    --- PASS: TestMsgCreateUserToken_ValidateBasic/subdenom_with_invalid_characters (0.00s)
+    --- PASS: TestMsgCreateUserToken_ValidateBasic/empty_name (0.00s)
+    --- PASS: TestMsgCreateUserToken_ValidateBasic/name_too_long (0.00s)
+    --- PASS: TestMsgCreateUserToken_ValidateBasic/empty_symbol (0.00s)
+    --- PASS: TestMsgCreateUserToken_ValidateBasic/symbol_too_long (0.00s)
+    --- PASS: TestMsgCreateUserToken_ValidateBasic/symbol_with_invalid_characters (0.00s)
+    --- PASS: TestMsgCreateUserToken_ValidateBasic/decimals_too_high (0.00s)
+    --- PASS: TestMsgCreateUserToken_ValidateBasic/valid_subdenom_with_hyphens (0.00s)
+=== RUN   TestMsgBuyTokens_ValidateBasic
+=== RUN   TestMsgBuyTokens_ValidateBasic/invalid_buyer_address
+--- PASS: TestMsgBuyTokens_ValidateBasic (0.00s)
+    --- PASS: TestMsgBuyTokens_ValidateBasic/invalid_buyer_address (0.00s)
+PASS
+ok      github.com/osmosis-labs/osmosis/v30/x/usertoken/types   (cached)
+FAIL
+gp@GALPRIMs-MacBook-Air nuahchain_osmosis %

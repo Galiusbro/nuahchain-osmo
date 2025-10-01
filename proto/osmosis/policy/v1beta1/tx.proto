@@ -15,14 +15,19 @@ service Msg {
   rpc CreatePolicy(MsgCreatePolicy) returns (MsgCreatePolicyResponse) {
     option (google.api.http).post = "/osmosis/policy/v1beta1/policies";
   };
-  rpc UpdatePolicyAttributes(MsgUpdatePolicyAttributes) returns (MsgUpdatePolicyAttributesResponse) {
-    option (google.api.http).post = "/osmosis/policy/v1beta1/policies/{policy_id}/attributes";
+  rpc UpdatePolicyAttributes(MsgUpdatePolicyAttributes)
+      returns (MsgUpdatePolicyAttributesResponse) {
+    option (google.api.http).post =
+        "/osmosis/policy/v1beta1/policies/{policy_id}/attributes";
   };
   rpc CancelPolicy(MsgCancelPolicy) returns (MsgCancelPolicyResponse) {
-    option (google.api.http).post = "/osmosis/policy/v1beta1/policies/{policy_id}/cancel";
+    option (google.api.http).post =
+        "/osmosis/policy/v1beta1/policies/{policy_id}/cancel";
   };
-  rpc UpdatePolicyStatus(MsgUpdatePolicyStatus) returns (MsgUpdatePolicyStatusResponse) {
-    option (google.api.http).post = "/osmosis/policy/v1beta1/policies/{policy_id}/status";
+  rpc UpdatePolicyStatus(MsgUpdatePolicyStatus)
+      returns (MsgUpdatePolicyStatusResponse) {
+    option (google.api.http).post =
+        "/osmosis/policy/v1beta1/policies/{policy_id}/status";
   };
 }
 
@@ -34,14 +39,12 @@ message MsgCreatePolicy {
   string policy_type = 2;
   repeated PolicyAttribute attributes = 3 [ (gogoproto.nullable) = false ];
   string treasury_pool_id = 4;
-  google.protobuf.Timestamp start_time = 5 [(gogoproto.stdtime) = true];
-  google.protobuf.Timestamp end_time = 6 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp start_time = 5 [ (gogoproto.stdtime) = true ];
+  google.protobuf.Timestamp end_time = 6 [ (gogoproto.stdtime) = true ];
   repeated string tags = 7;
 }
 
-message MsgCreatePolicyResponse {
-  uint64 policy_id = 1;
-}
+message MsgCreatePolicyResponse { uint64 policy_id = 1; }
 
 message MsgUpdatePolicyAttributes {
   option (cosmos.msg.v1.signer) = "authority";

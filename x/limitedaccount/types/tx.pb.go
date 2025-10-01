@@ -32,11 +32,13 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // MsgCreateLimitedAccount defines the Msg/CreateLimitedAccount request type.
 type MsgCreateLimitedAccount struct {
-	// authority is the address that controls the module (defaults to x/gov unless overwritten).
+	// authority is the address that controls the module (defaults to x/gov unless
+	// overwritten).
 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty" yaml:"authority"`
 	// address is the account address to make limited.
 	Address string `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
-	// max_daily_txs is the maximum number of free transactions per day (optional, uses default if 0).
+	// max_daily_txs is the maximum number of free transactions per day (optional,
+	// uses default if 0).
 	MaxDailyTxs uint32 `protobuf:"varint,3,opt,name=max_daily_txs,json=maxDailyTxs,proto3" json:"max_daily_txs,omitempty"`
 }
 
@@ -94,7 +96,8 @@ func (m *MsgCreateLimitedAccount) GetMaxDailyTxs() uint32 {
 	return 0
 }
 
-// MsgCreateLimitedAccountResponse defines the Msg/CreateLimitedAccount response type.
+// MsgCreateLimitedAccountResponse defines the Msg/CreateLimitedAccount response
+// type.
 type MsgCreateLimitedAccountResponse struct {
 }
 
@@ -133,7 +136,8 @@ var xxx_messageInfo_MsgCreateLimitedAccountResponse proto.InternalMessageInfo
 
 // MsgRemoveLimitedAccount defines the Msg/RemoveLimitedAccount request type.
 type MsgRemoveLimitedAccount struct {
-	// authority is the address that controls the module (defaults to x/gov unless overwritten).
+	// authority is the address that controls the module (defaults to x/gov unless
+	// overwritten).
 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty" yaml:"authority"`
 	// address is the account address to remove from limited accounts.
 	Address string `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
@@ -186,7 +190,8 @@ func (m *MsgRemoveLimitedAccount) GetAddress() string {
 	return ""
 }
 
-// MsgRemoveLimitedAccountResponse defines the Msg/RemoveLimitedAccount response type.
+// MsgRemoveLimitedAccountResponse defines the Msg/RemoveLimitedAccount response
+// type.
 type MsgRemoveLimitedAccountResponse struct {
 }
 

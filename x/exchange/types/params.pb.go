@@ -37,7 +37,8 @@ type Params struct {
 	MaxExchangeAmountUsd cosmossdk_io_math.LegacyDec `protobuf:"bytes,4,opt,name=max_exchange_amount_usd,json=maxExchangeAmountUsd,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"max_exchange_amount_usd"`
 	// daily_limit_usd is the daily exchange limit per address (e.g., $1M)
 	DailyLimitUsd cosmossdk_io_math.LegacyDec `protobuf:"bytes,5,opt,name=daily_limit_usd,json=dailyLimitUsd,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"daily_limit_usd"`
-	// price_deviation_threshold is the maximum allowed deviation between Oracle and TWAP prices
+	// price_deviation_threshold is the maximum allowed deviation between Oracle
+	// and TWAP prices
 	PriceDeviationThreshold cosmossdk_io_math.LegacyDec `protobuf:"bytes,6,opt,name=price_deviation_threshold,json=priceDeviationThreshold,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"price_deviation_threshold"`
 	// treasury_addresses are the addresses where exchanged tokens are sent
 	TreasuryAddresses []string `protobuf:"bytes,7,rep,name=treasury_addresses,json=treasuryAddresses,proto3" json:"treasury_addresses,omitempty"`

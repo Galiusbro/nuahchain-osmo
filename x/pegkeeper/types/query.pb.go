@@ -182,7 +182,8 @@ func (m *QueryPegStateResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryPegStateResponse proto.InternalMessageInfo
 
-// QueryAdjustmentHistoryRequest is the request type for the Query/AdjustmentHistory RPC method.
+// QueryAdjustmentHistoryRequest is the request type for the
+// Query/AdjustmentHistory RPC method.
 type QueryAdjustmentHistoryRequest struct {
 	// limit is the maximum number of adjustments to return
 	Limit uint64 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
@@ -223,7 +224,8 @@ func (m *QueryAdjustmentHistoryRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryAdjustmentHistoryRequest proto.InternalMessageInfo
 
-// QueryAdjustmentHistoryResponse is the response type for the Query/AdjustmentHistory RPC method.
+// QueryAdjustmentHistoryResponse is the response type for the
+// Query/AdjustmentHistory RPC method.
 type QueryAdjustmentHistoryResponse struct {
 	// adjustments is the list of supply adjustments
 	Adjustments []*SupplyAdjustment `protobuf:"bytes,1,rep,name=adjustments,proto3" json:"adjustments,omitempty"`

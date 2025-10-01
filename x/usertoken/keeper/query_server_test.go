@@ -220,7 +220,7 @@ func (suite *QueryServerTestSuite) TestQueryBondingCurvePrice() {
 		{
 			name: "token not found",
 			req:  &types.QueryBondingCurvePriceRequest{Denom: "factory/osmo1abc/nonexistent"},
-			err:  nil, // GetTokenSupply doesn't return error for non-existent tokens, returns zero supply
+			err:  status.Error(codes.NotFound, "token not found: factory/osmo1abc/nonexistent"),
 		},
 	}
 
@@ -245,4 +245,41 @@ func (suite *QueryServerTestSuite) TestQueryBondingCurvePrice() {
 			}
 		})
 	}
+}
+
+func (suite *QueryServerTestSuite) TestBondingCurveSupplyEstimation() {
+	denom := "factory/osmo1abc/bcsupply"
+	params := suite.App.UserTokenKeeper.GetParams(suite.Ctx)
+
+	userToken := types.UserToken{
+		Denom:                denom,
+		Creator:              suite.TestAccs[0].String(),
+		MaxSupply:            params.BondingCurveMaxSupply,
+		CurrentSupply:        math.NewInt(100_000_000),
+		FounderTokensClaimed: math.ZeroInt(),
+	}
+	suite.App.UserTokenKeeper.SetUserToken(suite.Ctx, userToken)
+
+	supply, err := suite.App.UserTokenKeeper.GetBondingCurveSupply(suite.Ctx, denom)
+	suite.Require().NoError(err)
+	suite.Require().Equal(math.ZeroInt(), supply)
+
+	// Set CurrentSupply to 65M in base units (60M initial + 5M from bonding curve)
+	scale := math.NewInt(1_000_000) // 6 decimals
+	userToken.CurrentSupply = math.NewInt(65_000_000).Mul(scale)
+	suite.App.UserTokenKeeper.SetUserToken(suite.Ctx, userToken)
+
+	supply, err = suite.App.UserTokenKeeper.GetBondingCurveSupply(suite.Ctx, denom)
+	suite.Require().NoError(err)
+	// Should return 5M tokens in base units
+	suite.Require().Equal(math.NewInt(5_000_000).Mul(scale), supply)
+
+	// Set CurrentSupply to 90M in base units (60M initial + 30M max from bonding curve)
+	userToken.CurrentSupply = math.NewInt(90_000_000).Mul(scale)
+	suite.App.UserTokenKeeper.SetUserToken(suite.Ctx, userToken)
+
+	supply, err = suite.App.UserTokenKeeper.GetBondingCurveSupply(suite.Ctx, denom)
+	suite.Require().NoError(err)
+	// Should return max bonding curve supply in base units
+	suite.Require().Equal(params.BondingCurveMaxSupply.Mul(scale), supply)
 }

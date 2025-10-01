@@ -7,6 +7,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
 
 	abci "github.com/cometbft/cometbft/abci/types"
 
@@ -65,9 +66,32 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncod
 	return genState.Validate()
 }
 
-// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the usertoken module.
+// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	_ = types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx))
+	fmt.Println("DEBUG: usertoken RegisterGRPCGatewayRoutes called")
+	fmt.Printf("DEBUG: clientCtx config: NodeURI=%s, Client=%v\n", clientCtx.NodeURI, clientCtx.Client != nil)
+	
+	// Try to register using QueryHandlerClient first
+	queryClient := types.NewQueryClient(clientCtx)
+	fmt.Printf("DEBUG: Created QueryClient: %T\n", queryClient)
+	
+	if err := types.RegisterQueryHandlerClient(context.Background(), mux, queryClient); err != nil {
+		fmt.Printf("DEBUG: usertoken RegisterQueryHandlerClient error: %v\n", err)
+		
+		// If client fails, try endpoint-based registration
+		fmt.Println("DEBUG: Trying RegisterQueryHandlerFromEndpoint...")
+		endpoint := "localhost:9090"
+		fmt.Printf("DEBUG: Connecting to gRPC endpoint: %s\n", endpoint)
+		
+		if err2 := types.RegisterQueryHandlerFromEndpoint(context.Background(), mux, endpoint, []grpc.DialOption{grpc.WithInsecure()}); err2 != nil {
+			fmt.Printf("DEBUG: usertoken RegisterQueryHandlerFromEndpoint error: %v\n", err2)
+			panic(fmt.Errorf("both registration methods failed: client error: %v, endpoint error: %v", err, err2))
+		}
+		fmt.Println("DEBUG: RegisterQueryHandlerFromEndpoint succeeded")
+	} else {
+		fmt.Println("DEBUG: RegisterQueryHandlerClient succeeded")
+	}
+	fmt.Println("DEBUG: usertoken RegisterGRPCGatewayRoutes completed successfully")
 }
 
 // GetTxCmd returns the root tx command for the usertoken module.

@@ -358,7 +358,8 @@ func (m *MsgRemoveSupportedToken) GetDenom() string {
 	return ""
 }
 
-// MsgRemoveSupportedTokenResponse defines the response for MsgRemoveSupportedToken
+// MsgRemoveSupportedTokenResponse defines the response for
+// MsgRemoveSupportedToken
 type MsgRemoveSupportedTokenResponse struct {
 }
 

@@ -27,25 +27,29 @@ service Msg {
 
   // UpdateTokenPrice updates the USD price for a specific token.
   // Can only be called by the admin account.
-  rpc UpdateTokenPrice(MsgUpdateTokenPrice) returns (MsgUpdateTokenPriceResponse) {
+  rpc UpdateTokenPrice(MsgUpdateTokenPrice)
+      returns (MsgUpdateTokenPriceResponse) {
     option (google.api.http).post = "/osmosis/usdoracle/update_token_price";
   };
 
   // AddSupportedToken adds a new supported token.
   // Can only be called by the admin account.
-  rpc AddSupportedToken(MsgAddSupportedToken) returns (MsgAddSupportedTokenResponse) {
+  rpc AddSupportedToken(MsgAddSupportedToken)
+      returns (MsgAddSupportedTokenResponse) {
     option (google.api.http).post = "/osmosis/usdoracle/add_supported_token";
   };
 
   // RemoveSupportedToken removes a supported token.
   // Can only be called by the admin account.
-  rpc RemoveSupportedToken(MsgRemoveSupportedToken) returns (MsgRemoveSupportedTokenResponse) {
+  rpc RemoveSupportedToken(MsgRemoveSupportedToken)
+      returns (MsgRemoveSupportedTokenResponse) {
     option (google.api.http).post = "/osmosis/usdoracle/remove_supported_token";
   };
 
   // UpdateSupportedToken updates configuration for a supported token.
   // Can only be called by the admin account.
-  rpc UpdateSupportedToken(MsgUpdateSupportedToken) returns (MsgUpdateSupportedTokenResponse) {
+  rpc UpdateSupportedToken(MsgUpdateSupportedToken)
+      returns (MsgUpdateSupportedTokenResponse) {
     option (google.api.http).post = "/osmosis/usdoracle/update_supported_token";
   };
 
@@ -57,7 +61,8 @@ service Msg {
 
   // UpdatePriceSource updates a specific price source configuration.
   // Can only be called by the admin account.
-  rpc UpdatePriceSource(MsgUpdatePriceSource) returns (MsgUpdatePriceSourceResponse) {
+  rpc UpdatePriceSource(MsgUpdatePriceSource)
+      returns (MsgUpdatePriceSourceResponse) {
     option (google.api.http).post = "/osmosis/usdoracle/update_price_source";
   };
 }
@@ -155,7 +160,8 @@ message MsgRemoveSupportedToken {
   string denom = 2;
 }
 
-// MsgRemoveSupportedTokenResponse is the response type for MsgRemoveSupportedToken
+// MsgRemoveSupportedTokenResponse is the response type for
+// MsgRemoveSupportedToken
 message MsgRemoveSupportedTokenResponse {}
 
 // MsgUpdateSupportedToken is the message type for updating a supported token
@@ -169,7 +175,8 @@ message MsgUpdateSupportedToken {
   SupportedToken token = 2 [ (gogoproto.nullable) = false ];
 }
 
-// MsgUpdateSupportedTokenResponse is the response type for MsgUpdateSupportedToken
+// MsgUpdateSupportedTokenResponse is the response type for
+// MsgUpdateSupportedToken
 message MsgUpdateSupportedTokenResponse {}
 
 // MsgUpdatePriceSource is the message type for updating a price source

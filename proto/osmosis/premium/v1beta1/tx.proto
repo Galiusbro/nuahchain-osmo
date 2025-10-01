@@ -13,14 +13,19 @@ import "cosmos/base/v1beta1/coin.proto";
 option go_package = "github.com/osmosis-labs/osmosis/v30/x/premium/types";
 
 service Msg {
-  rpc CreatePremiumPlan(MsgCreatePremiumPlan) returns (MsgCreatePremiumPlanResponse) {
+  rpc CreatePremiumPlan(MsgCreatePremiumPlan)
+      returns (MsgCreatePremiumPlanResponse) {
     option (google.api.http).post = "/osmosis/premium/v1beta1/plans";
   };
-  rpc RecordPremiumPayment(MsgRecordPremiumPayment) returns (MsgRecordPremiumPaymentResponse) {
-    option (google.api.http).post = "/osmosis/premium/v1beta1/plans/{plan_id}/payments";
+  rpc RecordPremiumPayment(MsgRecordPremiumPayment)
+      returns (MsgRecordPremiumPaymentResponse) {
+    option (google.api.http).post =
+        "/osmosis/premium/v1beta1/plans/{plan_id}/payments";
   };
-  rpc MarkPremiumOverdue(MsgMarkPremiumOverdue) returns (MsgMarkPremiumOverdueResponse) {
-    option (google.api.http).post = "/osmosis/premium/v1beta1/plans/{plan_id}/overdue";
+  rpc MarkPremiumOverdue(MsgMarkPremiumOverdue)
+      returns (MsgMarkPremiumOverdueResponse) {
+    option (google.api.http).post =
+        "/osmosis/premium/v1beta1/plans/{plan_id}/overdue";
   };
 }
 
@@ -36,9 +41,7 @@ message MsgCreatePremiumPlan {
   string treasury_pool_id = 6;
 }
 
-message MsgCreatePremiumPlanResponse {
-  uint64 plan_id = 1;
-}
+message MsgCreatePremiumPlanResponse { uint64 plan_id = 1; }
 
 message MsgRecordPremiumPayment {
   option (cosmos.msg.v1.signer) = "payer";

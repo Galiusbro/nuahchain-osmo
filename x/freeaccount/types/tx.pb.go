@@ -33,7 +33,8 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // MsgCreateFreeAccount defines a message to create a free account
 type MsgCreateFreeAccount struct {
-	// Authority is the address that controls the module (governance, module admin, etc).
+	// Authority is the address that controls the module (governance, module
+	// admin, etc).
 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
 	// Address is the address to create as a free account
 	Address string `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`

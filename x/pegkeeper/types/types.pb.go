@@ -135,7 +135,8 @@ type SupplyAdjustment struct {
 	PriceBefore string `protobuf:"bytes,2,opt,name=price_before,json=priceBefore,proto3" json:"price_before,omitempty"`
 	// price_after is the expected price after adjustment
 	PriceAfter string `protobuf:"bytes,3,opt,name=price_after,json=priceAfter,proto3" json:"price_after,omitempty"`
-	// supply_change_amount is the amount of supply change (positive for mint, negative for burn)
+	// supply_change_amount is the amount of supply change (positive for mint,
+	// negative for burn)
 	SupplyChangeAmount string `protobuf:"bytes,4,opt,name=supply_change_amount,json=supplyChangeAmount,proto3" json:"supply_change_amount,omitempty"`
 	// supply_change_denom is the denomination of the supply change
 	SupplyChangeDenom string `protobuf:"bytes,5,opt,name=supply_change_denom,json=supplyChangeDenom,proto3" json:"supply_change_denom,omitempty"`

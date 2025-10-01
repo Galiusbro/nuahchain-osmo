@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"strings"
 
 	"cosmossdk.io/log"
 	"cosmossdk.io/math"
@@ -9,6 +10,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	tokenfactorykeeper "github.com/osmosis-labs/osmosis/v30/x/tokenfactory/keeper"
 	"github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
@@ -54,6 +56,60 @@ func NewKeeper(
 	}
 }
 
+func (k Keeper) getTokenScaleFactors(ctx sdk.Context, denom string) (math.Int, math.LegacyDec, error) {
+	scale := math.NewInt(1)
+	scaleDec := math.LegacyNewDecFromInt(scale)
+
+	metadata, found := k.bankKeeper.GetDenomMetaData(ctx, denom)
+	if !found {
+		return scale, scaleDec, fmt.Errorf("metadata not found for denom: %s", denom)
+	}
+
+	var decimals uint32
+	for _, unit := range metadata.DenomUnits {
+		if unit.Denom == metadata.Display {
+			decimals = unit.Exponent
+			break
+		}
+	}
+
+	if decimals == 0 {
+		return scale, scaleDec, nil
+	}
+
+	for i := uint32(0); i < decimals; i++ {
+		scale = scale.MulRaw(10)
+	}
+
+	scaleDec = math.LegacyNewDecFromInt(scale)
+	return scale, scaleDec, nil
+}
+
+func (k Keeper) mustGetTokenScaleFactors(ctx sdk.Context, denom string) (math.Int, math.LegacyDec) {
+	// For user tokens (factory denoms), always use 6 decimals for now
+	// TODO: Fix metadata retrieval to get the actual decimals
+	if strings.Contains(denom, "factory/") {
+		defaultScale := math.NewInt(1_000_000) // 6 decimals
+		defaultScaleDec := math.LegacyNewDecFromInt(defaultScale)
+		return defaultScale, defaultScaleDec
+	}
+
+	scale, scaleDec, err := k.getTokenScaleFactors(ctx, denom)
+	if err != nil {
+		// Default to 6 decimals (1,000,000 scale) for other tokens when metadata is not found
+		defaultScale := math.NewInt(1_000_000)
+		defaultScaleDec := math.LegacyNewDecFromInt(defaultScale)
+		return defaultScale, defaultScaleDec
+	}
+	if scale.IsZero() {
+		// Default to 6 decimals if scale is zero
+		defaultScale := math.NewInt(1_000_000)
+		defaultScaleDec := math.LegacyNewDecFromInt(defaultScale)
+		return defaultScale, defaultScaleDec
+	}
+	return scale, scaleDec
+}
+
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
@@ -93,69 +149,50 @@ func (k Keeper) GetTokenSupply(ctx sdk.Context, denom string) (math.Int, error) 
 // GetBondingCurveSupply returns the supply that should be used for bonding curve calculations
 // For new token distribution model, bonding curve gets 30M tokens out of 100M total
 func (k Keeper) GetBondingCurveSupply(ctx sdk.Context, denom string) (math.Int, error) {
-	// Get user token to check if it exists
-	_, found := k.GetUserToken(ctx, denom)
+	userToken, found := k.GetUserToken(ctx, denom)
 	if !found {
 		return math.ZeroInt(), fmt.Errorf("token not found: %s", denom)
 	}
 
-	// For the new distribution model:
-	// - Total supply: 100M tokens
-	// - Bonding curve gets: 30M tokens
-	// - Platform gets: 10M tokens
-	// - Referral wallet gets: 10M tokens
-	// - AI CEO gets: 40M tokens (+ 10M more if founder doesn't buy)
-	// - Founder can buy: 10M tokens
+	scale, _ := k.mustGetTokenScaleFactors(ctx, denom)
 
-	// The bonding curve supply should track how many tokens have been sold from the 30M allocation
-	// We can calculate this by checking the actual token supply in circulation vs the initial distribution
-	totalSupply, err := k.GetTokenSupply(ctx, denom)
-	if err != nil {
-		return math.ZeroInt(), err
-	}
+	// Simple approach: track bonding curve supply based on CurrentSupply changes
+	// Initial circulating supply is 60M (distributed immediately)
+	// 10M platform + 10M referral + 40M AI CEO = 60M circulating
+	// Any increase in CurrentSupply above 60M represents tokens sold from bonding curve
+	initialCirculatingSupply := math.NewInt(60_000_000).Mul(scale)
 
-	// Initial distribution is 100M, bonding curve starts with 30M available
-	bondingCurveMaxSupply := math.NewInt(30_000_000) // 30M tokens for bonding curve
-	initialTotalSupply := math.NewInt(100_000_000)   // 100M total initial supply
-
-	// If total supply is still at initial 100M, no tokens have been sold from bonding curve
-	if totalSupply.Equal(initialTotalSupply) {
-		return math.ZeroInt(), nil // No tokens sold yet from bonding curve
-	}
-
-	// Calculate how many tokens have been sold from bonding curve
-	// This assumes any increase in supply beyond 100M comes from bonding curve sales
-	bondingCurveSold := totalSupply.Sub(initialTotalSupply)
+	bondingCurveSold := userToken.CurrentSupply.Sub(initialCirculatingSupply)
 	if bondingCurveSold.IsNegative() {
 		bondingCurveSold = math.ZeroInt()
-	}
-
-	// Ensure we don't exceed the bonding curve max supply
-	if bondingCurveSold.GT(bondingCurveMaxSupply) {
-		bondingCurveSold = bondingCurveMaxSupply
 	}
 
 	return bondingCurveSold, nil
 }
 
 // CalculateBondingCurvePrice calculates the current price based on supply
-func (k Keeper) CalculateBondingCurvePrice(ctx sdk.Context, currentSupply math.Int) math.LegacyDec {
+func (k Keeper) CalculateBondingCurvePrice(ctx sdk.Context, denom string, currentSupply math.Int) math.LegacyDec {
 	// Linear bonding curve: price = 0.0002 + (currentSupply / 30M) * (1.0 - 0.0002)
 	// Price ranges from 0.0002 N$ to 1.0 N$ for 30M tokens
-	maxSupply := math.NewInt(30_000_000)        // 30M tokens
 	minPrice := math.LegacyNewDecWithPrec(2, 4) // 0.0002
 	maxPrice := math.LegacyOneDec()             // 1.0
 
-	if currentSupply.GTE(maxSupply) {
+	scale, scaleDec := k.mustGetTokenScaleFactors(ctx, denom)
+	if scale.IsZero() {
+		scale = math.NewInt(1)
+		scaleDec = math.LegacyOneDec()
+	}
+
+	maxSupplyTokens := math.LegacyNewDecFromInt(math.NewInt(30_000_000))
+	currentSupplyTokens := math.LegacyNewDecFromInt(currentSupply).Quo(scaleDec)
+
+	if currentSupplyTokens.GTE(maxSupplyTokens) {
 		return maxPrice
 	}
 
-	// Calculate linear progression
-	progress := math.LegacyNewDecFromInt(currentSupply).Quo(math.LegacyNewDecFromInt(maxSupply))
+	progress := currentSupplyTokens.Quo(maxSupplyTokens)
 	priceRange := maxPrice.Sub(minPrice)
-	currentPrice := minPrice.Add(progress.Mul(priceRange))
-
-	return currentPrice
+	return minPrice.Add(progress.Mul(priceRange))
 }
 
 // InitGenesis initializes the module's state from a provided genesis state.
@@ -189,6 +226,9 @@ func (k Keeper) SetUserToken(ctx sdk.Context, userToken types.UserToken) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&userToken)
 	store.Set(types.UserTokenKey(userToken.Denom), bz)
+
+	// Ensure metadata exists (default to 6 decimals when unknown)
+	k.ensureTokenMetadata(ctx, userToken, 6)
 }
 
 // GetAllUserTokens returns all user tokens
@@ -207,6 +247,60 @@ func (k Keeper) GetAllUserTokens(ctx sdk.Context) []*types.UserToken {
 	return userTokens
 }
 
+func buildTokenMetadata(token types.UserToken, decimals uint32) banktypes.Metadata {
+	trimmedSymbol := strings.TrimSpace(token.Symbol)
+	trimmedName := strings.TrimSpace(token.Name)
+
+	displayDenom := strings.ToLower(trimmedSymbol)
+	if displayDenom == "" {
+		displayDenom = token.Denom
+	}
+
+	if decimals == 0 {
+		decimals = 6
+	}
+
+	denomUnits := []*banktypes.DenomUnit{{
+		Denom:    token.Denom,
+		Exponent: 0,
+	}}
+	if displayDenom != token.Denom {
+		aliases := []string{}
+		if trimmedSymbol != "" {
+			aliases = append(aliases, trimmedSymbol)
+		}
+		upperSymbol := strings.ToUpper(trimmedSymbol)
+		if upperSymbol != "" && upperSymbol != trimmedSymbol {
+			aliases = append(aliases, upperSymbol)
+		}
+
+		denomUnits = append(denomUnits, &banktypes.DenomUnit{
+			Denom:    displayDenom,
+			Exponent: decimals,
+			Aliases:  aliases,
+		})
+	}
+
+	return banktypes.Metadata{
+		Description: fmt.Sprintf("%s user token", trimmedName),
+		DenomUnits:  denomUnits,
+		Base:        token.Denom,
+		Display:     displayDenom,
+		Name:        trimmedName,
+		Symbol:      strings.ToUpper(trimmedSymbol),
+	}
+}
+
+func (k Keeper) ensureTokenMetadata(ctx sdk.Context, token types.UserToken, decimals uint32) {
+	metadata, found := k.bankKeeper.GetDenomMetaData(ctx, token.Denom)
+	if found && metadata.Base == token.Denom && len(metadata.DenomUnits) > 0 {
+		return
+	}
+
+	derived := buildTokenMetadata(token, decimals)
+	k.bankKeeper.SetDenomMetaData(ctx, derived)
+}
+
 // GetFounderTokensRemaining returns the remaining founder tokens that can be claimed
 func (k Keeper) GetFounderTokensRemaining(ctx sdk.Context, denom string) math.Int {
 	userToken, found := k.GetUserToken(ctx, denom)
@@ -215,7 +309,8 @@ func (k Keeper) GetFounderTokensRemaining(ctx sdk.Context, denom string) math.In
 	}
 
 	params := k.GetParams(ctx)
-	founderTrancheAmount := params.FounderTrancheAmount
+	scaleInt, _ := k.mustGetTokenScaleFactors(ctx, denom)
+	founderTrancheAmount := params.FounderTrancheAmount.Mul(scaleInt)
 
 	return founderTrancheAmount.Sub(userToken.FounderTokensClaimed)
 }
@@ -250,7 +345,7 @@ func (k Keeper) ClaimFounderTokens(ctx sdk.Context, denom string, claimer string
 
 // DistributeTokenPurchasePayment distributes payment according to new tokenomics:
 // 30% to bonding curve, 10% to creator, 10% to referral, 40% to AI CEO, 10% to platform fee
-func (k Keeper) DistributeTokenPurchasePayment(ctx sdk.Context, denom string, totalPayment math.Int) error {
+func (k Keeper) DistributeTokenPurchasePayment(ctx sdk.Context, denom string, totalPayment math.Int, paymentDenom string) error {
 	params := k.GetParams(ctx)
 	userToken, found := k.GetUserToken(ctx, denom)
 	if !found {
@@ -277,7 +372,7 @@ func (k Keeper) DistributeTokenPurchasePayment(ctx sdk.Context, denom string, to
 	if creatorAmount.IsPositive() {
 		creatorAddr, err := sdk.AccAddressFromBech32(userToken.Creator)
 		if err == nil {
-			creatorCoin := sdk.NewCoin("unuah", creatorAmount)
+			creatorCoin := sdk.NewCoin(paymentDenom, creatorAmount)
 			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, creatorAddr, sdk.NewCoins(creatorCoin)); err != nil {
 				return err
 			}
@@ -288,7 +383,7 @@ func (k Keeper) DistributeTokenPurchasePayment(ctx sdk.Context, denom string, to
 	if referralAmount.IsPositive() && params.ReferralWallet != "" {
 		referralAddr, err := sdk.AccAddressFromBech32(params.ReferralWallet)
 		if err == nil {
-			referralCoin := sdk.NewCoin("unuah", referralAmount)
+			referralCoin := sdk.NewCoin(paymentDenom, referralAmount)
 			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, referralAddr, sdk.NewCoins(referralCoin)); err != nil {
 				return err
 			}
@@ -299,7 +394,7 @@ func (k Keeper) DistributeTokenPurchasePayment(ctx sdk.Context, denom string, to
 	if aiCeoAmount.IsPositive() && params.AiCeoWallet != "" {
 		aiCeoAddr, err := sdk.AccAddressFromBech32(params.AiCeoWallet)
 		if err == nil {
-			aiCeoCoin := sdk.NewCoin("unuah", aiCeoAmount)
+			aiCeoCoin := sdk.NewCoin(paymentDenom, aiCeoAmount)
 			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aiCeoAddr, sdk.NewCoins(aiCeoCoin)); err != nil {
 				return err
 			}
@@ -310,7 +405,7 @@ func (k Keeper) DistributeTokenPurchasePayment(ctx sdk.Context, denom string, to
 	if platformFeeAmount.IsPositive() && params.PlatformFeeWallet != "" {
 		platformFeeAddr, err := sdk.AccAddressFromBech32(params.PlatformFeeWallet)
 		if err == nil {
-			platformFeeCoin := sdk.NewCoin("unuah", platformFeeAmount)
+			platformFeeCoin := sdk.NewCoin(paymentDenom, platformFeeAmount)
 			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, platformFeeAddr, sdk.NewCoins(platformFeeCoin)); err != nil {
 				return err
 			}
@@ -320,122 +415,277 @@ func (k Keeper) DistributeTokenPurchasePayment(ctx sdk.Context, denom string, to
 	return nil
 }
 
-// CalculateTokensFromPayment calculates how many tokens can be bought with a given payment amount
-// Uses optimized mathematical approach to avoid iterative calculations
-// Now uses only 30% of payment for bonding curve calculation
-func (k Keeper) CalculateTokensFromPayment(ctx sdk.Context, currentSupply math.Int, paymentAmount math.Int) math.Int {
-	params := k.GetParams(ctx)
-	startPrice := params.BondingCurveStartPrice
-	endPrice := params.BondingCurveEndPrice
-	maxSupply := params.BondingCurveMaxSupply
-
-	// Only 30% of payment goes to bonding curve
-	bondingCurvePayment := paymentAmount.MulRaw(30).QuoRaw(100)
-
-	// Calculate linear coefficient: (endPrice - startPrice) / maxSupply
-	priceRange := endPrice.Sub(startPrice)
-	linearCoeff := priceRange.QuoInt(maxSupply)
-
-	// Current price at supply: startPrice + linearCoeff * currentSupply
-	currentPrice := startPrice.Add(linearCoeff.MulInt(currentSupply))
-
-	// For small amounts, use simple approximation to avoid expensive calculations
-	paymentDec := math.LegacyNewDecFromInt(bondingCurvePayment)
-
-	// Estimate tokens using average price method (more gas efficient)
-	// avgPrice ≈ currentPrice + (linearCoeff * estimatedTokens / 2)
-	// Solving: paymentAmount = estimatedTokens * (currentPrice + linearCoeff * estimatedTokens / 2)
-
-	if linearCoeff.IsZero() {
-		// Constant price case
-		return paymentDec.Quo(currentPrice).TruncateInt()
-	}
-
-	// Quadratic formula: a*n^2 + b*n - c = 0
-	// where a = linearCoeff/2, b = currentPrice, c = paymentAmount
-	a := linearCoeff.QuoInt64(2)
-	b := currentPrice
-	c := paymentDec
-
-	// Discriminant = b^2 + 4ac (note: +4ac because c is positive in our equation)
-	discriminant := b.Mul(b).Add(a.Mul(c).MulInt64(4))
-
-	// n = (-b + sqrt(discriminant)) / (2a)
-	sqrtDiscriminant, err := discriminant.ApproxSqrt()
-	if err != nil {
-		// Fallback to simple linear approximation
-		return paymentDec.Quo(currentPrice).TruncateInt()
-	}
-
-	numerator := b.Neg().Add(sqrtDiscriminant)
-	denominator := a.MulInt64(2)
-
-	tokens := numerator.Quo(denominator).TruncateInt()
-
-	// Ensure non-negative result and within reasonable bounds
-	if tokens.IsNegative() || tokens.IsZero() {
+// CalculateTokensFromPayment converts a payment (in base currency units) into newly minted tokens.
+// The function assumes 30% of the payment funds the bonding curve reserve and integrates the
+// linear price curve P(s) = P0 + k*s, where k = (P1 - P0) / Smax. All supply math is handled in
+// whole token units (no reliance on denom metadata).
+func (k Keeper) CalculateTokensFromPayment(ctx sdk.Context, denom string, currentSupply math.Int, paymentAmount math.Int) math.Int {
+	logger := k.Logger(ctx)
+	if !paymentAmount.IsPositive() {
+		logger.Debug("bonding curve buy calc skipped", "denom", denom, "payment_total", paymentAmount.String(), "reason", "non-positive payment")
 		return math.ZeroInt()
 	}
 
-	// Cap at remaining supply to max
-	remainingSupply := maxSupply.Sub(currentSupply)
-	if tokens.GT(remainingSupply) {
-		tokens = remainingSupply
+	scaleInt, scaleDec := k.mustGetTokenScaleFactors(ctx, denom)
+	params := k.GetParams(ctx)
+	startPrice := params.BondingCurveStartPrice
+	endPrice := params.BondingCurveEndPrice
+	maxSupplyTokens := math.LegacyNewDecFromInt(params.BondingCurveMaxSupply)
+
+	if maxSupplyTokens.IsZero() {
+		logger.Debug("bonding curve buy calc skipped", "denom", denom, "reason", "max supply is zero")
+		return math.ZeroInt()
 	}
+
+	if currentSupply.IsNegative() {
+		currentSupply = math.ZeroInt()
+	}
+
+	currentSupplyTokens := math.LegacyNewDecFromInt(currentSupply).Quo(scaleDec)
+	if currentSupplyTokens.GTE(maxSupplyTokens) {
+		logger.Debug("bonding curve buy calc skipped", "denom", denom, "s_before", currentSupply.String(), "reason", "curve exhausted")
+		return math.ZeroInt()
+	}
+
+	remainingCapacityTokens := maxSupplyTokens.Sub(currentSupplyTokens)
+	if remainingCapacityTokens.IsNegative() || remainingCapacityTokens.IsZero() {
+		return math.ZeroInt()
+	}
+
+	// Calculate tokens based on full payment, but only 30% actually goes to curve reserve
+	// The distribution happens separately in msg_server.go
+	bondingCurvePayment := paymentAmount
+	if !bondingCurvePayment.IsPositive() {
+		logger.Debug("bonding curve buy calc skipped", "denom", denom, "payment_total", paymentAmount.String(), "payment_to_curve", bondingCurvePayment.String(), "reason", "insufficient payment for curve share")
+		return math.ZeroInt()
+	}
+
+	// Convert payment from micro-NUAH to NUAH (divide by 1,000,000) to match price units
+	nuahScale := math.LegacyNewDecWithPrec(1, 6) // 0.000001 = 1/1,000,000
+	paymentDec := math.LegacyNewDecFromInt(bondingCurvePayment).Mul(nuahScale)
+	priceRange := endPrice.Sub(startPrice)
+	linearCoeff := math.LegacyZeroDec()
+	if !priceRange.IsZero() {
+		linearCoeff = priceRange.Quo(maxSupplyTokens)
+	}
+
+	tokensDec := math.LegacyZeroDec()
+	if linearCoeff.IsZero() {
+		if startPrice.IsZero() {
+			logger.Debug("bonding curve buy calc skipped", "denom", denom, "reason", "zero price with zero slope")
+			return math.ZeroInt()
+		}
+		tokensDec = paymentDec.Quo(startPrice)
+	} else {
+		half := math.LegacyNewDecWithPrec(5, 1)
+		a := linearCoeff.Mul(half)
+		b := startPrice.Add(linearCoeff.Mul(currentSupplyTokens))
+
+		discriminant := b.Mul(b).Add(a.Mul(paymentDec).MulInt64(4))
+		sqrtDiscriminant, err := discriminant.ApproxSqrt()
+		if err != nil || sqrtDiscriminant.LT(b) {
+			tokensDec = paymentDec.Quo(b)
+		} else {
+			numerator := sqrtDiscriminant.Sub(b)
+			denominator := a.MulInt64(2)
+			if !denominator.IsZero() {
+				tokensDec = numerator.Quo(denominator)
+			}
+		}
+	}
+
+	if tokensDec.IsNegative() {
+		tokensDec = math.LegacyZeroDec()
+	}
+	if tokensDec.GT(remainingCapacityTokens) {
+		tokensDec = remainingCapacityTokens
+	}
+
+	maxSupplyBase := params.BondingCurveMaxSupply.Mul(scaleInt)
+	remainingCapacityBase := maxSupplyBase.Sub(currentSupply)
+	if remainingCapacityBase.IsNegative() || remainingCapacityBase.IsZero() {
+		return math.ZeroInt()
+	}
+
+	tokensBaseDec := tokensDec.Mul(scaleDec)
+	tokens := tokensBaseDec.TruncateInt()
+	if tokens.IsZero() && tokensDec.IsPositive() {
+		tokens = math.OneInt()
+	}
+	if tokens.GT(remainingCapacityBase) {
+		tokens = remainingCapacityBase
+	}
+
+	tokensDecFinal := math.LegacyNewDecFromInt(tokens).Quo(scaleDec)
+	costDec := math.LegacyZeroDec()
+	if tokensDecFinal.IsPositive() {
+		if linearCoeff.IsZero() {
+			costDec = startPrice.Mul(tokensDecFinal)
+		} else {
+			costDec = k.priceIntegralDelta(startPrice, linearCoeff, currentSupplyTokens, tokensDecFinal)
+		}
+	}
+
+	for costDec.GT(paymentDec) && tokens.GT(math.ZeroInt()) {
+		tokens = tokens.Sub(math.OneInt())
+		if tokens.IsNegative() || tokens.IsZero() {
+			tokens = math.ZeroInt()
+			costDec = math.LegacyZeroDec()
+			break
+		}
+		tokensDecFinal = math.LegacyNewDecFromInt(tokens).Quo(scaleDec)
+		if tokensDecFinal.IsPositive() {
+			if linearCoeff.IsZero() {
+				costDec = startPrice.Mul(tokensDecFinal)
+			} else {
+				costDec = k.priceIntegralDelta(startPrice, linearCoeff, currentSupplyTokens, tokensDecFinal)
+			}
+		} else {
+			costDec = math.LegacyZeroDec()
+		}
+	}
+
+	remainingAfterBase := maxSupplyBase.Sub(currentSupply.Add(tokens))
+	if remainingAfterBase.IsNegative() {
+		remainingAfterBase = math.ZeroInt()
+	}
+
+	avgPriceStr := "0"
+	if tokensDecFinal.IsPositive() {
+		avgPrice := costDec
+		if !tokensDecFinal.IsZero() {
+			avgPrice = costDec.Quo(tokensDecFinal)
+		}
+		avgPriceStr = avgPrice.String()
+	}
+
+	logger.Debug(
+		"bonding curve buy calc",
+		"denom", denom,
+		"s_before", currentSupply.String(),
+		"s_after", currentSupply.Add(tokens).String(),
+		"s_max", maxSupplyBase.String(),
+		"s_remaining_before", remainingCapacityBase.String(),
+		"s_remaining_after", remainingAfterBase.String(),
+		"delta_tokens", tokens.String(),
+		"payment_total", paymentAmount.String(),
+		"payment_to_curve", bondingCurvePayment.String(),
+		"cost_to_curve", costDec.String(),
+		"avg_price", avgPriceStr,
+	)
 
 	return tokens
 }
 
-// CalculatePayoutFromTokens calculates payout when selling tokens
-// Uses optimized mathematical approach instead of iterative calculation
-func (k Keeper) CalculatePayoutFromTokens(ctx sdk.Context, currentSupply math.Int, tokensToSell math.Int) math.Int {
-	params := k.GetParams(ctx)
-	startPrice := params.BondingCurveStartPrice
-	endPrice := params.BondingCurveEndPrice
-	maxSupply := params.BondingCurveMaxSupply
-
-	// Calculate linear coefficient
-	priceRange := endPrice.Sub(startPrice)
-	linearCoeff := priceRange.QuoInt(maxSupply)
-
-	// Calculate integral of price function from (currentSupply - tokensToSell) to currentSupply
-	// Integral of (startPrice + linearCoeff * x) dx = startPrice * x + linearCoeff * x^2 / 2
-
-	startSupply := currentSupply.Sub(tokensToSell)
-	endSupply := currentSupply
-
-	// Ensure non-negative supply
-	if startSupply.IsNegative() {
-		startSupply = math.ZeroInt()
-	}
-
-	// Calculate area under curve
-	// Area = integral(endSupply) - integral(startSupply)
-	integralEnd := k.calculatePriceIntegral(startPrice, linearCoeff, endSupply)
-	integralStart := k.calculatePriceIntegral(startPrice, linearCoeff, startSupply)
-
-	payout := integralEnd.Sub(integralStart)
-
-	// Convert to integer (payout is already in unuah units)
-	payoutInt := payout.TruncateInt()
-
-	// Ensure non-negative result
-	if payoutInt.IsNegative() {
+// CalculatePayoutFromTokens determines the base currency payout for selling tokens back to the curve.
+// It integrates the same linear price function while clamping supply to the valid bonding curve range.
+func (k Keeper) CalculatePayoutFromTokens(ctx sdk.Context, denom string, currentSupply math.Int, tokensToSell math.Int) math.Int {
+	logger := k.Logger(ctx)
+	if !tokensToSell.IsPositive() {
+		logger.Debug("bonding curve sell calc skipped", "denom", denom, "delta_tokens", tokensToSell.String(), "reason", "non-positive amount")
 		return math.ZeroInt()
 	}
 
-	return payoutInt
+	scaleInt, scaleDec := k.mustGetTokenScaleFactors(ctx, denom)
+	params := k.GetParams(ctx)
+	startPrice := params.BondingCurveStartPrice
+	endPrice := params.BondingCurveEndPrice
+	maxSupplyBase := params.BondingCurveMaxSupply.Mul(scaleInt)
+
+	if currentSupply.IsNegative() {
+		currentSupply = math.ZeroInt()
+	}
+	if currentSupply.GT(maxSupplyBase) {
+		currentSupply = maxSupplyBase
+	}
+
+	if tokensToSell.GT(currentSupply) {
+		tokensToSell = currentSupply
+	}
+	if tokensToSell.IsZero() {
+		logger.Debug("bonding curve sell calc skipped", "denom", denom, "delta_tokens", tokensToSell.String(), "reason", "nothing available on curve")
+		return math.ZeroInt()
+	}
+
+	currentSupplyTokens := math.LegacyNewDecFromInt(currentSupply).Quo(scaleDec)
+	tokensToSellTokens := math.LegacyNewDecFromInt(tokensToSell).Quo(scaleDec)
+	if tokensToSellTokens.GT(currentSupplyTokens) {
+		tokensToSellTokens = currentSupplyTokens
+	}
+
+	priceRange := endPrice.Sub(startPrice)
+	linearCoeff := math.LegacyZeroDec()
+	maxSupplyTokens := math.LegacyNewDecFromInt(params.BondingCurveMaxSupply)
+	if !priceRange.IsZero() {
+		linearCoeff = priceRange.Quo(maxSupplyTokens)
+	}
+
+	startingSupplyTokens := currentSupplyTokens.Sub(tokensToSellTokens)
+	if startingSupplyTokens.IsNegative() {
+		startingSupplyTokens = math.LegacyZeroDec()
+	}
+
+	payoutDec := math.LegacyZeroDec()
+	if tokensToSellTokens.IsPositive() {
+		if linearCoeff.IsZero() {
+			payoutDec = startPrice.Mul(tokensToSellTokens)
+		} else {
+			payoutDec = k.priceIntegralDelta(startPrice, linearCoeff, startingSupplyTokens, tokensToSellTokens)
+		}
+	}
+	if payoutDec.IsNegative() {
+		payoutDec = math.LegacyZeroDec()
+	}
+
+	// Convert payout from NUAH back to micro-NUAH (multiply by 1,000,000)
+	nuahToMicroScale := math.LegacyNewDecFromInt(math.NewInt(1_000_000))
+	payout := payoutDec.Mul(nuahToMicroScale).TruncateInt()
+	avgPriceStr := "0"
+	if tokensToSellTokens.IsPositive() {
+		avgPrice := payoutDec
+		if !tokensToSellTokens.IsZero() {
+			avgPrice = payoutDec.Quo(tokensToSellTokens)
+		}
+		avgPriceStr = avgPrice.String()
+	}
+
+	sRemainingBefore := currentSupply
+	sRemainingAfter := currentSupply.Sub(tokensToSell)
+	if sRemainingAfter.IsNegative() {
+		sRemainingAfter = math.ZeroInt()
+	}
+
+	logger.Debug(
+		"bonding curve sell calc",
+		"denom", denom,
+		"s_before", currentSupply.String(),
+		"s_after", currentSupply.Sub(tokensToSell).String(),
+		"s_max", maxSupplyBase.String(),
+		"s_remaining_before", sRemainingBefore.String(),
+		"s_remaining_after", sRemainingAfter.String(),
+		"delta_tokens", tokensToSell.String(),
+		"payout_from_curve", payout.String(),
+		"payout_curve_dec", payoutDec.String(),
+		"avg_price", avgPriceStr,
+	)
+
+	return payout
 }
 
-// calculatePriceIntegral calculates the integral of the price function at given supply
-func (k Keeper) calculatePriceIntegral(startPrice math.LegacyDec, linearCoeff math.LegacyDec, supply math.Int) math.LegacyDec {
-	supplyDec := math.LegacyNewDecFromInt(supply)
+// priceIntegralDelta computes the integral of the linear price function over [s, s+delta]
+// using token units (expressed as decimals) and returns the area in base currency units.
+func (k Keeper) priceIntegralDelta(startPrice, linearCoeff, supplyStart, delta math.LegacyDec) math.LegacyDec {
+	if delta.IsNegative() || delta.IsZero() {
+		return math.LegacyZeroDec()
+	}
 
-	// Integral = startPrice * supply + linearCoeff * supply^2 / 2
-	linearTerm := startPrice.Mul(supplyDec)
-	quadraticTerm := linearCoeff.Mul(supplyDec).Mul(supplyDec).QuoInt64(2)
+	supplyEnd := supplyStart.Add(delta)
+	half := math.LegacyNewDecWithPrec(5, 1)
 
-	return linearTerm.Add(quadraticTerm)
+	endIntegral := startPrice.Mul(supplyEnd).Add(linearCoeff.Mul(supplyEnd).Mul(supplyEnd).Mul(half))
+	startIntegral := startPrice.Mul(supplyStart).Add(linearCoeff.Mul(supplyStart).Mul(supplyStart).Mul(half))
+
+	return endIntegral.Sub(startIntegral)
 }
 
 func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
@@ -656,6 +906,111 @@ func (k Keeper) ProcessReferralReward(ctx sdk.Context, referralCode string, rewa
 	return nil
 }
 
+// findPaymentCurrency finds a suitable payment currency for the user
+// It looks for NDollar tokens first, then falls back to unuah
+func (k Keeper) findPaymentCurrency(ctx sdk.Context, userAddr sdk.AccAddress, requiredAmount math.Int) (string, error) {
+	// Get all spendable balances for the user
+	allBalances := k.bankKeeper.SpendableCoins(ctx, userAddr)
+
+	// Look for NDollar tokens (factory denoms with "ndollar" subdenom)
+	for _, balance := range allBalances {
+		if strings.Contains(balance.Denom, "factory/") && strings.HasSuffix(balance.Denom, "/ndollar") {
+			if balance.Amount.GTE(requiredAmount) {
+				return balance.Denom, nil
+			}
+		}
+	}
+
+	// Fall back to unuah if no NDollar found or insufficient balance
+	unuahBalance := k.bankKeeper.GetBalance(ctx, userAddr, "unuah")
+	if unuahBalance.Amount.GTE(requiredAmount) {
+		return "unuah", nil
+	}
+
+	// If neither currency has sufficient balance, return error with details
+	ndollarBalances := []string{}
+	for _, balance := range allBalances {
+		if strings.Contains(balance.Denom, "factory/") && strings.HasSuffix(balance.Denom, "/ndollar") {
+			ndollarBalances = append(ndollarBalances, fmt.Sprintf("%s: %s", balance.Denom, balance.Amount.String()))
+		}
+	}
+
+	if len(ndollarBalances) > 0 {
+		return "", fmt.Errorf("insufficient balance: need %s, have NDollar balances: %s, unuah balance: %s",
+			requiredAmount.String(), strings.Join(ndollarBalances, ", "), unuahBalance.Amount.String())
+	}
+
+	return "", fmt.Errorf("insufficient balance: need %s, have unuah balance: %s (no NDollar tokens found)",
+		requiredAmount.String(), unuahBalance.Amount.String())
+}
+
+// findPayoutCurrency finds a suitable currency for payout from module reserves
+// It looks for NDollar tokens first, then falls back to unuah
+func (k Keeper) findPayoutCurrency(ctx sdk.Context, requiredAmount math.Int) (string, error) {
+	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
+	if moduleAddr == nil {
+		return "", fmt.Errorf("module address not found")
+	}
+
+	// Get all spendable balances for the module
+	allBalances := k.bankKeeper.SpendableCoins(ctx, moduleAddr)
+
+	// Look for NDollar tokens (factory denoms with "ndollar" subdenom)
+	for _, balance := range allBalances {
+		if strings.Contains(balance.Denom, "factory/") && strings.HasSuffix(balance.Denom, "/ndollar") {
+			if balance.Amount.GTE(requiredAmount) {
+				return balance.Denom, nil
+			}
+		}
+	}
+
+	// Fall back to unuah if no NDollar found or insufficient balance
+	unuahBalance := k.bankKeeper.GetBalance(ctx, moduleAddr, "unuah")
+	if unuahBalance.Amount.GTE(requiredAmount) {
+		return "unuah", nil
+	}
+
+	// If neither currency has sufficient balance, return error with details
+	ndollarBalances := []string{}
+	for _, balance := range allBalances {
+		if strings.Contains(balance.Denom, "factory/") && strings.HasSuffix(balance.Denom, "/ndollar") {
+			ndollarBalances = append(ndollarBalances, fmt.Sprintf("%s: %s", balance.Denom, balance.Amount.String()))
+		}
+	}
+
+	if len(ndollarBalances) > 0 {
+		return "", fmt.Errorf("insufficient module balance for payout: need %s, have NDollar balances: %s, unuah balance: %s",
+			requiredAmount.String(), strings.Join(ndollarBalances, ", "), unuahBalance.Amount.String())
+	}
+
+	return "", fmt.Errorf("insufficient module balance for payout: need %s, have unuah balance: %s (no NDollar tokens found)",
+		requiredAmount.String(), unuahBalance.Amount.String())
+}
+
+// findPreferredBaseCurrency finds the preferred base currency for pools and trading
+// It looks for NDollar tokens first, then falls back to unuah
+func (k Keeper) findPreferredBaseCurrency(ctx sdk.Context) string {
+	// Check module balance for available currencies
+	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
+	if moduleAddr == nil {
+		return "unuah" // Fallback if module address not found
+	}
+
+	// Get all spendable balances for the module
+	allBalances := k.bankKeeper.SpendableCoins(ctx, moduleAddr)
+
+	// Look for NDollar tokens (factory denoms with "ndollar" subdenom)
+	for _, balance := range allBalances {
+		if strings.Contains(balance.Denom, "factory/") && strings.HasSuffix(balance.Denom, "/ndollar") {
+			// Found NDollar, use it as preferred base currency
+			return balance.Denom
+		}
+	}
+
+	// No NDollar found, fall back to unuah
+	return "unuah"
+}
+
 // EndBlocker is called at the end of every block
 func (k Keeper) EndBlocker(ctx sdk.Context) {
 	// Check if it's time to reset weekly limits (every 7 days)
@@ -670,5 +1025,10 @@ func (k Keeper) EndBlocker(ctx sdk.Context) {
 			program.LastResetTime = currentTime
 			k.SetReferralProgram(ctx, *program)
 		}
+	}
+
+	// Ensure bank metadata exists for all user tokens
+	for _, token := range k.GetAllUserTokens(ctx) {
+		k.ensureTokenMetadata(ctx, *token, 6)
 	}
 }

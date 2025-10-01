@@ -151,7 +151,8 @@ func (m *QueryGetUSDPriceRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryGetUSDPriceRequest proto.InternalMessageInfo
 
-// QueryGetUSDPriceResponse is response type for the Query/GetUSDPrice RPC method.
+// QueryGetUSDPriceResponse is response type for the Query/GetUSDPrice RPC
+// method.
 type QueryGetUSDPriceResponse struct {
 	Price USDPrice `protobuf:"bytes,1,opt,name=price,proto3" json:"price"`
 }
@@ -196,7 +197,8 @@ func (m *QueryGetUSDPriceResponse) GetPrice() USDPrice {
 	return USDPrice{}
 }
 
-// QueryGetPriceHistoryRequest is request type for the Query/GetPriceHistory RPC method.
+// QueryGetPriceHistoryRequest is request type for the Query/GetPriceHistory RPC
+// method.
 type QueryGetPriceHistoryRequest struct {
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -241,7 +243,8 @@ func (m *QueryGetPriceHistoryRequest) GetPagination() *query.PageRequest {
 	return nil
 }
 
-// QueryGetPriceHistoryResponse is response type for the Query/GetPriceHistory RPC method.
+// QueryGetPriceHistoryResponse is response type for the Query/GetPriceHistory
+// RPC method.
 type QueryGetPriceHistoryResponse struct {
 	Prices     []USDPrice          `protobuf:"bytes,1,rep,name=prices,proto3" json:"prices"`
 	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -294,7 +297,8 @@ func (m *QueryGetPriceHistoryResponse) GetPagination() *query.PageResponse {
 	return nil
 }
 
-// QueryGetPriceDeviationRequest is request type for the Query/GetPriceDeviation RPC method.
+// QueryGetPriceDeviationRequest is request type for the Query/GetPriceDeviation
+// RPC method.
 type QueryGetPriceDeviationRequest struct {
 }
 
@@ -331,7 +335,8 @@ func (m *QueryGetPriceDeviationRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryGetPriceDeviationRequest proto.InternalMessageInfo
 
-// QueryGetPriceDeviationResponse is response type for the Query/GetPriceDeviation RPC method.
+// QueryGetPriceDeviationResponse is response type for the
+// Query/GetPriceDeviation RPC method.
 type QueryGetPriceDeviationResponse struct {
 	Deviation         cosmossdk_io_math.LegacyDec `protobuf:"bytes,1,opt,name=deviation,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"deviation"`
 	IsWithinThreshold bool                        `protobuf:"varint,2,opt,name=is_within_threshold,json=isWithinThreshold,proto3" json:"is_within_threshold,omitempty"`
@@ -377,7 +382,8 @@ func (m *QueryGetPriceDeviationResponse) GetIsWithinThreshold() bool {
 	return false
 }
 
-// QueryGetTokenPriceRequest is request type for the Query/GetTokenPrice RPC method.
+// QueryGetTokenPriceRequest is request type for the Query/GetTokenPrice RPC
+// method.
 type QueryGetTokenPriceRequest struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
@@ -422,7 +428,8 @@ func (m *QueryGetTokenPriceRequest) GetDenom() string {
 	return ""
 }
 
-// QueryGetTokenPriceResponse is response type for the Query/GetTokenPrice RPC method.
+// QueryGetTokenPriceResponse is response type for the Query/GetTokenPrice RPC
+// method.
 type QueryGetTokenPriceResponse struct {
 	Price TokenPrice `protobuf:"bytes,1,opt,name=price,proto3" json:"price"`
 }
@@ -467,7 +474,8 @@ func (m *QueryGetTokenPriceResponse) GetPrice() TokenPrice {
 	return TokenPrice{}
 }
 
-// QueryGetAllTokenPricesRequest is request type for the Query/GetAllTokenPrices RPC method.
+// QueryGetAllTokenPricesRequest is request type for the Query/GetAllTokenPrices
+// RPC method.
 type QueryGetAllTokenPricesRequest struct {
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -512,7 +520,8 @@ func (m *QueryGetAllTokenPricesRequest) GetPagination() *query.PageRequest {
 	return nil
 }
 
-// QueryGetAllTokenPricesResponse is response type for the Query/GetAllTokenPrices RPC method.
+// QueryGetAllTokenPricesResponse is response type for the
+// Query/GetAllTokenPrices RPC method.
 type QueryGetAllTokenPricesResponse struct {
 	Prices     []TokenPrice        `protobuf:"bytes,1,rep,name=prices,proto3" json:"prices"`
 	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -565,7 +574,8 @@ func (m *QueryGetAllTokenPricesResponse) GetPagination() *query.PageResponse {
 	return nil
 }
 
-// QueryGetSupportedTokensRequest is request type for the Query/GetSupportedTokens RPC method.
+// QueryGetSupportedTokensRequest is request type for the
+// Query/GetSupportedTokens RPC method.
 type QueryGetSupportedTokensRequest struct {
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -610,7 +620,8 @@ func (m *QueryGetSupportedTokensRequest) GetPagination() *query.PageRequest {
 	return nil
 }
 
-// QueryGetSupportedTokensResponse is response type for the Query/GetSupportedTokens RPC method.
+// QueryGetSupportedTokensResponse is response type for the
+// Query/GetSupportedTokens RPC method.
 type QueryGetSupportedTokensResponse struct {
 	Tokens     []SupportedToken    `protobuf:"bytes,1,rep,name=tokens,proto3" json:"tokens"`
 	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -663,7 +674,8 @@ func (m *QueryGetSupportedTokensResponse) GetPagination() *query.PageResponse {
 	return nil
 }
 
-// QueryGetTokenInfoRequest is request type for the Query/GetTokenInfo RPC method.
+// QueryGetTokenInfoRequest is request type for the Query/GetTokenInfo RPC
+// method.
 type QueryGetTokenInfoRequest struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
@@ -708,7 +720,8 @@ func (m *QueryGetTokenInfoRequest) GetDenom() string {
 	return ""
 }
 
-// QueryGetTokenInfoResponse is response type for the Query/GetTokenInfo RPC method.
+// QueryGetTokenInfoResponse is response type for the Query/GetTokenInfo RPC
+// method.
 type QueryGetTokenInfoResponse struct {
 	Token SupportedToken `protobuf:"bytes,1,opt,name=token,proto3" json:"token"`
 }
@@ -753,7 +766,8 @@ func (m *QueryGetTokenInfoResponse) GetToken() SupportedToken {
 	return SupportedToken{}
 }
 
-// QueryGetTokenPriceHistoryRequest is request type for the Query/GetTokenPriceHistory RPC method.
+// QueryGetTokenPriceHistoryRequest is request type for the
+// Query/GetTokenPriceHistory RPC method.
 type QueryGetTokenPriceHistoryRequest struct {
 	Denom      string             `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 	Pagination *query.PageRequest `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -806,7 +820,8 @@ func (m *QueryGetTokenPriceHistoryRequest) GetPagination() *query.PageRequest {
 	return nil
 }
 
-// QueryGetTokenPriceHistoryResponse is response type for the Query/GetTokenPriceHistory RPC method.
+// QueryGetTokenPriceHistoryResponse is response type for the
+// Query/GetTokenPriceHistory RPC method.
 type QueryGetTokenPriceHistoryResponse struct {
 	Prices     []TokenPrice        `protobuf:"bytes,1,rep,name=prices,proto3" json:"prices"`
 	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -859,7 +874,8 @@ func (m *QueryGetTokenPriceHistoryResponse) GetPagination() *query.PageResponse 
 	return nil
 }
 
-// QueryGetTokenPriceDeviationRequest is request type for the Query/GetTokenPriceDeviation RPC method.
+// QueryGetTokenPriceDeviationRequest is request type for the
+// Query/GetTokenPriceDeviation RPC method.
 type QueryGetTokenPriceDeviationRequest struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
@@ -904,7 +920,8 @@ func (m *QueryGetTokenPriceDeviationRequest) GetDenom() string {
 	return ""
 }
 
-// QueryGetTokenPriceDeviationResponse is response type for the Query/GetTokenPriceDeviation RPC method.
+// QueryGetTokenPriceDeviationResponse is response type for the
+// Query/GetTokenPriceDeviation RPC method.
 type QueryGetTokenPriceDeviationResponse struct {
 	Deviation         cosmossdk_io_math.LegacyDec `protobuf:"bytes,1,opt,name=deviation,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"deviation"`
 	IsWithinThreshold bool                        `protobuf:"varint,2,opt,name=is_within_threshold,json=isWithinThreshold,proto3" json:"is_within_threshold,omitempty"`
@@ -951,7 +968,8 @@ func (m *QueryGetTokenPriceDeviationResponse) GetIsWithinThreshold() bool {
 	return false
 }
 
-// QueryGetPriceAggregationRequest is request type for the Query/GetPriceAggregation RPC method.
+// QueryGetPriceAggregationRequest is request type for the
+// Query/GetPriceAggregation RPC method.
 type QueryGetPriceAggregationRequest struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
@@ -996,7 +1014,8 @@ func (m *QueryGetPriceAggregationRequest) GetDenom() string {
 	return ""
 }
 
-// QueryGetPriceAggregationResponse is response type for the Query/GetPriceAggregation RPC method.
+// QueryGetPriceAggregationResponse is response type for the
+// Query/GetPriceAggregation RPC method.
 type QueryGetPriceAggregationResponse struct {
 	Aggregation PriceAggregation `protobuf:"bytes,1,opt,name=aggregation,proto3" json:"aggregation"`
 }

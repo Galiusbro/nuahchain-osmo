@@ -14,12 +14,15 @@ service Query {
     option (google.api.http).get = "/osmosis/premium/v1beta1/plans/{plan_id}";
   };
 
-  rpc PremiumPlans(QueryPremiumPlansRequest) returns (QueryPremiumPlansResponse) {
+  rpc PremiumPlans(QueryPremiumPlansRequest)
+      returns (QueryPremiumPlansResponse) {
     option (google.api.http).get = "/osmosis/premium/v1beta1/plans";
   };
 
-  rpc PremiumPayments(QueryPremiumPaymentsRequest) returns (QueryPremiumPaymentsResponse) {
-    option (google.api.http).get = "/osmosis/premium/v1beta1/plans/{plan_id}/payments";
+  rpc PremiumPayments(QueryPremiumPaymentsRequest)
+      returns (QueryPremiumPaymentsResponse) {
+    option (google.api.http).get =
+        "/osmosis/premium/v1beta1/plans/{plan_id}/payments";
   };
 
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
@@ -27,13 +30,9 @@ service Query {
   };
 }
 
-message QueryPremiumPlanRequest {
-  uint64 plan_id = 1;
-}
+message QueryPremiumPlanRequest { uint64 plan_id = 1; }
 
-message QueryPremiumPlanResponse {
-  PremiumPlan plan = 1;
-}
+message QueryPremiumPlanResponse { PremiumPlan plan = 1; }
 
 message QueryPremiumPlansRequest {
   uint64 policy_id = 1;
@@ -58,6 +57,4 @@ message QueryPremiumPaymentsResponse {
 
 message QueryParamsRequest {}
 
-message QueryParamsResponse {
-  Params params = 1;
-}
+message QueryParamsResponse { Params params = 1; }

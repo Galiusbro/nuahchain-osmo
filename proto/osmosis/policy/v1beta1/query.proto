@@ -11,7 +11,8 @@ option go_package = "github.com/osmosis-labs/osmosis/v30/x/policy/types";
 
 service Query {
   rpc Policy(QueryPolicyRequest) returns (QueryPolicyResponse) {
-    option (google.api.http).get = "/osmosis/policy/v1beta1/policies/{policy_id}";
+    option (google.api.http).get =
+        "/osmosis/policy/v1beta1/policies/{policy_id}";
   };
 
   rpc Policies(QueryPoliciesRequest) returns (QueryPoliciesResponse) {
@@ -23,13 +24,9 @@ service Query {
   };
 }
 
-message QueryPolicyRequest {
-  uint64 policy_id = 1;
-}
+message QueryPolicyRequest { uint64 policy_id = 1; }
 
-message QueryPolicyResponse {
-  Policy policy = 1;
-}
+message QueryPolicyResponse { Policy policy = 1; }
 
 message QueryPoliciesRequest {
   PolicyFilter filter = 1;
@@ -43,6 +40,4 @@ message QueryPoliciesResponse {
 
 message QueryParamsRequest {}
 
-message QueryParamsResponse {
-  Params params = 1;
-}
+message QueryParamsResponse { Params params = 1; }

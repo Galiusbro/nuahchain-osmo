@@ -23,13 +23,9 @@ service Query {
   };
 }
 
-message QueryClaimRequest {
-  uint64 claim_id = 1;
-}
+message QueryClaimRequest { uint64 claim_id = 1; }
 
-message QueryClaimResponse {
-  Claim claim = 1;
-}
+message QueryClaimResponse { Claim claim = 1; }
 
 message QueryClaimsRequest {
   uint64 policy_id = 1;
@@ -45,6 +41,4 @@ message QueryClaimsResponse {
 
 message QueryParamsRequest {}
 
-message QueryParamsResponse {
-  Params params = 1;
-}
+message QueryParamsResponse { Params params = 1; }

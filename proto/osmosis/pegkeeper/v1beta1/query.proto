@@ -23,14 +23,12 @@ service Query {
   }
 
   // AdjustmentHistory returns the supply adjustment history.
-  rpc AdjustmentHistory(QueryAdjustmentHistoryRequest) returns (QueryAdjustmentHistoryResponse) {
-    option (google.api.http).get = "/osmosis/pegkeeper/v1beta1/adjustment_history";
+  rpc AdjustmentHistory(QueryAdjustmentHistoryRequest)
+      returns (QueryAdjustmentHistoryResponse) {
+    option (google.api.http).get =
+        "/osmosis/pegkeeper/v1beta1/adjustment_history";
   }
 }
-
-
-
-
 
 // QueryParamsRequest is the request type for the Query/Params RPC method.
 message QueryParamsRequest {}
@@ -38,7 +36,7 @@ message QueryParamsRequest {}
 // QueryParamsResponse is the response type for the Query/Params RPC method.
 message QueryParamsResponse {
   // params defines the parameters of the module.
-  Params params = 1 [(gogoproto.nullable) = false];
+  Params params = 1 [ (gogoproto.nullable) = false ];
 }
 
 // QueryPegStateRequest is the request type for the Query/PegState RPC method.
@@ -50,7 +48,8 @@ message QueryPegStateResponse {
   PegState peg_state = 1;
 }
 
-// QueryAdjustmentHistoryRequest is the request type for the Query/AdjustmentHistory RPC method.
+// QueryAdjustmentHistoryRequest is the request type for the
+// Query/AdjustmentHistory RPC method.
 message QueryAdjustmentHistoryRequest {
   // limit is the maximum number of adjustments to return
   uint64 limit = 1;
@@ -58,7 +57,8 @@ message QueryAdjustmentHistoryRequest {
   uint64 offset = 2;
 }
 
-// QueryAdjustmentHistoryResponse is the response type for the Query/AdjustmentHistory RPC method.
+// QueryAdjustmentHistoryResponse is the response type for the
+// Query/AdjustmentHistory RPC method.
 message QueryAdjustmentHistoryResponse {
   // adjustments is the list of supply adjustments
   repeated SupplyAdjustment adjustments = 1;

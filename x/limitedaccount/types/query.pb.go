@@ -113,7 +113,8 @@ func (m *QueryParamsResponse) GetParams() Params {
 	return Params{}
 }
 
-// QueryLimitedAccountRequest is the request type for the Query/LimitedAccount RPC method.
+// QueryLimitedAccountRequest is the request type for the Query/LimitedAccount
+// RPC method.
 type QueryLimitedAccountRequest struct {
 	// address is the account address to query for.
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
@@ -159,7 +160,8 @@ func (m *QueryLimitedAccountRequest) GetAddress() string {
 	return ""
 }
 
-// QueryLimitedAccountResponse is the response type for the Query/LimitedAccount RPC method.
+// QueryLimitedAccountResponse is the response type for the Query/LimitedAccount
+// RPC method.
 type QueryLimitedAccountResponse struct {
 	// limited_account contains the limited account info.
 	LimitedAccount *LimitedAccount `protobuf:"bytes,1,opt,name=limited_account,json=limitedAccount,proto3" json:"limited_account,omitempty"`
@@ -205,7 +207,8 @@ func (m *QueryLimitedAccountResponse) GetLimitedAccount() *LimitedAccount {
 	return nil
 }
 
-// QueryAllLimitedAccountsRequest is the request type for the Query/AllLimitedAccounts RPC method.
+// QueryAllLimitedAccountsRequest is the request type for the
+// Query/AllLimitedAccounts RPC method.
 type QueryAllLimitedAccountsRequest struct {
 	// pagination defines an optional pagination for the request.
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -251,7 +254,8 @@ func (m *QueryAllLimitedAccountsRequest) GetPagination() *query.PageRequest {
 	return nil
 }
 
-// QueryAllLimitedAccountsResponse is the response type for the Query/AllLimitedAccounts RPC method.
+// QueryAllLimitedAccountsResponse is the response type for the
+// Query/AllLimitedAccounts RPC method.
 type QueryAllLimitedAccountsResponse struct {
 	// limited_accounts contains all the limited accounts.
 	LimitedAccounts []*LimitedAccount `protobuf:"bytes,1,rep,name=limited_accounts,json=limitedAccounts,proto3" json:"limited_accounts,omitempty"`

@@ -21,10 +21,12 @@ service Msg {
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
 
   // AddSupportedToken adds a token to the supported tokens registry
-  rpc AddSupportedToken(MsgAddSupportedToken) returns (MsgAddSupportedTokenResponse);
+  rpc AddSupportedToken(MsgAddSupportedToken)
+      returns (MsgAddSupportedTokenResponse);
 
   // RemoveSupportedToken removes a token from the supported tokens registry
-  rpc RemoveSupportedToken(MsgRemoveSupportedToken) returns (MsgRemoveSupportedTokenResponse);
+  rpc RemoveSupportedToken(MsgRemoveSupportedToken)
+      returns (MsgRemoveSupportedTokenResponse);
 }
 
 // MsgExchangeTokens defines the message for exchanging tokens to N$
@@ -33,7 +35,7 @@ message MsgExchangeTokens {
   option (amino.name) = "osmosis/exchange/exchange-tokens";
 
   string sender = 1;
-  cosmos.base.v1beta1.Coin token_in = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin token_in = 2 [ (gogoproto.nullable) = false ];
   string min_nuah_out = 3 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "cosmossdk.io/math.Int",
@@ -56,7 +58,7 @@ message MsgUpdateParams {
   option (amino.name) = "osmosis/exchange/update-params";
 
   string authority = 1;
-  Params params = 2 [(gogoproto.nullable) = false];
+  Params params = 2 [ (gogoproto.nullable) = false ];
 }
 
 // MsgUpdateParamsResponse defines the response for MsgUpdateParams
@@ -83,5 +85,6 @@ message MsgRemoveSupportedToken {
   string denom = 2;
 }
 
-// MsgRemoveSupportedTokenResponse defines the response for MsgRemoveSupportedToken
+// MsgRemoveSupportedTokenResponse defines the response for
+// MsgRemoveSupportedToken
 message MsgRemoveSupportedTokenResponse {}

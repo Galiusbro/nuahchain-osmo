@@ -10,43 +10,50 @@ option go_package = "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/types"
 // Msg defines the Msg service.
 service Msg {
   option (cosmos.msg.v1.service) = true;
-  
+
   // CreateLimitedAccount creates a new limited account.
-  rpc CreateLimitedAccount(MsgCreateLimitedAccount) returns (MsgCreateLimitedAccountResponse);
-  
+  rpc CreateLimitedAccount(MsgCreateLimitedAccount)
+      returns (MsgCreateLimitedAccountResponse);
+
   // RemoveLimitedAccount removes a limited account.
-  rpc RemoveLimitedAccount(MsgRemoveLimitedAccount) returns (MsgRemoveLimitedAccountResponse);
+  rpc RemoveLimitedAccount(MsgRemoveLimitedAccount)
+      returns (MsgRemoveLimitedAccountResponse);
 }
 
 // MsgCreateLimitedAccount defines the Msg/CreateLimitedAccount request type.
 message MsgCreateLimitedAccount {
   option (cosmos.msg.v1.signer) = "authority";
   option (amino.name) = "osmosis/limitedaccount/create-limited-account";
-  
-  // authority is the address that controls the module (defaults to x/gov unless overwritten).
-  string authority = 1 [(gogoproto.moretags) = "yaml:\"authority\""];
-  
+
+  // authority is the address that controls the module (defaults to x/gov unless
+  // overwritten).
+  string authority = 1 [ (gogoproto.moretags) = "yaml:\"authority\"" ];
+
   // address is the account address to make limited.
   string address = 2;
-  
-  // max_daily_txs is the maximum number of free transactions per day (optional, uses default if 0).
+
+  // max_daily_txs is the maximum number of free transactions per day (optional,
+  // uses default if 0).
   uint32 max_daily_txs = 3;
 }
 
-// MsgCreateLimitedAccountResponse defines the Msg/CreateLimitedAccount response type.
+// MsgCreateLimitedAccountResponse defines the Msg/CreateLimitedAccount response
+// type.
 message MsgCreateLimitedAccountResponse {}
 
 // MsgRemoveLimitedAccount defines the Msg/RemoveLimitedAccount request type.
 message MsgRemoveLimitedAccount {
   option (cosmos.msg.v1.signer) = "authority";
   option (amino.name) = "osmosis/limitedaccount/remove-limited-account";
-  
-  // authority is the address that controls the module (defaults to x/gov unless overwritten).
-  string authority = 1 [(gogoproto.moretags) = "yaml:\"authority\""];
-  
+
+  // authority is the address that controls the module (defaults to x/gov unless
+  // overwritten).
+  string authority = 1 [ (gogoproto.moretags) = "yaml:\"authority\"" ];
+
   // address is the account address to remove from limited accounts.
   string address = 2;
 }
 
-// MsgRemoveLimitedAccountResponse defines the Msg/RemoveLimitedAccount response type.
+// MsgRemoveLimitedAccountResponse defines the Msg/RemoveLimitedAccount response
+// type.
 message MsgRemoveLimitedAccountResponse {}

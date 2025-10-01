@@ -13,7 +13,8 @@ service Msg {
   option (cosmos.msg.v1.service) = true;
 
   // CreateFreeAccount creates a new free account
-  rpc CreateFreeAccount(MsgCreateFreeAccount) returns (MsgCreateFreeAccountResponse);
+  rpc CreateFreeAccount(MsgCreateFreeAccount)
+      returns (MsgCreateFreeAccountResponse);
 }
 
 // MsgCreateFreeAccount defines a message to create a free account
@@ -21,11 +22,12 @@ message MsgCreateFreeAccount {
   option (cosmos.msg.v1.signer) = "authority";
   option (amino.name) = "osmosis/MsgCreateFreeAccount";
 
-  // Authority is the address that controls the module (governance, module admin, etc).
-  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Authority is the address that controls the module (governance, module
+  // admin, etc).
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
 
   // Address is the address to create as a free account
-  string address = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string address = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
 }
 
 // MsgCreateFreeAccountResponse defines the Msg/CreateFreeAccount response type.

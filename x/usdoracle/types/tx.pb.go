@@ -562,7 +562,8 @@ func (m *MsgRemoveSupportedToken) GetDenom() string {
 	return ""
 }
 
-// MsgRemoveSupportedTokenResponse is the response type for MsgRemoveSupportedToken
+// MsgRemoveSupportedTokenResponse is the response type for
+// MsgRemoveSupportedToken
 type MsgRemoveSupportedTokenResponse struct {
 }
 
@@ -654,7 +655,8 @@ func (m *MsgUpdateSupportedToken) GetToken() SupportedToken {
 	return SupportedToken{}
 }
 
-// MsgUpdateSupportedTokenResponse is the response type for MsgUpdateSupportedToken
+// MsgUpdateSupportedTokenResponse is the response type for
+// MsgUpdateSupportedToken
 type MsgUpdateSupportedTokenResponse struct {
 }
 

@@ -112,7 +112,8 @@ func (m *QueryParamsResponse) GetParams() Params {
 	return Params{}
 }
 
-// QueryExchangeRateRequest is the request type for the Query/ExchangeRate RPC method.
+// QueryExchangeRateRequest is the request type for the Query/ExchangeRate RPC
+// method.
 type QueryExchangeRateRequest struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
@@ -157,7 +158,8 @@ func (m *QueryExchangeRateRequest) GetDenom() string {
 	return ""
 }
 
-// QueryExchangeRateResponse is the response type for the Query/ExchangeRate RPC method.
+// QueryExchangeRateResponse is the response type for the Query/ExchangeRate RPC
+// method.
 type QueryExchangeRateResponse struct {
 	ExchangeRate ExchangeRate `protobuf:"bytes,1,opt,name=exchange_rate,json=exchangeRate,proto3" json:"exchange_rate"`
 }
@@ -202,7 +204,8 @@ func (m *QueryExchangeRateResponse) GetExchangeRate() ExchangeRate {
 	return ExchangeRate{}
 }
 
-// QueryExchangeRatesRequest is the request type for the Query/ExchangeRates RPC method.
+// QueryExchangeRatesRequest is the request type for the Query/ExchangeRates RPC
+// method.
 type QueryExchangeRatesRequest struct {
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -247,7 +250,8 @@ func (m *QueryExchangeRatesRequest) GetPagination() *query.PageRequest {
 	return nil
 }
 
-// QueryExchangeRatesResponse is the response type for the Query/ExchangeRates RPC method.
+// QueryExchangeRatesResponse is the response type for the Query/ExchangeRates
+// RPC method.
 type QueryExchangeRatesResponse struct {
 	ExchangeRates []ExchangeRate      `protobuf:"bytes,1,rep,name=exchange_rates,json=exchangeRates,proto3" json:"exchange_rates"`
 	Pagination    *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -300,7 +304,8 @@ func (m *QueryExchangeRatesResponse) GetPagination() *query.PageResponse {
 	return nil
 }
 
-// QueryDailyLimitRequest is the request type for the Query/DailyLimit RPC method.
+// QueryDailyLimitRequest is the request type for the Query/DailyLimit RPC
+// method.
 type QueryDailyLimitRequest struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 }
@@ -345,7 +350,8 @@ func (m *QueryDailyLimitRequest) GetAddress() string {
 	return ""
 }
 
-// QueryDailyLimitResponse is the response type for the Query/DailyLimit RPC method.
+// QueryDailyLimitResponse is the response type for the Query/DailyLimit RPC
+// method.
 type QueryDailyLimitResponse struct {
 	DailyLimit DailyLimit `protobuf:"bytes,1,opt,name=daily_limit,json=dailyLimit,proto3" json:"daily_limit"`
 }

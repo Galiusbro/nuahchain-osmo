@@ -27,9 +27,9 @@ message Policy {
   string owner = 2;
   string policy_type = 3;
   PolicyStatus status = 4;
-  google.protobuf.Timestamp start_time = 5 [(gogoproto.stdtime) = true];
-  google.protobuf.Timestamp end_time = 6 [(gogoproto.stdtime) = true];
-  repeated PolicyAttribute attributes = 7 [(gogoproto.nullable) = false];
+  google.protobuf.Timestamp start_time = 5 [ (gogoproto.stdtime) = true ];
+  google.protobuf.Timestamp end_time = 6 [ (gogoproto.stdtime) = true ];
+  repeated PolicyAttribute attributes = 7 [ (gogoproto.nullable) = false ];
   string treasury_pool_id = 8;
   uint64 premium_plan_id = 9;
   repeated string tags = 10;

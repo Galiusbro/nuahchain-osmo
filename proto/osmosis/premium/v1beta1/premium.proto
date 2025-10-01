@@ -33,7 +33,8 @@ message PremiumPlan {
   PremiumPlanStatus status = 6;
   google.protobuf.Timestamp next_due_time = 7 [ (gogoproto.stdtime) = true ];
   uint64 payments_made = 8;
-  google.protobuf.Timestamp last_payment_time = 9 [ (gogoproto.stdtime) = true ];
+  google.protobuf.Timestamp last_payment_time = 9
+      [ (gogoproto.stdtime) = true ];
   string treasury_pool_id = 10;
 }
 

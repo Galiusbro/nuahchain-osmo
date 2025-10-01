@@ -11,18 +11,22 @@ option go_package = "github.com/osmosis-labs/osmosis/v30/x/freeaccount/types";
 // Query defines the gRPC querier service.
 service Query {
   // IsFreeAccount queries if an account is a free account
-  rpc IsFreeAccount(QueryIsFreeAccountRequest) returns (QueryIsFreeAccountResponse) {
-    option (google.api.http).get = "/osmosis/freeaccount/v1beta1/is_free_account/{address}";
+  rpc IsFreeAccount(QueryIsFreeAccountRequest)
+      returns (QueryIsFreeAccountResponse) {
+    option (google.api.http).get =
+        "/osmosis/freeaccount/v1beta1/is_free_account/{address}";
   }
 }
 
-// QueryIsFreeAccountRequest is the request type for the Query/IsFreeAccount RPC method.
+// QueryIsFreeAccountRequest is the request type for the Query/IsFreeAccount RPC
+// method.
 message QueryIsFreeAccountRequest {
   // Address is the address to check
-  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string address = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
 }
 
-// QueryIsFreeAccountResponse is the response type for the Query/IsFreeAccount RPC method.
+// QueryIsFreeAccountResponse is the response type for the Query/IsFreeAccount
+// RPC method.
 message QueryIsFreeAccountResponse {
   // IsFree indicates if the account is a free account
   bool is_free = 1;

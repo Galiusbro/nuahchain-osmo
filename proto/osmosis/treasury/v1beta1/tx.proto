@@ -12,20 +12,27 @@ import "osmosis/treasury/v1beta1/treasury.proto";
 option go_package = "github.com/osmosis-labs/osmosis/v30/x/treasury/types";
 
 service Msg {
-  rpc CreateTreasuryPool(MsgCreateTreasuryPool) returns (MsgCreateTreasuryPoolResponse) {
+  rpc CreateTreasuryPool(MsgCreateTreasuryPool)
+      returns (MsgCreateTreasuryPoolResponse) {
     option (google.api.http).post = "/osmosis/treasury/v1beta1/pools";
   };
-  rpc UpdateTreasuryPool(MsgUpdateTreasuryPool) returns (MsgUpdateTreasuryPoolResponse) {
+  rpc UpdateTreasuryPool(MsgUpdateTreasuryPool)
+      returns (MsgUpdateTreasuryPoolResponse) {
     option (google.api.http).post = "/osmosis/treasury/v1beta1/pools/{pool_id}";
   };
-  rpc DepositToTreasury(MsgDepositToTreasury) returns (MsgDepositToTreasuryResponse) {
-    option (google.api.http).post = "/osmosis/treasury/v1beta1/pools/{pool_id}/deposit";
+  rpc DepositToTreasury(MsgDepositToTreasury)
+      returns (MsgDepositToTreasuryResponse) {
+    option (google.api.http).post =
+        "/osmosis/treasury/v1beta1/pools/{pool_id}/deposit";
   };
-  rpc WithdrawFromTreasury(MsgWithdrawFromTreasury) returns (MsgWithdrawFromTreasuryResponse) {
-    option (google.api.http).post = "/osmosis/treasury/v1beta1/pools/{pool_id}/withdraw";
+  rpc WithdrawFromTreasury(MsgWithdrawFromTreasury)
+      returns (MsgWithdrawFromTreasuryResponse) {
+    option (google.api.http).post =
+        "/osmosis/treasury/v1beta1/pools/{pool_id}/withdraw";
   };
   rpc SetPoolReserves(MsgSetPoolReserves) returns (MsgSetPoolReservesResponse) {
-    option (google.api.http).post = "/osmosis/treasury/v1beta1/pools/{pool_id}/reserves";
+    option (google.api.http).post =
+        "/osmosis/treasury/v1beta1/pools/{pool_id}/reserves";
   };
 }
 

@@ -61,19 +61,24 @@ message Params {
 // GenesisState defines the usertoken module's genesis state.
 message GenesisState {
   // params defines all the parameters of the module.
-  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  Params params = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 
   // user_tokens defines all the user tokens.
-  repeated UserToken user_tokens = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  repeated UserToken user_tokens = 2
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 
   // referral_programs defines all the referral programs.
-  repeated ReferralProgram referral_programs = 3 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  repeated ReferralProgram referral_programs = 3
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 
   // referral_activations defines all the referral activations.
-  repeated ReferralActivation referral_activations = 4 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  repeated ReferralActivation referral_activations = 4
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 
   // user_referral_quotas defines all the user referral quotas.
-  repeated UserReferralQuota user_referral_quotas = 5 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  repeated UserReferralQuota user_referral_quotas = 5
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 }
 
 // UserToken defines a user token

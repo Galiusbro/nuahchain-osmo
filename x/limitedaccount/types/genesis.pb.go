@@ -35,7 +35,8 @@ type LimitedAccount struct {
 	DailyTxCount uint32 `protobuf:"varint,2,opt,name=daily_tx_count,json=dailyTxCount,proto3" json:"daily_tx_count,omitempty"`
 	// last_reset_time is when the daily counter was last reset
 	LastResetTime time.Time `protobuf:"bytes,3,opt,name=last_reset_time,json=lastResetTime,proto3,stdtime" json:"last_reset_time"`
-	// max_daily_txs is the maximum number of free transactions per day (default: 3)
+	// max_daily_txs is the maximum number of free transactions per day (default:
+	// 3)
 	MaxDailyTxs uint32 `protobuf:"varint,4,opt,name=max_daily_txs,json=maxDailyTxs,proto3" json:"max_daily_txs,omitempty"`
 }
 
@@ -104,7 +105,8 @@ func (m *LimitedAccount) GetMaxDailyTxs() uint32 {
 type Params struct {
 	// default_daily_limit is the default number of free transactions per day
 	DefaultDailyLimit uint32 `protobuf:"varint,1,opt,name=default_daily_limit,json=defaultDailyLimit,proto3" json:"default_daily_limit,omitempty"`
-	// reset_hour is the hour (0-23) when daily limits reset (default: 0 for midnight UTC)
+	// reset_hour is the hour (0-23) when daily limits reset (default: 0 for
+	// midnight UTC)
 	ResetHour uint32 `protobuf:"varint,2,opt,name=reset_hour,json=resetHour,proto3" json:"reset_hour,omitempty"`
 }
 
