@@ -1032,3 +1032,137 @@ func (k Keeper) EndBlocker(ctx sdk.Context) {
 		k.ensureTokenMetadata(ctx, *token, 6)
 	}
 }
+
+// GetTokenPrice returns the current price of a token from bonding curve
+func (k Keeper) GetTokenPrice(ctx sdk.Context, denom string) (math.LegacyDec, error) {
+	// Get current supply on bonding curve
+	supply, err := k.GetBondingCurveSupply(ctx, denom)
+	if err != nil {
+		return math.LegacyZeroDec(), err
+	}
+
+	// Calculate price using bonding curve formula: price = supply / scale
+	scale, _ := k.mustGetTokenScaleFactors(ctx, denom)
+	if supply.IsZero() {
+		// If supply is zero, return base price
+		return math.LegacyNewDecFromInt(math.NewInt(200)), nil // 0.0002 unuah = 200 unuah
+	}
+
+	// Linear bonding curve: price = base_price + (supply / max_supply) × (max_price - base_price)
+	// Price ranges from 0.0002 to 1.0 unuah for 30M tokens
+	basePrice := math.LegacyNewDecFromInt(math.NewInt(200))    // 0.0002 unuah = 200 unuah
+	maxPrice := math.LegacyNewDecFromInt(math.NewInt(1000000)) // 1.0 unuah = 1,000,000 unuah
+	maxSupply := math.LegacyNewDecFromInt(math.NewInt(30_000_000).Mul(scale))
+
+	supplyDec := math.LegacyNewDecFromInt(supply)
+	if supplyDec.GTE(maxSupply) {
+		return maxPrice, nil
+	}
+
+	progress := supplyDec.Quo(maxSupply)
+	priceRange := maxPrice.Sub(basePrice)
+	price := basePrice.Add(progress.Mul(priceRange))
+	return price, nil
+}
+
+// CheckTokenExists verifies if a user token exists
+func (k Keeper) CheckTokenExists(ctx sdk.Context, denom string) bool {
+	// Check if it's a factory token
+	if !strings.Contains(denom, "factory/") {
+		return false
+	}
+
+	// Check if token exists in our store
+	_, found := k.GetUserToken(ctx, denom)
+	return found
+}
+
+// ExecuteBuyTokens executes a token purchase through bonding curve
+func (k Keeper) ExecuteBuyTokens(ctx sdk.Context, buyer sdk.AccAddress, denom string, paymentAmount math.Int, paymentDenom string) (math.Int, error) {
+	// Get current supply
+	currentSupply, err := k.GetBondingCurveSupply(ctx, denom)
+	if err != nil {
+		return math.ZeroInt(), err
+	}
+
+	// Calculate tokens to receive
+	tokensToReceive := k.CalculateTokensFromPayment(ctx, denom, currentSupply, paymentAmount)
+	if tokensToReceive.IsZero() {
+		return math.ZeroInt(), fmt.Errorf("calculated zero tokens for payment amount %s", paymentAmount.String())
+	}
+
+	// Transfer payment from buyer to module
+	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
+	paymentCoin := sdk.NewCoin(paymentDenom, paymentAmount)
+	err = k.bankKeeper.SendCoins(ctx, buyer, moduleAddr, sdk.NewCoins(paymentCoin))
+	if err != nil {
+		return math.ZeroInt(), fmt.Errorf("failed to transfer payment: %w", err)
+	}
+
+	// Mint tokens to buyer
+	tokenCoin := sdk.NewCoin(denom, tokensToReceive)
+	err = k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(tokenCoin))
+	if err != nil {
+		return math.ZeroInt(), fmt.Errorf("failed to mint tokens: %w", err)
+	}
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, buyer, sdk.NewCoins(tokenCoin))
+	if err != nil {
+		return math.ZeroInt(), fmt.Errorf("failed to send tokens to buyer: %w", err)
+	}
+
+	return tokensToReceive, nil
+}
+
+// ExecuteSellTokens executes a token sale through bonding curve
+func (k Keeper) ExecuteSellTokens(ctx sdk.Context, seller sdk.AccAddress, denom string, tokenAmount math.Int) (math.Int, string, error) {
+	// Get user token to get current supply
+	userToken, found := k.GetUserToken(ctx, denom)
+	if !found {
+		return math.ZeroInt(), "", fmt.Errorf("token not found: %s", denom)
+	}
+
+	// Get bonding curve supply for validation
+	bondingCurveSupply, err := k.GetBondingCurveSupply(ctx, denom)
+	if err != nil {
+		return math.ZeroInt(), "", err
+	}
+
+	// Validate that we're not trying to sell more than available on bonding curve
+	if tokenAmount.GT(bondingCurveSupply) {
+		return math.ZeroInt(), "", fmt.Errorf("trying to sell %s tokens, but only %s available on bonding curve", tokenAmount.String(), bondingCurveSupply.String())
+	}
+
+	// Calculate payout using the total current supply (not just bonding curve supply)
+	payout := k.CalculatePayoutFromTokens(ctx, denom, userToken.CurrentSupply, tokenAmount)
+	if payout.IsZero() {
+		return math.ZeroInt(), "", fmt.Errorf("calculated zero payout for token amount %s", tokenAmount.String())
+	}
+
+	// Determine payout currency (prefer NDollar, fallback to unuah)
+	payoutDenom, err := k.findPayoutCurrency(ctx, payout)
+	if err != nil {
+		// If module doesn't have funds, use unuah as fallback
+		payoutDenom = "unuah"
+	}
+
+	// Burn tokens from seller
+	tokenCoin := sdk.NewCoin(denom, tokenAmount)
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, seller, types.ModuleName, sdk.NewCoins(tokenCoin))
+	if err != nil {
+		return math.ZeroInt(), "", fmt.Errorf("failed to transfer tokens from seller: %w", err)
+	}
+	err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(tokenCoin))
+	if err != nil {
+		return math.ZeroInt(), "", fmt.Errorf("failed to burn tokens: %w", err)
+	}
+
+	// Transfer payout from module to seller
+	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
+	payoutCoin := sdk.NewCoin(payoutDenom, payout)
+	err = k.bankKeeper.SendCoins(ctx, moduleAddr, seller, sdk.NewCoins(payoutCoin))
+	if err != nil {
+		return math.ZeroInt(), "", fmt.Errorf("failed to transfer payout: %w", err)
+	}
+
+	return payout, payoutDenom, nil
+}

@@ -18,7 +18,17 @@ import {
     MsgCreateUserToken,
     MsgSellTokens
 } from "./codec/usertoken";
+import {
+    MSG_OPEN_POSITION_TYPE_URL,
+    MSG_CLOSE_POSITION_TYPE_URL,
+    MSG_ADD_COLLATERAL_TYPE_URL,
+    MsgOpenPosition,
+    MsgClosePosition,
+    MsgAddCollateral,
+    PositionSide
+} from "./codec/leverage";
 import WalletBalance from "./components/WalletBalance";
+import LeverageTrading from "./components/LeverageTrading";
 
 interface BroadcastResult {
     hash: string;
@@ -221,7 +231,7 @@ const isTokenWithProperDecimals = (token: UserToken): boolean => {
 Decimal.set({ precision: 40, rounding: Decimal.ROUND_FLOOR });
 
 function App() {
-    const [activeTab, setActiveTab] = useState<"create" | "my" | "all" | "trade">("create");
+    const [activeTab, setActiveTab] = useState<"create" | "my" | "all" | "trade" | "leverage">("create");
     const [network, setNetwork] = useState<NetworkConfigState>(defaultNetwork);
     const [feeDenom, setFeeDenom] = useState(defaultNetwork.coinMinimalDenom);
     const [feeAmount, setFeeAmount] = useState("25000");
@@ -1365,6 +1375,17 @@ function App() {
                     }}>
                         Trade tokens
                     </button>
+                    <button type="button" onClick={() => handleTabChange("leverage")} style={{
+                        padding: "10px 18px",
+                        borderRadius: "20px",
+                        border: "1px solid #ff9800",
+                        backgroundColor: activeTab === "leverage" ? "#ff9800" : "transparent",
+                        color: activeTab === "leverage" ? "white" : "#ff9800",
+                        fontWeight: 600,
+                        cursor: "pointer"
+                    }}>
+                        🚀 Leverage (100x)
+                    </button>
                 </nav>
             </header>
 
@@ -1922,6 +1943,160 @@ function App() {
                     </div>
                 )}
             </section>
+            )}
+
+            {activeTab === "leverage" && (
+                <LeverageTrading
+                    walletAddress={walletAddress || ""}
+                    restEndpoint={restBaseUrl || ""}
+                    onOpenPosition={async (params) => {
+                        if (!client || !walletAddress) {
+                            throw new Error("Wallet not connected");
+                        }
+
+                        const registry = new Registry([
+                            ...defaultRegistryTypes,
+                            [MSG_OPEN_POSITION_TYPE_URL, MsgOpenPosition]
+                        ]);
+
+                        const clientWithRegistry = await SigningStargateClient.connectWithSigner(
+                            network.rpcEndpoint,
+                            offlineSigner!,
+                            { registry }
+                        );
+
+                        const msg: MsgOpenPosition = {
+                            trader: walletAddress,
+                            tokenDenom: params.tokenDenom,
+                            collateral: {
+                                denom: params.collateralDenom,
+                                amount: params.collateralAmount
+                            },
+                            leverage: params.leverage,
+                            side: params.side,
+                            minPrice: params.minPrice,
+                            maxPrice: params.maxPrice
+                        };
+
+                        const fee = {
+                            amount: [{ denom: feeDenom, amount: feeAmount }],
+                            gas: gasLimit
+                        };
+
+                        const result = await clientWithRegistry.signAndBroadcast(
+                            walletAddress,
+                            [{
+                                typeUrl: MSG_OPEN_POSITION_TYPE_URL,
+                                value: msg
+                            }],
+                            fee,
+                            "Open leverage position"
+                        );
+
+                        assertIsDeliverTxSuccess(result);
+                        setTxResult({
+                            hash: result.transactionHash,
+                            height: result.height,
+                            gasUsed: result.gasUsed,
+                            rawLog: result.rawLog
+                        });
+                    }}
+                    onClosePosition={async (positionId, minPrice, maxPrice) => {
+                        if (!client || !walletAddress) {
+                            throw new Error("Wallet not connected");
+                        }
+
+                        const registry = new Registry([
+                            ...defaultRegistryTypes,
+                            [MSG_CLOSE_POSITION_TYPE_URL, MsgClosePosition]
+                        ]);
+
+                        const clientWithRegistry = await SigningStargateClient.connectWithSigner(
+                            network.rpcEndpoint,
+                            offlineSigner!,
+                            { registry }
+                        );
+
+                        const msg: MsgClosePosition = {
+                            trader: walletAddress,
+                            positionId,
+                            minPrice,
+                            maxPrice
+                        };
+
+                        const fee = {
+                            amount: [{ denom: feeDenom, amount: feeAmount }],
+                            gas: gasLimit
+                        };
+
+                        const result = await clientWithRegistry.signAndBroadcast(
+                            walletAddress,
+                            [{
+                                typeUrl: MSG_CLOSE_POSITION_TYPE_URL,
+                                value: msg
+                            }],
+                            fee,
+                            "Close leverage position"
+                        );
+
+                        assertIsDeliverTxSuccess(result);
+                        setTxResult({
+                            hash: result.transactionHash,
+                            height: result.height,
+                            gasUsed: result.gasUsed,
+                            rawLog: result.rawLog
+                        });
+                    }}
+                    onAddCollateral={async (positionId, amount, denom) => {
+                        if (!client || !walletAddress) {
+                            throw new Error("Wallet not connected");
+                        }
+
+                        const registry = new Registry([
+                            ...defaultRegistryTypes,
+                            [MSG_ADD_COLLATERAL_TYPE_URL, MsgAddCollateral]
+                        ]);
+
+                        const clientWithRegistry = await SigningStargateClient.connectWithSigner(
+                            network.rpcEndpoint,
+                            offlineSigner!,
+                            { registry }
+                        );
+
+                        const msg: MsgAddCollateral = {
+                            trader: walletAddress,
+                            positionId,
+                            amount: {
+                                denom,
+                                amount
+                            }
+                        };
+
+                        const fee = {
+                            amount: [{ denom: feeDenom, amount: feeAmount }],
+                            gas: gasLimit
+                        };
+
+                        const result = await clientWithRegistry.signAndBroadcast(
+                            walletAddress,
+                            [{
+                                typeUrl: MSG_ADD_COLLATERAL_TYPE_URL,
+                                value: msg
+                            }],
+                            fee,
+                            "Add collateral to position"
+                        );
+
+                        assertIsDeliverTxSuccess(result);
+                        setTxResult({
+                            hash: result.transactionHash,
+                            height: result.height,
+                            gasUsed: result.gasUsed,
+                            rawLog: result.rawLog
+                        });
+                    }}
+                />
+            )}
         </main>
     );
 }

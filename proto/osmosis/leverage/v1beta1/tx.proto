@@ -1,0 +1,225 @@
+syntax = "proto3";
+
+package osmosis.leverage.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
+import "osmosis/leverage/v1beta1/leverage.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/leverage/types";
+
+// Msg defines the leverage Msg service
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // OpenPosition opens a new leverage position
+  rpc OpenPosition(MsgOpenPosition) returns (MsgOpenPositionResponse);
+
+  // ClosePosition closes an existing position
+  rpc ClosePosition(MsgClosePosition) returns (MsgClosePositionResponse);
+
+  // AddCollateral adds collateral to an existing position
+  rpc AddCollateral(MsgAddCollateral) returns (MsgAddCollateralResponse);
+
+  // RemoveCollateral removes collateral from an existing position
+  rpc RemoveCollateral(MsgRemoveCollateral) returns (MsgRemoveCollateralResponse);
+
+  // LiquidatePosition liquidates a position that has reached liquidation threshold
+  rpc LiquidatePosition(MsgLiquidatePosition) returns (MsgLiquidatePositionResponse);
+
+  // UpdateParams updates the module parameters
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+
+  // ProvideLiquidity provides liquidity to a lending pool
+  rpc ProvideLiquidity(MsgProvideLiquidity) returns (MsgProvideLiquidityResponse);
+}
+
+// MsgOpenPosition defines the message for opening a new leverage position
+message MsgOpenPosition {
+  option (cosmos.msg.v1.signer) = "trader";
+
+  // trader is the address of the trader opening the position
+  string trader = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // token_denom is the denomination of the token to trade
+  string token_denom = 2;
+
+  // collateral is the collateral amount and denomination
+  cosmos.base.v1beta1.Coin collateral = 3 [(gogoproto.nullable) = false];
+
+  // leverage is the desired leverage multiplier
+  string leverage = 4 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+
+  // side is the position side (LONG/SHORT)
+  PositionSide side = 5;
+
+  // min_price is the minimum acceptable price for slippage protection (for LONG positions)
+  string min_price = 6 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+
+  // max_price is the maximum acceptable price for slippage protection (for SHORT positions)
+  string max_price = 7 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// MsgOpenPositionResponse defines the response for MsgOpenPosition
+message MsgOpenPositionResponse {
+  // position_id is the ID of the newly created position
+  string position_id = 1;
+
+  // position is the created position
+  Position position = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgClosePosition defines the message for closing a position
+message MsgClosePosition {
+  option (cosmos.msg.v1.signer) = "trader";
+
+  // trader is the address of the trader closing the position
+  string trader = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // position_id is the ID of the position to close
+  string position_id = 2;
+
+  // min_price is the minimum acceptable price for slippage protection (for SHORT positions)
+  string min_price = 3 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+
+  // max_price is the maximum acceptable price for slippage protection (for LONG positions)
+  string max_price = 4 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// MsgClosePositionResponse defines the response for MsgClosePosition
+message MsgClosePositionResponse {
+  // realized_pnl is the realized profit/loss from closing the position
+  string realized_pnl = 1 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+
+  // collateral_returned is the collateral returned to the trader
+  cosmos.base.v1beta1.Coin collateral_returned = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgAddCollateral defines the message for adding collateral to a position
+message MsgAddCollateral {
+  option (cosmos.msg.v1.signer) = "trader";
+
+  // trader is the address of the trader adding collateral
+  string trader = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // position_id is the ID of the position to add collateral to
+  string position_id = 2;
+
+  // amount is the amount of collateral to add
+  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgAddCollateralResponse defines the response for MsgAddCollateral
+message MsgAddCollateralResponse {
+  // new_liquidation_price is the updated liquidation price after adding collateral
+  string new_liquidation_price = 1 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// MsgRemoveCollateral defines the message for removing collateral from a position
+message MsgRemoveCollateral {
+  option (cosmos.msg.v1.signer) = "trader";
+
+  // trader is the address of the trader removing collateral
+  string trader = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // position_id is the ID of the position to remove collateral from
+  string position_id = 2;
+
+  // amount is the amount of collateral to remove
+  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgRemoveCollateralResponse defines the response for MsgRemoveCollateral
+message MsgRemoveCollateralResponse {
+  // new_liquidation_price is the updated liquidation price after removing collateral
+  string new_liquidation_price = 1 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// MsgLiquidatePosition defines the message for liquidating a position
+message MsgLiquidatePosition {
+  option (cosmos.msg.v1.signer) = "liquidator";
+
+  // liquidator is the address of the liquidator
+  string liquidator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // position_id is the ID of the position to liquidate
+  string position_id = 2;
+}
+
+// MsgLiquidatePositionResponse defines the response for MsgLiquidatePosition
+message MsgLiquidatePositionResponse {
+  // liquidation_reward is the reward given to the liquidator
+  cosmos.base.v1beta1.Coin liquidation_reward = 1 [(gogoproto.nullable) = false];
+
+  // remaining_collateral is the collateral returned to the position owner (if any)
+  cosmos.base.v1beta1.Coin remaining_collateral = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgUpdateParams defines the message for updating module parameters
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address that controls the module (defaults to x/gov unless overwritten)
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // params defines the module parameters to update
+  LeverageParams params = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgUpdateParamsResponse defines the response for MsgUpdateParams
+message MsgUpdateParamsResponse {}
+
+// MsgProvideLiquidity defines the message for providing liquidity to a lending pool
+message MsgProvideLiquidity {
+  option (cosmos.msg.v1.signer) = "provider";
+
+  // provider is the address of the liquidity provider
+  string provider = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // amount is the amount of tokens to provide as liquidity
+  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgProvideLiquidityResponse defines the response for MsgProvideLiquidity
+message MsgProvideLiquidityResponse {
+  // share_tokens is the amount of share tokens minted to the provider
+  string share_tokens = 1 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable) = false
+  ];
+}

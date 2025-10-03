@@ -6,6 +6,7 @@ import (
 
 	storetypes "cosmossdk.io/store/types"
 
+	leveragetypes "github.com/osmosis-labs/osmosis/v30/x/leverage/types"
 	policytypes "github.com/osmosis-labs/osmosis/v30/x/policy/types"
 	premiumtypes "github.com/osmosis-labs/osmosis/v30/x/premium/types"
 	protorevtypes "github.com/osmosis-labs/osmosis/v30/x/protorev/types"
@@ -27,6 +28,7 @@ func (appKeepers *AppKeepers) GenerateKeys() {
 	appKeepers.memKeys = storetypes.NewMemoryStoreKeys(
 		capabilitytypes.MemStoreKey,
 		usertokentypes.MemStoreKey,
+		leveragetypes.MemStoreKey,
 		rolestypes.MemStoreKey,
 		policytypes.MemStoreKey,
 		premiumtypes.MemStoreKey,

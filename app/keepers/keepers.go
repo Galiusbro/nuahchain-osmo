@@ -109,6 +109,8 @@ import (
 	gammtypes "github.com/osmosis-labs/osmosis/v30/x/gamm/types"
 	incentiveskeeper "github.com/osmosis-labs/osmosis/v30/x/incentives/keeper"
 	incentivestypes "github.com/osmosis-labs/osmosis/v30/x/incentives/types"
+	leveragekeeper "github.com/osmosis-labs/osmosis/v30/x/leverage/keeper"
+	leveragetypes "github.com/osmosis-labs/osmosis/v30/x/leverage/types"
 	lockupkeeper "github.com/osmosis-labs/osmosis/v30/x/lockup/keeper"
 	lockuptypes "github.com/osmosis-labs/osmosis/v30/x/lockup/types"
 	mintkeeper "github.com/osmosis-labs/osmosis/v30/x/mint/keeper"
@@ -206,6 +208,7 @@ type AppKeepers struct {
 	ExchangeKeeper               *exchangekeeper.Keeper
 	PegKeeperKeeper              *pegkeeperkeeper.Keeper
 	UserTokenKeeper              *usertokenkeeper.Keeper
+	LeverageKeeper               *leveragekeeper.Keeper
 	RolesKeeper                  *roleskeeper.Keeper
 	PolicyKeeper                 *policykeeper.Keeper
 	PremiumKeeper                *premiumkeeper.Keeper
@@ -664,6 +667,18 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 	)
 	appKeepers.UserTokenKeeper = userTokenKeeper
 
+	// Initialize Leverage keeper
+	leverageKeeper := leveragekeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[leveragetypes.StoreKey],
+		appKeepers.memKeys[leveragetypes.MemStoreKey],
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		appKeepers.AccountKeeper,
+		appKeepers.BankKeeper,
+		*appKeepers.UserTokenKeeper,
+	)
+	appKeepers.LeverageKeeper = leverageKeeper
+
 	rolesKeeper := roleskeeper.NewKeeper(
 		appCodec,
 		appKeepers.keys[rolestypes.StoreKey],
@@ -1103,5 +1118,6 @@ func KVStoreKeys() []string {
 		claimstypes.StoreKey,
 		treasurytypes.StoreKey,
 		usertokentypes.StoreKey,
+		leveragetypes.StoreKey,
 	}
 }

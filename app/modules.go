@@ -14,6 +14,8 @@ import (
 	claims "github.com/osmosis-labs/osmosis/v30/x/claims"
 	claimstypes "github.com/osmosis-labs/osmosis/v30/x/claims/types"
 	exchangetypes "github.com/osmosis-labs/osmosis/v30/x/exchange/types"
+	leverage "github.com/osmosis-labs/osmosis/v30/x/leverage"
+	leveragetypes "github.com/osmosis-labs/osmosis/v30/x/leverage/types"
 	limitedaccount "github.com/osmosis-labs/osmosis/v30/x/limitedaccount"
 	limitedaccounttypes "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/types"
 	"github.com/osmosis-labs/osmosis/v30/x/pegkeeper"
@@ -167,6 +169,7 @@ var moduleAccountPermissions = map[string][]string{
 	usdoracletypes.ModuleName:                nil,
 	pegkeepertypes.ModuleName:                nil,
 	usertokentypes.ModuleName:                {authtypes.Minter, authtypes.Burner},
+	leveragetypes.ModuleName:                 nil,
 	treasurytypes.ModuleName:                 nil,
 	exchangetypes.ModuleName:                 {authtypes.Minter, authtypes.Burner},
 }
@@ -246,6 +249,7 @@ func appModules(
 		usdoracle.NewAppModule(appCodec, *app.USDOracleKeeper),
 		pegkeeper.NewAppModule(appCodec, *app.PegKeeperKeeper),
 		usertoken.NewAppModule(appCodec, *app.UserTokenKeeper),
+		leverage.NewAppModule(appCodec, *app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 	}
 }
 
@@ -343,6 +347,7 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		cosmwasmpooltypes.ModuleName,
 		auctiontypes.ModuleName,
 		usertokentypes.ModuleName,
+		leveragetypes.ModuleName,
 		usdoracletypes.ModuleName,
 		pegkeepertypes.ModuleName,
 		rolestypes.ModuleName,

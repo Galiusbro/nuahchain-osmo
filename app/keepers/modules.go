@@ -53,6 +53,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit/ibcratelimitmodule"
 	"github.com/osmosis-labs/osmosis/v30/x/incentives"
 	incentivesclient "github.com/osmosis-labs/osmosis/v30/x/incentives/client"
+	"github.com/osmosis-labs/osmosis/v30/x/leverage"
 	limitedaccount "github.com/osmosis-labs/osmosis/v30/x/limitedaccount"
 	"github.com/osmosis-labs/osmosis/v30/x/lockup"
 	"github.com/osmosis-labs/osmosis/v30/x/mint"
@@ -155,6 +156,7 @@ func NewAppModuleBasics(cdc codec.Codec) module.BasicManager {
 		claims.AppModuleBasic{},
 		usdoracle.AppModuleBasic{},
 		usertoken.AppModuleBasic{},
+		leverage.AppModuleBasic{},
 	)
 }
 
@@ -232,4 +234,5 @@ var AppModuleBasics = module.NewBasicManager(
 	claims.AppModuleBasic{},
 	usdoracle.AppModuleBasic{},
 	usertoken.AppModuleBasic{},
+	leverage.AppModuleBasic{},
 )
