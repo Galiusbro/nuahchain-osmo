@@ -1,13 +1,38 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type {
+    BroadcastResult,
+    NetworkConfigState,
+    TabType,
+    TokenFormState,
+    TradeFormState,
+    UserToken
+} from '@/types';
 import { Registry } from "@cosmjs/proto-signing";
 import {
     assertIsDeliverTxSuccess,
     defaultRegistryTypes,
-    DeliverTxResponse,
-    SigningStargateClient
+    DeliverTxResponse
 } from "@cosmjs/stargate";
 import Decimal from "decimal.js";
+import { Coins, Eye, Plus, TrendingUp, Wallet } from 'lucide-react';
 import type { ChangeEvent, CSSProperties, FormEvent, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+    MSG_ADD_COLLATERAL_TYPE_URL,
+    MSG_CLOSE_POSITION_TYPE_URL,
+    MSG_LIQUIDATE_POSITION_TYPE_URL,
+    MSG_OPEN_POSITION_TYPE_URL,
+    MSG_PROVIDE_LIQUIDITY_TYPE_URL,
+    MSG_REMOVE_COLLATERAL_TYPE_URL
+} from "./codec/leverage";
+import {
+    MsgAddCollateral,
+    MsgClosePosition,
+    MsgLiquidatePosition,
+    MsgOpenPosition,
+    MsgProvideLiquidity,
+    MsgRemoveCollateral
+} from "./codec/leverage_proto";
 import {
     MSG_BUY_FOUNDER_TOKENS_TYPE_URL,
     MSG_BUY_TOKENS_TYPE_URL,
@@ -18,67 +43,17 @@ import {
     MsgCreateUserToken,
     MsgSellTokens
 } from "./codec/usertoken";
-import {
-    MSG_OPEN_POSITION_TYPE_URL,
-    MSG_CLOSE_POSITION_TYPE_URL,
-    MSG_ADD_COLLATERAL_TYPE_URL,
-    MsgOpenPosition,
-    MsgClosePosition,
-    MsgAddCollateral,
-    PositionSide
-} from "./codec/leverage";
-import WalletBalance from "./components/WalletBalance";
-import LeverageTrading from "./components/LeverageTrading";
-
-interface BroadcastResult {
-    hash: string;
-    height: number;
-    gasUsed: number;
-    rawLog: string;
-}
-
-interface NetworkConfigState {
-    chainId: string;
-    chainName: string;
-    rpcEndpoint: string;
-    restEndpoint: string;
-    bech32Prefix: string;
-    coinDenom: string;
-    coinMinimalDenom: string;
-    coinDecimals: string;
-    gasPriceLow: string;
-    gasPriceAverage: string;
-    gasPriceHigh: string;
-}
-
-interface TokenFormState {
-    subdenom: string;
-    name: string;
-    symbol: string;
-    decimals: string;
-    memo: string;
-}
-
-interface TradeFormState {
-    denom: string;
-    paymentAmount: string;
-    paymentDenom: string;
-    tokenAmount: string;
-    minTokens: string;
-    minPrice: string;
-}
-
-interface UserToken {
-    denom: string;
-    creator: string;
-    name?: string;
-    symbol?: string;
-    description?: string;
-    max_supply?: string;
-    current_supply?: string;
-    founder_tokens_claimed?: string;
-    [key: string]: unknown;
-}
+import CreateTokenForm from './components/CreateTokenForm';
+import LeverageForm from './components/LeverageForm';
+import NetworkConfiguration from './components/NetworkConfiguration';
+import TokenActions from './components/TokenActions';
+import TokenTable from './components/TokenTable';
+import TradeForm from './components/TradeForm';
+import WalletBalance from './components/WalletBalance';
+import { useNetwork } from './hooks/useNetwork';
+import { useTokens } from './hooks/useTokens';
+import { useTrading } from './hooks/useTrading';
+import { useWallet } from './hooks/useWallet';
 
 interface UserTokensResponse {
     user_tokens?: UserToken[];
@@ -129,8 +104,8 @@ const emptyTradeForm: TradeFormState = {
 const defaultNetwork: NetworkConfigState = {
     chainId: "nuahchain",
     chainName: "Nuahchain",
-    rpcEndpoint: "http://localhost:26657",
-    restEndpoint: "http://localhost:1317",
+    rpcEndpoint: "http://localhost:5173/api",
+    restEndpoint: "http://localhost:5173/rest",
     bech32Prefix: "nuah",
     coinDenom: "NUAH",
     coinMinimalDenom: "unuah",
@@ -231,29 +206,64 @@ const isTokenWithProperDecimals = (token: UserToken): boolean => {
 Decimal.set({ precision: 40, rounding: Decimal.ROUND_FLOOR });
 
 function App() {
-    const [activeTab, setActiveTab] = useState<"create" | "my" | "all" | "trade" | "leverage">("create");
-    const [network, setNetwork] = useState<NetworkConfigState>(defaultNetwork);
-    const [feeDenom, setFeeDenom] = useState(defaultNetwork.coinMinimalDenom);
+    const [activeTab, setActiveTab] = useState<TabType>("create");
+    const { network, handleNetworkChange } = useNetwork();
+    const { client, walletAddress, isConnecting, connectWallet } = useWallet(network);
+
+    // Create signAndBroadcast function for leverage module
+    const signAndBroadcast = useCallback(async (messages: any[], fee: any, memo?: string) => {
+        if (!client || !walletAddress) {
+            throw new Error("Wallet not connected");
+        }
+        return await client.signAndBroadcast(walletAddress, messages, fee, memo);
+    }, [client, walletAddress]);
+
+    const [feeDenom, setFeeDenom] = useState(network.coinMinimalDenom);
     const [feeAmount, setFeeAmount] = useState("25000");
     const [gasLimit, setGasLimit] = useState("1500000");
     const [form, setForm] = useState<TokenFormState>(emptyForm);
-    const [tradeForm, setTradeForm] = useState<TradeFormState>(emptyTradeForm);
-    const [tradeMode, setTradeMode] = useState<"buy" | "sell">("buy");
-    const [client, setClient] = useState<SigningStargateClient | null>(null);
-    const [walletAddress, setWalletAddress] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [buyingDenom, setBuyingDenom] = useState<string | null>(null);
     const [status, setStatus] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [txResult, setTxResult] = useState<BroadcastResult | null>(null);
-    const [allTokens, setAllTokens] = useState<UserToken[]>([]);
-    const [isFetchingTokens, setIsFetchingTokens] = useState(false);
-    const [tokensError, setTokensError] = useState<string | null>(null);
-    const [myTokens, setMyTokens] = useState<UserToken[]>([]);
-    const [priceCache, setPriceCache] = useState<Record<string, Decimal>>({});
-    const [tradePreview, setTradePreview] = useState<TradePreviewState>({});
     const [keplrCurrenciesMap, setKeplrCurrenciesMap] = useState<Record<string, KeplrCurrency>>({});
     const [addingKeplrDenom, setAddingKeplrDenom] = useState<string | null>(null);
+
+    const restBaseUrl = useMemo(
+        () => network.restEndpoint.trim().replace(/\/+$/, ""),
+        [network.restEndpoint]
+    );
+
+    const {
+        allTokens,
+        myTokens,
+        isFetchingTokens,
+        tokensError,
+        priceCache,
+        fetchTokens,
+        fetchTokensByCreator,
+        fetchPrice,
+        setAllTokens,
+        setMyTokens
+    } = useTokens({ restBaseUrl, walletAddress });
+
+    const {
+        tradeForm,
+        tradeMode,
+        tradePreview,
+        availableBuyTokens,
+        availableSellTokens,
+        handleTradeModeChange,
+        handleTradeInputChange,
+        setTradeForm
+    } = useTrading({
+        allTokens,
+        myTokens,
+        priceCache,
+        fetchPrice,
+        fetchTokenEstimate: () => Promise.resolve(null) // TODO: Implement
+    });
 
     const registry = useMemo(
         () =>
@@ -262,14 +272,15 @@ function App() {
                 [MSG_CREATE_USER_TOKEN_TYPE_URL, MsgCreateUserToken],
                 [MSG_BUY_FOUNDER_TOKENS_TYPE_URL, MsgBuyFounderTokens],
                 [MSG_BUY_TOKENS_TYPE_URL, MsgBuyTokens],
-                [MSG_SELL_TOKENS_TYPE_URL, MsgSellTokens]
+                [MSG_SELL_TOKENS_TYPE_URL, MsgSellTokens],
+                [MSG_OPEN_POSITION_TYPE_URL, MsgOpenPosition],
+                [MSG_CLOSE_POSITION_TYPE_URL, MsgClosePosition],
+                [MSG_ADD_COLLATERAL_TYPE_URL, MsgAddCollateral],
+                [MSG_REMOVE_COLLATERAL_TYPE_URL, MsgRemoveCollateral],
+                [MSG_LIQUIDATE_POSITION_TYPE_URL, MsgLiquidatePosition],
+                [MSG_PROVIDE_LIQUIDITY_TYPE_URL, MsgProvideLiquidity]
             ]),
         []
-    );
-
-    const restBaseUrl = useMemo(
-        () => network.restEndpoint.trim().replace(/\/+$/, ""),
-        [network.restEndpoint]
     );
 
     const baseCurrency = useMemo<KeplrCurrencyWithGas>(() => {
@@ -291,109 +302,6 @@ function App() {
             }
         };
     }, [network.coinDecimals, network.coinDenom, network.coinMinimalDenom, network.gasPriceAverage, network.gasPriceHigh, network.gasPriceLow]);
-
-    const fetchTokens = useCallback(async () => {
-        if (!restBaseUrl) {
-            setAllTokens([]);
-            setTokensError(null);
-            return;
-        }
-
-        setIsFetchingTokens(true);
-        setTokensError(null);
-
-        try {
-            const tokens: UserToken[] = [];
-            let nextKey: string | undefined;
-
-            do {
-                const query = nextKey ? `?pagination.key=${encodeURIComponent(nextKey)}` : "";
-                const response = await fetch(`${restBaseUrl}/osmosis/usertoken/v1beta1/user_tokens${query}`);
-                if (!response.ok) {
-                    throw new Error(`REST query failed with status ${response.status}`);
-                }
-
-                const data: UserTokensResponse = await response.json();
-                if (Array.isArray(data.user_tokens)) {
-                    tokens.push(...data.user_tokens);
-                }
-
-                const rawNextKey = data.pagination?.next_key ?? undefined;
-                nextKey = rawNextKey && rawNextKey !== "" ? rawNextKey : undefined;
-            } while (nextKey);
-
-            setAllTokens(tokens);
-        } catch (fetchError) {
-            setTokensError(fetchError instanceof Error ? fetchError.message : String(fetchError));
-        } finally {
-            setIsFetchingTokens(false);
-        }
-    }, [restBaseUrl]);
-
-    const fetchTokensByCreator = useCallback(async (creator: string) => {
-        if (!restBaseUrl || !creator) {
-            return [];
-        }
-
-        try {
-            const tokens: UserToken[] = [];
-            let nextKey: string | undefined;
-
-            do {
-                const query = nextKey ? `?pagination.key=${encodeURIComponent(nextKey)}` : "";
-                const response = await fetch(`${restBaseUrl}/osmosis/usertoken/v1beta1/user_tokens${query}`);
-                if (!response.ok) {
-                    throw new Error(`REST query failed with status ${response.status}`);
-                }
-
-                const data: UserTokensResponse = await response.json();
-
-                if (Array.isArray(data.user_tokens)) {
-                    const creatorTokens = data.user_tokens.filter((token) => token.creator === creator);
-                    tokens.push(...creatorTokens);
-                }
-
-                const rawNextKey = data.pagination?.next_key ?? undefined;
-                nextKey = rawNextKey && rawNextKey !== "" ? rawNextKey : undefined;
-            } while (nextKey);
-
-            return tokens;
-        } catch (fetchError) {
-            console.error('Error fetching tokens by creator:', fetchError);
-            return [];
-        }
-    }, [restBaseUrl]);
-
-    useEffect(() => {
-        void fetchTokens();
-    }, [fetchTokens]);
-
-    const fetchPrice = useCallback(async (denom: string) => {
-        if (!restBaseUrl || !denom) {
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `${restBaseUrl}/osmosis/usertoken/v1beta1/bonding_curve_price/${encodeURI(denom)}`
-            );
-            if (!response.ok) {
-                throw new Error(`Failed to fetch price: ${response.status}`);
-            }
-
-            const data = await response.json();
-            const rawPrice = data?.price ?? data?.bonding_curve_price ?? data?.price?.price;
-            if (!rawPrice) {
-                throw new Error("Malformed price response");
-            }
-
-            const price = new Decimal(rawPrice);
-            setPriceCache((prev) => ({ ...prev, [denom]: price }));
-        } catch (priceError) {
-            console.error("Price fetch error:", priceError);
-            setPriceCache((prev) => ({ ...prev, [denom]: new Decimal(0) }));
-        }
-    }, [restBaseUrl]);
 
     const fetchTokenEstimate = useCallback(async (denom: string, paymentAmount: string): Promise<Decimal | null> => {
         if (!restBaseUrl || !denom || !paymentAmount) {
@@ -480,17 +388,33 @@ function App() {
         }
     }, [allTokens, priceCache]);
 
-    useEffect(() => {
-        if (tradeForm.denom) {
-            void fetchPrice(tradeForm.denom);
-        }
-    }, [tradeForm.denom, fetchPrice]);
 
 
-    const handleTabChange = (tab: "create" | "my" | "all" | "trade") => {
+    const handleTabChange = (tab: TabType) => {
         setActiveTab(tab);
         if (tab !== "create") {
             void fetchTokens();
+        }
+    };
+
+    const handleConnectWallet = async () => {
+        try {
+            setError(null);
+            setStatus("Connecting wallet...");
+            setTxResult(null);
+
+            const result = await connectWallet();
+            setStatus(`Wallet connected: ${result.address}`);
+
+            await fetchTokens();
+            if (Object.keys(keplrCurrenciesMap).length > 0) {
+                // await suggestChain(Object.values(keplrCurrenciesMap));
+            }
+        } catch (connectError) {
+            console.error(connectError);
+            setStatus(null);
+            setTxResult(null);
+            setError(connectError instanceof Error ? connectError.message : String(connectError));
         }
     };
 
@@ -501,8 +425,6 @@ function App() {
         }));
     }, [network.coinMinimalDenom]);
 
-    const availableBuyTokens = useMemo(() => allTokens.filter(token => isTokenWithProperDecimals(token)), [allTokens]);
-    const availableSellTokens = useMemo(() => myTokens.filter(token => isTokenWithProperDecimals(token)), [myTokens]);
 
     useEffect(() => {
         setTradeForm({
@@ -710,9 +632,9 @@ function App() {
         }
     };
 
-    const handleNetworkChange = (field: keyof NetworkConfigState) => (event: ChangeEvent<HTMLInputElement>) => {
+    const handleNetworkChangeWithFee = (field: keyof NetworkConfigState) => (event: ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target;
-        setNetwork((current) => ({ ...current, [field]: value }));
+        handleNetworkChange(field)(event);
 
         if (field === "coinMinimalDenom") {
             setFeeDenom(value);
@@ -776,121 +698,6 @@ function App() {
         };
     }, []);
 
-    const handleConnectWallet = async () => {
-        try {
-            setError(null);
-            setStatus("Connecting wallet...");
-            setTxResult(null);
-
-            if (!window.keplr) {
-                throw new Error("Keplr extension not detected. Please install or unlock Keplr.");
-            }
-
-            const trimmedChainId = network.chainId.trim();
-            if (!trimmedChainId) {
-                throw new Error("Chain ID is required.");
-            }
-
-            const rpc = network.rpcEndpoint.trim();
-            if (!rpc) {
-                throw new Error("RPC endpoint is required.");
-            }
-
-            const rest = network.restEndpoint.trim();
-            if (!rest) {
-                throw new Error("REST endpoint is required.");
-            }
-
-            const chainName = network.chainName.trim() || trimmedChainId;
-            const bech32Prefix = network.bech32Prefix.trim() || "nuah";
-            const coinDenom = network.coinDenom.trim() || "NUAH";
-            const minimalDenom = network.coinMinimalDenom.trim();
-            if (!minimalDenom) {
-                throw new Error("Coin minimal denom is required.");
-            }
-
-            const decimals = Number(network.coinDecimals);
-            if (!Number.isInteger(decimals) || decimals < 0 || decimals > 18) {
-                throw new Error("Coin decimals must be an integer between 0 and 18.");
-            }
-
-            const gasPriceLow = Number(network.gasPriceLow);
-            const gasPriceAverage = Number(network.gasPriceAverage);
-            const gasPriceHigh = Number(network.gasPriceHigh);
-
-            if ([gasPriceLow, gasPriceAverage, gasPriceHigh].some((value) => Number.isNaN(value) || value < 0)) {
-                throw new Error("Gas price steps must be non-negative numbers.");
-            }
-
-            if (window.keplr.experimentalSuggestChain) {
-                await window.keplr.experimentalSuggestChain({
-                    chainId: trimmedChainId,
-                    chainName,
-                    rpc,
-                    rest,
-                    bip44: { coinType: 118 },
-                    bech32Config: buildBech32Config(bech32Prefix),
-                    stakeCurrency: {
-                        coinDenom,
-                        coinMinimalDenom: minimalDenom,
-                        coinDecimals: decimals
-                    },
-                    currencies: [
-                        {
-                            coinDenom,
-                            coinMinimalDenom: minimalDenom,
-                            coinDecimals: decimals
-                        }
-                    ],
-                    feeCurrencies: [
-                        {
-                            coinDenom,
-                            coinMinimalDenom: minimalDenom,
-                            coinDecimals: decimals,
-                            gasPriceStep: {
-                                low: gasPriceLow,
-                                average: gasPriceAverage,
-                                high: gasPriceHigh
-                            }
-                        }
-                    ],
-                    gasPriceStep: {
-                        low: gasPriceLow,
-                        average: gasPriceAverage,
-                        high: gasPriceHigh
-                    }
-                });
-            }
-
-            await window.keplr.enable(trimmedChainId);
-            const signer = await window.keplr.getOfflineSignerAuto(trimmedChainId);
-            const accounts = await signer.getAccounts();
-
-            if (accounts.length === 0) {
-                throw new Error("No accounts returned by the wallet.");
-            }
-
-            const signingClient = await SigningStargateClient.connectWithSigner(rpc, signer, {
-                registry
-            });
-
-            setClient(signingClient);
-            setWalletAddress(accounts[0].address);
-            setStatus(`Wallet connected: ${accounts[0].address}`);
-
-            await fetchTokens();
-            if (Object.keys(keplrCurrenciesMap).length > 0) {
-                await suggestChain(Object.values(keplrCurrenciesMap));
-            }
-        } catch (connectError) {
-            console.error(connectError);
-            setClient(null);
-            setWalletAddress("");
-            setStatus(null);
-            setTxResult(null);
-            setError(connectError instanceof Error ? connectError.message : String(connectError));
-        }
-    };
 
     const handleInputChange = (field: keyof TokenFormState) => (event: ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target;
@@ -1105,64 +912,6 @@ function App() {
         }
     }, [walletAddress, fetchTokensByCreator]);
 
-    useEffect(() => {
-        const updatePreview = async () => {
-            try {
-                if (!tradeForm.denom) {
-                    setTradePreview({});
-                    return;
-                }
-
-                if (tradeMode === "buy") {
-                    if (tradeForm.paymentAmount.trim() === "") {
-                        setTradePreview({});
-                        return;
-                    }
-
-                    const paymentNUAH = new Decimal(tradeForm.paymentAmount || "0");
-                    if (paymentNUAH.lte(0)) {
-                        setTradePreview({});
-                        return;
-                    }
-
-                    setTradePreview({ loading: true });
-
-                    // Use accurate backend calculation
-                    const tokensUnits = await fetchTokenEstimate(tradeForm.denom, tradeForm.paymentAmount);
-                    if (tokensUnits && tokensUnits.gt(0)) {
-                        setTradePreview({ tokensUnits });
-                    } else {
-                        setTradePreview({ error: "Unable to calculate token estimate" });
-                    }
-                } else {
-                    if (tradeForm.tokenAmount.trim() === "") {
-                        setTradePreview({});
-                        return;
-                    }
-
-                    const tokensUnits = new Decimal(tradeForm.tokenAmount || "0");
-                    if (tokensUnits.lte(0)) {
-                        setTradePreview({});
-                        return;
-                    }
-
-                    // For sell operations, use current price (this could also be improved with an API call)
-                    const price = priceCache[tradeForm.denom];
-                    if (!price || price.lte(0)) {
-                        setTradePreview({ loading: true });
-                        return;
-                    }
-
-                    const payoutNUAH = tokensUnits.mul(price);
-                    setTradePreview({ payoutNUAH: Decimal.max(payoutNUAH, new Decimal(0)) });
-                }
-            } catch (previewError) {
-                setTradePreview({ error: previewError instanceof Error ? previewError.message : String(previewError) });
-            }
-        };
-
-        void updatePreview();
-    }, [tradeMode, tradeForm, priceCache, fetchTokenEstimate]);
 
     const renderTokensTable = (tokens: UserToken[], options?: { renderActions?: (token: UserToken) => ReactNode }) => {
         const showActions = Boolean(options?.renderActions);
@@ -1317,786 +1066,125 @@ function App() {
     };
 
     return (
-        <main
-            style={{
-                fontFamily: "Inter, system-ui, sans-serif",
-                margin: "0 auto",
-                maxWidth: "920px",
-                padding: "32px"
-            }}
-        >
-            <header style={{ marginBottom: "24px" }}>
-                <h1 style={{ marginBottom: "8px" }}>User Token Console</h1>
-                <p style={{ color: "#4a5568", lineHeight: 1.5 }}>
-                    Configure your network, connect Keplr, create user tokens, and review existing denoms.
-                </p>
-                <nav style={{ display: "flex", gap: "12px", marginTop: "24px", flexWrap: "wrap" }}>
-                    <button type="button" onClick={() => handleTabChange("create")} style={{
-                        padding: "10px 18px",
-                        borderRadius: "20px",
-                        border: "1px solid #2b6cb0",
-                        backgroundColor: activeTab === "create" ? "#2b6cb0" : "transparent",
-                        color: activeTab === "create" ? "white" : "#2b6cb0",
-                        fontWeight: 600,
-                        cursor: "pointer"
-                    }}>
-                        Create token
-                    </button>
-                    <button type="button" onClick={() => handleTabChange("my")} style={{
-                        padding: "10px 18px",
-                        borderRadius: "20px",
-                        border: "1px solid #2b6cb0",
-                        backgroundColor: activeTab === "my" ? "#2b6cb0" : "transparent",
-                        color: activeTab === "my" ? "white" : "#2b6cb0",
-                        fontWeight: 600,
-                        cursor: "pointer"
-                    }}>
-                        My tokens
-                    </button>
-                    <button type="button" onClick={() => handleTabChange("all")} style={{
-                        padding: "10px 18px",
-                        borderRadius: "20px",
-                        border: "1px solid #2b6cb0",
-                        backgroundColor: activeTab === "all" ? "#2b6cb0" : "transparent",
-                        color: activeTab === "all" ? "white" : "#2b6cb0",
-                        fontWeight: 600,
-                        cursor: "pointer"
-                    }}>
-                        All tokens
-                    </button>
-                    <button type="button" onClick={() => handleTabChange("trade")} style={{
-                        padding: "10px 18px",
-                        borderRadius: "20px",
-                        border: "1px solid #2b6cb0",
-                        backgroundColor: activeTab === "trade" ? "#2b6cb0" : "transparent",
-                        color: activeTab === "trade" ? "white" : "#2b6cb0",
-                        fontWeight: 600,
-                        cursor: "pointer"
-                    }}>
-                        Trade tokens
-                    </button>
-                    <button type="button" onClick={() => handleTabChange("leverage")} style={{
-                        padding: "10px 18px",
-                        borderRadius: "20px",
-                        border: "1px solid #ff9800",
-                        backgroundColor: activeTab === "leverage" ? "#ff9800" : "transparent",
-                        color: activeTab === "leverage" ? "white" : "#ff9800",
-                        fontWeight: 600,
-                        cursor: "pointer"
-                    }}>
-                        🚀 Leverage (100x)
-                    </button>
-                </nav>
-            </header>
+        <main className="min-h-screen bg-background">
+            <div className="container mx-auto max-w-6xl p-6">
+                <header className="mb-8">
+                    <h1 className="text-4xl font-bold mb-2">User Token Console</h1>
+                    <p className="text-muted-foreground text-lg">
+                        Configure your network, connect Keplr, create user tokens, and review existing denoms.
+                    </p>
 
-            <section style={{ marginBottom: "32px", padding: "24px", border: "1px solid #e2e8f0", borderRadius: "12px" }}>
-                <h2 style={{ marginBottom: "16px", fontSize: "18px" }}>Network configuration</h2>
+                    <Tabs value={activeTab} onValueChange={(value) => handleTabChange(value as "create" | "my" | "all" | "trade" | "leverage")} className="mt-6">
+                        <TabsList className="grid w-full grid-cols-5">
+                            <TabsTrigger value="create" className="flex items-center gap-2">
+                                <Plus className="h-4 w-4" />
+                                Create token
+                            </TabsTrigger>
+                            <TabsTrigger value="my" className="flex items-center gap-2">
+                                <Wallet className="h-4 w-4" />
+                                My tokens
+                            </TabsTrigger>
+                            <TabsTrigger value="all" className="flex items-center gap-2">
+                                <Eye className="h-4 w-4" />
+                                All tokens
+                            </TabsTrigger>
+                            <TabsTrigger value="trade" className="flex items-center gap-2">
+                                <Coins className="h-4 w-4" />
+                                Trade tokens
+                            </TabsTrigger>
+                            <TabsTrigger value="leverage" className="flex items-center gap-2">
+                                <TrendingUp className="h-4 w-4" />
+                                🚀 Leverage (100x)
+                            </TabsTrigger>
+                        </TabsList>
 
-                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-                    <div style={{ flex: "1 1 260px" }}>
-                        <label style={fieldLabelStyle} htmlFor="chain-id">Chain ID</label>
-                        <input
-                            id="chain-id"
-                            style={inputStyle}
-                            value={network.chainId}
-                            onChange={handleNetworkChange("chainId")}
-                            placeholder="nuahchain"
-                            required
-                        />
-                    </div>
-                    <div style={{ flex: "1 1 260px" }}>
-                        <label style={fieldLabelStyle} htmlFor="chain-name">Chain name</label>
-                        <input
-                            id="chain-name"
-                            style={inputStyle}
-                            value={network.chainName}
-                            onChange={handleNetworkChange("chainName")}
-                            placeholder="Nuahchain"
-                        />
-                    </div>
-                    <div style={{ flex: "1 1 260px" }}>
-                        <label style={fieldLabelStyle} htmlFor="bech32-prefix">Bech32 prefix</label>
-                        <input
-                            id="bech32-prefix"
-                            style={inputStyle}
-                            value={network.bech32Prefix}
-                            onChange={handleNetworkChange("bech32Prefix")}
-                            placeholder="nuah"
-                            required
-                        />
-                    </div>
-                </div>
+                        <TabsContent value="create">
+                            <NetworkConfiguration
+                                network={network}
+                                onNetworkChange={handleNetworkChangeWithFee}
+                                onConnectWallet={handleConnectWallet}
+                                isConnecting={isConnecting}
+                                walletAddress={walletAddress}
+                                status={status}
+                                error={error}
+                            />
 
-                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-                    <div style={{ flex: "1 1 320px" }}>
-                        <label style={fieldLabelStyle} htmlFor="rpc-endpoint">RPC endpoint</label>
-                        <input
-                            id="rpc-endpoint"
-                            style={inputStyle}
-                            value={network.rpcEndpoint}
-                            onChange={handleNetworkChange("rpcEndpoint")}
-                            placeholder="https://rpc.nuahchain.example.com"
-                            required
-                        />
-                    </div>
-                    <div style={{ flex: "1 1 320px" }}>
-                        <label style={fieldLabelStyle} htmlFor="rest-endpoint">REST endpoint</label>
-                        <input
-                            id="rest-endpoint"
-                            style={inputStyle}
-                            value={network.restEndpoint}
-                            onChange={handleNetworkChange("restEndpoint")}
-                            placeholder="https://lcd.nuahchain.example.com"
-                            required
-                        />
-                    </div>
-                </div>
-
-                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-                    <div style={{ flex: "1 1 220px" }}>
-                        <label style={fieldLabelStyle} htmlFor="coin-denom">Display denom</label>
-                        <input
-                            id="coin-denom"
-                            style={inputStyle}
-                            value={network.coinDenom}
-                            onChange={handleNetworkChange("coinDenom")}
-                            placeholder="NUAH"
-                            required
-                        />
-                    </div>
-                    <div style={{ flex: "1 1 220px" }}>
-                        <label style={fieldLabelStyle} htmlFor="coin-minimal-denom">Minimal denom</label>
-                        <input
-                            id="coin-minimal-denom"
-                            style={inputStyle}
-                            value={network.coinMinimalDenom}
-                            onChange={handleNetworkChange("coinMinimalDenom")}
-                            placeholder="unuah"
-                            required
-                        />
-                    </div>
-                    <div style={{ flex: "1 1 160px" }}>
-                        <label style={fieldLabelStyle} htmlFor="coin-decimals">Decimals</label>
-                        <input
-                            id="coin-decimals"
-                            style={inputStyle}
-                            type="number"
-                            min={0}
-                            max={18}
-                            value={network.coinDecimals}
-                            onChange={handleNetworkChange("coinDecimals")}
-                            required
-                        />
-                    </div>
-                </div>
-
-                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-                    <div style={{ flex: "1 1 160px" }}>
-                        <label style={fieldLabelStyle} htmlFor="gas-price-low">Gas price (low)</label>
-                        <input
-                            id="gas-price-low"
-                            style={inputStyle}
-                            value={network.gasPriceLow}
-                            onChange={handleNetworkChange("gasPriceLow")}
-                            placeholder="0.005"
-                            required
-                        />
-                    </div>
-                    <div style={{ flex: "1 1 160px" }}>
-                        <label style={fieldLabelStyle} htmlFor="gas-price-average">Gas price (average)</label>
-                        <input
-                            id="gas-price-average"
-                            style={inputStyle}
-                            value={network.gasPriceAverage}
-                            onChange={handleNetworkChange("gasPriceAverage")}
-                            placeholder="0.025"
-                            required
-                        />
-                    </div>
-                    <div style={{ flex: "1 1 160px" }}>
-                        <label style={fieldLabelStyle} htmlFor="gas-price-high">Gas price (high)</label>
-                        <input
-                            id="gas-price-high"
-                            style={inputStyle}
-                            value={network.gasPriceHigh}
-                            onChange={handleNetworkChange("gasPriceHigh")}
-                            placeholder="0.04"
-                            required
-                        />
-                    </div>
-                </div>
-
-                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-                    <div style={{ flex: "1 1 220px" }}>
-                        <label style={fieldLabelStyle} htmlFor="fee-denom">Fee denom</label>
-                        <input
-                            id="fee-denom"
-                            style={inputStyle}
-                            value={feeDenom}
-                            onChange={(event) => setFeeDenom(event.target.value)}
-                            placeholder="unuah"
-                            required
-                        />
-                    </div>
-                    <div style={{ flex: "1 1 220px" }}>
-                        <label style={fieldLabelStyle} htmlFor="fee-amount">Fee amount</label>
-                        <input
-                            id="fee-amount"
-                            style={inputStyle}
-                            value={feeAmount}
-                            onChange={(event) => setFeeAmount(event.target.value)}
-                            placeholder="25000"
-                            required
-                        />
-                    </div>
-                    <div style={{ flex: "1 1 220px" }}>
-                        <label style={fieldLabelStyle} htmlFor="gas-limit">Gas limit</label>
-                        <input
-                            id="gas-limit"
-                            style={inputStyle}
-                            value={gasLimit}
-                            onChange={(event) => setGasLimit(event.target.value)}
-                            placeholder="1500000"
-                            required
-                        />
-                    </div>
-                </div>
-
-                <button
-                    type="button"
-                    onClick={handleConnectWallet}
-                    style={{
-                        padding: "10px 18px",
-                        borderRadius: "8px",
-                        border: "none",
-                        backgroundColor: "#2b6cb0",
-                        color: "white",
-                        fontWeight: 600,
-                        cursor: "pointer"
-                    }}
-                >
-                    {walletAddress ? "Reconnect" : "Connect Keplr"}
-                </button>
-            </section>
-
-            {/* Wallet Balance Component */}
-            <WalletBalance
-                client={client}
-                walletAddress={walletAddress}
-                restEndpoint={network.restEndpoint}
-                onError={(error) => setError(error)}
-            />
-
-            {activeTab === "create" && (
-                <section style={{ padding: "24px", border: "1px solid #e2e8f0", borderRadius: "12px" }}>
-                    <h2 style={{ marginBottom: "16px", fontSize: "18px" }}>Token metadata</h2>
-                    <form onSubmit={handleSubmit}>
-                        <label style={fieldLabelStyle} htmlFor="subdenom">
-                            Subdenom
-                        </label>
-                        <input
-                            id="subdenom"
-                            style={inputStyle}
-                            value={form.subdenom}
-                            onChange={handleInputChange("subdenom")}
-                            placeholder="mytoken"
-                            required
-                        />
-
-                        <label style={fieldLabelStyle} htmlFor="name">
-                            Name
-                        </label>
-                        <input
-                            id="name"
-                            style={inputStyle}
-                            value={form.name}
-                            onChange={handleInputChange("name")}
-                            placeholder="My Token"
-                            required
-                        />
-
-                        <label style={fieldLabelStyle} htmlFor="symbol">
-                            Symbol
-                        </label>
-                        <input
-                            id="symbol"
-                            style={inputStyle}
-                            value={form.symbol}
-                            onChange={handleInputChange("symbol")}
-                            placeholder="MYT"
-                            required
-                        />
-
-                        <label style={fieldLabelStyle} htmlFor="decimals">
-                            Decimals (0-18)
-                        </label>
-                        <input
-                            id="decimals"
-                            style={inputStyle}
-                            type="number"
-                            min={0}
-                            max={18}
-                            value={form.decimals}
-                            onChange={handleInputChange("decimals")}
-                            required
-                        />
-
-                        <label style={fieldLabelStyle} htmlFor="memo">
-                            Memo (optional)
-                        </label>
-                        <input
-                            id="memo"
-                            style={inputStyle}
-                            value={form.memo}
-                            onChange={handleInputChange("memo")}
-                            placeholder="Optional memo"
-                        />
-
-                        <button
-                            type="submit"
-                            disabled={isSubmitting || !walletAddress}
-                            style={{
-                                padding: "12px 18px",
-                                borderRadius: "8px",
-                                border: "none",
-                                backgroundColor: isSubmitting || !walletAddress ? "#a0aec0" : "#38a169",
-                                color: "white",
-                                fontWeight: 600,
-                                cursor: isSubmitting || !walletAddress ? "not-allowed" : "pointer",
-                                width: "100%"
-                            }}
-                        >
-                            {isSubmitting ? "Broadcasting..." : "Create user token"}
-                        </button>
-                    </form>
-                </section>
-            )}
-
-            {activeTab === "my" && (
-                <section style={{ padding: "24px", border: "1px solid #e2e8f0", borderRadius: "12px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                        <h2 style={{ fontSize: "18px", margin: 0 }}>My tokens</h2>
-                        <button
-                            type="button"
-                            onClick={handleRefreshTokens}
-                            style={{
-                                padding: "8px 14px",
-                                borderRadius: "8px",
-                                border: "1px solid #2b6cb0",
-                                backgroundColor: "transparent",
-                                color: "#2b6cb0",
-                                fontWeight: 600,
-                                cursor: "pointer"
-                            }}
-                        >
-                            Refresh
-                        </button>
-                    </div>
-                    {!walletAddress ? (
-                        <div style={{ color: "#4a5568" }}>Connect Keplr to view tokens you created.</div>
-                    ) : (
-                        renderTokensContent(myTokens, "No tokens created with this address yet.", {
-                            renderActions: renderFounderAction
-                        })
-                    )}
-                </section>
-            )}
-
-            {activeTab === "all" && (
-                <section style={{ padding: "24px", border: "1px solid #e2e8f0", borderRadius: "12px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                        <h2 style={{ fontSize: "18px", margin: 0 }}>All user tokens</h2>
-                        <button
-                            type="button"
-                            onClick={handleRefreshTokens}
-                            style={{
-                                padding: "8px 14px",
-                                borderRadius: "8px",
-                                border: "1px solid #2b6cb0",
-                                backgroundColor: "transparent",
-                                color: "#2b6cb0",
-                                fontWeight: 600,
-                                cursor: "pointer"
-                            }}
-                        >
-                            Refresh
-                        </button>
-                    </div>
-                    {renderTokensContent(allTokens, "No user tokens have been created yet.")}
-                </section>
-            )}
-
-            {activeTab === "trade" && (
-                <section style={{ padding: "24px", border: "1px solid #e2e8f0", borderRadius: "12px" }}>
-                    <h2 style={{ fontSize: "18px", marginBottom: "16px" }}>Trade tokens</h2>
-
-                    <div style={{ marginBottom: "24px" }}>
-                        <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
-                            <button
-                                type="button"
-                                onClick={() => setTradeMode("buy")}
-                                style={{
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    border: "1px solid #2b6cb0",
-                                    backgroundColor: tradeMode === "buy" ? "#2b6cb0" : "transparent",
-                                    color: tradeMode === "buy" ? "white" : "#2b6cb0",
-                                    fontWeight: 600,
-                                    cursor: "pointer"
-                                }}
-                            >
-                                Buy Tokens
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setTradeMode("sell")}
-                                style={{
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    border: "1px solid #2b6cb0",
-                                    backgroundColor: tradeMode === "sell" ? "#2b6cb0" : "transparent",
-                                    color: tradeMode === "sell" ? "white" : "#2b6cb0",
-                                    fontWeight: 600,
-                                    cursor: "pointer"
-                                }}
-                            >
-                                Sell Tokens
-                            </button>
-                        </div>
-
-                        {(tradeMode === "buy" ? availableBuyTokens : availableSellTokens).length === 0 ? (
-                            <div style={{ color: "#4a5568", marginBottom: "16px" }}>
-                                {tradeMode === "buy"
-                                    ? "No user tokens available yet. Create or wait for a token to trade."
-                                    : "You do not hold any user tokens to sell."}
-                            </div>
-                        ) : null}
-
-                        <form onSubmit={tradeMode === "buy" ? handleBuyTokens : handleSellTokens}>
-                            <div>
-                                <label style={fieldLabelStyle}>Token Denom</label>
-                                <select
-                                    value={tradeForm.denom}
-                                    onChange={(e) => setTradeForm({ ...tradeForm, denom: e.target.value })}
-                                    style={{ ...inputStyle, padding: "8px 10px" }}
-                                    required
-                                >
-                                    <option value="" disabled>
-                                        {tradeMode === "buy" ? "Select a token to buy" : "Select a token to sell"}
-                                    </option>
-                                    {(tradeMode === "buy" ? availableBuyTokens : availableSellTokens).map((token) => (
-                                        <option key={token.denom} value={token.denom}>
-                                            {(token.symbol || token.name || token.denom) as string}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {tradeMode === "buy" ? (
-                                <>
-                                    <div>
-                                        <label style={fieldLabelStyle}>Payment Amount (NUAH)</label>
-                                        <input
-                                            type="text"
-                                            value={tradeForm.paymentAmount}
-                                            onChange={(e) => setTradeForm({ ...tradeForm, paymentAmount: e.target.value })}
-                                            placeholder="Amount to spend"
-                                            style={inputStyle}
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label style={fieldLabelStyle}>Payment Denom</label>
-                                        <input
-                                            type="text"
-                                            value={baseCurrency.coinDenom}
-                                            readOnly
-                                            style={{ ...inputStyle, backgroundColor: "#edf2f7" }}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label style={fieldLabelStyle}>Minimum Tokens to Receive</label>
-                                        <input
-                                            type="text"
-                                            value={tradeForm.minTokens}
-                                            onChange={(e) => setTradeForm({ ...tradeForm, minTokens: e.target.value })}
-                                            placeholder="Minimum tokens (optional)"
-                                            style={inputStyle}
-                                        />
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <div>
-                                        <label style={fieldLabelStyle}>Token Amount to Sell</label>
-                                        <input
-                                            type="text"
-                                            value={tradeForm.tokenAmount}
-                                            onChange={(e) => setTradeForm({ ...tradeForm, tokenAmount: e.target.value })}
-                                            placeholder="Amount of tokens to sell"
-                                            style={inputStyle}
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label style={fieldLabelStyle}>Minimum Price to Receive (NUAH)</label>
-                                        <input
-                                            type="text"
-                                            value={tradeForm.minPrice}
-                                            onChange={(e) => setTradeForm({ ...tradeForm, minPrice: e.target.value })}
-                                            placeholder="Minimum price (optional)"
-                                            style={inputStyle}
-                                        />
-                                    </div>
-                                </>
+                            {/* Wallet Balance */}
+                            {walletAddress && (
+                                <WalletBalance
+                                    client={client}
+                                    walletAddress={walletAddress}
+                                    restEndpoint={network.restEndpoint}
+                                    onError={setError}
+                                />
                             )}
 
-                            <div
-                                style={{
-                                    marginBottom: "16px",
-                                    padding: "12px",
-                                    borderRadius: "8px",
-                                    border: "1px solid #e2e8f0",
-                                    backgroundColor: "#f7fafc",
-                                    color: tradePreview.error ? "#c53030" : "#2d3748"
-                                }}
-                            >
-                                {tradePreview.error ? (
-                                    <span>{tradePreview.error}</span>
-                                ) : tradePreview.loading ? (
-                                    <span>Loading preview...</span>
-                                ) : tradeMode === "buy" ? (
-                                    <div>
-                                        <div style={{ fontWeight: 600, marginBottom: "4px" }}>Estimated tokens (approximate)</div>
-                                        <div style={{ marginBottom: "6px" }}>
-                                            {tradePreview.tokensUnits
-                                                ? `${tradePreview.tokensUnits.toFixed(6)} (${formatAmount(
-                                                    tradePreview.tokensUnits.mul(MICRO_FACTOR).toFixed(0)
-                                                )} micro-units)`
-                                                : "Enter amount to preview"}
-                                        </div>
-                                        {tradePreview.tokensUnits && (
-                                            <div style={{ fontSize: "12px", color: "#666", fontStyle: "italic" }}>
-                                                ⚠️ Actual amount may vary due to bonding curve dynamics
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <div style={{ fontWeight: 600, marginBottom: "4px" }}>Estimated payout</div>
-                                        <div>
-                                            {tradePreview.payoutNUAH
-                                                ? `${tradePreview.payoutNUAH.toFixed(6)} NUAH (${formatAmount(
-                                                    tradePreview.payoutNUAH.mul(MICRO_FACTOR).toFixed(0)
-                                                )} unuah)`
-                                                : "Enter amount to preview"}
-                                        </div>
-                                    </div>
+                            <CreateTokenForm
+                                form={form}
+                                onInputChange={handleInputChange}
+                                onSubmit={handleSubmit}
+                                isSubmitting={isSubmitting}
+                                walletAddress={walletAddress}
+                            />
+                        </TabsContent>
+
+                        <TabsContent value="my">
+                            <TokenTable
+                                tokens={myTokens}
+                                emptyMessage="You haven't created any tokens yet."
+                                isLoading={isFetchingTokens}
+                                error={tokensError}
+                                restBaseUrl={restBaseUrl}
+                                renderActions={(token) => (
+                                    <TokenActions
+                                        token={token}
+                                        onAddToKeplr={handleAddTokenToKeplr}
+                                        onBuyFounderTokens={handleBuyFounderTokens}
+                                        isAddingToKeplr={addingKeplrDenom === token.denom}
+                                        isBuyingFounder={buyingDenom === token.denom}
+                                        isAlreadyAddedToKeplr={Boolean(keplrCurrenciesMap[token.denom])}
+                                        isFounderTrancheAvailable={!token.founder_tokens_claimed || token.founder_tokens_claimed === "0"}
+                                    />
                                 )}
-                            </div>
+                            />
+                        </TabsContent>
 
-                            <button
-                                type="submit"
-                                disabled={isSubmitting || !walletAddress}
-                                style={{
-                                    width: "100%",
-                                    padding: "12px",
-                                    borderRadius: "8px",
-                                    border: "none",
-                                    backgroundColor: isSubmitting || !walletAddress ? "#a0aec0" : "#2b6cb0",
-                                    color: "white",
-                                    fontWeight: 600,
-                                    cursor: isSubmitting || !walletAddress ? "not-allowed" : "pointer"
-                                }}
-                            >
-                                {isSubmitting ? "Processing..." : tradeMode === "buy" ? "Buy Tokens" : "Sell Tokens"}
-                            </button>
-                        </form>
-                    </div>
-                </section>
-            )}
+                        <TabsContent value="all">
+                            <TokenTable
+                                tokens={allTokens}
+                                emptyMessage="No tokens found."
+                                isLoading={isFetchingTokens}
+                                error={tokensError}
+                                restBaseUrl={restBaseUrl}
+                            />
+                        </TabsContent>
 
-            <section style={{ marginTop: "24px" }}>
-                {status && (
-                    <div style={{ marginBottom: "12px", color: "#2f855a", fontWeight: 600 }}>{status}</div>
-                )}
-                {error && (
-                    <div style={{ marginBottom: "12px", color: "#c53030", whiteSpace: "pre-wrap" }}>{error}</div>
-                )}
-                {txResult && (
-                    <div
-                        style={{
-                            backgroundColor: "#f0fff4",
-                            border: "1px solid #9ae6b4",
-                            borderRadius: "10px",
-                            padding: "16px",
-                            fontSize: "14px"
-                        }}
-                    >
-                        <div><strong>Tx hash:</strong> {txResult.hash}</div>
-                        <div><strong>Height:</strong> {txResult.height}</div>
-                        <div><strong>Gas used:</strong> {txResult.gasUsed}</div>
-                        <div style={{ marginTop: "8px" }}>
-                            <strong>Raw log:</strong>
-                            <pre style={{ whiteSpace: "pre-wrap", overflowX: "auto", marginTop: "6px" }}>{txResult.rawLog}</pre>
-                        </div>
-                    </div>
-                )}
-            </section>
-            )}
+                        <TabsContent value="trade">
+                            <TradeForm
+                                tradeForm={tradeForm}
+                                tradeMode={tradeMode}
+                                onTradeModeChange={handleTradeModeChange}
+                                onInputChange={handleTradeInputChange}
+                                onSubmit={handleBuyTokens}
+                                isSubmitting={isSubmitting}
+                                walletAddress={walletAddress}
+                                availableBuyTokens={availableBuyTokens}
+                                availableSellTokens={availableSellTokens}
+                                tradePreview={tradePreview}
+                            />
+                        </TabsContent>
 
-            {activeTab === "leverage" && (
-                <LeverageTrading
-                    walletAddress={walletAddress || ""}
-                    restEndpoint={restBaseUrl || ""}
-                    onOpenPosition={async (params) => {
-                        if (!client || !walletAddress) {
-                            throw new Error("Wallet not connected");
-                        }
-
-                        const registry = new Registry([
-                            ...defaultRegistryTypes,
-                            [MSG_OPEN_POSITION_TYPE_URL, MsgOpenPosition]
-                        ]);
-
-                        const clientWithRegistry = await SigningStargateClient.connectWithSigner(
-                            network.rpcEndpoint,
-                            offlineSigner!,
-                            { registry }
-                        );
-
-                        const msg: MsgOpenPosition = {
-                            trader: walletAddress,
-                            tokenDenom: params.tokenDenom,
-                            collateral: {
-                                denom: params.collateralDenom,
-                                amount: params.collateralAmount
-                            },
-                            leverage: params.leverage,
-                            side: params.side,
-                            minPrice: params.minPrice,
-                            maxPrice: params.maxPrice
-                        };
-
-                        const fee = {
-                            amount: [{ denom: feeDenom, amount: feeAmount }],
-                            gas: gasLimit
-                        };
-
-                        const result = await clientWithRegistry.signAndBroadcast(
-                            walletAddress,
-                            [{
-                                typeUrl: MSG_OPEN_POSITION_TYPE_URL,
-                                value: msg
-                            }],
-                            fee,
-                            "Open leverage position"
-                        );
-
-                        assertIsDeliverTxSuccess(result);
-                        setTxResult({
-                            hash: result.transactionHash,
-                            height: result.height,
-                            gasUsed: result.gasUsed,
-                            rawLog: result.rawLog
-                        });
-                    }}
-                    onClosePosition={async (positionId, minPrice, maxPrice) => {
-                        if (!client || !walletAddress) {
-                            throw new Error("Wallet not connected");
-                        }
-
-                        const registry = new Registry([
-                            ...defaultRegistryTypes,
-                            [MSG_CLOSE_POSITION_TYPE_URL, MsgClosePosition]
-                        ]);
-
-                        const clientWithRegistry = await SigningStargateClient.connectWithSigner(
-                            network.rpcEndpoint,
-                            offlineSigner!,
-                            { registry }
-                        );
-
-                        const msg: MsgClosePosition = {
-                            trader: walletAddress,
-                            positionId,
-                            minPrice,
-                            maxPrice
-                        };
-
-                        const fee = {
-                            amount: [{ denom: feeDenom, amount: feeAmount }],
-                            gas: gasLimit
-                        };
-
-                        const result = await clientWithRegistry.signAndBroadcast(
-                            walletAddress,
-                            [{
-                                typeUrl: MSG_CLOSE_POSITION_TYPE_URL,
-                                value: msg
-                            }],
-                            fee,
-                            "Close leverage position"
-                        );
-
-                        assertIsDeliverTxSuccess(result);
-                        setTxResult({
-                            hash: result.transactionHash,
-                            height: result.height,
-                            gasUsed: result.gasUsed,
-                            rawLog: result.rawLog
-                        });
-                    }}
-                    onAddCollateral={async (positionId, amount, denom) => {
-                        if (!client || !walletAddress) {
-                            throw new Error("Wallet not connected");
-                        }
-
-                        const registry = new Registry([
-                            ...defaultRegistryTypes,
-                            [MSG_ADD_COLLATERAL_TYPE_URL, MsgAddCollateral]
-                        ]);
-
-                        const clientWithRegistry = await SigningStargateClient.connectWithSigner(
-                            network.rpcEndpoint,
-                            offlineSigner!,
-                            { registry }
-                        );
-
-                        const msg: MsgAddCollateral = {
-                            trader: walletAddress,
-                            positionId,
-                            amount: {
-                                denom,
-                                amount
-                            }
-                        };
-
-                        const fee = {
-                            amount: [{ denom: feeDenom, amount: feeAmount }],
-                            gas: gasLimit
-                        };
-
-                        const result = await clientWithRegistry.signAndBroadcast(
-                            walletAddress,
-                            [{
-                                typeUrl: MSG_ADD_COLLATERAL_TYPE_URL,
-                                value: msg
-                            }],
-                            fee,
-                            "Add collateral to position"
-                        );
-
-                        assertIsDeliverTxSuccess(result);
-                        setTxResult({
-                            hash: result.transactionHash,
-                            height: result.height,
-                            gasUsed: result.gasUsed,
-                            rawLog: result.rawLog
-                        });
-                    }}
-                />
-            )}
+                        <TabsContent value="leverage">
+                            <LeverageForm
+                                walletAddress={walletAddress}
+                                restEndpoint={network.restEndpoint}
+                                registry={registry}
+                                signAndBroadcast={signAndBroadcast}
+                            />
+                        </TabsContent>
+                    </Tabs>
+                </header>
+            </div>
         </main>
     );
 }

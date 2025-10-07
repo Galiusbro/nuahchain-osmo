@@ -193,10 +193,21 @@ func (k msgServer) BuyTokens(goCtx context.Context, msg *types.MsgBuyTokens) (*t
 		return nil, fmt.Errorf("invalid buyer address: %w", err)
 	}
 
-	// Transfer payment from buyer to module first
+	// Ensure reserve has enough tokens available (excluding founder tranche)
 	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
 	if moduleAddr == nil {
 		return nil, fmt.Errorf("module address not found")
+	}
+
+	moduleBalance := k.bankKeeper.GetBalance(ctx, moduleAddr, msg.Denom).Amount
+	founderReserved := k.GetFounderTokensRemaining(ctx, msg.Denom)
+	if moduleBalance.LT(founderReserved) {
+		return nil, fmt.Errorf("module balance %s is below founder reserve %s", moduleBalance.String(), founderReserved.String())
+	}
+
+	availableTokens := moduleBalance.Sub(founderReserved)
+	if availableTokens.LT(tokensReceived) {
+		return nil, fmt.Errorf("insufficient bonding curve liquidity: requested %s, available %s", tokensReceived.String(), availableTokens.String())
 	}
 
 	// Try to find suitable payment currency (NDollar or unuah)
@@ -214,16 +225,11 @@ func (k msgServer) BuyTokens(goCtx context.Context, msg *types.MsgBuyTokens) (*t
 	// For bonding curve trading, 100% of payment stays in module as curve reserve
 	// Payment distribution (30%/10%/10%/40%/10%) only applies to token creation, not trading
 
-	// Mint tokens to buyer via tokenfactory
-	tokensToMint := sdk.NewCoin(msg.Denom, tokensReceived)
-	err = k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(tokensToMint))
+	// Transfer tokens from reserve to buyer
+	tokensToDeliver := sdk.NewCoin(msg.Denom, tokensReceived)
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, buyerAddr, sdk.NewCoins(tokensToDeliver))
 	if err != nil {
-		return nil, fmt.Errorf("failed to mint tokens: %w", err)
-	}
-
-	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, buyerAddr, sdk.NewCoins(tokensToMint))
-	if err != nil {
-		return nil, fmt.Errorf("failed to send minted tokens: %w", err)
+		return nil, fmt.Errorf("failed to send tokens from reserve: %w", err)
 	}
 
 	// Update supply tracking in store
@@ -325,15 +331,10 @@ func (k msgServer) SellTokens(goCtx context.Context, msg *types.MsgSellTokens) (
 	}
 	curveSoldAfter := bondingCurveSupply.Sub(msg.Amount.Amount)
 
-	// Burn tokens from seller
+	// Transfer tokens back into the bonding curve reserve
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, sellerAddr, types.ModuleName, sdk.NewCoins(msg.Amount))
 	if err != nil {
 		return nil, fmt.Errorf("failed to send tokens to module: %w", err)
-	}
-
-	err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(msg.Amount))
-	if err != nil {
-		return nil, fmt.Errorf("failed to burn tokens: %w", err)
 	}
 
 	// Try to find suitable payout currency (NDollar or unuah) from module reserves
@@ -562,13 +563,8 @@ func (k msgServer) ClaimFounderTokens(goCtx context.Context, msg *types.MsgClaim
 		userToken.FounderTokensClaimed = userToken.FounderTokensClaimed.Add(msg.Amount)
 		k.SetUserToken(ctx, userToken)
 
-		// Mint tokens directly to AI CEO wallet (not affecting bonding curve)
+		// Transfer reserved founder tokens from module to AI CEO wallet
 		founderTokens := sdk.NewCoin(msg.Denom, msg.Amount)
-		err = k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(founderTokens))
-		if err != nil {
-			return nil, fmt.Errorf("failed to mint founder tokens for AI CEO: %w", err)
-		}
-
 		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, aiCeoAddr, sdk.NewCoins(founderTokens))
 		if err != nil {
 			return nil, fmt.Errorf("failed to send founder tokens to AI CEO: %w", err)
@@ -596,12 +592,7 @@ func (k msgServer) ClaimFounderTokens(goCtx context.Context, msg *types.MsgClaim
 		return nil, err
 	}
 
-	// Mint founder tokens to claimer (normal case)
 	founderTokens := sdk.NewCoin(msg.Denom, msg.Amount)
-	err = k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(founderTokens))
-	if err != nil {
-		return nil, fmt.Errorf("failed to mint founder tokens: %w", err)
-	}
 
 	// Create vesting account for 1 year lock period
 	endTime := ctx.BlockTime().AddDate(1, 0, 0).Unix() // 1 year from now
@@ -984,15 +975,18 @@ func (k msgServer) ActivateReferral(goCtx context.Context, msg *types.MsgActivat
 	program.UsedLinks++
 	k.SetReferralProgram(ctx, program)
 
-	// Reward both participants with 1 token each
+	// Reward both participants with 1 token each from referral treasury
 	rewardAmount := cosmossdk_io_math.NewInt(1000000) // 1 token with 6 decimals
 	rewardCoin := sdk.NewCoin(program.TokenDenom, rewardAmount)
 
-	// Mint tokens for rewards (2 tokens total)
-	totalRewardAmount := rewardAmount.Mul(cosmossdk_io_math.NewInt(2)) // 2 tokens
-	totalRewardCoin := sdk.NewCoin(program.TokenDenom, totalRewardAmount)
-	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(totalRewardCoin)); err != nil {
-		return nil, errors.Wrapf(err, "failed to mint reward coins")
+	params := k.GetParams(ctx)
+	if params.ReferralWallet == "" {
+		return nil, errors.Wrapf(types.ErrInvalidRequest, "referral wallet not configured")
+	}
+
+	referralTreasury, err := sdk.AccAddressFromBech32(params.ReferralWallet)
+	if err != nil {
+		return nil, errors.Wrapf(types.ErrInvalidAddress, "invalid referral wallet address: %s", err)
 	}
 
 	// Send reward to referrer
@@ -1001,7 +995,7 @@ func (k msgServer) ActivateReferral(goCtx context.Context, msg *types.MsgActivat
 		return nil, errors.Wrapf(types.ErrInvalidAddress, "invalid referrer address: %s", err)
 	}
 
-	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, referrerAddr, sdk.NewCoins(rewardCoin)); err != nil {
+	if err := k.bankKeeper.SendCoins(ctx, referralTreasury, referrerAddr, sdk.NewCoins(rewardCoin)); err != nil {
 		return nil, errors.Wrapf(err, "failed to send reward coins to referrer")
 	}
 
@@ -1011,7 +1005,7 @@ func (k msgServer) ActivateReferral(goCtx context.Context, msg *types.MsgActivat
 		return nil, errors.Wrapf(types.ErrInvalidAddress, "invalid referee address: %s", err)
 	}
 
-	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, refereeAddr, sdk.NewCoins(rewardCoin)); err != nil {
+	if err := k.bankKeeper.SendCoins(ctx, referralTreasury, refereeAddr, sdk.NewCoins(rewardCoin)); err != nil {
 		return nil, errors.Wrapf(err, "failed to send reward coins to referee")
 	}
 

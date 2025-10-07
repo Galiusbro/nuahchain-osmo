@@ -169,7 +169,7 @@ var moduleAccountPermissions = map[string][]string{
 	usdoracletypes.ModuleName:                nil,
 	pegkeepertypes.ModuleName:                nil,
 	usertokentypes.ModuleName:                {authtypes.Minter, authtypes.Burner},
-	leveragetypes.ModuleName:                 nil,
+	leveragetypes.ModuleName:                 {authtypes.Minter, authtypes.Burner},
 	treasurytypes.ModuleName:                 nil,
 	exchangetypes.ModuleName:                 {authtypes.Minter, authtypes.Burner},
 }

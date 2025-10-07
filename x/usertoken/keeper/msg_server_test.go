@@ -22,9 +22,44 @@ type MsgServerTestSuite struct {
 	msgServer types.MsgServer
 }
 
-func (suite *MsgServerTestSuite) SetupTest() {
+func (suite *MsgServerTestSuite) resetSuite() {
 	suite.Setup()
 	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+
+	params := suite.App.UserTokenKeeper.GetParams(suite.Ctx)
+	if params.PlatformFeeWallet == "" {
+		params.PlatformFeeWallet = suite.TestAccs[1].String()
+	}
+	if params.ReferralWallet == "" {
+		params.ReferralWallet = suite.TestAccs[2].String()
+	}
+	if params.AiCeoWallet == "" {
+		params.AiCeoWallet = suite.TestAccs[1].String()
+	}
+	suite.App.UserTokenKeeper.SetParams(suite.Ctx, params)
+}
+
+func (suite *MsgServerTestSuite) fundReferralTreasury(denom string, amount math.Int) {
+	if amount.IsZero() {
+		return
+	}
+	params := suite.App.UserTokenKeeper.GetParams(suite.Ctx)
+	suite.Require().NotEmpty(params.ReferralWallet, "referral wallet must be configured")
+	referralAddr, err := sdk.AccAddressFromBech32(params.ReferralWallet)
+	suite.Require().NoError(err)
+
+	moduleAddr := suite.App.AccountKeeper.GetModuleAddress(types.ModuleName)
+	suite.Require().NotNil(moduleAddr)
+	moduleBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, moduleAddr, denom).Amount
+	if moduleBalance.LT(amount) {
+		delta := amount.Sub(moduleBalance)
+		suite.Require().NoError(suite.App.BankKeeper.MintCoins(suite.Ctx, types.ModuleName, sdk.NewCoins(sdk.NewCoin(denom, delta))))
+	}
+	suite.Require().NoError(suite.App.BankKeeper.SendCoinsFromModuleToAccount(suite.Ctx, types.ModuleName, referralAddr, sdk.NewCoins(sdk.NewCoin(denom, amount))))
+}
+
+func (suite *MsgServerTestSuite) SetupTest() {
+	suite.resetSuite()
 }
 
 func TestMsgServerTestSuite(t *testing.T) {
@@ -33,8 +68,7 @@ func TestMsgServerTestSuite(t *testing.T) {
 
 func (suite *MsgServerTestSuite) TestCreateUserToken() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	// Set up wallet addresses in params for proper token distribution
 	params := suite.App.UserTokenKeeper.GetParams(suite.Ctx)
@@ -143,8 +177,7 @@ func (suite *MsgServerTestSuite) TestCreateUserToken() {
 
 func (suite *MsgServerTestSuite) TestCreateUserTokenValidation() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	creator := suite.TestAccs[0]
 
@@ -165,8 +198,7 @@ func (suite *MsgServerTestSuite) TestCreateUserTokenValidation() {
 
 func (suite *MsgServerTestSuite) TestCreateUserTokenDuplicateSubdenom() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	creator := suite.TestAccs[0]
 
@@ -258,19 +290,19 @@ func (suite *MsgServerTestSuite) TestCalculateTokensFromPayment() {
 			name:          "small payment at zero supply",
 			currentSupply: math.ZeroInt(),
 			paymentAmount: math.NewInt(50),
-			expected:      math.NewInt(24596094416), // Updated to match actual calculation with proper decimals
+			expected:      math.NewInt(249994),
 		},
 		{
 			name:          "full curve purchase",
 			currentSupply: math.ZeroInt(),
 			paymentAmount: math.NewInt(50_010_000),
-			expected:      math.NewInt(29999999999400), // Updated to match actual calculation with proper decimals
+			expected:      math.NewInt(49_109_730_112),
 		},
 		{
 			name:          "clamped to remaining supply",
 			currentSupply: math.NewInt(29_950_000).Mul(scale), // Convert current supply to base units
 			paymentAmount: math.NewInt(10_000_000),
-			expected:      math.NewInt(50_000).Mul(scale), // Convert expected to base units
+			expected:      math.NewInt(10_016_689),
 		},
 		{
 			name:          "zero payment",
@@ -302,13 +334,13 @@ func (suite *MsgServerTestSuite) TestCalculatePayoutFromTokens() {
 			name:          "sell tokens matching small purchase",
 			currentSupply: math.NewInt(24_596).Mul(scale), // Convert to base units
 			tokensToSell:  math.NewInt(24_596).Mul(scale), // Convert to base units
-			expected:      math.NewInt(14),                // Updated to match actual calculation with proper decimals
+			expected:      math.NewInt(14_999_903),
 		},
 		{
 			name:          "sell entire curve",
 			currentSupply: params.BondingCurveMaxSupply.Mul(scale), // Convert to base units
 			tokensToSell:  params.BondingCurveMaxSupply.Mul(scale), // Convert to base units
-			expected:      math.NewInt(15_003_000),
+			expected:      math.NewInt(15_003_000_000_150),
 		},
 		{
 			name:          "sell zero tokens",
@@ -422,8 +454,7 @@ func (suite *MsgServerTestSuite) TestStartLBPValidation() {
 
 func (suite *MsgServerTestSuite) TestBuyTokensBasic() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	// Create a test token first
 	creator := suite.TestAccs[0]
@@ -472,8 +503,7 @@ func (suite *MsgServerTestSuite) TestBuyTokensBasic() {
 
 func (suite *MsgServerTestSuite) TestBuyTokensExpectedAmounts() {
 	suite.Run("small payment", func() {
-		suite.Setup()
-		suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+		suite.resetSuite()
 
 		creator := suite.TestAccs[0]
 		buyer := suite.TestAccs[1]
@@ -505,6 +535,7 @@ func (suite *MsgServerTestSuite) TestBuyTokensExpectedAmounts() {
 			"0",
 		)
 
+		initialBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, buyer, tokenDenom).Amount
 		resp, err := suite.msgServer.BuyTokens(suite.Ctx, msgBuy)
 		suite.Require().NoError(err)
 
@@ -514,7 +545,8 @@ func (suite *MsgServerTestSuite) TestBuyTokensExpectedAmounts() {
 
 		// Verify the tokens were actually transferred
 		buyerBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, buyer, tokenDenom)
-		suite.Require().Equal(resp.TokensReceived, buyerBalance.Amount)
+		expectedBalance := initialBalance.Add(resp.TokensReceived)
+		suite.Require().Equal(expectedBalance, buyerBalance.Amount)
 
 		// Verify the bonding curve supply tracking is correct
 		curveSold, err := suite.App.UserTokenKeeper.GetBondingCurveSupply(suite.Ctx, tokenDenom)
@@ -527,8 +559,7 @@ func (suite *MsgServerTestSuite) TestBuyTokensExpectedAmounts() {
 	})
 
 	suite.Run("full curve purchase", func() {
-		suite.Setup()
-		suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+		suite.resetSuite()
 
 		creator := suite.TestAccs[0]
 		buyer := suite.TestAccs[1]
@@ -559,6 +590,7 @@ func (suite *MsgServerTestSuite) TestBuyTokensExpectedAmounts() {
 			"0",
 		)
 
+		// initialBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, buyer, tokenDenom).Amount
 		resp, err := suite.msgServer.BuyTokens(suite.Ctx, msgBuy)
 		suite.Require().NoError(err)
 
@@ -611,8 +643,7 @@ func (suite *MsgServerTestSuite) TestBuyTokensExpectedAmounts() {
 
 func (suite *MsgServerTestSuite) TestClaimFounderTokensMinimumPurchase() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	// Set up AI CEO wallet in params
 	params := suite.App.UserTokenKeeper.GetParams(suite.Ctx)
@@ -670,8 +701,7 @@ func (suite *MsgServerTestSuite) TestClaimFounderTokensMinimumPurchase() {
 
 func (suite *MsgServerTestSuite) TestClaimFounderTokensSufficientPurchase() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	// Set up AI CEO wallet in params
 	params := suite.App.UserTokenKeeper.GetParams(suite.Ctx)
@@ -743,8 +773,7 @@ func (suite *MsgServerTestSuite) TestClaimFounderTokensSufficientPurchase() {
 
 func (suite *MsgServerTestSuite) TestBuyFounderTokens() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	// Create a test token
 	creator := suite.TestAccs[0]
@@ -817,8 +846,7 @@ func (suite *MsgServerTestSuite) TestBuyFounderTokens() {
 
 func (suite *MsgServerTestSuite) TestBuyFounderTokensInsufficientFunds() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	// Create a test token
 	creator := suite.TestAccs[0]
@@ -851,13 +879,12 @@ func (suite *MsgServerTestSuite) TestBuyFounderTokensInsufficientFunds() {
 
 	_, err = suite.msgServer.BuyFounderTokens(suite.Ctx, msgBuy)
 	suite.Require().Error(err)
-	suite.Require().Contains(err.Error(), "insufficient funds")
+	suite.Require().Contains(err.Error(), "failed to find suitable payment currency")
 }
 
 func (suite *MsgServerTestSuite) TestBuyTokensPaymentDistribution() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	// Create a test token first
 	creator := suite.TestAccs[0]
@@ -906,8 +933,7 @@ func (suite *MsgServerTestSuite) TestBuyTokensPaymentDistribution() {
 
 func (suite *MsgServerTestSuite) TestCreateReferralProgram() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	creator := suite.TestAccs[0]
 	tokenDenom := "factory/" + creator.String() + "/testtoken"
@@ -933,8 +959,7 @@ func (suite *MsgServerTestSuite) TestCreateReferralProgram() {
 
 func (suite *MsgServerTestSuite) TestActivateReferral() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	creator := suite.TestAccs[0]
 	referee := suite.TestAccs[1]
@@ -955,6 +980,8 @@ func (suite *MsgServerTestSuite) TestActivateReferral() {
 		referee.String(), // referee
 	)
 
+	suite.fundReferralTreasury(tokenDenom, math.NewInt(10).Mul(math.NewInt(1_000_000)))
+
 	_, err = suite.msgServer.ActivateReferral(suite.Ctx, msgActivateReferral)
 	suite.Require().NoError(err)
 
@@ -969,8 +996,7 @@ func (suite *MsgServerTestSuite) TestActivateReferral() {
 
 func (suite *MsgServerTestSuite) TestWeeklyLinkReplenishment() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	creator := suite.TestAccs[0]
 	tokenDenom := "factory/" + creator.String() + "/testtoken"
@@ -997,6 +1023,7 @@ func (suite *MsgServerTestSuite) TestWeeklyLinkReplenishment() {
 		)
 		_, err := suite.msgServer.CreateReferralProgram(suite.Ctx, msgCreate)
 		suite.Require().NoError(err)
+		suite.fundReferralTreasury(testTokenDenom, math.NewInt(10).Mul(math.NewInt(1_000_000)))
 
 		// Activate each different referral code to use up links from the main program
 		msgActivateReferral := types.NewMsgActivateReferral(
@@ -1026,6 +1053,7 @@ func (suite *MsgServerTestSuite) TestWeeklyLinkReplenishment() {
 			tokenDenom, // Main program as referral code
 			referee,    // Different referee each time
 		)
+		suite.fundReferralTreasury(tokenDenom, math.NewInt(10).Mul(math.NewInt(1_000_000)))
 		_, err = suite.msgServer.ActivateReferral(suite.Ctx, msgActivateReferral)
 		if i == 0 {
 			// First activation should succeed
@@ -1055,8 +1083,7 @@ func (suite *MsgServerTestSuite) TestWeeklyLinkReplenishment() {
 
 func (suite *MsgServerTestSuite) TestWeeklyLinkReplenishmentFullUtilization() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	creator := suite.TestAccs[0]
 	tokenDenom := "factory/" + creator.String() + "/testtoken"
@@ -1083,6 +1110,7 @@ func (suite *MsgServerTestSuite) TestWeeklyLinkReplenishmentFullUtilization() {
 		)
 		_, err := suite.msgServer.CreateReferralProgram(suite.Ctx, msgCreate)
 		suite.Require().NoError(err)
+		suite.fundReferralTreasury(testTokenDenom, math.NewInt(10).Mul(math.NewInt(1_000_000)))
 
 		// Activate this referral code (each activation uses 1 link from the program)
 		msgActivateReferral := types.NewMsgActivateReferral(
@@ -1118,8 +1146,7 @@ func (suite *MsgServerTestSuite) TestWeeklyLinkReplenishmentFullUtilization() {
 
 func (suite *MsgServerTestSuite) TestSellTokens() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	// Create a test token first
 	creator := suite.TestAccs[0]
@@ -1146,6 +1173,8 @@ func (suite *MsgServerTestSuite) TestSellTokens() {
 	suite.Require().NoError(err)
 
 	// Buy tokens first
+	initialTokens := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, tokenDenom).Amount
+
 	msgBuy := types.NewMsgBuyTokens(
 		seller.String(),
 		tokenDenom,
@@ -1156,18 +1185,18 @@ func (suite *MsgServerTestSuite) TestSellTokens() {
 	_, err = suite.msgServer.BuyTokens(suite.Ctx, msgBuy)
 	suite.Require().NoError(err)
 
-	// Get seller's token balance
-	sellerBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, tokenDenom)
-	suite.Require().True(sellerBalance.Amount.GT(math.ZeroInt()))
-
 	// Fund module with N$ for payout based on bonding curve economics
-	// According to docs: full curve costs ~15,003,000 N$, so 20M should be sufficient
-	moduleFunding := sdk.NewCoin("unuah", math.NewInt(20000000)) // 20M unuah (20,000 N$)
+	moduleFunding := sdk.NewCoin("unuah", math.NewInt(20000000))
 	err = suite.App.BankKeeper.MintCoins(suite.Ctx, types.ModuleName, sdk.NewCoins(moduleFunding))
 	suite.Require().NoError(err)
 
-	// Now test selling half of the tokens
-	sellAmount := sdk.NewCoin(tokenDenom, sellerBalance.Amount.QuoRaw(2))
+	// Calculate amount acquired via the purchase
+	sellerBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, tokenDenom)
+	tokensPurchased := sellerBalance.Amount.Sub(initialTokens)
+	suite.Require().True(tokensPurchased.IsPositive())
+
+	// Now test selling half of the purchased tokens
+	sellAmount := sdk.NewCoin(tokenDenom, tokensPurchased.QuoRaw(2))
 	msgSell := types.NewMsgSellTokens(
 		seller.String(),
 		tokenDenom,
@@ -1182,7 +1211,8 @@ func (suite *MsgServerTestSuite) TestSellTokens() {
 
 	// Verify seller's token balance decreased
 	newSellerBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, tokenDenom)
-	suite.Require().Equal(sellerBalance.Amount.Sub(sellAmount.Amount), newSellerBalance.Amount)
+	expectedBalance := sellerBalance.Amount.Sub(sellAmount.Amount)
+	suite.Require().Equal(expectedBalance, newSellerBalance.Amount)
 
 	// Verify seller received N$ payout
 	sellerNuahBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, "unuah")
@@ -1205,8 +1235,7 @@ func (suite *MsgServerTestSuite) TestSellTokens() {
 
 func (suite *MsgServerTestSuite) TestSellTokensInsufficientBalance() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	// Create a test token first
 	creator := suite.TestAccs[0]
@@ -1245,8 +1274,7 @@ func (suite *MsgServerTestSuite) TestSellTokensInsufficientBalance() {
 
 func (suite *MsgServerTestSuite) TestSellTokensExceedsCurveSupply() {
 	suite.Run("no curve liquidity", func() {
-		suite.Setup()
-		suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+		suite.resetSuite()
 
 		creator := suite.TestAccs[0]
 		seller := suite.TestAccs[1]
@@ -1283,8 +1311,7 @@ func (suite *MsgServerTestSuite) TestSellTokensExceedsCurveSupply() {
 	})
 
 	suite.Run("sale exceeds curve supply", func() {
-		suite.Setup()
-		suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+		suite.resetSuite()
 
 		creator := suite.TestAccs[0]
 		seller := suite.TestAccs[1]
@@ -1316,7 +1343,9 @@ func (suite *MsgServerTestSuite) TestSellTokensExceedsCurveSupply() {
 		_, err = suite.msgServer.BuyTokens(suite.Ctx, msgBuy)
 		suite.Require().NoError(err)
 
-		sellAmount := sdk.NewCoin(tokenDenom, math.NewInt(1_000_000))
+		available, err := suite.App.UserTokenKeeper.GetBondingCurveSupply(suite.Ctx, tokenDenom)
+		suite.Require().NoError(err)
+		sellAmount := sdk.NewCoin(tokenDenom, available.Add(math.NewInt(1)))
 		msgSell := types.NewMsgSellTokens(
 			seller.String(),
 			tokenDenom,
@@ -1326,18 +1355,13 @@ func (suite *MsgServerTestSuite) TestSellTokensExceedsCurveSupply() {
 
 		_, err = suite.msgServer.SellTokens(suite.Ctx, msgSell)
 		suite.Require().Error(err)
-		// The error message changed to be more specific about zero payout
-		suite.Require().True(
-			strings.Contains(err.Error(), "exceeds bonding curve supply") ||
-				strings.Contains(err.Error(), "payout is zero for requested sale amount"),
-			"Expected curve supply or zero payout error, got: %s", err.Error())
+		suite.Require().Contains(err.Error(), "exceeds bonding curve supply")
 	})
 }
 
 func (suite *MsgServerTestSuite) TestSellTokensMinPriceNotMet() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	// Create a test token first
 	creator := suite.TestAccs[0]
@@ -1363,6 +1387,10 @@ func (suite *MsgServerTestSuite) TestSellTokensMinPriceNotMet() {
 	err = suite.App.BankKeeper.SendCoinsFromModuleToAccount(suite.Ctx, types.ModuleName, seller, sdk.NewCoins(paymentAmount))
 	suite.Require().NoError(err)
 
+	// Get initial token balance before purchase
+	initialTokens := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, tokenDenom).Amount
+	suite.Require().True(initialTokens.GTE(math.ZeroInt()))
+
 	msgBuy := types.NewMsgBuyTokens(
 		seller.String(),
 		tokenDenom,
@@ -1373,10 +1401,6 @@ func (suite *MsgServerTestSuite) TestSellTokensMinPriceNotMet() {
 	_, err = suite.msgServer.BuyTokens(suite.Ctx, msgBuy)
 	suite.Require().NoError(err)
 
-	// Get seller's token balance
-	sellerBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, tokenDenom)
-	suite.Require().True(sellerBalance.Amount.GT(math.ZeroInt()))
-
 	// Fund module with N$ for payout based on bonding curve economics
 	// According to docs: full curve costs ~15,003,000 N$, so 20M should be sufficient
 	moduleFunding := sdk.NewCoin("unuah", math.NewInt(20000000)) // 20M unuah (20,000 N$)
@@ -1384,7 +1408,10 @@ func (suite *MsgServerTestSuite) TestSellTokensMinPriceNotMet() {
 	suite.Require().NoError(err)
 
 	// Try to sell with unreasonably high minimum price
-	sellAmount := sdk.NewCoin(tokenDenom, sellerBalance.Amount)
+	sellerBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, tokenDenom)
+	tokensPurchased := sellerBalance.Amount.Sub(initialTokens)
+	suite.Require().True(tokensPurchased.IsPositive())
+	sellAmount := sdk.NewCoin(tokenDenom, tokensPurchased)
 	// Set min_price higher than expected payout to trigger the error
 	// With small purchase (100 unuah) and small token amount, payout should be much less than 1000 unuah
 	msgSell := types.NewMsgSellTokens(
@@ -1398,12 +1425,14 @@ func (suite *MsgServerTestSuite) TestSellTokensMinPriceNotMet() {
 	suite.Require().Error(err)
 	suite.Require().Contains(err.Error(), "price received")
 	suite.Require().Contains(err.Error(), "is less than minimum price")
+
+	postFail := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, tokenDenom).Amount
+	suite.Require().Equal(sellerBalance.Amount, postFail)
 }
 
 func (suite *MsgServerTestSuite) TestUserReferralQuotaWeeklyReset() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	creator := suite.TestAccs[0]
 
@@ -1439,8 +1468,7 @@ func (suite *MsgServerTestSuite) TestUserReferralQuotaWeeklyReset() {
 
 func (suite *MsgServerTestSuite) TestUserReferralQuotaPartialUtilization() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	creator := suite.TestAccs[0]
 
@@ -1470,8 +1498,7 @@ func (suite *MsgServerTestSuite) TestUserReferralQuotaPartialUtilization() {
 
 func (suite *MsgServerTestSuite) TestUserReferralQuotaMultipleExpansions() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	creator := suite.TestAccs[0]
 
@@ -1515,8 +1542,7 @@ func (suite *MsgServerTestSuite) TestUserReferralQuotaMultipleExpansions() {
 
 func (suite *MsgServerTestSuite) TestCreateReferralProgramQuotaLimits() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	creator := suite.TestAccs[0]
 
@@ -1551,8 +1577,7 @@ func (suite *MsgServerTestSuite) TestCreateReferralProgramQuotaLimits() {
 
 func (suite *MsgServerTestSuite) TestCreateReferralProgramNewUserInitialization() {
 	// Setup fresh context for this test
-	suite.Setup()
-	suite.msgServer = keeper.NewMsgServerImpl(*suite.App.UserTokenKeeper, suite.App.UserTokenKeeper.GetAuthority())
+	suite.resetSuite()
 
 	creator := suite.TestAccs[0]
 

@@ -1,13 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Decimal from 'decimal.js';
+import { RefreshCw, TrendingDown, TrendingUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import {
     Position,
     PositionSide,
-    PositionStatus,
     positionSideToString,
+    PositionStatus,
     positionStatusToString,
-    QueryPositionsByTraderResponse,
     QueryEstimatePositionResponse,
+    QueryPositionsByTraderResponse,
     QueryTokenPriceResponse
 } from '../codec/leverage';
 
@@ -39,14 +45,14 @@ const LeverageTrading: React.FC<LeverageTradingProps> = ({
     const [positions, setPositions] = useState<Position[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>('');
-    
+
     // Form state for opening positions
     const [tokenDenom, setTokenDenom] = useState('');
     const [collateralAmount, setCollateralAmount] = useState('');
     const [collateralDenom, setCollateralDenom] = useState('unuah');
     const [leverage, setLeverage] = useState('2');
     const [side, setSide] = useState<PositionSide>(PositionSide.LONG);
-    
+
     // Price and estimation data
     const [tokenPrice, setTokenPrice] = useState<string>('0');
     const [estimation, setEstimation] = useState<QueryEstimatePositionResponse | null>(null);
@@ -54,17 +60,17 @@ const LeverageTrading: React.FC<LeverageTradingProps> = ({
     // Load user positions
     const loadPositions = async () => {
         if (!walletAddress) return;
-        
+
         setLoading(true);
         try {
             const response = await fetch(
                 `${restEndpoint}/osmosis/leverage/v1beta1/positions/trader/${walletAddress}`
             );
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            
+
             const data: QueryPositionsByTraderResponse = await response.json();
             setPositions(data.positions || []);
         } catch (err) {
@@ -78,12 +84,12 @@ const LeverageTrading: React.FC<LeverageTradingProps> = ({
     // Load token price
     const loadTokenPrice = async (denom: string) => {
         if (!denom) return;
-        
+
         try {
             const response = await fetch(
                 `${restEndpoint}/osmosis/leverage/v1beta1/token-price/${encodeURIComponent(denom)}`
             );
-            
+
             if (response.ok) {
                 const data: QueryTokenPriceResponse = await response.json();
                 setTokenPrice(data.price);
@@ -96,7 +102,7 @@ const LeverageTrading: React.FC<LeverageTradingProps> = ({
     // Estimate position
     const estimatePosition = async () => {
         if (!tokenDenom || !collateralAmount || !leverage) return;
-        
+
         try {
             const params = new URLSearchParams({
                 tokenDenom,
@@ -104,11 +110,11 @@ const LeverageTrading: React.FC<LeverageTradingProps> = ({
                 leverage,
                 side: side.toString()
             });
-            
+
             const response = await fetch(
                 `${restEndpoint}/osmosis/leverage/v1beta1/estimate-position?${params}`
             );
-            
+
             if (response.ok) {
                 const data: QueryEstimatePositionResponse = await response.json();
                 setEstimation(data);
@@ -134,7 +140,7 @@ const LeverageTrading: React.FC<LeverageTradingProps> = ({
     // Handle form submission
     const handleOpenPosition = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!tokenDenom || !collateralAmount || !leverage) {
             setError('Please fill in all required fields');
             return;
@@ -143,22 +149,30 @@ const LeverageTrading: React.FC<LeverageTradingProps> = ({
         try {
             setLoading(true);
             setError('');
-            
+
             const collateralAmountMicro = new Decimal(collateralAmount).mul(1_000_000).toString();
-            
+
+            const priceMicro = tokenPrice && tokenPrice !== '0'
+                ? new Decimal(tokenPrice).mul(1_000_000)
+                : null;
+
             await onOpenPosition({
                 tokenDenom,
                 collateralAmount: collateralAmountMicro,
                 collateralDenom,
                 leverage,
                 side,
-                minPrice: '0', // For simplicity, no slippage protection in this demo
-                maxPrice: new Decimal(tokenPrice).mul(1.1).toString() // 10% slippage tolerance
+                minPrice: side === PositionSide.SHORT && priceMicro
+                    ? priceMicro.mul(0.9).toFixed(18)
+                    : '0',
+                maxPrice: side === PositionSide.LONG && priceMicro
+                    ? priceMicro.mul(1.1).toFixed(18)
+                    : '999999999000000'
             });
-            
+
             // Reload positions after successful trade
             await loadPositions();
-            
+
             // Reset form
             setTokenDenom('');
             setCollateralAmount('');
@@ -176,13 +190,13 @@ const LeverageTrading: React.FC<LeverageTradingProps> = ({
         try {
             setLoading(true);
             setError('');
-            
+
             await onClosePosition(
                 positionId,
-                '0', // Min price (no slippage protection for demo)
-                new Decimal(tokenPrice).mul(1.1).toString() // Max price with 10% slippage
+                '0', // Keep wide slippage bounds when closing positions
+                '999999999000000'
             );
-            
+
             // Reload positions after successful close
             await loadPositions();
         } catch (err) {
@@ -203,237 +217,271 @@ const LeverageTrading: React.FC<LeverageTradingProps> = ({
     };
 
     return (
-        <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-            <h2>🚀 Leverage Trading (Max 100x)</h2>
-            
+        <div className="p-5 max-w-6xl mx-auto">
+            <div className="mb-6">
+                <h2 className="text-3xl font-bold flex items-center gap-2">
+                    🚀 Leverage Trading (Max 100x)
+                </h2>
+            </div>
+
             {error && (
-                <div style={{ 
-                    color: 'red', 
-                    backgroundColor: '#ffebee', 
-                    padding: '10px', 
-                    borderRadius: '4px', 
-                    marginBottom: '20px' 
-                }}>
+                <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-5">
                     {error}
                 </div>
             )}
 
-            {/* Open Position Form */}
-            <div style={{ 
-                backgroundColor: '#f5f5f5', 
-                padding: '20px', 
-                borderRadius: '8px', 
-                marginBottom: '30px' 
-            }}>
-                <h3>📈 Open New Position</h3>
-                <form onSubmit={handleOpenPosition}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-                        <div>
-                            <label>Token Denom:</label>
-                            <input
-                                type="text"
-                                value={tokenDenom}
-                                onChange={(e) => setTokenDenom(e.target.value)}
-                                placeholder="factory/osmo.../mytoken"
-                                style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                                required
-                            />
-                        </div>
-                        
-                        <div>
-                            <label>Collateral Amount:</label>
-                            <input
-                                type="number"
-                                value={collateralAmount}
-                                onChange={(e) => setCollateralAmount(e.target.value)}
-                                placeholder="100"
-                                min="0"
-                                step="0.000001"
-                                style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                                required
-                            />
-                        </div>
-                        
-                        <div>
-                            <label>Collateral Denom:</label>
-                            <select
-                                value={collateralDenom}
-                                onChange={(e) => setCollateralDenom(e.target.value)}
-                                style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                            >
-                                <option value="unuah">UNUAH</option>
-                                <option value="factory/osmo1.../ndollar">NDollar</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label>Leverage (1x - 100x):</label>
-                            <input
-                                type="number"
-                                value={leverage}
-                                onChange={(e) => setLeverage(e.target.value)}
-                                min="1"
-                                max="100"
-                                step="0.1"
-                                style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                                required
-                            />
-                        </div>
-                        
-                        <div>
-                            <label>Position Side:</label>
-                            <select
-                                value={side}
-                                onChange={(e) => setSide(parseInt(e.target.value) as PositionSide)}
-                                style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                            >
-                                <option value={PositionSide.LONG}>LONG (Buy)</option>
-                                <option value={PositionSide.SHORT}>SHORT (Sell)</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    {/* Position Estimation */}
-                    {estimation && (
-                        <div style={{ 
-                            marginTop: '15px', 
-                            padding: '10px', 
-                            backgroundColor: '#e3f2fd', 
-                            borderRadius: '4px' 
-                        }}>
-                            <h4>📊 Position Estimate:</h4>
-                            <p><strong>Position Size:</strong> {formatAmount(estimation.positionSize)} tokens</p>
-                            <p><strong>Entry Price:</strong> {formatPrice(estimation.entryPrice)} {collateralDenom}</p>
-                            <p><strong>Liquidation Price:</strong> {formatPrice(estimation.liquidationPrice)} {collateralDenom}</p>
-                            <p><strong>Trading Fee:</strong> {formatAmount(estimation.tradingFee)} {collateralDenom}</p>
-                        </div>
-                    )}
-                    
-                    <button
-                        type="submit"
-                        disabled={loading || !walletAddress}
-                        style={{
-                            marginTop: '15px',
-                            padding: '12px 24px',
-                            backgroundColor: side === PositionSide.LONG ? '#4caf50' : '#f44336',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            fontSize: '16px'
-                        }}
-                    >
-                        {loading ? 'Opening...' : `Open ${positionSideToString(side)} Position`}
-                    </button>
-                </form>
-            </div>
+            <Tabs defaultValue="open" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="open">Open Position</TabsTrigger>
+                    <TabsTrigger value="positions">Your Positions</TabsTrigger>
+                </TabsList>
 
-            {/* Current Positions */}
-            <div>
-                <h3>📋 Your Positions</h3>
-                {loading && positions.length === 0 ? (
-                    <p>Loading positions...</p>
-                ) : positions.length === 0 ? (
-                    <p>No positions found. Open your first leverage position above!</p>
-                ) : (
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
-                            <thead>
-                                <tr style={{ backgroundColor: '#f0f0f0' }}>
-                                    <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd' }}>ID</th>
-                                    <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd' }}>Token</th>
-                                    <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd' }}>Side</th>
-                                    <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd' }}>Size</th>
-                                    <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd' }}>Collateral</th>
-                                    <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd' }}>Leverage</th>
-                                    <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd' }}>Entry Price</th>
-                                    <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd' }}>Liq. Price</th>
-                                    <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd' }}>PnL</th>
-                                    <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd' }}>Status</th>
-                                    <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd' }}>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {positions.map((position) => (
-                                    <tr key={position.id}>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                                            {position.id.substring(0, 8)}...
-                                        </td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                                            {position.tokenDenom.split('/').pop()}
-                                        </td>
-                                        <td style={{ 
-                                            padding: '12px', 
-                                            border: '1px solid #ddd',
-                                            color: position.side === PositionSide.LONG ? '#4caf50' : '#f44336',
-                                            fontWeight: 'bold'
-                                        }}>
-                                            {positionSideToString(position.side)}
-                                        </td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                                            {formatAmount(position.size)}
-                                        </td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                                            {formatAmount(position.collateral)} {position.collateralDenom}
-                                        </td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                                            {new Decimal(position.leverage).toFixed(1)}x
-                                        </td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                                            {formatPrice(position.entryPrice)}
-                                        </td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                                            {formatPrice(position.liquidationPrice)}
-                                        </td>
-                                        <td style={{ 
-                                            padding: '12px', 
-                                            border: '1px solid #ddd',
-                                            color: new Decimal(position.unrealizedPnl).isPositive() ? '#4caf50' : '#f44336'
-                                        }}>
-                                            {new Decimal(position.unrealizedPnl).isPositive() ? '+' : ''}
-                                            {formatAmount(position.unrealizedPnl)}
-                                        </td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                                            <span style={{
-                                                padding: '4px 8px',
-                                                borderRadius: '4px',
-                                                fontSize: '12px',
-                                                backgroundColor: 
-                                                    position.status === PositionStatus.OPEN ? '#e8f5e8' :
-                                                    position.status === PositionStatus.CLOSED ? '#f0f0f0' : '#ffebee',
-                                                color:
-                                                    position.status === PositionStatus.OPEN ? '#2e7d32' :
-                                                    position.status === PositionStatus.CLOSED ? '#666' : '#c62828'
-                                            }}>
-                                                {positionStatusToString(position.status)}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                                            {position.status === PositionStatus.OPEN && (
-                                                <button
-                                                    onClick={() => handleClosePosition(position.id)}
-                                                    disabled={loading}
-                                                    style={{
-                                                        padding: '6px 12px',
-                                                        backgroundColor: '#ff9800',
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '4px',
-                                                        cursor: loading ? 'not-allowed' : 'pointer',
-                                                        fontSize: '12px'
-                                                    }}
-                                                >
-                                                    Close
-                                                </button>
+                <TabsContent value="open">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <TrendingUp className="h-5 w-5" />
+                                Open New Position
+                            </CardTitle>
+                            <CardDescription>
+                                Create a new leverage position with up to 100x leverage
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <form onSubmit={handleOpenPosition} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="tokenDenom">Token Denom</Label>
+                                        <Input
+                                            id="tokenDenom"
+                                            type="text"
+                                            value={tokenDenom}
+                                            onChange={(e) => setTokenDenom(e.target.value)}
+                                            placeholder="factory/osmo.../mytoken"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="collateralAmount">Collateral Amount</Label>
+                                        <Input
+                                            id="collateralAmount"
+                                            type="number"
+                                            value={collateralAmount}
+                                            onChange={(e) => setCollateralAmount(e.target.value)}
+                                            placeholder="100"
+                                            min="0"
+                                            step="0.000001"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="collateralDenom">Collateral Denom</Label>
+                                        <select
+                                            id="collateralDenom"
+                                            value={collateralDenom}
+                                            onChange={(e) => setCollateralDenom(e.target.value)}
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            <option value="unuah">UNUAH</option>
+                                            <option value="factory/osmo1.../ndollar">NDollar</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="leverage">Leverage (1x - 100x)</Label>
+                                        <Input
+                                            id="leverage"
+                                            type="number"
+                                            value={leverage}
+                                            onChange={(e) => setLeverage(e.target.value)}
+                                            min="1"
+                                            max="100"
+                                            step="0.1"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="side">Position Side</Label>
+                                        <select
+                                            id="side"
+                                            value={side}
+                                            onChange={(e) => setSide(parseInt(e.target.value) as PositionSide)}
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            <option value={PositionSide.LONG}>LONG (Buy)</option>
+                                            <option value={PositionSide.SHORT}>SHORT (Sell)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Position Estimation */}
+                                {estimation && (
+                                    <Card className="bg-blue-50 dark:bg-blue-950/20">
+                                        <CardHeader>
+                                            <CardTitle className="text-lg">📊 Position Estimate</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-2">
+                                            <div className="flex justify-between">
+                                                <span className="font-medium">Position Size:</span>
+                                                <span>{formatAmount(estimation.positionSize)} tokens</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="font-medium">Entry Price:</span>
+                                                <span>{formatPrice(estimation.entryPrice)} {collateralDenom}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="font-medium">Liquidation Price:</span>
+                                                <span>{formatPrice(estimation.liquidationPrice)} {collateralDenom}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="font-medium">Trading Fee:</span>
+                                                <span>{formatAmount(estimation.tradingFee)} {collateralDenom}</span>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                )}
+
+                                <Button
+                                    type="submit"
+                                    disabled={loading || !walletAddress}
+                                    className={`w-full ${side === PositionSide.LONG
+                                            ? 'bg-green-600 hover:bg-green-700'
+                                            : 'bg-red-600 hover:bg-red-700'
+                                        }`}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                            Opening...
+                                        </>
+                                    ) : (
+                                        <>
+                                            {side === PositionSide.LONG ? (
+                                                <TrendingUp className="h-4 w-4 mr-2" />
+                                            ) : (
+                                                <TrendingDown className="h-4 w-4 mr-2" />
                                             )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
+                                            Open {positionSideToString(side)} Position
+                                        </>
+                                    )}
+                                </Button>
+                            </form>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="positions">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                📋 Your Positions
+                            </CardTitle>
+                            <CardDescription>
+                                Manage your active leverage positions
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {loading && positions.length === 0 ? (
+                                <div className="flex items-center justify-center py-8">
+                                    <RefreshCw className="h-6 w-6 animate-spin mr-2" />
+                                    <span>Loading positions...</span>
+                                </div>
+                            ) : positions.length === 0 ? (
+                                <div className="text-center py-8">
+                                    <p className="text-muted-foreground">
+                                        No positions found. Open your first leverage position above!
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full border-collapse">
+                                        <thead>
+                                            <tr className="border-b">
+                                                <th className="text-left p-3 font-medium">ID</th>
+                                                <th className="text-left p-3 font-medium">Token</th>
+                                                <th className="text-left p-3 font-medium">Side</th>
+                                                <th className="text-left p-3 font-medium">Size</th>
+                                                <th className="text-left p-3 font-medium">Collateral</th>
+                                                <th className="text-left p-3 font-medium">Leverage</th>
+                                                <th className="text-left p-3 font-medium">Entry Price</th>
+                                                <th className="text-left p-3 font-medium">Liq. Price</th>
+                                                <th className="text-left p-3 font-medium">PnL</th>
+                                                <th className="text-left p-3 font-medium">Status</th>
+                                                <th className="text-left p-3 font-medium">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {positions.map((position) => (
+                                                <tr key={position.id} className="border-b hover:bg-muted/50">
+                                                    <td className="p-3 text-sm font-mono">
+                                                        {position.id.substring(0, 8)}...
+                                                    </td>
+                                                    <td className="p-3">
+                                                        {position.tokenDenom.split('/').pop()}
+                                                    </td>
+                                                    <td className={`p-3 font-bold ${position.side === PositionSide.LONG
+                                                            ? 'text-green-600'
+                                                            : 'text-red-600'
+                                                        }`}>
+                                                        {positionSideToString(position.side)}
+                                                    </td>
+                                                    <td className="p-3">
+                                                        {formatAmount(position.size)}
+                                                    </td>
+                                                    <td className="p-3">
+                                                        {formatAmount(position.collateral)} {position.collateralDenom}
+                                                    </td>
+                                                    <td className="p-3">
+                                                        {new Decimal(position.leverage).toFixed(1)}x
+                                                    </td>
+                                                    <td className="p-3">
+                                                        {formatPrice(position.entryPrice)}
+                                                    </td>
+                                                    <td className="p-3">
+                                                        {formatPrice(position.liquidationPrice)}
+                                                    </td>
+                                                    <td className={`p-3 font-medium ${new Decimal(position.unrealizedPnl).isPositive()
+                                                            ? 'text-green-600'
+                                                            : 'text-red-600'
+                                                        }`}>
+                                                        {new Decimal(position.unrealizedPnl).isPositive() ? '+' : ''}
+                                                        {formatAmount(position.unrealizedPnl)}
+                                                    </td>
+                                                    <td className="p-3">
+                                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${position.status === PositionStatus.OPEN
+                                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                                                : position.status === PositionStatus.CLOSED
+                                                                    ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
+                                                                    : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                                                            }`}>
+                                                            {positionStatusToString(position.status)}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-3">
+                                                        {position.status === PositionStatus.OPEN && (
+                                                            <Button
+                                                                onClick={() => handleClosePosition(position.id)}
+                                                                disabled={loading}
+                                                                size="sm"
+                                                                variant="destructive"
+                                                            >
+                                                                Close
+                                                            </Button>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 };

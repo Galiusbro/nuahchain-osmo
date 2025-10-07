@@ -114,19 +114,47 @@ func (k msgServer) OpenPosition(goCtx context.Context, msg *types.MsgOpenPositio
 	// For leverage trading, we simulate buying tokens with borrowed funds
 	// In a real implementation, this would involve a lending protocol
 	var tokensReceived math.Int
+	borrowAmount := math.ZeroInt()
+	var borrowErr error
 	if msg.Side == types.PositionSideLong {
-		// For LONG: Calculate tokens as if we bought with full position value
-		// but only use collateral from user (the rest is "borrowed")
-		tokensReceived = positionSize
+		// For LONG: actually borrow additional base currency and buy tokens
+		borrowDec := positionValue.Sub(collateralDec)
+		if borrowDec.IsPositive() {
+			borrowAmount = borrowDec.TruncateInt()
+		}
 
-		// Calculate liquidation price for LONG position
+		var borrowID string
+		if borrowAmount.IsPositive() {
+			borrowID, borrowErr = k.lendingKeeper.BorrowTokens(ctx, traderAddr, msg.Collateral.Denom, borrowAmount, positionID)
+			if borrowErr != nil {
+				return nil, fmt.Errorf("failed to borrow collateral for LONG position: %w", borrowErr)
+			}
+
+			borrowCoin := sdk.NewCoin(msg.Collateral.Denom, borrowAmount)
+			if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, traderAddr, types.ModuleName, sdk.NewCoins(borrowCoin)); err != nil {
+				_ = k.lendingKeeper.RepayTokens(ctx, traderAddr, borrowID, borrowAmount)
+				return nil, fmt.Errorf("failed to move borrowed collateral to module: %w", err)
+			}
+		}
+
+		totalPurchase := msg.Collateral.Amount.Add(borrowAmount)
+		purchaseTokens, err := k.userTokenKeeper.ExecuteBuyTokens(ctx, moduleAddr, msg.TokenDenom, totalPurchase, msg.Collateral.Denom)
+		if err != nil {
+			// Refund collateral (including trading fee) and repay borrow if needed
+			refund := sdk.NewCoin(msg.Collateral.Denom, totalAmount)
+			_ = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, traderAddr, sdk.NewCoins(refund))
+			if borrowAmount.IsPositive() {
+				borrowCoin := sdk.NewCoin(msg.Collateral.Denom, borrowAmount)
+				_ = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, traderAddr, sdk.NewCoins(borrowCoin))
+				if borrowID != "" {
+					_ = k.lendingKeeper.RepayTokens(ctx, traderAddr, borrowID, borrowAmount)
+				}
+			}
+			return nil, fmt.Errorf("failed to buy tokens for LONG position: %w", err)
+		}
+
+		tokensReceived = purchaseTokens
 		liquidationPrice = k.CalculateLiquidationPrice(ctx, msg.Collateral.Amount, tokensReceived, currentPrice, msg.Side)
-
-		// In a real implementation, we would:
-		// 1. Borrow additional funds (positionValue - collateral)
-		// 2. Buy tokens with total funds
-		// 3. Hold tokens as collateral for the loan
-		// For now, we just simulate this by calculating the position size
 	} else {
 		// For SHORT: Borrow tokens from lending pool and sell them immediately
 		borrowID, err := k.lendingKeeper.BorrowTokens(ctx, traderAddr, msg.TokenDenom, positionSize, positionID)
@@ -244,37 +272,64 @@ func (k msgServer) ClosePosition(goCtx context.Context, msg *types.MsgClosePosit
 	var collateralToReturn math.Int
 
 	if position.Side == types.PositionSideLong {
-		// For LONG: Simulate selling tokens and return collateral + PnL
-		// In leverage trading, LONG positions are virtual - we don't actually hold tokens
-		// We calculate the value of the position and return it as unuah
-
-		// Calculate the current value of the position
-		positionValue := math.LegacyNewDecFromInt(position.Size_).Mul(currentPrice)
-
-		// Calculate the original investment (collateral)
-		originalInvestment := math.LegacyNewDecFromInt(position.Collateral)
-
-		// Calculate profit/loss
-		pnl := positionValue.Sub(originalInvestment)
-
-		// Return collateral + PnL (convert to int)
-		collateralToReturn = position.Collateral.Add(pnl.TruncateInt())
-		if collateralToReturn.IsNegative() {
-			collateralToReturn = math.ZeroInt()
+		// For LONG: sell held tokens, repay any borrowed collateral, return remaining proceeds
+		moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
+		if moduleAddr == nil {
+			return nil, fmt.Errorf("module address not found")
 		}
-	} else {
-		// For SHORT: Buy back tokens to repay the borrowed amount
-		// Find the associated borrow position
-		borrowPositions := k.lendingKeeper.GetAllBorrowPositions(ctx)
-		var borrowID string
-		for _, bp := range borrowPositions {
-			if bp.LeveragePositionId == position.Id && bp.Borrower == position.Trader {
-				borrowID = bp.Id
-				break
+
+		// Transfer tokens from module to trader for sale
+		tokenCoin := sdk.NewCoin(position.TokenDenom, position.Size_)
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, traderAddr, sdk.NewCoins(tokenCoin))
+		if err != nil {
+			return nil, fmt.Errorf("failed to transfer position tokens: %w", err)
+		}
+
+		// Sell tokens back through bonding curve
+		payout, payoutDenom, err := k.userTokenKeeper.ExecuteSellTokens(ctx, traderAddr, position.TokenDenom, position.Size_)
+		if err != nil {
+			// Return tokens to module in case of failure
+			_ = k.bankKeeper.SendCoinsFromAccountToModule(ctx, traderAddr, types.ModuleName, sdk.NewCoins(tokenCoin))
+			return nil, fmt.Errorf("failed to sell tokens for LONG position: %w", err)
+		}
+
+		// Move proceeds back to leverage module for accounting
+		payoutCoin := sdk.NewCoin(payoutDenom, payout)
+		if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, traderAddr, types.ModuleName, sdk.NewCoins(payoutCoin)); err != nil {
+			return nil, fmt.Errorf("failed to capture sale proceeds: %w", err)
+		}
+
+		// Repay any borrowed collateral using sale proceeds
+		debtPaid := math.ZeroInt()
+		if borrowID, found := k.lendingKeeper.GetBorrowIDByLeveragePosition(ctx, position.Id); found {
+			borrowPos, found := k.lendingKeeper.GetBorrowPosition(ctx, borrowID)
+			if found {
+				debt := borrowPos.GetTotalDebt()
+				if debt.IsPositive() {
+					debtCoin := sdk.NewCoin(position.CollateralDenom, debt)
+					if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, traderAddr, sdk.NewCoins(debtCoin)); err != nil {
+						return nil, fmt.Errorf("failed to provision repayment funds: %w", err)
+					}
+
+					if err := k.lendingKeeper.RepayTokens(ctx, traderAddr, borrowID, debt); err != nil {
+						return nil, fmt.Errorf("failed to repay borrowed collateral: %w", err)
+					}
+					debtPaid = debt
+				}
 			}
 		}
 
-		if borrowID != "" {
+		// Remaining proceeds are collateral plus realized PnL
+		collateralToReturn = payout.Sub(debtPaid)
+		if collateralToReturn.IsNegative() {
+			collateralToReturn = math.ZeroInt()
+		}
+		realizedPnL = collateralToReturn.Sub(position.Collateral)
+		position.UnrealizedPnl = math.ZeroInt()
+	} else {
+		// For SHORT: Buy back tokens to repay the borrowed amount
+		// Find the associated borrow position
+		if borrowID, found := k.lendingKeeper.GetBorrowIDByLeveragePosition(ctx, position.Id); found {
 			// Get borrow position to know how much to repay
 			borrowPos, found := k.lendingKeeper.GetBorrowPosition(ctx, borrowID)
 			if found {
@@ -530,31 +585,20 @@ func (k msgServer) LiquidatePosition(goCtx context.Context, msg *types.MsgLiquid
 		}
 	} else {
 		// For SHORT: Buy back tokens to repay the borrowed amount
-		// Find the associated borrow position
-		borrowPositions := k.lendingKeeper.GetAllBorrowPositions(ctx)
-		var borrowID string
-		for _, bp := range borrowPositions {
-			if bp.LeveragePositionId == position.Id && bp.Borrower == position.Trader {
-				borrowID = bp.Id
-				break
-			}
-		}
-
-		if borrowID != "" {
+		if borrowID, found := k.lendingKeeper.GetBorrowIDByLeveragePosition(ctx, position.Id); found {
 			// Get borrow position to know how much to repay
 			borrowPos, found := k.lendingKeeper.GetBorrowPosition(ctx, borrowID)
 			if found {
 				// Calculate cost to buy back borrowed tokens
 				buybackCost := math.LegacyNewDecFromInt(borrowPos.GetTotalDebt()).Mul(currentPrice).TruncateInt()
 
-				// Buy back tokens using module funds
-				_, err = k.userTokenKeeper.ExecuteBuyTokens(ctx, moduleAddr, position.TokenDenom, buybackCost, position.CollateralDenom)
+				// Buy back tokens using liquidator funds
+				_, err = k.userTokenKeeper.ExecuteBuyTokens(ctx, liquidatorAddr, position.TokenDenom, buybackCost, position.CollateralDenom)
 				if err != nil {
 					return nil, fmt.Errorf("failed to execute liquidation buyback: %w", err)
 				}
 
 				// Repay the borrowed tokens (liquidator pays the debt)
-				liquidatorAddr, _ := sdk.AccAddressFromBech32(msg.Liquidator)
 				err = k.lendingKeeper.RepayTokens(ctx, liquidatorAddr, borrowID, borrowPos.GetTotalDebt())
 				if err != nil {
 					return nil, fmt.Errorf("failed to repay borrowed tokens during liquidation: %w", err)

@@ -36,6 +36,8 @@ var (
 	LiquidityProviderKeyPrefix = []byte{0x08}
 	// NextBorrowIDKeyPrefix is the prefix for the next borrow position ID
 	NextBorrowIDKeyPrefix = []byte{0x09}
+	// LeverageBorrowIndexKeyPrefix maps leverage position IDs to borrow IDs
+	LeverageBorrowIndexKeyPrefix = []byte{0x0B}
 )
 
 // PositionKey returns the store key to retrieve a Position from the index fields
@@ -86,6 +88,11 @@ func BorrowerPositionPrefix(borrower string) []byte {
 func BorrowerPositionKey(borrower, borrowID string) []byte {
 	prefix := BorrowerPositionPrefix(borrower)
 	return append(prefix, []byte(borrowID)...)
+}
+
+// LeverageBorrowIndexKey returns the store key mapping a leverage position ID to its borrow ID
+func LeverageBorrowIndexKey(leveragePositionID string) []byte {
+	return append(LeverageBorrowIndexKeyPrefix, []byte(leveragePositionID)...)
 }
 
 // LiquidityProviderKey returns the store key for a liquidity provider

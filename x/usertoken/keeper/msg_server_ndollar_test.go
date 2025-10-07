@@ -12,6 +12,8 @@ import (
 
 // TestBuyTokensWithNDollar tests buying tokens with NDollar instead of unuah
 func (suite *MsgServerTestSuite) TestBuyTokensWithNDollar() {
+	suite.resetSuite()
+
 	// Create a test user (buyer)
 	buyer := suite.TestAccs[1]
 
@@ -77,6 +79,7 @@ func (suite *MsgServerTestSuite) TestBuyTokensWithNDollar() {
 	}
 
 	// This should work - the system should accept NDollar as payment
+	startBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, buyer, userTokenDenom).Amount
 	resp, err := suite.msgServer.BuyTokens(suite.Ctx, buyMsg)
 	suite.Require().NoError(err, "BuyTokens should accept NDollar as payment")
 	suite.Require().NotNil(resp)
@@ -90,8 +93,8 @@ func (suite *MsgServerTestSuite) TestBuyTokensWithNDollar() {
 
 	// Verify buyer received user tokens
 	buyerTokenBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, buyer, userTokenDenom)
-	suite.Require().Equal(resp.TokensReceived, buyerTokenBalance.Amount,
-		"Buyer should receive the calculated amount of tokens")
+	suite.Require().Equal(startBalance.Add(resp.TokensReceived), buyerTokenBalance.Amount,
+		"Buyer token balance should increase by purchase amount")
 
 	// Verify module received the NDollar payment
 	moduleAddr := suite.App.AccountKeeper.GetModuleAddress(types.ModuleName)
@@ -107,6 +110,8 @@ func (suite *MsgServerTestSuite) TestBuyTokensWithNDollar() {
 
 // TestBuyTokensWithNDollarInsufficientBalance tests buying tokens with insufficient NDollar balance
 func (suite *MsgServerTestSuite) TestBuyTokensWithNDollarInsufficientBalance() {
+	suite.resetSuite()
+
 	// Create a test user (buyer)
 	buyer := suite.TestAccs[1]
 
@@ -160,6 +165,7 @@ func (suite *MsgServerTestSuite) TestBuyTokensWithNDollarInsufficientBalance() {
 	}
 
 	// This should fail due to insufficient balance
+	initialTokens := suite.App.BankKeeper.GetBalance(suite.Ctx, buyer, userTokenDenom).Amount
 	_, err = suite.msgServer.BuyTokens(suite.Ctx, buyMsg)
 	suite.Require().Error(err, "BuyTokens should fail with insufficient NDollar balance")
 	suite.Require().Contains(err.Error(), "failed to find suitable payment currency",
@@ -172,12 +178,14 @@ func (suite *MsgServerTestSuite) TestBuyTokensWithNDollarInsufficientBalance() {
 
 	// Verify buyer has no user tokens
 	buyerTokenBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, buyer, userTokenDenom)
-	suite.Require().True(buyerTokenBalance.Amount.IsZero(),
-		"Buyer should have no user tokens after failed transaction")
+	suite.Require().Equal(initialTokens, buyerTokenBalance.Amount,
+		"Buyer token balance should remain unchanged")
 }
 
 // TestBuyFounderTokensWithNDollar tests buying founder tokens with NDollar
 func (suite *MsgServerTestSuite) TestBuyFounderTokensWithNDollar() {
+	suite.resetSuite()
+
 	// Create NDollar token first
 	validator := suite.TestAccs[0]
 	ndollarSubdenom := "ndollar"
@@ -367,6 +375,7 @@ func (suite *MsgServerTestSuite) TestSellTokensWithNDollarPayout() {
 	suite.Require().NoError(err)
 
 	// Buy tokens through bonding curve first
+	startingTokens := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, userTokenDenom).Amount
 	buyAmount := cosmossdk_io_math.NewInt(100_000_000) // 100 units payment
 	msgBuyTokens := &types.MsgBuyTokens{
 		Buyer:     seller.String(),
@@ -384,16 +393,22 @@ func (suite *MsgServerTestSuite) TestSellTokensWithNDollarPayout() {
 	suite.Require().True(moduleNDollarBalance.Amount.IsPositive(), "Module should have NDollar from purchase")
 
 	// Verify seller has tokens from the purchase
-	sellerTokenBalance := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, userTokenDenom)
-	suite.Require().True(sellerTokenBalance.Amount.IsPositive(), "Seller should have tokens from purchase")
+	postPurchaseTokens := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, userTokenDenom).Amount
+	suite.Require().True(postPurchaseTokens.IsPositive(), "Seller should have tokens from purchase")
 
-	// Get the actual token amount to sell
-	tokenAmountToSell := sellerTokenBalance.Amount
+	// Determine how many tokens were acquired via purchase
+	bondingCurveSupply, err := suite.App.UserTokenKeeper.GetBondingCurveSupply(suite.Ctx, userTokenDenom)
+	suite.Require().NoError(err)
+	tokensToSell := postPurchaseTokens.Sub(startingTokens)
+	if tokensToSell.GT(bondingCurveSupply) {
+		tokensToSell = bondingCurveSupply
+	}
+	suite.Require().True(tokensToSell.IsPositive(), "Should have positive amount to sell")
 
 	// Sell tokens
 	msgSellTokens := &types.MsgSellTokens{
 		Seller:   seller.String(),
-		Amount:   sdk.NewCoin(userTokenDenom, tokenAmountToSell),
+		Amount:   sdk.NewCoin(userTokenDenom, tokensToSell),
 		MinPrice: cosmossdk_io_math.NewInt(1),
 	}
 
@@ -407,9 +422,10 @@ func (suite *MsgServerTestSuite) TestSellTokensWithNDollarPayout() {
 	suite.Require().True(sellerNDollarBalance.Amount.IsPositive(), "Seller should have received NDollar payout")
 	suite.Require().True(sellerUnuahBalance.Amount.IsZero(), "Seller should not have received unuah")
 
-	// Verify seller no longer has tokens
+	// Verify seller returned to their original balance
 	sellerTokenBalanceAfter := suite.App.BankKeeper.GetBalance(suite.Ctx, seller, userTokenDenom)
-	suite.Require().True(sellerTokenBalanceAfter.Amount.IsZero(), "Seller should no longer have tokens")
+	suite.Require().Equal(startingTokens, sellerTokenBalanceAfter.Amount,
+		"Seller token balance should return to pre-purchase amount")
 }
 
 func (suite *MsgServerTestSuite) TestCreateUserTokenWithNDollarPreference() {

@@ -1,12 +1,14 @@
 package keeper
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
 	"cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/osmosis-labs/osmosis/v30/x/leverage/types"
 )
@@ -42,41 +44,6 @@ func (lk LendingKeeper) CreateLendingPool(ctx sdk.Context, denom string) error {
 	}
 
 	lk.SetLendingPool(ctx, pool)
-	return nil
-}
-
-// InitializePoolWithLiquidity initializes a lending pool with initial liquidity from module reserves
-func (lk LendingKeeper) InitializePoolWithLiquidity(ctx sdk.Context, denom string) error {
-	// Get module address
-	moduleAddr := lk.keeper.accountKeeper.GetModuleAddress(types.ModuleName)
-	if moduleAddr == nil {
-		return fmt.Errorf("module address not found")
-	}
-
-	// Get bonding curve supply from usertoken module
-	bondingCurveSupply, err := lk.keeper.userTokenKeeper.GetBondingCurveSupply(ctx, denom)
-	if err != nil {
-		return fmt.Errorf("failed to get bonding curve supply: %w", err)
-	}
-
-	// If no bonding curve supply, create empty pool
-	if bondingCurveSupply.IsZero() {
-		return nil
-	}
-
-	// Get the pool
-	pool, found := lk.GetLendingPool(ctx, denom)
-	if !found {
-		return fmt.Errorf("pool not found after creation")
-	}
-
-	// Use bonding curve supply as available liquidity
-	// This represents tokens that can be borrowed for SHORT positions
-	pool.AvailableLiquidity = pool.AvailableLiquidity.Add(bondingCurveSupply)
-	pool.LastUpdateTime = ctx.BlockTime().Unix()
-
-	lk.SetLendingPool(ctx, pool)
-
 	return nil
 }
 
@@ -266,16 +233,30 @@ func (lk LendingKeeper) BorrowTokens(ctx sdk.Context, borrower sdk.AccAddress, d
 		if err := lk.CreateLendingPool(ctx, denom); err != nil {
 			return "", fmt.Errorf("failed to create lending pool: %w", err)
 		}
-		// Initialize pool with some liquidity from module reserves
-		if err := lk.InitializePoolWithLiquidity(ctx, denom); err != nil {
-			return "", fmt.Errorf("failed to initialize pool liquidity: %w", err)
-		}
 		pool, _ = lk.GetLendingPool(ctx, denom)
 	}
 
 	// Check if there's enough available liquidity
 	if pool.AvailableLiquidity.LT(amount) {
 		return "", types.ErrInsufficientLiquidity
+	}
+
+	if err := lk.keeper.userTokenKeeper.ReserveTokensForLeverage(ctx, denom, amount); err != nil {
+		return "", fmt.Errorf("failed to reserve leverage liquidity: %w", err)
+	}
+	reserveActive := true
+	defer func() {
+		if reserveActive {
+			_ = lk.keeper.userTokenKeeper.ReleaseTokensFromLeverage(ctx, denom, amount)
+		}
+	}()
+
+	loanCoin := sdk.NewCoin(denom, amount)
+	if err := lk.keeper.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrower, sdk.NewCoins(loanCoin)); err != nil {
+		if errors.Is(err, sdkerrors.ErrInsufficientFunds) {
+			return "", types.ErrInsufficientLiquidity
+		}
+		return "", fmt.Errorf("failed to transfer borrowed tokens: %w", err)
 	}
 
 	// Generate borrow position ID
@@ -293,11 +274,6 @@ func (lk LendingKeeper) BorrowTokens(ctx sdk.Context, borrower sdk.AccAddress, d
 		LastInterestTime:   ctx.BlockTime().Unix(),
 		LeveragePositionId: leveragePositionID,
 	}
-
-	// For SHORT positions, we don't actually transfer tokens to borrower
-	// Instead, we simulate borrowing by allowing the borrower to sell tokens from bonding curve
-	// The actual token transfer happens in the SHORT position logic via ExecuteSellTokens
-	// This is a conceptual borrow - the borrower gets the right to sell tokens from bonding curve
 
 	// Update pool
 	pool.TotalBorrowed = pool.TotalBorrowed.Add(amount)
@@ -323,6 +299,7 @@ func (lk LendingKeeper) BorrowTokens(ctx sdk.Context, borrower sdk.AccAddress, d
 		),
 	})
 
+	reserveActive = false
 	return borrowID, nil
 }
 
@@ -387,6 +364,10 @@ func (lk LendingKeeper) RepayTokens(ctx sdk.Context, borrower sdk.AccAddress, bo
 
 	lk.UpdateInterestRate(ctx, &pool)
 	lk.SetLendingPool(ctx, pool)
+
+	if err := lk.keeper.userTokenKeeper.ReleaseTokensFromLeverage(ctx, borrowPos.TokenDenom, amount); err != nil {
+		return fmt.Errorf("failed to return leverage liquidity: %w", err)
+	}
 
 	// Emit event
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -506,12 +487,34 @@ func (lk LendingKeeper) SetBorrowPosition(ctx sdk.Context, borrowPos types.Borro
 
 	// Also store by borrower for efficient queries
 	store.Set(types.BorrowerPositionKey(borrowPos.Borrower, borrowPos.Id), []byte(borrowPos.Id))
+
+	if borrowPos.LeveragePositionId != "" {
+		store.Set(types.LeverageBorrowIndexKey(borrowPos.LeveragePositionId), []byte(borrowPos.Id))
+	}
 }
 
 func (lk LendingKeeper) DeleteBorrowPosition(ctx sdk.Context, borrowPos types.BorrowPosition) {
 	store := ctx.KVStore(lk.keeper.storeKey)
 	store.Delete(types.BorrowPositionKey(borrowPos.Id))
 	store.Delete(types.BorrowerPositionKey(borrowPos.Borrower, borrowPos.Id))
+
+	if borrowPos.LeveragePositionId != "" {
+		store.Delete(types.LeverageBorrowIndexKey(borrowPos.LeveragePositionId))
+	}
+}
+
+func (lk LendingKeeper) GetBorrowIDByLeveragePosition(ctx sdk.Context, leveragePositionID string) (string, bool) {
+	if leveragePositionID == "" {
+		return "", false
+	}
+
+	store := ctx.KVStore(lk.keeper.storeKey)
+	bz := store.Get(types.LeverageBorrowIndexKey(leveragePositionID))
+	if bz == nil {
+		return "", false
+	}
+
+	return string(bz), true
 }
 
 func (lk LendingKeeper) GetAllBorrowPositions(ctx sdk.Context) []types.BorrowPosition {
@@ -565,6 +568,21 @@ func (lk LendingKeeper) GetLiquidityProvidersByDenom(ctx sdk.Context, denom stri
 		if lp.TokenDenom == denom {
 			providers = append(providers, lp)
 		}
+	}
+
+	return providers
+}
+
+func (lk LendingKeeper) GetAllLiquidityProviders(ctx sdk.Context) []types.LiquidityProvider {
+	store := ctx.KVStore(lk.keeper.storeKey)
+	iterator := storetypes.KVStorePrefixIterator(store, types.LiquidityProviderKeyPrefix)
+	defer iterator.Close()
+
+	var providers []types.LiquidityProvider
+	for ; iterator.Valid(); iterator.Next() {
+		var lp types.LiquidityProvider
+		lk.keeper.cdc.MustUnmarshal(iterator.Value(), &lp)
+		providers = append(providers, lp)
 	}
 
 	return providers

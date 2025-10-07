@@ -14,6 +14,7 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgRemoveCollateral{}, "leverage/MsgRemoveCollateral", nil)
 	cdc.RegisterConcrete(&MsgLiquidatePosition{}, "leverage/MsgLiquidatePosition", nil)
 	cdc.RegisterConcrete(&MsgUpdateParams{}, "leverage/MsgUpdateParams", nil)
+	cdc.RegisterConcrete(&MsgProvideLiquidity{}, "leverage/MsgProvideLiquidity", nil)
 }
 
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
@@ -24,6 +25,7 @@ func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 		&MsgRemoveCollateral{},
 		&MsgLiquidatePosition{},
 		&MsgUpdateParams{},
+		&MsgProvideLiquidity{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

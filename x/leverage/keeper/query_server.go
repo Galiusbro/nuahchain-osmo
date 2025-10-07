@@ -281,3 +281,98 @@ func (k queryServer) TokenPrice(goCtx context.Context, req *types.QueryTokenPric
 		Supply: supply,
 	}, nil
 }
+
+// LendingPools returns all lending pools
+func (k queryServer) LendingPools(goCtx context.Context, req *types.QueryLendingPoolsRequest) (*types.QueryLendingPoolsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	pools := k.lendingKeeper.GetAllLendingPools(ctx)
+
+	return &types.QueryLendingPoolsResponse{Pools: pools}, nil
+}
+
+// LendingPool returns a specific lending pool by denom
+func (k queryServer) LendingPool(goCtx context.Context, req *types.QueryLendingPoolRequest) (*types.QueryLendingPoolResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "denom cannot be empty")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	pool, exists := k.lendingKeeper.GetLendingPool(ctx, req.Denom)
+	if !exists {
+		return nil, status.Error(codes.NotFound, "lending pool not found")
+	}
+
+	return &types.QueryLendingPoolResponse{Pool: pool}, nil
+}
+
+// BorrowPositions returns all borrow positions for a borrower
+func (k queryServer) BorrowPositions(goCtx context.Context, req *types.QueryBorrowPositionsRequest) (*types.QueryBorrowPositionsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	if req.Borrower == "" {
+		return nil, status.Error(codes.InvalidArgument, "borrower cannot be empty")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	positions := k.lendingKeeper.GetAllBorrowPositions(ctx)
+
+	// Filter positions by borrower
+	var borrowerPositions []types.BorrowPosition
+	for _, pos := range positions {
+		if pos.Borrower == req.Borrower {
+			borrowerPositions = append(borrowerPositions, pos)
+		}
+	}
+
+	return &types.QueryBorrowPositionsResponse{Positions: borrowerPositions}, nil
+}
+
+// LiquidityProviders returns all liquidity providers
+func (k queryServer) LiquidityProviders(goCtx context.Context, req *types.QueryLiquidityProvidersRequest) (*types.QueryLiquidityProvidersResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	providers := k.lendingKeeper.GetAllLiquidityProviders(ctx)
+
+	return &types.QueryLiquidityProvidersResponse{Providers: providers}, nil
+}
+
+// Stats returns leverage module statistics
+func (k queryServer) Stats(goCtx context.Context, req *types.QueryStatsRequest) (*types.QueryStatsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Get all positions
+	allPositions := k.GetAllPositions(ctx)
+
+	// Get all lending pools
+	allPools := k.lendingKeeper.GetAllLendingPools(ctx)
+
+	// Get all borrow positions
+	allBorrowPositions := k.lendingKeeper.GetAllBorrowPositions(ctx)
+
+	// Get all liquidity providers
+	allProviders := k.lendingKeeper.GetAllLiquidityProviders(ctx)
+
+	return &types.QueryStatsResponse{
+		TotalPositions:          uint64(len(allPositions)),
+		TotalLendingPools:       uint64(len(allPools)),
+		TotalBorrowPositions:    uint64(len(allBorrowPositions)),
+		TotalLiquidityProviders: uint64(len(allProviders)),
+	}, nil
+}

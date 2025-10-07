@@ -12,6 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
+	leveragetypes "github.com/osmosis-labs/osmosis/v30/x/leverage/types"
 	tokenfactorykeeper "github.com/osmosis-labs/osmosis/v30/x/tokenfactory/keeper"
 	"github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
 )
@@ -149,25 +150,36 @@ func (k Keeper) GetTokenSupply(ctx sdk.Context, denom string) (math.Int, error) 
 // GetBondingCurveSupply returns the supply that should be used for bonding curve calculations
 // For new token distribution model, bonding curve gets 30M tokens out of 100M total
 func (k Keeper) GetBondingCurveSupply(ctx sdk.Context, denom string) (math.Int, error) {
-	userToken, found := k.GetUserToken(ctx, denom)
+	_, found := k.GetUserToken(ctx, denom)
 	if !found {
 		return math.ZeroInt(), fmt.Errorf("token not found: %s", denom)
 	}
 
-	scale, _ := k.mustGetTokenScaleFactors(ctx, denom)
+	// Bonding curve has 30M tokens available from the start
+	// We calculate the bonding curve supply based on the actual module balance
+	// The module should have 30M tokens for the bonding curve initially
 
-	// Simple approach: track bonding curve supply based on CurrentSupply changes
-	// Initial circulating supply is 60M (distributed immediately)
-	// 10M platform + 10M referral + 40M AI CEO = 60M circulating
-	// Any increase in CurrentSupply above 60M represents tokens sold from bonding curve
-	initialCirculatingSupply := math.NewInt(60_000_000).Mul(scale)
-
-	bondingCurveSold := userToken.CurrentSupply.Sub(initialCirculatingSupply)
-	if bondingCurveSold.IsNegative() {
-		bondingCurveSold = math.ZeroInt()
+	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
+	if moduleAddr == nil {
+		return math.ZeroInt(), fmt.Errorf("module address not found")
 	}
 
-	return bondingCurveSold, nil
+	// Get the actual module balance for this token
+	moduleBalance := k.bankKeeper.GetBalance(ctx, moduleAddr, denom).Amount
+
+	// The bonding curve supply is the module balance minus the founder reserve
+	founderReserved := k.GetFounderTokensRemaining(ctx, denom)
+	if moduleBalance.LT(founderReserved) {
+		// If module balance is below founder reserve, bonding curve has no supply
+		return math.ZeroInt(), nil
+	}
+
+	bondingCurveSupply := moduleBalance.Sub(founderReserved)
+	if bondingCurveSupply.IsNegative() {
+		bondingCurveSupply = math.ZeroInt()
+	}
+
+	return bondingCurveSupply, nil
 }
 
 // CalculateBondingCurvePrice calculates the current price based on supply
@@ -343,6 +355,54 @@ func (k Keeper) ClaimFounderTokens(ctx sdk.Context, denom string, claimer string
 	return nil
 }
 
+// ReserveTokensForLeverage transfers tokens from the usertoken reserve to the leverage module
+// so they can be borrowed by traders. It ensures that founder allocations remain untouched.
+func (k Keeper) ReserveTokensForLeverage(ctx sdk.Context, denom string, amount math.Int) error {
+	if amount.IsZero() {
+		return nil
+	}
+	if !amount.IsPositive() {
+		return fmt.Errorf("reserve amount must be positive")
+	}
+
+	usertokenModuleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
+	if usertokenModuleAddr == nil {
+		return fmt.Errorf("usertoken module address not found")
+	}
+
+	leverageModuleAddr := k.accountKeeper.GetModuleAddress(leveragetypes.ModuleName)
+	if leverageModuleAddr == nil {
+		return fmt.Errorf("leverage module address not found")
+	}
+
+	moduleBalance := k.bankKeeper.GetBalance(ctx, usertokenModuleAddr, denom).Amount
+	founderReserved := k.GetFounderTokensRemaining(ctx, denom)
+	if moduleBalance.LT(founderReserved) {
+		return fmt.Errorf("module balance %s is below founder reserve %s", moduleBalance.String(), founderReserved.String())
+	}
+
+	available := moduleBalance.Sub(founderReserved)
+	if available.LT(amount) {
+		return fmt.Errorf("insufficient reserve liquidity: requested %s, available %s", amount.String(), available.String())
+	}
+
+	coin := sdk.NewCoin(denom, amount)
+	return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, leveragetypes.ModuleName, sdk.NewCoins(coin))
+}
+
+// ReleaseTokensFromLeverage returns repaid tokens from leverage back to the bonding curve reserve.
+func (k Keeper) ReleaseTokensFromLeverage(ctx sdk.Context, denom string, amount math.Int) error {
+	if amount.IsZero() {
+		return nil
+	}
+	if !amount.IsPositive() {
+		return fmt.Errorf("release amount must be positive")
+	}
+
+	coin := sdk.NewCoin(denom, amount)
+	return k.bankKeeper.SendCoinsFromModuleToModule(ctx, leveragetypes.ModuleName, types.ModuleName, sdk.NewCoins(coin))
+}
+
 // DistributeTokenPurchasePayment distributes payment according to new tokenomics:
 // 30% to bonding curve, 10% to creator, 10% to referral, 40% to AI CEO, 10% to platform fee
 func (k Keeper) DistributeTokenPurchasePayment(ctx sdk.Context, denom string, totalPayment math.Int, paymentDenom string) error {
@@ -460,9 +520,9 @@ func (k Keeper) CalculateTokensFromPayment(ctx sdk.Context, denom string, curren
 		return math.ZeroInt()
 	}
 
-	// Convert payment from micro-NUAH to NUAH (divide by 1,000,000) to match price units
-	nuahScale := math.LegacyNewDecWithPrec(1, 6) // 0.000001 = 1/1,000,000
-	paymentDec := math.LegacyNewDecFromInt(bondingCurvePayment).Mul(nuahScale)
+	// Convert payment from unuah to N$ (1:1 ratio) to match price units
+	// unuah and N$ have 1:1 ratio, so no conversion needed
+	paymentDec := math.LegacyNewDecFromInt(bondingCurvePayment)
 	priceRange := endPrice.Sub(startPrice)
 	linearCoeff := math.LegacyZeroDec()
 	if !priceRange.IsZero() {
@@ -581,6 +641,11 @@ func (k Keeper) CalculateTokensFromPayment(ctx sdk.Context, denom string, curren
 // It integrates the same linear price function while clamping supply to the valid bonding curve range.
 func (k Keeper) CalculatePayoutFromTokens(ctx sdk.Context, denom string, currentSupply math.Int, tokensToSell math.Int) math.Int {
 	logger := k.Logger(ctx)
+	logger.Debug("CalculatePayoutFromTokens called",
+		"denom", denom,
+		"currentSupply", currentSupply.String(),
+		"tokensToSell", tokensToSell.String())
+
 	if !tokensToSell.IsPositive() {
 		logger.Debug("bonding curve sell calc skipped", "denom", denom, "delta_tokens", tokensToSell.String(), "reason", "non-positive amount")
 		return math.ZeroInt()
@@ -613,6 +678,14 @@ func (k Keeper) CalculatePayoutFromTokens(ctx sdk.Context, denom string, current
 		tokensToSellTokens = currentSupplyTokens
 	}
 
+	logger.Debug("bonding curve sell calc debug",
+		"denom", denom,
+		"currentSupply", currentSupply.String(),
+		"maxSupplyBase", maxSupplyBase.String(),
+		"tokensToSell", tokensToSell.String(),
+		"currentSupplyTokens", currentSupplyTokens.String(),
+		"tokensToSellTokens", tokensToSellTokens.String())
+
 	priceRange := endPrice.Sub(startPrice)
 	linearCoeff := math.LegacyZeroDec()
 	maxSupplyTokens := math.LegacyNewDecFromInt(params.BondingCurveMaxSupply)
@@ -637,9 +710,9 @@ func (k Keeper) CalculatePayoutFromTokens(ctx sdk.Context, denom string, current
 		payoutDec = math.LegacyZeroDec()
 	}
 
-	// Convert payout from NUAH back to micro-NUAH (multiply by 1,000,000)
-	nuahToMicroScale := math.LegacyNewDecFromInt(math.NewInt(1_000_000))
-	payout := payoutDec.Mul(nuahToMicroScale).TruncateInt()
+	// Convert payout from N$ back to unuah (1:1 ratio)
+	// unuah and N$ have 1:1 ratio, so no conversion needed
+	payout := payoutDec.TruncateInt()
 	avgPriceStr := "0"
 	if tokensToSellTokens.IsPositive() {
 		avgPrice := payoutDec
@@ -1099,15 +1172,34 @@ func (k Keeper) ExecuteBuyTokens(ctx sdk.Context, buyer sdk.AccAddress, denom st
 		return math.ZeroInt(), fmt.Errorf("failed to transfer payment: %w", err)
 	}
 
-	// Mint tokens to buyer
-	tokenCoin := sdk.NewCoin(denom, tokensToReceive)
-	err = k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(tokenCoin))
-	if err != nil {
-		return math.ZeroInt(), fmt.Errorf("failed to mint tokens: %w", err)
+	// Ensure sufficient reserve availability (respect founder reserve)
+	if moduleAddr == nil {
+		return math.ZeroInt(), fmt.Errorf("module address not found")
 	}
-	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, buyer, sdk.NewCoins(tokenCoin))
-	if err != nil {
+
+	moduleBalance := k.bankKeeper.GetBalance(ctx, moduleAddr, denom).Amount
+	founderReserved := k.GetFounderTokensRemaining(ctx, denom)
+	if moduleBalance.LT(founderReserved) {
+		return math.ZeroInt(), fmt.Errorf("module balance %s is below founder reserve %s", moduleBalance.String(), founderReserved.String())
+	}
+
+	available := moduleBalance.Sub(founderReserved)
+	if available.LT(tokensToReceive) {
+		return math.ZeroInt(), fmt.Errorf("insufficient reserve liquidity: requested %s, available %s", tokensToReceive.String(), available.String())
+	}
+
+	// Transfer tokens from module reserve to buyer (no minting for trading)
+	tokenCoin := sdk.NewCoin(denom, tokensToReceive)
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, buyer, sdk.NewCoins(tokenCoin)); err != nil {
 		return math.ZeroInt(), fmt.Errorf("failed to send tokens to buyer: %w", err)
+	}
+
+	// Update CurrentSupply to reflect tokens sold from bonding curve
+	// This is needed for the bonding curve calculation to work correctly
+	userToken, found := k.GetUserToken(ctx, denom)
+	if found {
+		userToken.CurrentSupply = userToken.CurrentSupply.Add(tokensToReceive)
+		k.SetUserToken(ctx, userToken)
 	}
 
 	return tokensToReceive, nil
@@ -1127,13 +1219,34 @@ func (k Keeper) ExecuteSellTokens(ctx sdk.Context, seller sdk.AccAddress, denom 
 		return math.ZeroInt(), "", err
 	}
 
+	logger := k.Logger(ctx)
+	logger.Debug("ExecuteSellTokens bonding curve supply check",
+		"denom", denom,
+		"tokenAmount", tokenAmount.String(),
+		"bondingCurveSupply", bondingCurveSupply.String())
+
 	// Validate that we're not trying to sell more than available on bonding curve
 	if tokenAmount.GT(bondingCurveSupply) {
 		return math.ZeroInt(), "", fmt.Errorf("trying to sell %s tokens, but only %s available on bonding curve", tokenAmount.String(), bondingCurveSupply.String())
 	}
 
-	// Calculate payout using the total current supply (not just bonding curve supply)
-	payout := k.CalculatePayoutFromTokens(ctx, denom, userToken.CurrentSupply, tokenAmount)
+	// Calculate payout using the bonding curve supply (tokens sold from curve)
+	// We need to calculate how many tokens have been sold from the bonding curve
+	scale, _ := k.mustGetTokenScaleFactors(ctx, denom)
+	initialCirculatingSupply := math.NewInt(60_000_000).Mul(scale)
+	tokensSoldFromCurve := userToken.CurrentSupply.Sub(initialCirculatingSupply)
+	if tokensSoldFromCurve.IsNegative() {
+		tokensSoldFromCurve = math.ZeroInt()
+	}
+
+	logger.Debug("bonding curve sell debug",
+		"denom", denom,
+		"tokensSoldFromCurve", tokensSoldFromCurve.String(),
+		"tokenAmount", tokenAmount.String(),
+		"currentSupply", userToken.CurrentSupply.String(),
+		"initialCirculatingSupply", initialCirculatingSupply.String())
+
+	payout := k.CalculatePayoutFromTokens(ctx, denom, tokensSoldFromCurve, tokenAmount)
 	if payout.IsZero() {
 		return math.ZeroInt(), "", fmt.Errorf("calculated zero payout for token amount %s", tokenAmount.String())
 	}

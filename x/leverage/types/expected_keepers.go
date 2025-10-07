@@ -26,6 +26,7 @@ type BankKeeper interface {
 	SendCoins(ctx context.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error
 	SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
 	SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
+	SendCoinsFromModuleToModule(ctx context.Context, senderModule string, recipientModule string, amt sdk.Coins) error
 	MintCoins(ctx context.Context, moduleName string, amt sdk.Coins) error
 	BurnCoins(ctx context.Context, moduleName string, amt sdk.Coins) error
 	GetDenomMetaData(ctx context.Context, denom string) (banktypes.Metadata, bool)
@@ -51,6 +52,12 @@ type UserTokenKeeper interface {
 
 	// ExecuteSellTokens executes a token sale through bonding curve
 	ExecuteSellTokens(ctx sdk.Context, seller sdk.AccAddress, denom string, tokenAmount math.Int) (math.Int, string, error)
+
+	// ReserveTokensForLeverage transfers reserve liquidity to the leverage module
+	ReserveTokensForLeverage(ctx sdk.Context, denom string, amount math.Int) error
+
+	// ReleaseTokensFromLeverage returns repaid tokens to the bonding curve reserve
+	ReleaseTokensFromLeverage(ctx sdk.Context, denom string, amount math.Int) error
 
 	// CheckTokenExists verifies if a user token exists
 	CheckTokenExists(ctx sdk.Context, denom string) bool

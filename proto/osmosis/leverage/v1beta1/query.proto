@@ -44,7 +44,32 @@ service Query {
 
   // TokenPrice returns the current price of a token from the usertoken bonding curve
   rpc TokenPrice(QueryTokenPriceRequest) returns (QueryTokenPriceResponse) {
-    option (google.api.http).get = "/osmosis/leverage/v1beta1/token-price/{denom}";
+    option (google.api.http).get = "/osmosis/leverage/v1beta1/token-price/{denom=**}";
+  }
+
+  // LendingPools returns all lending pools
+  rpc LendingPools(QueryLendingPoolsRequest) returns (QueryLendingPoolsResponse) {
+    option (google.api.http).get = "/osmosis/leverage/v1beta1/lending-pools";
+  }
+
+  // LendingPool returns a specific lending pool by denom
+  rpc LendingPool(QueryLendingPoolRequest) returns (QueryLendingPoolResponse) {
+    option (google.api.http).get = "/osmosis/leverage/v1beta1/lending-pool/{denom}";
+  }
+
+  // BorrowPositions returns all borrow positions for a borrower
+  rpc BorrowPositions(QueryBorrowPositionsRequest) returns (QueryBorrowPositionsResponse) {
+    option (google.api.http).get = "/osmosis/leverage/v1beta1/borrow-positions/{borrower}";
+  }
+
+  // LiquidityProviders returns all liquidity providers
+  rpc LiquidityProviders(QueryLiquidityProvidersRequest) returns (QueryLiquidityProvidersResponse) {
+    option (google.api.http).get = "/osmosis/leverage/v1beta1/liquidity-providers";
+  }
+
+  // Stats returns leverage module statistics
+  rpc Stats(QueryStatsRequest) returns (QueryStatsResponse) {
+    option (google.api.http).get = "/osmosis/leverage/v1beta1/stats";
   }
 }
 
@@ -223,4 +248,64 @@ message QueryTokenPriceResponse {
     (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.nullable) = false
   ];
+}
+
+// QueryLendingPoolsRequest is the request type for the Query/LendingPools RPC method
+message QueryLendingPoolsRequest {}
+
+// QueryLendingPoolsResponse is the response type for the Query/LendingPools RPC method
+message QueryLendingPoolsResponse {
+  // pools is the list of lending pools
+  repeated LendingPool pools = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryLendingPoolRequest is the request type for the Query/LendingPool RPC method
+message QueryLendingPoolRequest {
+  // denom is the denomination of the lending pool
+  string denom = 1;
+}
+
+// QueryLendingPoolResponse is the response type for the Query/LendingPool RPC method
+message QueryLendingPoolResponse {
+  // pool is the lending pool
+  LendingPool pool = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryBorrowPositionsRequest is the request type for the Query/BorrowPositions RPC method
+message QueryBorrowPositionsRequest {
+  // borrower is the address of the borrower
+  string borrower = 1;
+}
+
+// QueryBorrowPositionsResponse is the response type for the Query/BorrowPositions RPC method
+message QueryBorrowPositionsResponse {
+  // positions is the list of borrow positions
+  repeated BorrowPosition positions = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryLiquidityProvidersRequest is the request type for the Query/LiquidityProviders RPC method
+message QueryLiquidityProvidersRequest {}
+
+// QueryLiquidityProvidersResponse is the response type for the Query/LiquidityProviders RPC method
+message QueryLiquidityProvidersResponse {
+  // providers is the list of liquidity providers
+  repeated LiquidityProvider providers = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryStatsRequest is the request type for the Query/Stats RPC method
+message QueryStatsRequest {}
+
+// QueryStatsResponse is the response type for the Query/Stats RPC method
+message QueryStatsResponse {
+  // total_positions is the total number of positions
+  uint64 total_positions = 1;
+
+  // total_lending_pools is the total number of lending pools
+  uint64 total_lending_pools = 2;
+
+  // total_borrow_positions is the total number of borrow positions
+  uint64 total_borrow_positions = 3;
+
+  // total_liquidity_providers is the total number of liquidity providers
+  uint64 total_liquidity_providers = 4;
 }

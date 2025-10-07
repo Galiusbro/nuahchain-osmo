@@ -5,6 +5,7 @@ export const MSG_CLOSE_POSITION_TYPE_URL = "/osmosis.leverage.v1beta1.MsgClosePo
 export const MSG_ADD_COLLATERAL_TYPE_URL = "/osmosis.leverage.v1beta1.MsgAddCollateral";
 export const MSG_REMOVE_COLLATERAL_TYPE_URL = "/osmosis.leverage.v1beta1.MsgRemoveCollateral";
 export const MSG_LIQUIDATE_POSITION_TYPE_URL = "/osmosis.leverage.v1beta1.MsgLiquidatePosition";
+export const MSG_PROVIDE_LIQUIDITY_TYPE_URL = "/osmosis.leverage.v1beta1.MsgProvideLiquidity";
 
 // Position side enum
 export enum PositionSide {
@@ -47,6 +48,43 @@ export interface LeverageParams {
     tradingFee: string;
     maxPositionSize: string;
     minCollateralAmount: string;
+    baseInterestRate: string;
+    interestRateMultiplier: string;
+    maxInterestRate: string;
+    maxBorrowRatio: string;
+}
+
+// Lending pool interface
+export interface LendingPool {
+    denom: string;
+    totalSupply: string;
+    totalBorrowed: string;
+    availableLiquidity: string;
+    interestRate: string;
+    utilizationRate: string;
+    lastUpdateTime: number;
+}
+
+// Borrow position interface
+export interface BorrowPosition {
+    id: string;
+    borrower: string;
+    tokenDenom: string;
+    borrowedAmount: string;
+    accruedInterest: string;
+    interestRate: string;
+    createdAt: number;
+    lastInterestTime: number;
+    leveragePositionId: string;
+}
+
+// Liquidity provider interface
+export interface LiquidityProvider {
+    provider: string;
+    tokenDenom: string;
+    amount: string;
+    shareTokens: string;
+    providedAt: number;
 }
 
 // Message interfaces for protobuf
@@ -93,6 +131,14 @@ export interface MsgLiquidatePosition {
     positionId: string;
 }
 
+export interface MsgProvideLiquidity {
+    provider: string;
+    amount: {
+        denom: string;
+        amount: string;
+    };
+}
+
 // Response interfaces
 export interface MsgOpenPositionResponse {
     positionId: string;
@@ -124,6 +170,10 @@ export interface MsgLiquidatePositionResponse {
         denom: string;
         amount: string;
     };
+}
+
+export interface MsgProvideLiquidityResponse {
+    shareTokens: string;
 }
 
 // Query interfaces
@@ -187,6 +237,46 @@ export interface QueryLiquidationPriceRequest {
 
 export interface QueryLiquidationPriceResponse {
     liquidationPrice: string;
+}
+
+// Additional query interfaces
+export interface QueryLendingPoolsResponse {
+    pools: LendingPool[];
+    pagination?: {
+        nextKey?: string;
+        total?: number;
+    };
+}
+
+export interface QueryLendingPoolResponse {
+    pool: LendingPool;
+}
+
+export interface QueryBorrowPositionsByBorrowerResponse {
+    positions: BorrowPosition[];
+    pagination?: {
+        nextKey?: string;
+        total?: number;
+    };
+}
+
+export interface QueryLiquidityProvidersResponse {
+    providers: LiquidityProvider[];
+    pagination?: {
+        nextKey?: string;
+        total?: number;
+    };
+}
+
+export interface QueryParamsResponse {
+    params: LeverageParams;
+}
+
+export interface QueryStatsResponse {
+    totalPositions: number;
+    totalLendingPools: number;
+    totalBorrowPositions: number;
+    totalLiquidityProviders: number;
 }
 
 // Helper functions for position side
