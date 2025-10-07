@@ -14,8 +14,6 @@ import (
 	claims "github.com/osmosis-labs/osmosis/v30/x/claims"
 	claimstypes "github.com/osmosis-labs/osmosis/v30/x/claims/types"
 	exchangetypes "github.com/osmosis-labs/osmosis/v30/x/exchange/types"
-	leverage "github.com/osmosis-labs/osmosis/v30/x/leverage"
-	leveragetypes "github.com/osmosis-labs/osmosis/v30/x/leverage/types"
 	limitedaccount "github.com/osmosis-labs/osmosis/v30/x/limitedaccount"
 	limitedaccounttypes "github.com/osmosis-labs/osmosis/v30/x/limitedaccount/types"
 	"github.com/osmosis-labs/osmosis/v30/x/pegkeeper"
@@ -30,8 +28,6 @@ import (
 	treasurytypes "github.com/osmosis-labs/osmosis/v30/x/treasury/types"
 	"github.com/osmosis-labs/osmosis/v30/x/usdoracle"
 	usdoracletypes "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types"
-	"github.com/osmosis-labs/osmosis/v30/x/usertoken"
-	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
 
 	ibcwasm "github.com/cosmos/ibc-go/modules/light-clients/08-wasm"
 	ibcwasmtypes "github.com/cosmos/ibc-go/modules/light-clients/08-wasm/types"
@@ -168,8 +164,6 @@ var moduleAccountPermissions = map[string][]string{
 	limitedaccounttypes.ModuleName:           nil,
 	usdoracletypes.ModuleName:                nil,
 	pegkeepertypes.ModuleName:                nil,
-	usertokentypes.ModuleName:                {authtypes.Minter, authtypes.Burner},
-	leveragetypes.ModuleName:                 {authtypes.Minter, authtypes.Burner},
 	treasurytypes.ModuleName:                 nil,
 	exchangetypes.ModuleName:                 {authtypes.Minter, authtypes.Burner},
 }
@@ -248,8 +242,6 @@ func appModules(
 		claims.NewAppModule(appCodec, *app.ClaimsKeeper),
 		usdoracle.NewAppModule(appCodec, *app.USDOracleKeeper),
 		pegkeeper.NewAppModule(appCodec, *app.PegKeeperKeeper),
-		usertoken.NewAppModule(appCodec, *app.UserTokenKeeper),
-		leverage.NewAppModule(appCodec, *app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 	}
 }
 
@@ -346,8 +338,6 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		packetforwardtypes.ModuleName,
 		cosmwasmpooltypes.ModuleName,
 		auctiontypes.ModuleName,
-		usertokentypes.ModuleName,
-		leveragetypes.ModuleName,
 		usdoracletypes.ModuleName,
 		pegkeepertypes.ModuleName,
 		rolestypes.ModuleName,

@@ -1,0 +1,8 @@
+./cli_tester.go
+./dynamic.go
+./flag_advice.go
+./index_cmd.go
+./parsers.go
+./query_cmd_wrap.go
+./string_formatter.go
+./tx_cmd_wrap.go

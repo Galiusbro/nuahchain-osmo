@@ -1,0 +1,3 @@
+./expected_interfaces.go
+./wasm.go
+./wasm_vm.go

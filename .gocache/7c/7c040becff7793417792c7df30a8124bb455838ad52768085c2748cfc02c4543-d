@@ -1,0 +1,4 @@
+./decode.go
+./decoder_stream.go
+./encode.go
+./encode_stream.go

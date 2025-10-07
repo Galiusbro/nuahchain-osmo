@@ -1,0 +1,4 @@
+./block_process_indexer_factory.go
+./block_updates_indexer_block_process_strategy.go
+./full_indexer_block_process_strategy.go
+./pair_publisher.go

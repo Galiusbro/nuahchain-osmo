@@ -53,7 +53,6 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit/ibcratelimitmodule"
 	"github.com/osmosis-labs/osmosis/v30/x/incentives"
 	incentivesclient "github.com/osmosis-labs/osmosis/v30/x/incentives/client"
-	"github.com/osmosis-labs/osmosis/v30/x/leverage"
 	limitedaccount "github.com/osmosis-labs/osmosis/v30/x/limitedaccount"
 	"github.com/osmosis-labs/osmosis/v30/x/lockup"
 	"github.com/osmosis-labs/osmosis/v30/x/mint"
@@ -74,7 +73,6 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/txfees"
 	txfeesclient "github.com/osmosis-labs/osmosis/v30/x/txfees/client"
 	"github.com/osmosis-labs/osmosis/v30/x/usdoracle"
-	"github.com/osmosis-labs/osmosis/v30/x/usertoken"
 	valsetprefmodule "github.com/osmosis-labs/osmosis/v30/x/valset-pref/valpref-module"
 	"github.com/osmosis-labs/osmosis/x/epochs"
 	ibc_hooks "github.com/osmosis-labs/osmosis/x/ibc-hooks"
@@ -155,8 +153,6 @@ func NewAppModuleBasics(cdc codec.Codec) module.BasicManager {
 		treasury.AppModuleBasic{},
 		claims.AppModuleBasic{},
 		usdoracle.AppModuleBasic{},
-		usertoken.AppModuleBasic{},
-		leverage.AppModuleBasic{},
 	)
 }
 
@@ -233,6 +229,4 @@ var AppModuleBasics = module.NewBasicManager(
 	treasury.AppModuleBasic{},
 	claims.AppModuleBasic{},
 	usdoracle.AppModuleBasic{},
-	usertoken.AppModuleBasic{},
-	leverage.AppModuleBasic{},
 )
