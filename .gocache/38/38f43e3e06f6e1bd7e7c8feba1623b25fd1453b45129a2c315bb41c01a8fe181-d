@@ -1,9 +1,0 @@
-./channel_keys.go
-./client_keys.go
-./connection_keys.go
-./doc.go
-./errors.go
-./packet_keys.go
-./parse.go
-./port_keys.go
-./validate.go

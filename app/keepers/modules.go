@@ -41,6 +41,7 @@ import (
 	"github.com/skip-mev/block-sdk/v2/x/auction"
 
 	_ "github.com/osmosis-labs/osmosis/v30/client/docs/statik"
+	"github.com/osmosis-labs/osmosis/v30/x/bondingcurve"
 	claims "github.com/osmosis-labs/osmosis/v30/x/claims"
 	clclient "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/client"
 	concentratedliquidity "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/clmodule"
@@ -73,6 +74,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/txfees"
 	txfeesclient "github.com/osmosis-labs/osmosis/v30/x/txfees/client"
 	"github.com/osmosis-labs/osmosis/v30/x/usdoracle"
+	"github.com/osmosis-labs/osmosis/v30/x/usertoken"
 	valsetprefmodule "github.com/osmosis-labs/osmosis/v30/x/valset-pref/valpref-module"
 	"github.com/osmosis-labs/osmosis/x/epochs"
 	ibc_hooks "github.com/osmosis-labs/osmosis/x/ibc-hooks"
@@ -208,6 +210,8 @@ var AppModuleBasics = module.NewBasicManager(
 	epochs.AppModuleBasic{},
 	superfluid.AppModuleBasic{},
 	tokenfactory.AppModuleBasic{},
+	bondingcurve.AppModuleBasic{},
+	usertoken.AppModuleBasic{},
 	valsetprefmodule.AppModuleBasic{},
 	wasm.AppModuleBasic{},
 	icq.AppModuleBasic{},

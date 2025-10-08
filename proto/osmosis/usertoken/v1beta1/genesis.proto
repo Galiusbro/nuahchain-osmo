@@ -1,0 +1,13 @@
+syntax = "proto3";
+package osmosis.usertoken.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "osmosis/usertoken/v1beta1/params.proto";
+import "osmosis/usertoken/v1beta1/token.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/usertoken/types";
+
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+  repeated Token tokens = 2 [(gogoproto.nullable) = false];
+}

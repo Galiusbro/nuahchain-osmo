@@ -1,0 +1,20 @@
+# import config
+packagefile context=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/32/32fd1d4f0dc1addb1f0ce6cb21e79aa81c6e5e1954c10c983940e475a4b2814c-d
+packagefile cosmossdk.io/store/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/a9/a9d1a2a3ce7a1c46c50334891af77ba1e5d9416c472560eff37ae534ba1cb6bf-d
+packagefile cosmossdk.io/x/upgrade/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/3a/3a3e926304831558c3ae1cf8226ba7cce24665a55b7670757350a5435da112e7-d
+packagefile errors=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/38/38a9b5ab9230439f76f0082b072897099ab46a5c1f81932b97a18ad4f52bd716-d
+packagefile fmt=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/14/14898fc9cf93ae046520d51da5f69ccf5f09b5d5d3faaf48d33ebf2088e4ded2-d
+packagefile github.com/CosmWasm/wasmd/x/wasm/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/04/043acca227b86b26bb15b3c095aef529b5e911795c0351eca5bb1ae5f7ea779e-d
+packagefile github.com/cosmos/cosmos-sdk/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/cd/cd18df6882a6e108a8355270471e401f1508b1517b7d745263ff6629042fa4a1-d
+packagefile github.com/cosmos/cosmos-sdk/types/module=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/be/be775f6a94c7f9d4f89a8ba91ec87ec35300681201cd68683fd870981158a7dc-d
+packagefile github.com/cosmos/cosmos-sdk/x/distribution/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/c1/c106c15ad8543f4a97826d7ccc6ef231c556099b4d61b6690d981a5355567562-d
+packagefile github.com/osmosis-labs/osmosis/osmomath=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/5c/5cf8ccb4ad9b0fb5016d5f2d3b2f2e7711d7b1a9ef19c45ab805f4cc759f2b4b-d
+packagefile github.com/osmosis-labs/osmosis/v30/app/keepers=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gotmp/go-build2501316216/b1642/_pkg_.a
+packagefile github.com/osmosis-labs/osmosis/v30/app/params=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/7f/7fa81d6dcb2123e3c626c1529419e844c6b6ef453b211f7d6b03bb596b5ea27c-d
+packagefile github.com/osmosis-labs/osmosis/v30/app/upgrades=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gotmp/go-build2501316216/b1831/_pkg_.a
+packagefile github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/43/43f65ff0ab2426cd5f712f5a440eff7d6107694553e5fd6d65a8a62349692fb0-d
+packagefile github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/cd/cdb090b7bc8c936b040dcd6ec036e5d5e76edb92b99d60e81ee019ef669a5b42-d
+packagefile github.com/osmosis-labs/osmosis/v30/x/superfluid/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/e1/e1b9a05ce34d99397ceb83dcaf0112177989c5a2f3aec60290bee8e7eaf99cbb-d
+packagefile github.com/osmosis-labs/osmosis/v30/x/tokenfactory/keeper=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/4c/4c448e8d70a426a60e8a10bcdac83c7c0712f27223daee45b5b3dd4bbdbe8d91-d
+packagefile github.com/osmosis-labs/osmosis/v30/x/tokenfactory/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/17/17a485609eabbc82e9047e9411cbdd368fa08b9a75b39d4acbe3a478de1956d3-d
+packagefile time=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/fb/fb21c46d5d3348b1962ad04dc5b4975ee9ca4b196e15819437f923bd50fc8230-d

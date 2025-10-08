@@ -1,5 +1,0 @@
-./abci.go
-./doc.go
-./genesis.go
-./module.go
-./proposal_handler.go

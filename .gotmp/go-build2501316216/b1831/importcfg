@@ -1,0 +1,7 @@
+# import config
+packagefile cosmossdk.io/store/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/a9/a9d1a2a3ce7a1c46c50334891af77ba1e5d9416c472560eff37ae534ba1cb6bf-d
+packagefile cosmossdk.io/x/upgrade/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/3a/3a3e926304831558c3ae1cf8226ba7cce24665a55b7670757350a5435da112e7-d
+packagefile github.com/cometbft/cometbft/proto/tendermint/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/b3/b3b614611874efd740d34cd5d6c1efb25c686b5073f8a8089b32d2b3ad015033-d
+packagefile github.com/cosmos/cosmos-sdk/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/cd/cd18df6882a6e108a8355270471e401f1508b1517b7d745263ff6629042fa4a1-d
+packagefile github.com/cosmos/cosmos-sdk/types/module=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/be/be775f6a94c7f9d4f89a8ba91ec87ec35300681201cd68683fd870981158a7dc-d
+packagefile github.com/osmosis-labs/osmosis/v30/app/keepers=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gotmp/go-build2501316216/b1642/_pkg_.a

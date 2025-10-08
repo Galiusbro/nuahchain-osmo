@@ -1,0 +1,58 @@
+syntax = "proto3";
+package osmosis.bondingcurve.v1beta1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types";
+
+enum PositionType {
+  POSITION_TYPE_UNSPECIFIED = 0;
+  POSITION_TYPE_LONG = 1;
+  POSITION_TYPE_SHORT = 2;
+}
+
+enum PositionStatus {
+  POSITION_STATUS_UNSPECIFIED = 0;
+  POSITION_STATUS_OPEN = 1;
+  POSITION_STATUS_CLOSED = 2;
+  POSITION_STATUS_LIQUIDATED = 3;
+}
+
+message MarginPosition {
+  uint64 id = 1;
+  string trader = 2;
+  string denom = 3;
+  string collateral_denom = 4;
+  string collateral_amount = 5;
+  string position_size = 6;
+  string entry_price = 7;
+  uint32 leverage = 8;
+  PositionType type = 9;
+  uint64 created_at = 10;
+  string liquidation_price = 11;
+  string maintenance_margin = 12;
+  string funding_fee_accrued = 13;
+  PositionStatus status = 14;
+  string realized_pnl = 15;
+  string last_mark_price = 16;
+}
+
+message MarginPool {
+  string denom = 1;
+  string total_collateral = 2;
+  string available_liquidity = 3;
+  string total_long_exposure = 4;
+  string total_short_exposure = 5;
+  string maintenance_margin_ratio = 6;
+  uint64 next_position_id = 7;
+  uint64 last_funding_timestamp = 8;
+  string cumulative_funding_rate = 9;
+  string insurance_fund = 10;
+  string total_liquidation_fees = 11;
+  string total_bad_debt = 12;
+  bool liquidations_paused = 13;
+  string last_mark_price = 14;
+  string last_twap_price = 15;
+  uint64 total_liquidations = 16;
+  uint64 last_liquidation_height = 17;
+}

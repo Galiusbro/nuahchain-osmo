@@ -1,0 +1,17 @@
+syntax = "proto3";
+package osmosis.bondingcurve.v1beta1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types";
+
+message BondingCurvePool {
+  string denom = 1;
+  string tokens_sold = 2;
+  string reserve_nuah = 3;
+  string reserve_ndollar = 4;
+  string last_price = 5;
+  uint64 dex_pool_id = 6;
+  bool dex_activated = 7;
+  string liquidity_provider = 8;
+}

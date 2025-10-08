@@ -93,6 +93,8 @@ import (
 	appparams "github.com/osmosis-labs/osmosis/v30/app/params"
 	_ "github.com/osmosis-labs/osmosis/v30/client/docs/statik"
 	"github.com/osmosis-labs/osmosis/v30/simulation/simtypes"
+	"github.com/osmosis-labs/osmosis/v30/x/bondingcurve"
+	bondingcurvetypes "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types"
 	concentratedliquidity "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/clmodule"
 	concentratedliquiditytypes "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/types"
 	cwpoolmodule "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/module"
@@ -123,6 +125,8 @@ import (
 	twaptypes "github.com/osmosis-labs/osmosis/v30/x/twap/types"
 	"github.com/osmosis-labs/osmosis/v30/x/txfees"
 	txfeestypes "github.com/osmosis-labs/osmosis/v30/x/txfees/types"
+	"github.com/osmosis-labs/osmosis/v30/x/usertoken"
+	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
 	valsetpreftypes "github.com/osmosis-labs/osmosis/v30/x/valset-pref/types"
 	valsetprefmodule "github.com/osmosis-labs/osmosis/v30/x/valset-pref/valpref-module"
 	"github.com/osmosis-labs/osmosis/x/epochs"
@@ -156,6 +160,8 @@ var moduleAccountPermissions = map[string][]string{
 	txfeestypes.TakerFeeCollectorName:        nil,
 	wasmtypes.ModuleName:                     {authtypes.Burner},
 	tokenfactorytypes.ModuleName:             {authtypes.Minter, authtypes.Burner},
+	bondingcurvetypes.ModuleName:             nil,
+	usertokentypes.ModuleName:                nil,
 	valsetpreftypes.ModuleName:               {authtypes.Staking},
 	poolmanagertypes.ModuleName:              nil,
 	cosmwasmpooltypes.ModuleName:             nil,
@@ -224,6 +230,8 @@ func appModules(
 			app.ConcentratedLiquidityKeeper,
 		),
 		tokenfactory.NewAppModule(*app.TokenFactoryKeeper, app.AccountKeeper, app.BankKeeper),
+		bondingcurve.NewAppModule(*app.BondingCurveKeeper),
+		usertoken.NewAppModule(*app.UserTokenKeeper),
 		valsetprefmodule.NewAppModule(appCodec, *app.ValidatorSetPreferenceKeeper),
 		ibcratelimitmodule.NewAppModule(*app.RateLimitingICS4Wrapper),
 		ibc_hooks.NewAppModule(app.AccountKeeper, *app.IBCHooksKeeper),
@@ -322,6 +330,8 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		poolincentivestypes.ModuleName,
 		superfluidtypes.ModuleName,
 		tokenfactorytypes.ModuleName,
+		bondingcurvetypes.ModuleName,
+		usertokentypes.ModuleName,
 		valsetpreftypes.ModuleName,
 		incentivestypes.ModuleName,
 		epochstypes.ModuleName,

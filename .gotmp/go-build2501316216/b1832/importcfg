@@ -1,0 +1,5 @@
+# import config
+packagefile fmt=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/14/14898fc9cf93ae046520d51da5f69ccf5f09b5d5d3faaf48d33ebf2088e4ded2-d
+packagefile github.com/cosmos/cosmos-sdk/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/cd/cd18df6882a6e108a8355270471e401f1508b1517b7d745263ff6629042fa4a1-d
+packagefile github.com/osmosis-labs/osmosis/v30/app/keepers=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gotmp/go-build2501316216/b1642/_pkg_.a
+packagefile github.com/osmosis-labs/osmosis/v30/app/upgrades=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gotmp/go-build2501316216/b1831/_pkg_.a

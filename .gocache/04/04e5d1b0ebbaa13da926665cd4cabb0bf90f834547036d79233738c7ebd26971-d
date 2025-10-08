@@ -1,7 +1,0 @@
-./accum.go
-./accum.pb.go
-./accum_helpers.go
-./errors.go
-./module.go
-./options.go
-./prefix.go

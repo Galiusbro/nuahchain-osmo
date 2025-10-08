@@ -1,0 +1,16 @@
+syntax = "proto3";
+package osmosis.bondingcurve.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "osmosis/bondingcurve/v1beta1/params.proto";
+import "osmosis/bondingcurve/v1beta1/pool.proto";
+import "osmosis/bondingcurve/v1beta1/margin.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types";
+
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+  repeated BondingCurvePool pools = 2 [(gogoproto.nullable) = false];
+  repeated MarginPool margin_pools = 3 [(gogoproto.nullable) = false];
+  repeated MarginPosition margin_positions = 4 [(gogoproto.nullable) = false];
+}

@@ -1,0 +1,19 @@
+syntax = "proto3";
+package osmosis.usertoken.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/usertoken/types";
+
+message Params {
+  cosmos.base.v1beta1.Coin token_creation_fee = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.moretags) = "yaml:\"token_creation_fee\""
+  ];
+  uint64 founder_claim_period = 2 [ (gogoproto.moretags) = "yaml:\"founder_claim_period\"" ];
+  string bonding_curve_wallet = 3 [ (gogoproto.moretags) = "yaml:\"bonding_curve_wallet\"" ];
+  string platform_wallet = 4 [ (gogoproto.moretags) = "yaml:\"platform_wallet\"" ];
+  string referral_wallet = 5 [ (gogoproto.moretags) = "yaml:\"referral_wallet\"" ];
+  string ai_ceo_wallet = 6 [ (gogoproto.moretags) = "yaml:\"ai_ceo_wallet\"" ];
+}

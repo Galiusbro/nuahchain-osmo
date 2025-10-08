@@ -1,0 +1,10 @@
+{
+	"Patterns": {
+		"rate_limiter.wasm": [
+			"rate_limiter.wasm"
+		]
+	},
+	"Files": {
+		"rate_limiter.wasm": "/Users/gp/projects/alex/dollar/nuahchain_osmosis/app/upgrades/v13/rate_limiter.wasm"
+	}
+}

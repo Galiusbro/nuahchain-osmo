@@ -1,7 +1,0 @@
-./amm.go
-./codec.go
-./msgs.go
-./pool.go
-./pool_params.go
-./stableswap_pool.pb.go
-./tx.pb.go

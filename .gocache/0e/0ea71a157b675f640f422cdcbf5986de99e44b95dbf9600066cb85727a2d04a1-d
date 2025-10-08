@@ -1,7 +1,0 @@
-./admins_test.go
-./before_send_test.go
-./createdenom_test.go
-./genesis_test.go
-./keeper_test.go
-./msg_server_test.go
-./new_factory_smoke_test.go

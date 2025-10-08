@@ -101,6 +101,8 @@ import (
 
 	_ "github.com/osmosis-labs/osmosis/v30/client/docs/statik"
 	owasm "github.com/osmosis-labs/osmosis/v30/wasmbinding"
+	bondingcurvekeeper "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/keeper"
+	bondingcurvetypes "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types"
 	concentratedliquidity "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity"
 	concentratedliquiditytypes "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/types"
 	exchangekeeper "github.com/osmosis-labs/osmosis/v30/x/exchange/keeper"
@@ -130,6 +132,8 @@ import (
 	txfeestypes "github.com/osmosis-labs/osmosis/v30/x/txfees/types"
 	usdoraclekeeper "github.com/osmosis-labs/osmosis/v30/x/usdoracle/keeper"
 	usdoracletypes "github.com/osmosis-labs/osmosis/v30/x/usdoracle/types"
+	usertokenkeeper "github.com/osmosis-labs/osmosis/v30/x/usertoken/keeper"
+	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
 	valsetpref "github.com/osmosis-labs/osmosis/v30/x/valset-pref"
 	valsetpreftypes "github.com/osmosis-labs/osmosis/v30/x/valset-pref/types"
 	epochskeeper "github.com/osmosis-labs/osmosis/x/epochs/keeper"
@@ -192,6 +196,8 @@ type AppKeepers struct {
 	WasmKeeper                   *wasmkeeper.Keeper
 	ContractKeeper               *wasmkeeper.PermissionedKeeper
 	TokenFactoryKeeper           *tokenfactorykeeper.Keeper
+	BondingCurveKeeper           *bondingcurvekeeper.Keeper
+	UserTokenKeeper              *usertokenkeeper.Keeper
 	PoolManagerKeeper            *poolmanager.Keeper
 	ValidatorSetPreferenceKeeper *valsetpref.Keeper
 	ConcentratedLiquidityKeeper  *concentratedliquidity.Keeper
@@ -590,6 +596,27 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 	)
 	appKeepers.TokenFactoryKeeper = &tokenFactoryKeeper
 
+	userTokenKeeper := usertokenkeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[usertokentypes.StoreKey],
+		appKeepers.GetSubspace(usertokentypes.ModuleName),
+		appKeepers.AccountKeeper,
+		appKeepers.BankKeeper,
+		appKeepers.TokenFactoryKeeper,
+	)
+	appKeepers.UserTokenKeeper = &userTokenKeeper
+
+	bondingCurveKeeper := bondingcurvekeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[bondingcurvetypes.StoreKey],
+		appKeepers.GetSubspace(bondingcurvetypes.ModuleName),
+		appKeepers.AccountKeeper,
+		appKeepers.BankKeeper,
+		appKeepers.UserTokenKeeper,
+		appKeepers.PoolManagerKeeper,
+	)
+	appKeepers.BondingCurveKeeper = &bondingCurveKeeper
+
 	validatorSetPreferenceKeeper := valsetpref.NewKeeper(
 		appKeepers.keys[valsetpreftypes.StoreKey],
 		appKeepers.GetSubspace(valsetpreftypes.ModuleName),
@@ -934,6 +961,8 @@ func (appKeepers *AppKeepers) initParamsKeeper(appCodec codec.BinaryCodec, legac
 	paramsKeeper.Subspace(gammtypes.ModuleName)
 	paramsKeeper.Subspace(wasmtypes.ModuleName)
 	paramsKeeper.Subspace(tokenfactorytypes.ModuleName)
+	paramsKeeper.Subspace(bondingcurvetypes.ModuleName).WithKeyTable(bondingcurvetypes.ParamKeyTable())
+	paramsKeeper.Subspace(usertokentypes.ModuleName).WithKeyTable(usertokentypes.ParamKeyTable())
 	paramsKeeper.Subspace(twaptypes.ModuleName)
 	paramsKeeper.Subspace(ibcratelimittypes.ModuleName)
 	paramsKeeper.Subspace(concentratedliquiditytypes.ModuleName)
@@ -1067,6 +1096,8 @@ func KVStoreKeys() []string {
 		superfluidtypes.StoreKey,
 		wasmtypes.StoreKey,
 		tokenfactorytypes.StoreKey,
+		bondingcurvetypes.StoreKey,
+		usertokentypes.StoreKey,
 		valsetpreftypes.StoreKey,
 		protorevtypes.StoreKey,
 		ibchookstypes.StoreKey,

@@ -26,6 +26,15 @@ go.work.sum
 # Go sum
 go.work.sum
 
+# Go cache and temporary files
+go-build/
+.gocache/
+*.tmp
+*.log
+
+# Project specific logs
+nuahd.log
+
 # Dependency directories (remove the comment below to include it)
 # vendor/
 

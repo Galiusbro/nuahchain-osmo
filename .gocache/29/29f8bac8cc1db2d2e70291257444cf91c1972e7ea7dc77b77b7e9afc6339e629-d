@@ -1,6 +1,0 @@
-./instantiate_msg.pb.go
-./module_query_msg.go
-./module_query_msg.pb.go
-./module_sudo_msg.go
-./module_sudo_msg.pb.go
-./pool_query_msg.pb.go

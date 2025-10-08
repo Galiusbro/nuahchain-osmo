@@ -1,8 +1,0 @@
-./create_pool.go
-./gov.go
-./keeper.go
-./msg_server.go
-./protorev.go
-./router.go
-./store.go
-./taker_fee.go

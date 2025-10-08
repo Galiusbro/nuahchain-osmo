@@ -1,6 +1,0 @@
-./capability.pb.go
-./errors.go
-./genesis.go
-./genesis.pb.go
-./keys.go
-./types.go

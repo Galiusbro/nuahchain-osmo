@@ -1,6 +1,0 @@
-./expected_keepers.go
-./genesis.go
-./localhost.go
-./solomachine.go
-./solomachine.pb.go
-./store.go

@@ -1,0 +1,10 @@
+# import config
+packagefile context=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/32/32fd1d4f0dc1addb1f0ce6cb21e79aa81c6e5e1954c10c983940e475a4b2814c-d
+packagefile cosmossdk.io/log=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/93/93aa24ab06226cb1a238249d2655b1f3fc47c7a35f5e962eb2ed3a54bc647605-d
+packagefile cosmossdk.io/store/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/a9/a9d1a2a3ce7a1c46c50334891af77ba1e5d9416c472560eff37ae534ba1cb6bf-d
+packagefile fmt=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/14/14898fc9cf93ae046520d51da5f69ccf5f09b5d5d3faaf48d33ebf2088e4ded2-d
+packagefile github.com/cosmos/cosmos-sdk/codec=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/c8/c8c531669984e9d9cef999e04da9159ccb49d2cbf62bf45897e9253726211007-d
+packagefile github.com/cosmos/cosmos-sdk/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/cd/cd18df6882a6e108a8355270471e401f1508b1517b7d745263ff6629042fa4a1-d
+packagefile github.com/cosmos/cosmos-sdk/x/params/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/34/34fa1ede6d57d6dd3ce9931db9a4aa5258f399e78f886ac29fbdd26cbb832918-d
+packagefile github.com/osmosis-labs/osmosis/osmomath=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gocache/5c/5cf8ccb4ad9b0fb5016d5f2d3b2f2e7711d7b1a9ef19c45ab805f4cc759f2b4b-d
+packagefile github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types=/Users/gp/projects/alex/dollar/nuahchain_osmosis/.gotmp/go-build2501316216/b889/_pkg_.a

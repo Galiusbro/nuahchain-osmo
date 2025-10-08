@@ -1,6 +1,0 @@
-./events.go
-./grpc_query.go
-./handshake.go
-./keeper.go
-./migrations.go
-./verify.go

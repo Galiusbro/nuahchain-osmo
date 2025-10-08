@@ -1,5 +1,0 @@
-./codec.go
-./commitment.pb.go
-./errors.go
-./merkle.go
-./utils.go

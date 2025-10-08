@@ -1,5 +1,0 @@
-./message_plugin.go
-./queries.go
-./query_plugin.go
-./stargate_whitelist.go
-./wasm.go

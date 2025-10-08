@@ -1,0 +1,83 @@
+syntax = "proto3";
+package osmosis.bondingcurve.v1beta1;
+
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "gogoproto/gogo.proto";
+import "osmosis/bondingcurve/v1beta1/margin.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types";
+
+service Msg {
+  rpc BuyFromCurve(MsgBuyFromCurve) returns (MsgBuyFromCurveResponse);
+  rpc SellToCurve(MsgSellToCurve) returns (MsgSellToCurveResponse);
+  rpc OpenMarginPosition(MsgOpenMarginPosition) returns (MsgOpenMarginPositionResponse);
+  rpc CloseMarginPosition(MsgCloseMarginPosition) returns (MsgCloseMarginPositionResponse);
+}
+
+message MsgBuyFromCurve {
+  option (amino.name) = "osmosis/bondingcurve/buy";
+  option (cosmos.msg.v1.signer) = "trader";
+
+  string trader = 1;
+  string denom = 2;
+  string payment_denom = 3;
+  string payment_amount = 4;
+  string min_tokens_out = 5;
+}
+
+message MsgBuyFromCurveResponse {
+  string tokens_out = 1;
+  string price_paid = 2;
+}
+
+message MsgSellToCurve {
+  option (amino.name) = "osmosis/bondingcurve/sell";
+  option (cosmos.msg.v1.signer) = "trader";
+
+  string trader = 1;
+  string denom = 2;
+  string token_amount = 3;
+  string payment_denom = 4;
+  string min_payment_out = 5;
+}
+
+message MsgSellToCurveResponse {
+  string payment_out = 1;
+  string price_received = 2;
+}
+
+message MsgOpenMarginPosition {
+  option (amino.name) = "osmosis/bondingcurve/open-margin";
+  option (cosmos.msg.v1.signer) = "trader";
+
+  string trader = 1;
+  string denom = 2;
+  string collateral_denom = 3;
+  string collateral_amount = 4;
+  uint32 leverage = 5;
+  PositionType position_type = 6;
+  string min_position_size = 7;
+}
+
+message MsgOpenMarginPositionResponse {
+  uint64 position_id = 1;
+  string position_size = 2;
+  string entry_price = 3;
+  string liquidation_price = 4;
+}
+
+message MsgCloseMarginPosition {
+  option (amino.name) = "osmosis/bondingcurve/close-margin";
+  option (cosmos.msg.v1.signer) = "trader";
+
+  string trader = 1;
+  uint64 position_id = 2;
+  string min_payout = 3;
+}
+
+message MsgCloseMarginPositionResponse {
+  string payout_amount = 1;
+  string realized_pnl = 2;
+  string fees_paid = 3;
+}

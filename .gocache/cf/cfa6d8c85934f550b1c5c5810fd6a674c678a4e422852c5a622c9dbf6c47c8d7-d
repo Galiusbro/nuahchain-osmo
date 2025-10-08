@@ -1,4 +1,0 @@
-./block_process_sqs_factory.go
-./block_updates_sqs_block_process_strategy.go
-./full_sqs_block_process_strategy.go
-./transform_and_load.go

@@ -1,5 +1,0 @@
-./constants.go
-./downtime_duration.pb.go
-./genesis.go
-./genesis.pb.go
-./keys.go

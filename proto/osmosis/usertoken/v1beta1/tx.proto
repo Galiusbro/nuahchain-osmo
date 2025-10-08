@@ -1,0 +1,38 @@
+syntax = "proto3";
+package osmosis.usertoken.v1beta1;
+
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/usertoken/types";
+
+service Msg {
+  rpc CreateToken(MsgCreateToken) returns (MsgCreateTokenResponse);
+  rpc FounderClaim(MsgFounderClaim) returns (MsgFounderClaimResponse);
+}
+
+message MsgCreateToken {
+  option (amino.name) = "osmosis/usertoken/create-token";
+  option (cosmos.msg.v1.signer) = "creator";
+
+  string creator = 1;
+  string name = 2;
+  string symbol = 3;
+  string image = 4;
+  string description = 5;
+}
+
+message MsgCreateTokenResponse {
+  string denom = 1;
+}
+
+message MsgFounderClaim {
+  option (amino.name) = "osmosis/usertoken/founder-claim";
+  option (cosmos.msg.v1.signer) = "founder";
+
+  string founder = 1;
+  string denom = 2;
+}
+
+message MsgFounderClaimResponse {}

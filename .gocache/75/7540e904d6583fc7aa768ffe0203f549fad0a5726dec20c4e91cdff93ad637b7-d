@@ -1,6 +1,0 @@
-./codec.go
-./expected_keepers.go
-./forward.go
-./genesis.go
-./genesis.pb.go
-./keys.go

@@ -1,6 +1,0 @@
-./auction.go
-./errors.go
-./genesis.go
-./grpc_query.go
-./keeper.go
-./msg_server.go

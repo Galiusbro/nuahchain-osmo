@@ -113,8 +113,10 @@ import (
 
 	appparams "github.com/osmosis-labs/osmosis/v30/app/params"
 
+	bondingcurvetypes "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types"
 	minttypes "github.com/osmosis-labs/osmosis/v30/x/mint/types"
 	protorevtypes "github.com/osmosis-labs/osmosis/v30/x/protorev/types"
+	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
 
 	"github.com/osmosis-labs/osmosis/v30/app/keepers"
 	"github.com/osmosis-labs/osmosis/v30/app/upgrades"
@@ -178,8 +180,10 @@ var (
 
 	// module accounts that are allowed to receive tokens.
 	allowedReceivingModAcc = map[string]bool{
-		protorevtypes.ModuleName: true,
-		treasurytypes.ModuleName: true,
+		protorevtypes.ModuleName:     true,
+		treasurytypes.ModuleName:     true,
+		usertokentypes.ModuleName:    true,
+		bondingcurvetypes.ModuleName: true,
 	}
 
 	// TODO: Refactor wasm items into a wasm.go file
@@ -488,6 +492,10 @@ func NewNUAHApp(
 	// Any time a module requires a keeper de-ref'd that's not its native one,
 	// its code-smell and should probably change. We should get the staking keeper dependencies fixed.
 	app.mm = module.NewManager(appModules(app, encodingConfig, skipGenesisInvariants)...)
+
+	// ensure usertoken message types are registered prior to service wiring
+	usertokentypes.RegisterInterfaces(app.interfaceRegistry)
+	bondingcurvetypes.RegisterInterfaces(app.interfaceRegistry)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the

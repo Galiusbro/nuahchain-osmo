@@ -1,5 +1,0 @@
-./abci.go
-./genesis.go
-./keeper.go
-./query.go
-./store.go
