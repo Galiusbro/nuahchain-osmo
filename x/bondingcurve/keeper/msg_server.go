@@ -303,13 +303,33 @@ func (s msgServer) OpenMarginPosition(goCtx context.Context, msg *types.MsgOpenM
 		return nil, types.ErrInsufficientLiquidity
 	}
 
-	entryPrice := pool.LastPriceDec()
-	if !entryPrice.IsPositive() {
-		entryPrice = types.CalculatePrice(pool.TokensSoldDec(), params)
+	// Determine price source based on message or default to bonding curve
+	priceSource := msg.PriceSource
+	if priceSource == types.PriceSource_PRICE_SOURCE_UNSPECIFIED {
+		priceSource = types.PriceSource_PRICE_SOURCE_BONDING_CURVE // Default to bonding curve
 	}
-	if !entryPrice.IsPositive() {
-		entryPrice = params.StartPriceDec()
+
+	var entryPrice osmomath.Dec
+
+	switch priceSource {
+	case types.PriceSource_PRICE_SOURCE_DEX_POOL:
+		var priceErr error
+		entryPrice, priceErr = s.getDexPoolPrice(ctx, pool, params)
+		if priceErr != nil {
+			return nil, fmt.Errorf("failed to get DEX pool price: %w", priceErr)
+		}
+	case types.PriceSource_PRICE_SOURCE_BONDING_CURVE:
+		fallthrough
+	default:
+		entryPrice = pool.LastPriceDec()
+		if !entryPrice.IsPositive() {
+			entryPrice = types.CalculatePrice(pool.TokensSoldDec(), params)
+		}
+		if !entryPrice.IsPositive() {
+			entryPrice = params.StartPriceDec()
+		}
 	}
+
 	if !entryPrice.IsPositive() {
 		return nil, types.ErrInvalidAmount
 	}
@@ -366,6 +386,7 @@ func (s msgServer) OpenMarginPosition(goCtx context.Context, msg *types.MsgOpenM
 		Status:            types.PositionStatus_POSITION_STATUS_OPEN,
 		RealizedPnl:       osmomath.ZeroDec().String(),
 		LastMarkPrice:     entryPrice.String(),
+		PriceSource:       priceSource,
 	}
 
 	s.setMarginPosition(ctx, position)
@@ -421,13 +442,28 @@ func (s msgServer) CloseMarginPosition(goCtx context.Context, msg *types.MsgClos
 		return nil, types.ErrInvalidAmount
 	}
 
-	currentPrice := pool.LastPriceDec()
-	if !currentPrice.IsPositive() {
-		currentPrice = types.CalculatePrice(pool.TokensSoldDec(), params)
+	// Get current price based on position's price source
+	var currentPrice osmomath.Dec
+
+	switch position.PriceSource {
+	case types.PriceSource_PRICE_SOURCE_DEX_POOL:
+		var priceErr error
+		currentPrice, priceErr = s.getDexPoolPrice(ctx, pool, params)
+		if priceErr != nil {
+			return nil, fmt.Errorf("failed to get DEX pool price for closing position: %w", priceErr)
+		}
+	case types.PriceSource_PRICE_SOURCE_BONDING_CURVE:
+		fallthrough
+	default:
+		currentPrice = pool.LastPriceDec()
+		if !currentPrice.IsPositive() {
+			currentPrice = types.CalculatePrice(pool.TokensSoldDec(), params)
+		}
+		if !currentPrice.IsPositive() {
+			currentPrice = params.StartPriceDec()
+		}
 	}
-	if !currentPrice.IsPositive() {
-		currentPrice = params.StartPriceDec()
-	}
+
 	if !currentPrice.IsPositive() {
 		return nil, types.ErrInvalidAmount
 	}
@@ -565,4 +601,37 @@ func (s msgServer) receiveTokens(ctx sdk.Context, trader sdk.AccAddress, coin sd
 	}
 
 	return s.bankKeeper.SendCoins(sdk.WrapSDKContext(ctx), trader, wallet, sdk.NewCoins(coin))
+}
+
+// getDexPoolPrice retrieves the current price from the DEX pool
+func (s msgServer) getDexPoolPrice(ctx sdk.Context, pool types.BondingCurvePool, params types.Params) (osmomath.Dec, error) {
+	// Check if DEX pool is activated
+	if !pool.DexActivated || pool.DexPoolId == 0 {
+		return osmomath.ZeroDec(), fmt.Errorf("DEX pool not activated for denom %s", pool.Denom)
+	}
+
+	// Get quote denom
+	quoteDenom := params.QuoteDenom
+	if quoteDenom == "" {
+		quoteDenom = "unuah" // Default quote denom
+	}
+
+	// Get spot price from DEX pool using pool manager
+	spotPrice, err := s.poolManager.RouteCalculateSpotPrice(
+		ctx,
+		pool.DexPoolId,
+		quoteDenom, // quote asset (e.g., "unuah")
+		pool.Denom, // base asset (e.g., "factory/nuah1.../ttt")
+	)
+	if err != nil {
+		return osmomath.ZeroDec(), fmt.Errorf("failed to calculate spot price from DEX pool %d: %w", pool.DexPoolId, err)
+	}
+
+	// Convert BigDec to Dec
+	price := spotPrice.Dec()
+	if !price.IsPositive() {
+		return osmomath.ZeroDec(), fmt.Errorf("DEX pool price is not positive: %s", price.String())
+	}
+
+	return price, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/osmosis-labs/osmosis/osmomath"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v30/x/poolmanager/types"
 	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
 )
@@ -26,4 +27,5 @@ type UserTokenKeeper interface {
 
 type PoolManagerKeeper interface {
 	CreatePool(ctx sdk.Context, msg poolmanagertypes.CreatePoolMsg) (uint64, error)
+	RouteCalculateSpotPrice(ctx sdk.Context, poolId uint64, quoteAssetDenom string, baseAssetDenom string) (osmomath.BigDec, error)
 }

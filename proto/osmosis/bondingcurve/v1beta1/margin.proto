@@ -18,6 +18,12 @@ enum PositionStatus {
   POSITION_STATUS_LIQUIDATED = 3;
 }
 
+enum PriceSource {
+  PRICE_SOURCE_UNSPECIFIED = 0;
+  PRICE_SOURCE_BONDING_CURVE = 1;
+  PRICE_SOURCE_DEX_POOL = 2;
+}
+
 message MarginPosition {
   uint64 id = 1;
   string trader = 2;
@@ -35,6 +41,7 @@ message MarginPosition {
   PositionStatus status = 14;
   string realized_pnl = 15;
   string last_mark_price = 16;
+  PriceSource price_source = 17;
 }
 
 message MarginPool {

@@ -58,6 +58,7 @@ message MsgOpenMarginPosition {
   uint32 leverage = 5;
   PositionType position_type = 6;
   string min_position_size = 7;
+  PriceSource price_source = 8;
 }
 
 message MsgOpenMarginPositionResponse {

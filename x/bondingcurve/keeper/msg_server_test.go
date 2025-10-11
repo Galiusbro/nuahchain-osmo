@@ -909,6 +909,331 @@ func (s *KeeperTestSuite) TestDexActivationAndTrading() {
 	fmt.Printf("=== END DEX ACTIVATION AND TRADING TEST ===\n\n")
 }
 
+func (s *KeeperTestSuite) TestMarginTradingWithDexPool() {
+	// Test margin trading using DEX pool price source
+	fmt.Printf("\n=== MARGIN TRADING WITH DEX POOL TEST ===\n")
+
+	// Setup: Activate DEX first
+	params := s.App.BondingCurveKeeper.GetParams(s.Ctx)
+	maxSupply := params.MaxSupplyDec()
+
+	// Buy tokens to activate DEX (reach 85% of max supply)
+	fmt.Printf("Activating DEX by buying tokens...\n")
+	totalTokensBought := osmomath.ZeroDec()
+	paymentAmount := "1000000.0"
+
+	for i := 0; i < 20; i++ {
+		buyResp, err := s.msgServer.BuyFromCurve(s.Ctx, &types.MsgBuyFromCurve{
+			Trader:        s.trader.String(),
+			Denom:         s.denom,
+			PaymentDenom:  s.quoteDenom,
+			PaymentAmount: paymentAmount,
+		})
+
+		if err != nil {
+			fmt.Printf("Buy error at transaction %d: %s\n", i+1, err.Error())
+			break
+		}
+
+		tokensOut, _ := osmomath.NewDecFromStr(buyResp.TokensOut)
+		totalTokensBought = totalTokensBought.Add(tokensOut)
+
+		// Check if we've reached 85% of max supply
+		if totalTokensBought.GTE(maxSupply.Mul(osmomath.MustNewDecFromStr("0.85"))) {
+			fmt.Printf("Reached 85%% of max supply, stopping\n")
+			break
+		}
+	}
+
+	// Trigger DEX activation
+	fmt.Printf("Triggering DEX activation...\n")
+	s.Require().NoError(s.App.BondingCurveKeeper.EndBlocker(s.Ctx))
+
+	// Verify DEX is activated
+	pool, found := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	s.Require().True(found)
+	s.Require().True(pool.DexActivated)
+	s.Require().NotZero(pool.DexPoolId)
+
+	fmt.Printf("DEX activated! Pool ID: %d\n", pool.DexPoolId)
+
+	// Test 1: Open margin position with bonding curve price
+	fmt.Printf("\n--- TEST 1: MARGIN POSITION WITH BONDING CURVE PRICE ---\n")
+
+	bondingCurveResp, err := s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "1000.0",
+		Leverage:         5,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		MinPositionSize:  "0",
+		PriceSource:      types.PriceSource_PRICE_SOURCE_BONDING_CURVE,
+	})
+
+	s.Require().NoError(err)
+	fmt.Printf("Bonding curve position opened: ID=%d\n", bondingCurveResp.PositionId)
+
+	// Test 2: Open margin position with DEX pool price
+	fmt.Printf("\n--- TEST 2: MARGIN POSITION WITH DEX POOL PRICE ---\n")
+
+	dexResp, err := s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "1000.0",
+		Leverage:         5,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		MinPositionSize:  "0",
+		PriceSource:      types.PriceSource_PRICE_SOURCE_DEX_POOL,
+	})
+
+	if err != nil {
+		fmt.Printf("DEX margin position error: %s\n", err.Error())
+	} else {
+		fmt.Printf("DEX position opened: ID=%d\n", dexResp.PositionId)
+
+		// Compare prices
+		bondingPosition, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, bondingCurveResp.PositionId)
+		s.Require().True(found)
+
+		dexPosition, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, dexResp.PositionId)
+		s.Require().True(found)
+
+		fmt.Printf("Bonding curve entry price: %s\n", bondingPosition.EntryPrice)
+		fmt.Printf("DEX pool entry price: %s\n", dexPosition.EntryPrice)
+		fmt.Printf("Price source comparison: Bonding=%s, DEX=%s\n",
+			bondingPosition.PriceSource.String(), dexPosition.PriceSource.String())
+	}
+
+	fmt.Printf("=== END MARGIN TRADING WITH DEX POOL TEST ===\n\n")
+}
+
+func (s *KeeperTestSuite) TestDexMarginTradingComprehensive() {
+	// Comprehensive test for DEX margin trading - similar to bonding curve tests
+	fmt.Printf("\n=== COMPREHENSIVE DEX MARGIN TRADING TEST ===\n")
+
+	// Setup: Activate DEX first
+	params := s.App.BondingCurveKeeper.GetParams(s.Ctx)
+	maxSupply := params.MaxSupplyDec()
+
+	// Buy tokens to activate DEX (reach 85% of max supply)
+	fmt.Printf("Activating DEX by buying tokens...\n")
+	totalTokensBought := osmomath.ZeroDec()
+	paymentAmount := "1000000.0"
+
+	for i := 0; i < 20; i++ {
+		buyResp, err := s.msgServer.BuyFromCurve(s.Ctx, &types.MsgBuyFromCurve{
+			Trader:        s.trader.String(),
+			Denom:         s.denom,
+			PaymentDenom:  s.quoteDenom,
+			PaymentAmount: paymentAmount,
+		})
+
+		if err != nil {
+			fmt.Printf("Buy error at transaction %d: %s\n", i+1, err.Error())
+			break
+		}
+
+		tokensOut, _ := osmomath.NewDecFromStr(buyResp.TokensOut)
+		totalTokensBought = totalTokensBought.Add(tokensOut)
+
+		// Check if we've reached 85% of max supply
+		if totalTokensBought.GTE(maxSupply.Mul(osmomath.MustNewDecFromStr("0.85"))) {
+			fmt.Printf("Reached 85%% of max supply, stopping\n")
+			break
+		}
+	}
+
+	// Trigger DEX activation
+	fmt.Printf("Triggering DEX activation...\n")
+	s.Require().NoError(s.App.BondingCurveKeeper.EndBlocker(s.Ctx))
+
+	// Verify DEX is activated
+	pool, found := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	s.Require().True(found)
+	s.Require().True(pool.DexActivated)
+	s.Require().NotZero(pool.DexPoolId)
+
+	fmt.Printf("DEX activated! Pool ID: %d\n", pool.DexPoolId)
+
+	// Test 1: Open DEX margin position with different leverage levels
+	fmt.Printf("\n--- TEST 1: DEX MARGIN POSITIONS WITH DIFFERENT LEVERAGE ---\n")
+
+	// Test 1x leverage (minimum)
+	fmt.Printf("Testing 1x leverage (minimum)...\n")
+	minLeverageResp, err := s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "500.0",
+		Leverage:         types.MinMarginLeverage, // 1x
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		PriceSource:      types.PriceSource_PRICE_SOURCE_DEX_POOL,
+	})
+	s.Require().NoError(err)
+	fmt.Printf("1x leverage position opened: ID=%d\n", minLeverageResp.PositionId)
+
+	// Test 10x leverage (medium)
+	fmt.Printf("Testing 10x leverage (medium)...\n")
+	mediumLeverageResp, err := s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "1000.0",
+		Leverage:         10,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		PriceSource:      types.PriceSource_PRICE_SOURCE_DEX_POOL,
+	})
+	s.Require().NoError(err)
+	fmt.Printf("10x leverage position opened: ID=%d\n", mediumLeverageResp.PositionId)
+
+	// Test 100x leverage (maximum)
+	fmt.Printf("Testing 100x leverage (maximum)...\n")
+	maxLeverageResp, err := s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "2000.0",
+		Leverage:         types.MaxMarginLeverage, // 100x
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		PriceSource:      types.PriceSource_PRICE_SOURCE_DEX_POOL,
+	})
+	s.Require().NoError(err)
+	fmt.Printf("100x leverage position opened: ID=%d\n", maxLeverageResp.PositionId)
+
+	// Test 2: Verify position details and price sources
+	fmt.Printf("\n--- TEST 2: VERIFY POSITION DETAILS ---\n")
+
+	// Check 1x position
+	minPosition, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, minLeverageResp.PositionId)
+	s.Require().True(found)
+	s.Require().Equal(types.PriceSource_PRICE_SOURCE_DEX_POOL, minPosition.PriceSource)
+	s.Require().Equal(types.MinMarginLeverage, minPosition.Leverage)
+	fmt.Printf("1x position: PriceSource=%s, Leverage=%d, EntryPrice=%s\n",
+		minPosition.PriceSource.String(), minPosition.Leverage, minPosition.EntryPrice)
+
+	// Check 10x position
+	mediumPosition, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, mediumLeverageResp.PositionId)
+	s.Require().True(found)
+	s.Require().Equal(types.PriceSource_PRICE_SOURCE_DEX_POOL, mediumPosition.PriceSource)
+	s.Require().Equal(uint32(10), mediumPosition.Leverage)
+	fmt.Printf("10x position: PriceSource=%s, Leverage=%d, EntryPrice=%s\n",
+		mediumPosition.PriceSource.String(), mediumPosition.Leverage, mediumPosition.EntryPrice)
+
+	// Check 100x position
+	maxPosition, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, maxLeverageResp.PositionId)
+	s.Require().True(found)
+	s.Require().Equal(types.PriceSource_PRICE_SOURCE_DEX_POOL, maxPosition.PriceSource)
+	s.Require().Equal(types.MaxMarginLeverage, maxPosition.Leverage)
+	fmt.Printf("100x position: PriceSource=%s, Leverage=%d, EntryPrice=%s\n",
+		maxPosition.PriceSource.String(), maxPosition.Leverage, maxPosition.EntryPrice)
+
+	// Test 3: Test closing DEX margin positions
+	fmt.Printf("\n--- TEST 3: CLOSING DEX MARGIN POSITIONS ---\n")
+
+	// Close 1x position
+	fmt.Printf("Closing 1x leverage position...\n")
+	closeResp1, err := s.msgServer.CloseMarginPosition(s.Ctx, &types.MsgCloseMarginPosition{
+		Trader:     s.trader.String(),
+		PositionId: minLeverageResp.PositionId,
+	})
+	s.Require().NoError(err)
+	fmt.Printf("1x position closed: Payout=%s, PnL=%s\n",
+		closeResp1.PayoutAmount, closeResp1.RealizedPnl)
+
+	// Close 10x position
+	fmt.Printf("Closing 10x leverage position...\n")
+	closeResp2, err := s.msgServer.CloseMarginPosition(s.Ctx, &types.MsgCloseMarginPosition{
+		Trader:     s.trader.String(),
+		PositionId: mediumLeverageResp.PositionId,
+	})
+	s.Require().NoError(err)
+	fmt.Printf("10x position closed: Payout=%s, PnL=%s\n",
+		closeResp2.PayoutAmount, closeResp2.RealizedPnl)
+
+	// Test 4: Test invalid leverage for DEX
+	fmt.Printf("\n--- TEST 4: TESTING INVALID LEVERAGE FOR DEX ---\n")
+
+	// Test leverage below minimum
+	_, err = s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "100.0",
+		Leverage:         0, // Below minimum
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		PriceSource:      types.PriceSource_PRICE_SOURCE_DEX_POOL,
+	})
+	s.Require().Error(err)
+	s.Require().ErrorIs(err, types.ErrInvalidLeverage)
+	fmt.Printf("Below minimum leverage correctly rejected\n")
+
+	// Test leverage above maximum
+	_, err = s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "100.0",
+		Leverage:         types.MaxMarginLeverage + 1, // Above maximum
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		PriceSource:      types.PriceSource_PRICE_SOURCE_DEX_POOL,
+	})
+	s.Require().Error(err)
+	s.Require().ErrorIs(err, types.ErrInvalidLeverage)
+	fmt.Printf("Above maximum leverage correctly rejected\n")
+
+	// Test 5: Compare DEX vs Bonding Curve prices
+	fmt.Printf("\n--- TEST 5: COMPARING DEX VS BONDING CURVE PRICES ---\n")
+
+	// Open positions with both price sources
+	bondingResp, err := s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "1000.0",
+		Leverage:         5,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		PriceSource:      types.PriceSource_PRICE_SOURCE_BONDING_CURVE,
+	})
+	s.Require().NoError(err)
+
+	dexResp, err := s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "1000.0",
+		Leverage:         5,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		PriceSource:      types.PriceSource_PRICE_SOURCE_DEX_POOL,
+	})
+	s.Require().NoError(err)
+
+	// Compare prices
+	bondingPos, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, bondingResp.PositionId)
+	s.Require().True(found)
+
+	dexPos, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, dexResp.PositionId)
+	s.Require().True(found)
+
+	fmt.Printf("Price comparison:\n")
+	fmt.Printf("  Bonding Curve: %s (source: %s)\n",
+		bondingPos.EntryPrice, bondingPos.PriceSource.String())
+	fmt.Printf("  DEX Pool: %s (source: %s)\n",
+		dexPos.EntryPrice, dexPos.PriceSource.String())
+
+	// Calculate price difference
+	bondingPrice, _ := osmomath.NewDecFromStr(bondingPos.EntryPrice)
+	dexPrice, _ := osmomath.NewDecFromStr(dexPos.EntryPrice)
+	priceDiff := dexPrice.Sub(bondingPrice)
+	priceDiffPercent := priceDiff.Quo(bondingPrice).Mul(osmomath.MustNewDecFromStr("100"))
+
+	fmt.Printf("  Price difference: %s (%s%%)\n",
+		priceDiff.String(), priceDiffPercent.String())
+
+	fmt.Printf("=== END COMPREHENSIVE DEX MARGIN TRADING TEST ===\n\n")
+}
+
 func (s *KeeperTestSuite) TestMaxLeverage100x() {
 	s.setupMarginLiquidity(sdkmath.NewInt(10_000_000), osmomath.OneDec())
 
