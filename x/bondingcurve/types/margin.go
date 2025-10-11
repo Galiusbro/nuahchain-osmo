@@ -13,7 +13,7 @@ const (
 
 var (
 	DefaultMaintenanceMarginRatio = osmomath.MustNewDecFromStr("0.01")    // 1% maintenance margin
-	LiquidationBufferFactor       = osmomath.MustNewDecFromStr("0.9")     // 10% safety buffer
+	LiquidationBufferFactor       = osmomath.MustNewDecFromStr("0.1")     // 10% safety buffer
 	DefaultMarginFeeRate          = osmomath.NewDecWithPrec(5, 3)         // 0.5% fee
 	DefaultFundingRate            = osmomath.ZeroDec()                    // placeholder for v1
 	MarginPricePrecision          = osmomath.NewDecWithPrec(1, 6)         // helper to ensure precision

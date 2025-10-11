@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
@@ -27,9 +28,14 @@ type Keeper struct {
 }
 
 const (
-	maxLiquidationsPerBlock  = 50
-	maxPositionsConsidered   = 250
-	liquidationUrgencyBuffer = 0.05
+	maxLiquidationsPerBlock   = 50
+	maxPositionsConsidered    = 250
+	liquidationUrgencyBuffer  = 0.05
+	liquidationAlertThreshold = 25
+)
+
+var (
+	priceVolatilityAlertThreshold = osmomath.NewDecWithPrec(3, 1) // 30% deviation alert
 )
 
 func NewKeeper(
@@ -260,6 +266,14 @@ type liquidationCandidate struct {
 	Distance  osmomath.Dec
 }
 
+type liquidationResult struct {
+	liquidationType  string
+	payout           osmomath.Dec
+	liquidatorReward osmomath.Dec
+	insurancePayout  osmomath.Dec
+	badDebt          osmomath.Dec
+}
+
 func (k Keeper) ProcessLiquidations(ctx sdk.Context) error {
 	store := k.getStore(ctx)
 	iterator := storetypes.KVStorePrefixIterator(store, types.MarginPositionKeyPrefix)
@@ -267,6 +281,7 @@ func (k Keeper) ProcessLiquidations(ctx sdk.Context) error {
 
 	candidates := make([]liquidationCandidate, 0, 16)
 	considered := 0
+	volatilityAlerts := make(map[string]bool)
 
 	for ; iterator.Valid(); iterator.Next() {
 		if considered >= maxPositionsConsidered {
@@ -285,6 +300,19 @@ func (k Keeper) ProcessLiquidations(ctx sdk.Context) error {
 		}
 
 		marginPool = updatedPool
+
+		if priceInfo.TwapPrice.IsPositive() && !priceInfo.IsCircuitBreakerTriggered() && !volatilityAlerts[position.Denom] {
+			deviation := priceInfo.MarkPrice.Sub(priceInfo.TwapPrice).Abs().Quo(priceInfo.TwapPrice)
+			if deviation.GTE(priceVolatilityAlertThreshold) {
+				ctx.EventManager().EmitEvent(sdk.NewEvent(
+					types.EventTypePriceVolatility,
+					sdk.NewAttribute(types.AttributeKeyDenom, position.Denom),
+					sdk.NewAttribute(types.AttributeKeyPrice, priceInfo.MarkPrice.String()),
+					sdk.NewAttribute(types.AttributeKeyVolatility, deviation.String()),
+				))
+				volatilityAlerts[position.Denom] = true
+			}
+		}
 
 		if marginPool.LiquidationsPaused {
 			if priceInfo.IsCircuitBreakerTriggered() {
@@ -334,6 +362,7 @@ func (k Keeper) ProcessLiquidations(ctx sdk.Context) error {
 	}
 
 	processed := 0
+	denomLiquidations := make(map[string]int)
 	for _, candidate := range candidates {
 		if processed >= maxLiquidationsPerBlock {
 			break
@@ -348,6 +377,7 @@ func (k Keeper) ProcessLiquidations(ctx sdk.Context) error {
 			continue
 		}
 		k.setMarginPool(ctx, updatedPool)
+		denomLiquidations[candidate.Position.Denom]++
 		processed++
 	}
 
@@ -356,6 +386,19 @@ func (k Keeper) ProcessLiquidations(ctx sdk.Context) error {
 			types.EventTypeLiquidationBatch,
 			sdk.NewAttribute(types.AttributeKeyPositionsProcessed, fmt.Sprintf("%d", processed)),
 		))
+		if processed >= liquidationAlertThreshold {
+			details := make([]string, 0, len(denomLiquidations))
+			for denom, count := range denomLiquidations {
+				details = append(details, fmt.Sprintf("%s:%d", denom, count))
+			}
+			sort.Strings(details)
+			ctx.EventManager().EmitEvent(sdk.NewEvent(
+				types.EventTypeLiquidationAlert,
+				sdk.NewAttribute(types.AttributeKeyPositionsProcessed, fmt.Sprintf("%d", processed)),
+				sdk.NewAttribute(types.AttributeKeyThreshold, fmt.Sprintf("%d", liquidationAlertThreshold)),
+				sdk.NewAttribute(types.AttributeKeyDenom, strings.Join(details, ",")),
+			))
+		}
 	}
 
 	return nil
@@ -426,15 +469,15 @@ func (k Keeper) handleLiquidationCandidate(ctx sdk.Context, pool types.MarginPoo
 
 	shouldPartial := position.PositionSizeDec().GTE(types.MaxPartialPositionSize) && ratio.LTE(types.PartialLiquidationBuffer)
 	if shouldPartial {
-		updatedPool, err := k.executePartialLiquidation(ctx, pool, position, candidate.MarkPrice)
+		updatedPool, _, err := k.executePartialLiquidation(ctx, pool, position, candidate.MarkPrice, nil)
 		return updatedPool, true, err
 	}
 
-	updatedPool, err := k.executeFullLiquidation(ctx, pool, position, candidate.MarkPrice)
+	updatedPool, _, err := k.executeFullLiquidation(ctx, pool, position, candidate.MarkPrice, nil)
 	return updatedPool, true, err
 }
 
-func (k Keeper) executeFullLiquidation(ctx sdk.Context, pool types.MarginPool, position types.MarginPosition, markPrice osmomath.Dec) (types.MarginPool, error) {
+func (k Keeper) executeFullLiquidation(ctx sdk.Context, pool types.MarginPool, position types.MarginPosition, markPrice osmomath.Dec, liquidator sdk.AccAddress) (types.MarginPool, liquidationResult, error) {
 	collateral := position.CollateralAmountDec()
 	positionSize := position.PositionSizeDec()
 	pnl := position.CalculatePnL(markPrice)
@@ -485,17 +528,24 @@ func (k Keeper) executeFullLiquidation(ctx sdk.Context, pool types.MarginPool, p
 
 	traderAddr, err := sdk.AccAddressFromBech32(position.Trader)
 	if err != nil {
-		return pool, err
+		return pool, liquidationResult{}, err
 	}
 
 	if payoutCoin, err := types.DecToCoin(payout, position.CollateralDenom); err == nil && payoutCoin.Amount.IsPositive() {
 		if err := k.bankKeeper.SendCoinsFromModuleToAccount(sdk.WrapSDKContext(ctx), types.ModuleName, traderAddr, sdk.NewCoins(payoutCoin)); err != nil {
-			return pool, err
+			return pool, liquidationResult{}, err
 		}
 	}
 
-	ctx.EventManager().EmitEvent(sdk.NewEvent(
-		types.EventTypeCloseMargin,
+	if len(liquidator) > 0 {
+		if rewardCoin, err := types.DecToCoin(liquidatorReward, position.CollateralDenom); err == nil && rewardCoin.Amount.IsPositive() {
+			if err := k.bankKeeper.SendCoinsFromModuleToAccount(sdk.WrapSDKContext(ctx), types.ModuleName, liquidator, sdk.NewCoins(rewardCoin)); err != nil {
+				return pool, liquidationResult{}, err
+			}
+		}
+	}
+
+	attributes := []sdk.Attribute{
 		sdk.NewAttribute(types.AttributeKeyTrader, position.Trader),
 		sdk.NewAttribute(types.AttributeKeyDenom, position.Denom),
 		sdk.NewAttribute(types.AttributeKeyPositionId, fmt.Sprintf("%d", position.Id)),
@@ -507,12 +557,26 @@ func (k Keeper) executeFullLiquidation(ctx sdk.Context, pool types.MarginPool, p
 		sdk.NewAttribute(types.AttributeKeyLiquidatorReward, liquidatorReward.String()),
 		sdk.NewAttribute(types.AttributeKeyInsurancePayout, insuranceShare.String()),
 		sdk.NewAttribute(types.AttributeKeyBadDebtCovered, badDebt.String()),
+	}
+	if len(liquidator) > 0 {
+		attributes = append(attributes, sdk.NewAttribute(types.AttributeKeyLiquidator, liquidator.String()))
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		types.EventTypeCloseMargin,
+		attributes...,
 	))
 
-	return pool, nil
+	return pool, liquidationResult{
+		liquidationType:  "full",
+		payout:           payout,
+		liquidatorReward: liquidatorReward,
+		insurancePayout:  insuranceShare,
+		badDebt:          badDebt,
+	}, nil
 }
 
-func (k Keeper) executePartialLiquidation(ctx sdk.Context, pool types.MarginPool, position types.MarginPosition, markPrice osmomath.Dec) (types.MarginPool, error) {
+func (k Keeper) executePartialLiquidation(ctx sdk.Context, pool types.MarginPool, position types.MarginPosition, markPrice osmomath.Dec, liquidator sdk.AccAddress) (types.MarginPool, liquidationResult, error) {
 	collateral := position.CollateralAmountDec()
 	positionSize := position.PositionSizeDec()
 	fraction := types.PartialLiquidationFraction
@@ -600,17 +664,24 @@ func (k Keeper) executePartialLiquidation(ctx sdk.Context, pool types.MarginPool
 
 	traderAddr, err := sdk.AccAddressFromBech32(position.Trader)
 	if err != nil {
-		return pool, err
+		return pool, liquidationResult{}, err
 	}
 
 	if payoutCoin, err := types.DecToCoin(payout, position.CollateralDenom); err == nil && payoutCoin.Amount.IsPositive() {
 		if err := k.bankKeeper.SendCoinsFromModuleToAccount(sdk.WrapSDKContext(ctx), types.ModuleName, traderAddr, sdk.NewCoins(payoutCoin)); err != nil {
-			return pool, err
+			return pool, liquidationResult{}, err
 		}
 	}
 
-	ctx.EventManager().EmitEvent(sdk.NewEvent(
-		types.EventTypeCloseMargin,
+	if len(liquidator) > 0 {
+		if rewardCoin, err := types.DecToCoin(liquidatorReward, position.CollateralDenom); err == nil && rewardCoin.Amount.IsPositive() {
+			if err := k.bankKeeper.SendCoinsFromModuleToAccount(sdk.WrapSDKContext(ctx), types.ModuleName, liquidator, sdk.NewCoins(rewardCoin)); err != nil {
+				return pool, liquidationResult{}, err
+			}
+		}
+	}
+
+	attributes := []sdk.Attribute{
 		sdk.NewAttribute(types.AttributeKeyTrader, position.Trader),
 		sdk.NewAttribute(types.AttributeKeyDenom, position.Denom),
 		sdk.NewAttribute(types.AttributeKeyPositionId, fmt.Sprintf("%d", position.Id)),
@@ -623,9 +694,23 @@ func (k Keeper) executePartialLiquidation(ctx sdk.Context, pool types.MarginPool
 		sdk.NewAttribute(types.AttributeKeyInsurancePayout, insuranceShare.String()),
 		sdk.NewAttribute(types.AttributeKeyBadDebtCovered, badDebt.String()),
 		sdk.NewAttribute(types.AttributeKeyPositionSize, newPositionSize.String()),
+	}
+	if len(liquidator) > 0 {
+		attributes = append(attributes, sdk.NewAttribute(types.AttributeKeyLiquidator, liquidator.String()))
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		types.EventTypeCloseMargin,
+		attributes...,
 	))
 
-	return pool, nil
+	return pool, liquidationResult{
+		liquidationType:  "partial",
+		payout:           payout,
+		liquidatorReward: liquidatorReward,
+		insurancePayout:  insuranceShare,
+		badDebt:          badDebt,
+	}, nil
 }
 
 func (k Keeper) clampDec(dec osmomath.Dec) osmomath.Dec {

@@ -7,6 +7,8 @@ const (
 	EventTypeCloseMargin      = "close_margin_position"
 	EventTypeCircuitBreaker   = "margin_circuit_breaker"
 	EventTypeLiquidationBatch = "margin_liquidation_batch"
+	EventTypeLiquidationAlert = "margin_liquidation_alert"
+	EventTypePriceVolatility  = "margin_price_volatility"
 
 	AttributeKeyTrader             = "trader"
 	AttributeKeyDenom              = "denom"
@@ -27,6 +29,7 @@ const (
 	AttributeKeyRealizedPnL        = "realized_pnl"
 	AttributeKeyFeesPaid           = "fees_paid"
 	AttributeKeyLiquidationPenalty = "liquidation_penalty"
+	AttributeKeyLiquidator         = "liquidator"
 	AttributeKeyLiquidatorReward   = "liquidator_reward"
 	AttributeKeyInsurancePayout    = "insurance_payout"
 	AttributeKeyLiquidationType    = "liquidation_type"
@@ -34,4 +37,6 @@ const (
 	AttributeKeyPaused             = "paused"
 	AttributeKeyResumeHeight       = "resume_height"
 	AttributeKeyPositionsProcessed = "positions_processed"
+	AttributeKeyVolatility         = "volatility"
+	AttributeKeyThreshold          = "threshold"
 )

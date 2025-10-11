@@ -14,6 +14,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	legacy.RegisterAminoMsg(cdc, &MsgSellToCurve{}, "osmosis/bondingcurve/sell")
 	legacy.RegisterAminoMsg(cdc, &MsgOpenMarginPosition{}, "osmosis/bondingcurve/open-margin")
 	legacy.RegisterAminoMsg(cdc, &MsgCloseMarginPosition{}, "osmosis/bondingcurve/close-margin")
+	legacy.RegisterAminoMsg(cdc, &MsgLiquidateMarginPosition{}, "osmosis/bondingcurve/liquidate-margin")
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -23,6 +24,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgSellToCurve{},
 		&MsgOpenMarginPosition{},
 		&MsgCloseMarginPosition{},
+		&MsgLiquidateMarginPosition{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

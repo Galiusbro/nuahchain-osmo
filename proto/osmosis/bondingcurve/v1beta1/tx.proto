@@ -13,6 +13,7 @@ service Msg {
   rpc SellToCurve(MsgSellToCurve) returns (MsgSellToCurveResponse);
   rpc OpenMarginPosition(MsgOpenMarginPosition) returns (MsgOpenMarginPositionResponse);
   rpc CloseMarginPosition(MsgCloseMarginPosition) returns (MsgCloseMarginPositionResponse);
+  rpc LiquidateMarginPosition(MsgLiquidateMarginPosition) returns (MsgLiquidateMarginPositionResponse);
 }
 
 message MsgBuyFromCurve {
@@ -81,4 +82,19 @@ message MsgCloseMarginPositionResponse {
   string payout_amount = 1;
   string realized_pnl = 2;
   string fees_paid = 3;
+}
+
+message MsgLiquidateMarginPosition {
+  option (amino.name) = "osmosis/bondingcurve/liquidate-margin";
+  option (cosmos.msg.v1.signer) = "liquidator";
+
+  string liquidator = 1;
+  uint64 position_id = 2;
+}
+
+message MsgLiquidateMarginPositionResponse {
+  string liquidation_type = 1;
+  string payout_amount = 2;
+  string liquidator_reward = 3;
+  string bad_debt = 4;
 }

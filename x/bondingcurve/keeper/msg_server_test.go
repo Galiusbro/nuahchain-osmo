@@ -382,7 +382,7 @@ func (s *KeeperTestSuite) TestProcessLiquidationsPartial() {
 	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
 	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
 
-	pool.LastPrice = osmomath.MustNewDecFromStr("0.97").String()
+	pool.LastPrice = osmomath.MustNewDecFromStr("0.98").String() // Very close to liquidation threshold for partial liquidation
 	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
 	s.Ctx = s.Ctx.WithBlockHeight(s.Ctx.BlockHeight() + 1)
 	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
@@ -442,6 +442,158 @@ func (s *KeeperTestSuite) TestProcessLiquidationsCircuitBreaker() {
 
 	marginPool, _ = s.App.BondingCurveKeeper.GetMarginPool(s.Ctx, s.denom)
 	s.Require().False(marginPool.LiquidationsPaused)
+}
+
+func (s *KeeperTestSuite) TestLiquidateMarginPositionFullExternal() {
+	s.setupMarginLiquidity(sdkmath.NewInt(5_000_000), osmomath.OneDec())
+
+	liquidator := s.TestAccs[6]
+
+	openResp, err := s.msgServer.OpenMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "500.0",
+		Leverage:         20,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+	})
+	s.Require().NoError(err)
+
+	positionBefore, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, openResp.PositionId)
+	s.Require().True(found)
+
+	collateral := positionBefore.CollateralAmountDec()
+	penalty := collateral.Mul(types.LiquidationPenaltyRate)
+	rewardDec := penalty.Mul(types.LiquidatorIncentiveRate)
+	expectedReward := sdkmath.NewIntFromBigInt(rewardDec.TruncateInt().BigInt())
+
+	pool, _ := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	pool.LastPrice = osmomath.OneDec().String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	pool.LastPrice = osmomath.MustNewDecFromStr("0.90").String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+
+	liquidatorBefore := s.App.BankKeeper.GetBalance(s.Ctx, liquidator, s.quoteDenom)
+
+	resp, err := s.msgServer.LiquidateMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgLiquidateMarginPosition{
+		Liquidator: liquidator.String(),
+		PositionId: openResp.PositionId,
+	})
+	s.Require().NoError(err)
+	s.Require().Equal("full", resp.LiquidationType)
+
+	rewardResp, err := osmomath.NewDecFromStr(resp.LiquidatorReward)
+	s.Require().NoError(err)
+	s.Require().True(rewardResp.Equal(rewardDec))
+
+	position, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, openResp.PositionId)
+	s.Require().True(found)
+	s.Require().Equal(types.PositionStatus_POSITION_STATUS_LIQUIDATED, position.Status)
+	s.Require().True(position.PositionSizeDec().IsZero())
+
+	liquidatorAfter := s.App.BankKeeper.GetBalance(s.Ctx, liquidator, s.quoteDenom)
+	s.Require().True(liquidatorAfter.Amount.GT(liquidatorBefore.Amount))
+	s.Require().Equal(expectedReward, liquidatorAfter.Amount.Sub(liquidatorBefore.Amount))
+
+	marginPool, found := s.App.BondingCurveKeeper.GetMarginPool(s.Ctx, s.denom)
+	s.Require().True(found)
+	s.Require().Equal(uint64(1), marginPool.TotalLiquidations)
+}
+
+func (s *KeeperTestSuite) TestLiquidateMarginPositionPartialExternal() {
+	s.setupMarginLiquidity(sdkmath.NewInt(20_000_000), osmomath.OneDec())
+
+	liquidator := s.TestAccs[6]
+
+	openResp, err := s.msgServer.OpenMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "20000.0",
+		Leverage:         60,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+	})
+	s.Require().NoError(err)
+
+	positionBefore, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, openResp.PositionId)
+	s.Require().True(found)
+	originalSize := positionBefore.PositionSizeDec()
+
+	fraction := types.PartialLiquidationFraction
+	partialCollateral := positionBefore.CollateralAmountDec().Mul(fraction)
+	penalty := partialCollateral.Mul(types.LiquidationPenaltyRate)
+	rewardDec := penalty.Mul(types.LiquidatorIncentiveRate)
+	expectedReward := sdkmath.NewIntFromBigInt(rewardDec.TruncateInt().BigInt())
+
+	pool, _ := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	pool.LastPrice = osmomath.OneDec().String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	pool.LastPrice = osmomath.MustNewDecFromStr("0.98").String() // Very close to liquidation threshold for partial liquidation
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+
+	liquidatorBefore := s.App.BankKeeper.GetBalance(s.Ctx, liquidator, s.quoteDenom)
+
+	resp, err := s.msgServer.LiquidateMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgLiquidateMarginPosition{
+		Liquidator: liquidator.String(),
+		PositionId: openResp.PositionId,
+	})
+	s.Require().NoError(err)
+	s.Require().Equal("partial", resp.LiquidationType)
+
+	rewardResp, err := osmomath.NewDecFromStr(resp.LiquidatorReward)
+	s.Require().NoError(err)
+	s.Require().True(rewardResp.Equal(rewardDec))
+
+	position, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, openResp.PositionId)
+	s.Require().True(found)
+	s.Require().Equal(types.PositionStatus_POSITION_STATUS_OPEN, position.Status)
+	s.Require().True(position.PositionSizeDec().LT(originalSize))
+	s.Require().True(position.PositionSizeDec().GT(osmomath.ZeroDec()))
+
+	liquidatorAfter := s.App.BankKeeper.GetBalance(s.Ctx, liquidator, s.quoteDenom)
+	s.Require().True(liquidatorAfter.Amount.GT(liquidatorBefore.Amount))
+	s.Require().Equal(expectedReward, liquidatorAfter.Amount.Sub(liquidatorBefore.Amount))
+
+	marginPool, found := s.App.BondingCurveKeeper.GetMarginPool(s.Ctx, s.denom)
+	s.Require().True(found)
+	s.Require().Equal(uint64(1), marginPool.TotalLiquidations)
+	s.Require().True(marginPool.TotalLongExposureDec().Equal(position.PositionSizeDec()))
+}
+
+func (s *KeeperTestSuite) TestLiquidateMarginPositionNotEligible() {
+	s.setupMarginLiquidity(sdkmath.NewInt(5_000_000), osmomath.OneDec())
+	liquidator := s.TestAccs[6]
+
+	openResp, err := s.msgServer.OpenMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "500.0",
+		Leverage:         10,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+	})
+	s.Require().NoError(err)
+
+	pool, _ := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	pool.LastPrice = osmomath.OneDec().String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	resp, err := s.msgServer.LiquidateMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgLiquidateMarginPosition{
+		Liquidator: liquidator.String(),
+		PositionId: openResp.PositionId,
+	})
+	s.Require().Error(err)
+	s.Require().ErrorIs(err, types.ErrPositionNotLiquidatable)
+	s.Require().Nil(resp)
+
+	position, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, openResp.PositionId)
+	s.Require().True(found)
+	s.Require().Equal(types.PositionStatus_POSITION_STATUS_OPEN, position.Status)
 }
 
 func (s *KeeperTestSuite) TestProcessLiquidationsStressBatching() {
@@ -1324,4 +1476,408 @@ func (s *KeeperTestSuite) TestLeverageAboveMaximum() {
 	})
 	s.Require().Error(err)
 	s.Require().ErrorIs(err, types.ErrInvalidLeverage)
+}
+
+// ===== SHORT POSITION LIQUIDATION TESTS =====
+
+func (s *KeeperTestSuite) TestProcessLiquidationsShort() {
+	s.setupMarginLiquidity(sdkmath.NewInt(2_000_000), osmomath.OneDec())
+
+	openResp, err := s.msgServer.OpenMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "500.0",
+		Leverage:         20,
+		PositionType:     types.PositionType_POSITION_TYPE_SHORT,
+	})
+	s.Require().NoError(err)
+
+	// Prime TWAP with stable price
+	pool, found := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	s.Require().True(found)
+	pool.LastPrice = osmomath.OneDec().String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	// Increase price above liquidation threshold for SHORT position
+	pool.LastPrice = osmomath.MustNewDecFromStr("1.60").String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+	s.Ctx = s.Ctx.WithBlockHeight(s.Ctx.BlockHeight() + 1)
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+	s.Ctx = s.Ctx.WithBlockHeight(s.Ctx.BlockHeight() + 1)
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	position, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, openResp.PositionId)
+	s.Require().True(found)
+	s.Require().Equal(types.PositionStatus_POSITION_STATUS_LIQUIDATED, position.Status)
+	s.Require().True(position.PositionSizeDec().IsZero())
+
+	marginPool, found := s.App.BondingCurveKeeper.GetMarginPool(s.Ctx, s.denom)
+	s.Require().True(found)
+	s.Require().True(marginPool.TotalShortExposureDec().IsZero())
+	s.Require().True(marginPool.TotalCollateralDec().IsZero())
+	s.Require().Equal(uint64(1), marginPool.TotalLiquidations)
+}
+
+func (s *KeeperTestSuite) TestLiquidateMarginPositionShortExternal() {
+	s.setupMarginLiquidity(sdkmath.NewInt(5_000_000), osmomath.OneDec())
+
+	liquidator := s.TestAccs[6]
+
+	openResp, err := s.msgServer.OpenMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "500.0",
+		Leverage:         20,
+		PositionType:     types.PositionType_POSITION_TYPE_SHORT,
+	})
+	s.Require().NoError(err)
+
+	positionBefore, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, openResp.PositionId)
+	s.Require().True(found)
+
+	collateral := positionBefore.CollateralAmountDec()
+	penalty := collateral.Mul(types.LiquidationPenaltyRate)
+	rewardDec := penalty.Mul(types.LiquidatorIncentiveRate)
+	expectedReward := sdkmath.NewIntFromBigInt(rewardDec.TruncateInt().BigInt())
+
+	pool, _ := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	pool.LastPrice = osmomath.OneDec().String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	// Increase price to trigger SHORT liquidation
+	pool.LastPrice = osmomath.MustNewDecFromStr("1.10").String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+
+	liquidatorBefore := s.App.BankKeeper.GetBalance(s.Ctx, liquidator, s.quoteDenom)
+
+	resp, err := s.msgServer.LiquidateMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgLiquidateMarginPosition{
+		Liquidator: liquidator.String(),
+		PositionId: openResp.PositionId,
+	})
+	s.Require().NoError(err)
+	s.Require().Equal("full", resp.LiquidationType)
+
+	rewardResp, err := osmomath.NewDecFromStr(resp.LiquidatorReward)
+	s.Require().NoError(err)
+	s.Require().True(rewardResp.Equal(rewardDec))
+
+	position, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, openResp.PositionId)
+	s.Require().True(found)
+	s.Require().Equal(types.PositionStatus_POSITION_STATUS_LIQUIDATED, position.Status)
+	s.Require().True(position.PositionSizeDec().IsZero())
+
+	liquidatorAfter := s.App.BankKeeper.GetBalance(s.Ctx, liquidator, s.quoteDenom)
+	s.Require().True(liquidatorAfter.Amount.GT(liquidatorBefore.Amount))
+	s.Require().Equal(expectedReward, liquidatorAfter.Amount.Sub(liquidatorBefore.Amount))
+
+	marginPool, found := s.App.BondingCurveKeeper.GetMarginPool(s.Ctx, s.denom)
+	s.Require().True(found)
+	s.Require().Equal(uint64(1), marginPool.TotalLiquidations)
+}
+
+// ===== PRICE VOLATILITY ALERT TESTS =====
+
+func (s *KeeperTestSuite) TestPriceVolatilityAlert() {
+	s.setupMarginLiquidity(sdkmath.NewInt(5_000_000), osmomath.OneDec())
+
+	openResp, err := s.msgServer.OpenMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "1000.0",
+		Leverage:         15,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+	})
+	s.Require().NoError(err)
+
+	// Set stable price for TWAP
+	pool, _ := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	pool.LastPrice = osmomath.OneDec().String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	// Trigger volatility alert with 40% price increase (above 30% threshold)
+	pool.LastPrice = osmomath.MustNewDecFromStr("1.40").String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+
+	// Process liquidations to trigger volatility check
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	// Check that position is still open (not liquidated due to circuit breaker)
+	position, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, openResp.PositionId)
+	s.Require().True(found)
+	s.Require().Equal(types.PositionStatus_POSITION_STATUS_OPEN, position.Status)
+}
+
+// ===== EDGE CASE TESTS =====
+
+func (s *KeeperTestSuite) TestLiquidationWithZeroPrice() {
+	s.setupMarginLiquidity(sdkmath.NewInt(2_000_000), osmomath.OneDec())
+
+	openResp, err := s.msgServer.OpenMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "500.0",
+		Leverage:         20,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+	})
+	s.Require().NoError(err)
+
+	// Set zero price
+	pool, _ := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	pool.LastPrice = osmomath.ZeroDec().String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+
+	// Should not liquidate with zero price
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	position, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, openResp.PositionId)
+	s.Require().True(found)
+	s.Require().Equal(types.PositionStatus_POSITION_STATUS_OPEN, position.Status)
+}
+
+func (s *KeeperTestSuite) TestLiquidationWithInsufficientInsurance() {
+	s.setupMarginLiquidity(sdkmath.NewInt(1_000_000), osmomath.OneDec())
+
+	// Create position that will result in bad debt
+	openResp, err := s.msgServer.OpenMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "100.0", // Small collateral
+		Leverage:         50,      // High leverage
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+	})
+	s.Require().NoError(err)
+
+	// Set price that will cause significant loss - for 50x leverage with 10% buffer
+	// Liquidation price = 1.0 * (1 - 0.1) = 0.9, so we need price < 0.9
+	pool, _ := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	pool.LastPrice = osmomath.MustNewDecFromStr("0.5").String() // 50% loss to trigger liquidation
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+
+	// Process liquidations
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	position, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, openResp.PositionId)
+	s.Require().True(found)
+	s.Require().Equal(types.PositionStatus_POSITION_STATUS_LIQUIDATED, position.Status,
+		"Position should be liquidated, got status: %d", position.Status)
+
+	// Check that bad debt was recorded
+	marginPool, found := s.App.BondingCurveKeeper.GetMarginPool(s.Ctx, s.denom)
+	s.Require().True(found)
+	s.Require().True(marginPool.TotalBadDebtDec().GT(osmomath.ZeroDec()))
+}
+
+// ===== ERROR SCENARIO TESTS =====
+
+func (s *KeeperTestSuite) TestLiquidatePositionNotFound() {
+	liquidator := s.TestAccs[6]
+
+	_, err := s.msgServer.LiquidateMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgLiquidateMarginPosition{
+		Liquidator: liquidator.String(),
+		PositionId: 99999, // Non-existent position
+	})
+	s.Require().Error(err)
+	s.Require().ErrorIs(err, types.ErrPositionNotFound)
+}
+
+func (s *KeeperTestSuite) TestLiquidatePositionClosed() {
+	s.setupMarginLiquidity(sdkmath.NewInt(2_000_000), osmomath.OneDec())
+	liquidator := s.TestAccs[6]
+
+	openResp, err := s.msgServer.OpenMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "500.0",
+		Leverage:         20,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+	})
+	s.Require().NoError(err)
+
+	// Liquidate position first using external liquidator
+	pool, _ := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	pool.LastPrice = osmomath.MustNewDecFromStr("0.80").String() // Less extreme price to avoid circuit breaker
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+
+	// Use external liquidator to close the position
+	_, err = s.msgServer.LiquidateMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgLiquidateMarginPosition{
+		Liquidator: liquidator.String(),
+		PositionId: openResp.PositionId,
+	})
+	s.Require().NoError(err)
+
+	// Try to liquidate already liquidated position
+	_, err = s.msgServer.LiquidateMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgLiquidateMarginPosition{
+		Liquidator: liquidator.String(),
+		PositionId: openResp.PositionId,
+	})
+	s.Require().Error(err)
+	s.Require().ErrorIs(err, types.ErrPositionClosed)
+}
+
+func (s *KeeperTestSuite) TestLiquidateWhenPaused() {
+	s.setupMarginLiquidity(sdkmath.NewInt(5_000_000), osmomath.OneDec())
+	liquidator := s.TestAccs[6]
+
+	openResp, err := s.msgServer.OpenMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "1000.0",
+		Leverage:         15,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+	})
+	s.Require().NoError(err)
+
+	// Trigger circuit breaker to pause liquidations
+	pool, _ := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	pool.LastPrice = osmomath.MustNewDecFromStr("5.0").String() // 500% increase
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	// Try to liquidate when paused
+	_, err = s.msgServer.LiquidateMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgLiquidateMarginPosition{
+		Liquidator: liquidator.String(),
+		PositionId: openResp.PositionId,
+	})
+	s.Require().Error(err)
+	s.Require().ErrorIs(err, types.ErrLiquidationsPaused)
+}
+
+func (s *KeeperTestSuite) TestLiquidateCircuitBreaker() {
+	s.setupMarginLiquidity(sdkmath.NewInt(5_000_000), osmomath.OneDec())
+	liquidator := s.TestAccs[6]
+
+	openResp, err := s.msgServer.OpenMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "1000.0",
+		Leverage:         15,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+	})
+	s.Require().NoError(err)
+
+	// Set stable price first
+	pool, _ := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	pool.LastPrice = osmomath.OneDec().String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	// Trigger circuit breaker during liquidation attempt
+	pool.LastPrice = osmomath.MustNewDecFromStr("5.0").String() // 500% increase
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+
+	_, err = s.msgServer.LiquidateMarginPosition(sdk.WrapSDKContext(s.Ctx), &types.MsgLiquidateMarginPosition{
+		Liquidator: liquidator.String(),
+		PositionId: openResp.PositionId,
+	})
+	s.Require().Error(err)
+	s.Require().ErrorIs(err, types.ErrCircuitBreaker)
+}
+
+// ===== GAS OPTIMIZATION TESTS =====
+
+func (s *KeeperTestSuite) TestLiquidationGasLimits() {
+	s.setupMarginLiquidity(sdkmath.NewInt(100_000_000), osmomath.OneDec())
+
+	// Create many positions to test gas limits
+	var positionIDs []uint64
+	for i := 0; i < 100; i++ {
+		collateral := fmt.Sprintf("%d.0", 100+i*2)
+		resp, err := s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+			Trader:           s.trader.String(),
+			Denom:            s.denom,
+			CollateralDenom:  s.quoteDenom,
+			CollateralAmount: collateral,
+			Leverage:         30,
+			PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		})
+		s.Require().NoError(err)
+		positionIDs = append(positionIDs, resp.PositionId)
+	}
+
+	// Set price to trigger liquidations
+	pool, _ := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	pool.LastPrice = osmomath.MustNewDecFromStr("0.3").String()
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+
+	// Process liquidations - should respect gas limits
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	// Count liquidated positions
+	liquidatedCount := 0
+	for _, id := range positionIDs {
+		pos, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, id)
+		s.Require().True(found)
+		if pos.Status == types.PositionStatus_POSITION_STATUS_LIQUIDATED {
+			liquidatedCount++
+		}
+	}
+
+	// Should not liquidate more than maxLiquidationsPerBlock (50)
+	s.Require().True(liquidatedCount <= 50, "Should not exceed gas limit of 50 liquidations per block")
+}
+
+func (s *KeeperTestSuite) TestLiquidationPrioritization() {
+	s.setupMarginLiquidity(sdkmath.NewInt(50_000_000), osmomath.OneDec())
+
+	// Create positions with different liquidation distances
+	// Higher leverage = closer to liquidation threshold
+	positions := []struct {
+		collateral string
+		leverage   uint32
+		expected   bool // whether it should be liquidated first
+	}{
+		{"1000.0", 20, true}, // High leverage - should be liquidated
+		{"2000.0", 15, true}, // Medium leverage - should be liquidated
+		{"1500.0", 18, true}, // High leverage - should be liquidated
+		{"3000.0", 1, false}, // Very low leverage - should remain open
+	}
+
+	var positionIDs []uint64
+	for _, pos := range positions {
+		resp, err := s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+			Trader:           s.trader.String(),
+			Denom:            s.denom,
+			CollateralDenom:  s.quoteDenom,
+			CollateralAmount: pos.collateral,
+			Leverage:         pos.leverage,
+			PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		})
+		s.Require().NoError(err)
+		positionIDs = append(positionIDs, resp.PositionId)
+	}
+
+	// Set price to trigger some liquidations - need lower price for higher leverage positions
+	pool, _ := s.App.BondingCurveKeeper.GetPool(s.Ctx, s.denom)
+	pool.LastPrice = osmomath.MustNewDecFromStr("0.92").String() // 8% drop to trigger liquidations for high leverage only
+	s.App.BondingCurveKeeper.SetPool(s.Ctx, pool)
+
+	// Process liquidations
+	s.Require().NoError(s.App.BondingCurveKeeper.ProcessLiquidations(s.Ctx))
+
+	// Check that positions closer to liquidation are processed first
+	for i, id := range positionIDs {
+		pos, found := s.App.BondingCurveKeeper.GetMarginPosition(s.Ctx, id)
+		s.Require().True(found)
+
+		if positions[i].expected {
+			// These should be liquidated
+			s.Require().Equal(types.PositionStatus_POSITION_STATUS_LIQUIDATED, pos.Status,
+				"Position %d should be liquidated", i)
+		} else {
+			// These should remain open
+			s.Require().Equal(types.PositionStatus_POSITION_STATUS_OPEN, pos.Status,
+				"Position %d should remain open", i)
+		}
+	}
 }

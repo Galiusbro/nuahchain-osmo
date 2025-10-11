@@ -577,6 +577,94 @@ func (s msgServer) CloseMarginPosition(goCtx context.Context, msg *types.MsgClos
 	}, nil
 }
 
+func (s msgServer) LiquidateMarginPosition(goCtx context.Context, msg *types.MsgLiquidateMarginPosition) (*types.MsgLiquidateMarginPositionResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	liquidator, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	if err != nil {
+		return nil, err
+	}
+
+	position, found := s.GetMarginPosition(ctx, msg.PositionId)
+	if !found {
+		return nil, types.ErrPositionNotFound
+	}
+
+	if position.Status != types.PositionStatus_POSITION_STATUS_OPEN {
+		return nil, types.ErrPositionClosed
+	}
+
+	marginPool := s.ensureMarginPool(ctx, position.Denom)
+	updatedPool, priceInfo, err := s.updatePriceInfo(ctx, marginPool)
+	if err != nil {
+		return nil, err
+	}
+	marginPool = updatedPool
+
+	if priceInfo.TwapPrice.IsPositive() && !priceInfo.IsCircuitBreakerTriggered() {
+		deviation := priceInfo.MarkPrice.Sub(priceInfo.TwapPrice).Abs().Quo(priceInfo.TwapPrice)
+		if deviation.GTE(priceVolatilityAlertThreshold) {
+			ctx.EventManager().EmitEvent(sdk.NewEvent(
+				types.EventTypePriceVolatility,
+				sdk.NewAttribute(types.AttributeKeyDenom, position.Denom),
+				sdk.NewAttribute(types.AttributeKeyPrice, priceInfo.MarkPrice.String()),
+				sdk.NewAttribute(types.AttributeKeyVolatility, deviation.String()),
+			))
+		}
+	}
+
+	if marginPool.LiquidationsPaused {
+		if priceInfo.IsCircuitBreakerTriggered() {
+			return nil, types.ErrLiquidationsPaused
+		}
+		marginPool.LiquidationsPaused = false
+		s.setMarginPool(ctx, marginPool)
+	}
+
+	if priceInfo.IsCircuitBreakerTriggered() {
+		marginPool.LiquidationsPaused = true
+		marginPool.LastLiquidationHeight = uint64(ctx.BlockHeight())
+		s.setMarginPool(ctx, marginPool)
+		ctx.EventManager().EmitEvent(sdk.NewEvent(
+			types.EventTypeCircuitBreaker,
+			sdk.NewAttribute(types.AttributeKeyDenom, position.Denom),
+			sdk.NewAttribute(types.AttributeKeyPrice, priceInfo.MarkPrice.String()),
+			sdk.NewAttribute(types.AttributeKeyPaused, "true"),
+		))
+		return nil, types.ErrCircuitBreaker
+	}
+
+	ratio := s.liquidationRatio(position, priceInfo.MarkPrice)
+	if ratio.IsNegative() {
+		return nil, types.ErrPositionNotLiquidatable
+	}
+
+	shouldPartial := position.PositionSizeDec().GTE(types.MaxPartialPositionSize) && ratio.LTE(types.PartialLiquidationBuffer)
+
+	var (
+		result    liquidationResult
+		poolAfter types.MarginPool
+	)
+
+	if shouldPartial {
+		poolAfter, result, err = s.executePartialLiquidation(ctx, marginPool, position, priceInfo.MarkPrice, liquidator)
+	} else {
+		poolAfter, result, err = s.executeFullLiquidation(ctx, marginPool, position, priceInfo.MarkPrice, liquidator)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	s.setMarginPool(ctx, poolAfter)
+
+	return &types.MsgLiquidateMarginPositionResponse{
+		LiquidationType:  result.liquidationType,
+		PayoutAmount:     result.payout.String(),
+		LiquidatorReward: result.liquidatorReward.String(),
+		BadDebt:          result.badDebt.String(),
+	}, nil
+}
+
 func (s msgServer) distributeTokens(ctx sdk.Context, trader sdk.AccAddress, coin sdk.Coin) error {
 	wallet, err := s.bondingCurveWallet(ctx)
 	if err != nil {
