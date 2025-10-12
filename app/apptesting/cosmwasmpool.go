@@ -266,7 +266,7 @@ func (s *KeeperTestHelper) StoreCosmWasmPoolContractCodeCustomProject(contractNa
 }
 
 func (s *KeeperTestHelper) GetContractCode(contractName string) []byte {
-	return s.GetContractCodeCustomProject(contractName, "osmosis", "x/cosmwasmpool/bytecode")
+	return s.GetContractCodeCustomProject(contractName, "nuahchain_osmosis", "x/cosmwasmpool/bytecode")
 }
 
 // GetContractCode returns the contract code for the given contract name.
@@ -275,10 +275,21 @@ func (s *KeeperTestHelper) GetContractCodeCustomProject(contractName string, pro
 	workingDir, err := os.Getwd()
 	s.Require().NoError(err)
 
-	projectRootPath := fmt.Sprintf("/%s/", projectName)
-	projectRootIndex := strings.LastIndex(workingDir, projectRootPath) + len(projectRootPath)
-	workingDir = workingDir[:projectRootIndex]
-	code, err := os.ReadFile(workingDir + path + "/" + contractName + ".wasm")
+	// Find the project root by looking for the project name in the path
+	projectRootPath := fmt.Sprintf("/%s", projectName)
+	projectRootIndex := strings.LastIndex(workingDir, projectRootPath)
+	if projectRootIndex != -1 {
+		workingDir = workingDir[:projectRootIndex+len(projectRootPath)]
+	}
+
+	// If we're already in a subdirectory that contains part of the path, go up to the project root
+	if strings.Contains(workingDir, "/x/cosmwasmpool") && !strings.HasSuffix(workingDir, "/x/cosmwasmpool") {
+		cosmwasmpoolIndex := strings.LastIndex(workingDir, "/x/cosmwasmpool")
+		workingDir = workingDir[:cosmwasmpoolIndex]
+	}
+
+	fullPath := workingDir + "/" + path + "/" + contractName + ".wasm"
+	code, err := os.ReadFile(fullPath)
 	s.Require().NoError(err)
 
 	return code
