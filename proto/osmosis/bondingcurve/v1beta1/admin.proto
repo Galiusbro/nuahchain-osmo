@@ -1,0 +1,46 @@
+syntax = "proto3";
+package osmosis.bondingcurve.v1beta1;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "gogoproto/gogo.proto";
+import "osmosis/bondingcurve/v1beta1/params.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types";
+
+message PendingParams {
+  Params params = 1 [(gogoproto.nullable) = false];
+  google.protobuf.Timestamp apply_time = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  uint64 apply_height = 3;
+}
+
+message PauseInfo {
+  bool paused = 1;
+  string reason = 2;
+  google.protobuf.Timestamp resume_at = 3 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp updated_at = 4 [(gogoproto.stdtime) = true];
+}
+
+message FreezeInfo {
+  bool frozen = 1;
+  string reason = 2;
+  google.protobuf.Timestamp unfreeze_at = 3 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp updated_at = 4 [(gogoproto.stdtime) = true];
+}
+
+message EmergencyConfig {
+  repeated string signers = 1;
+  uint32 threshold = 2;
+  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true];
+}
+
+message EmergencyAction {
+  uint64 id = 1;
+  string action_type = 2;
+  string target = 3;
+  google.protobuf.Timestamp requested_at = 4 [(gogoproto.stdtime) = true];
+  google.protobuf.Timestamp execute_at = 5 [(gogoproto.stdtime) = true];
+  repeated string signers = 6;
+  string reason = 7;
+  uint32 threshold = 8;
+}

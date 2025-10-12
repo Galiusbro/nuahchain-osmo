@@ -1,6 +1,8 @@
 syntax = "proto3";
 package osmosis.bondingcurve.v1beta1;
 
+import "cosmos/base/v1beta1/coin.proto";
+import "google/protobuf/duration.proto";
 import "gogoproto/gogo.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types";
@@ -11,4 +13,10 @@ message Params {
   string max_supply = 3;
   string start_price = 4;
   string end_price = 5;
+  cosmos.base.v1beta1.Coin token_creation_fee = 6 [(gogoproto.nullable) = false];
+  google.protobuf.Duration founder_claim_period = 7 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
+  uint32 max_leverage = 8;
+  string liquidation_penalty = 9;
+  string protocol_fee_rate = 10;
+  string min_collateral_ratio = 11;
 }

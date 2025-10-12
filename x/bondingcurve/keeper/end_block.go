@@ -16,6 +16,10 @@ import (
 
 // EndBlocker processes bonding curve pools and activates DEX liquidity when thresholds are met.
 func (k Keeper) EndBlocker(ctx sdk.Context) error {
+	if err := k.applyPendingParams(ctx); err != nil {
+		return err
+	}
+
 	if err := k.ProcessLiquidations(ctx); err != nil {
 		return err
 	}

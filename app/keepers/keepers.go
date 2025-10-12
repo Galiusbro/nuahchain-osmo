@@ -614,6 +614,7 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 		appKeepers.BankKeeper,
 		appKeepers.UserTokenKeeper,
 		appKeepers.PoolManagerKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 	appKeepers.BondingCurveKeeper = &bondingCurveKeeper
 

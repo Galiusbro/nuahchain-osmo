@@ -27,6 +27,18 @@ func (p Params) EndPriceDec() osmomath.Dec {
 	return MustNewDecFromStr(p.EndPrice)
 }
 
+func (p Params) LiquidationPenaltyDec() osmomath.Dec {
+	return MustNewDecFromStr(p.LiquidationPenalty)
+}
+
+func (p Params) ProtocolFeeRateDec() osmomath.Dec {
+	return MustNewDecFromStr(p.ProtocolFeeRate)
+}
+
+func (p Params) MinCollateralRatioDec() osmomath.Dec {
+	return MustNewDecFromStr(p.MinCollateralRatio)
+}
+
 func (p Params) PriceSlope() osmomath.Dec {
 	maxSupply := p.MaxSupplyDec()
 	if maxSupply.IsZero() {

@@ -25,6 +25,7 @@ type Keeper struct {
 	bankKeeper      types.BankKeeper
 	userTokenKeeper types.UserTokenKeeper
 	poolManager     types.PoolManagerKeeper
+	authority       string
 }
 
 const (
@@ -46,6 +47,7 @@ func NewKeeper(
 	bankKeeper types.BankKeeper,
 	userTokenKeeper types.UserTokenKeeper,
 	poolManager types.PoolManagerKeeper,
+	authority string,
 ) Keeper {
 	if ps.Name() != "" && !ps.HasKeyTable() {
 		ps = ps.WithKeyTable(types.ParamKeyTable())
@@ -59,6 +61,7 @@ func NewKeeper(
 		bankKeeper:      bankKeeper,
 		userTokenKeeper: userTokenKeeper,
 		poolManager:     poolManager,
+		authority:       authority,
 	}
 }
 
@@ -88,6 +91,10 @@ func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 
 func (k Keeper) getStore(ctx sdk.Context) storetypes.KVStore {
 	return ctx.KVStore(k.storeKey)
+}
+
+func (k Keeper) GetAuthority() string {
+	return k.authority
 }
 
 func (k Keeper) GetPool(ctx sdk.Context, denom string) (types.BondingCurvePool, bool) {
@@ -130,6 +137,33 @@ func (k Keeper) setMarginPool(ctx sdk.Context, pool types.MarginPool) {
 
 func (k Keeper) SetMarginPool(ctx sdk.Context, pool types.MarginPool) {
 	k.setMarginPool(ctx, pool)
+}
+
+func (k Keeper) applyPendingParams(ctx sdk.Context) error {
+	pending, found := k.getPendingParams(ctx)
+	if !found {
+		return nil
+	}
+
+	if !pending.Ready(ctx.BlockTime(), ctx.BlockHeight()) {
+		return nil
+	}
+
+	params := pending.Params
+	if err := params.Validate(); err != nil {
+		k.deletePendingParams(ctx)
+		return err
+	}
+
+	k.SetParams(ctx, params)
+	k.deletePendingParams(ctx)
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		types.EventTypeParamsApplied,
+		sdk.NewAttribute(types.AttributeKeyAuthority, k.authority),
+	))
+
+	return nil
 }
 
 func (k Keeper) ensurePool(ctx sdk.Context, denom string) types.BondingCurvePool {
@@ -275,6 +309,10 @@ type liquidationResult struct {
 }
 
 func (k Keeper) ProcessLiquidations(ctx sdk.Context) error {
+	if global, ok := k.getGlobalPause(ctx); ok && global.IsActive(ctx.BlockTime()) {
+		return nil
+	}
+
 	store := k.getStore(ctx)
 	iterator := storetypes.KVStorePrefixIterator(store, types.MarginPositionKeyPrefix)
 	defer iterator.Close()
@@ -296,6 +334,13 @@ func (k Keeper) ProcessLiquidations(ctx sdk.Context) error {
 		marginPool := k.ensureMarginPool(ctx, position.Denom)
 		updatedPool, priceInfo, err := k.updatePriceInfo(ctx, marginPool)
 		if err != nil {
+			continue
+		}
+
+		if pauseInfo, ok := k.getTokenPause(ctx, position.Denom); ok && pauseInfo.IsActive(ctx.BlockTime()) {
+			continue
+		}
+		if freezeInfo, ok := k.getFreezeInfo(ctx, types.FreezeTargetType_FREEZE_TARGET_TYPE_TOKEN, position.Denom); ok && freezeInfo.IsFrozen(ctx.BlockTime()) {
 			continue
 		}
 

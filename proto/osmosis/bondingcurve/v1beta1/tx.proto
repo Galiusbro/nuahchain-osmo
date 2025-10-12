@@ -3,8 +3,11 @@ package osmosis.bondingcurve.v1beta1;
 
 import "amino/amino.proto";
 import "cosmos/msg/v1/msg.proto";
+import "google/protobuf/duration.proto";
 import "gogoproto/gogo.proto";
+import "osmosis/bondingcurve/v1beta1/admin.proto";
 import "osmosis/bondingcurve/v1beta1/margin.proto";
+import "osmosis/bondingcurve/v1beta1/params.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types";
 
@@ -14,6 +17,11 @@ service Msg {
   rpc OpenMarginPosition(MsgOpenMarginPosition) returns (MsgOpenMarginPositionResponse);
   rpc CloseMarginPosition(MsgCloseMarginPosition) returns (MsgCloseMarginPositionResponse);
   rpc LiquidateMarginPosition(MsgLiquidateMarginPosition) returns (MsgLiquidateMarginPositionResponse);
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+  rpc SetEmergencyPause(MsgSetEmergencyPause) returns (MsgSetEmergencyPauseResponse);
+  rpc SetTokenPause(MsgSetTokenPause) returns (MsgSetTokenPauseResponse);
+  rpc ForceLiquidation(MsgForceLiquidation) returns (MsgForceLiquidationResponse);
+  rpc SetFreeze(MsgSetFreeze) returns (MsgSetFreezeResponse);
 }
 
 message MsgBuyFromCurve {
@@ -97,4 +105,84 @@ message MsgLiquidateMarginPositionResponse {
   string payout_amount = 2;
   string liquidator_reward = 3;
   string bad_debt = 4;
+}
+
+message MsgUpdateParams {
+  option (amino.name) = "osmosis/bondingcurve/update-params";
+  option (cosmos.msg.v1.signer) = "authority";
+
+  string authority = 1;
+  Params params = 2 [(gogoproto.nullable) = false];
+}
+
+message MsgUpdateParamsResponse {
+  PendingParams pending_params = 1;
+}
+
+message MsgSetEmergencyPause {
+  option (amino.name) = "osmosis/bondingcurve/set-emergency-pause";
+  option (cosmos.msg.v1.signer) = "authority";
+
+  string authority = 1;
+  bool paused = 2;
+  string reason = 3;
+  google.protobuf.Duration resume_in = 4 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
+  repeated string signers = 5;
+}
+
+message MsgSetEmergencyPauseResponse {
+  PauseInfo status = 1;
+}
+
+message MsgSetTokenPause {
+  option (amino.name) = "osmosis/bondingcurve/set-token-pause";
+  option (cosmos.msg.v1.signer) = "authority";
+
+  string authority = 1;
+  string denom = 2;
+  bool paused = 3;
+  string reason = 4;
+  google.protobuf.Duration resume_in = 5 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
+  repeated string signers = 6;
+}
+
+message MsgSetTokenPauseResponse {
+  PauseInfo status = 1;
+}
+
+message MsgForceLiquidation {
+  option (amino.name) = "osmosis/bondingcurve/force-liquidation";
+  option (cosmos.msg.v1.signer) = "authority";
+
+  string authority = 1;
+  repeated uint64 position_ids = 2;
+  string reason = 3;
+  repeated string signers = 4;
+}
+
+message MsgForceLiquidationResponse {
+  uint64 positions_processed = 1;
+}
+
+enum FreezeTargetType {
+  FREEZE_TARGET_TYPE_UNSPECIFIED = 0;
+  FREEZE_TARGET_TYPE_ADDRESS = 1;
+  FREEZE_TARGET_TYPE_TOKEN = 2;
+}
+
+message MsgSetFreeze {
+  option (amino.name) = "osmosis/bondingcurve/set-freeze";
+  option (cosmos.msg.v1.signer) = "authority";
+
+  string authority = 1;
+  FreezeTargetType target_type = 2;
+  string target = 3;
+  bool frozen = 4;
+  string reason = 5;
+  google.protobuf.Duration duration = 6 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
+  repeated string signers = 7;
+}
+
+message MsgSetFreezeResponse {
+  FreezeInfo status = 1;
 }

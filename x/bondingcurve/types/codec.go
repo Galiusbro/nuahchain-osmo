@@ -15,6 +15,11 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	legacy.RegisterAminoMsg(cdc, &MsgOpenMarginPosition{}, "osmosis/bondingcurve/open-margin")
 	legacy.RegisterAminoMsg(cdc, &MsgCloseMarginPosition{}, "osmosis/bondingcurve/close-margin")
 	legacy.RegisterAminoMsg(cdc, &MsgLiquidateMarginPosition{}, "osmosis/bondingcurve/liquidate-margin")
+	legacy.RegisterAminoMsg(cdc, &MsgUpdateParams{}, "osmosis/bondingcurve/update-params")
+	legacy.RegisterAminoMsg(cdc, &MsgSetEmergencyPause{}, "osmosis/bondingcurve/emergency-pause")
+	legacy.RegisterAminoMsg(cdc, &MsgSetTokenPause{}, "osmosis/bondingcurve/token-pause")
+	legacy.RegisterAminoMsg(cdc, &MsgForceLiquidation{}, "osmosis/bondingcurve/force-liquidation")
+	legacy.RegisterAminoMsg(cdc, &MsgSetFreeze{}, "osmosis/bondingcurve/set-freeze")
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -25,6 +30,11 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgOpenMarginPosition{},
 		&MsgCloseMarginPosition{},
 		&MsgLiquidateMarginPosition{},
+		&MsgUpdateParams{},
+		&MsgSetEmergencyPause{},
+		&MsgSetTokenPause{},
+		&MsgForceLiquidation{},
+		&MsgSetFreeze{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

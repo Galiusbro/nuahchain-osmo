@@ -26,6 +26,34 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 	for _, position := range genState.MarginPositions {
 		k.setMarginPosition(ctx, position)
 	}
+
+	if genState.GlobalPause != nil {
+		k.setGlobalPause(ctx, *genState.GlobalPause)
+	}
+
+	for _, pause := range genState.TokenPauses {
+		k.setTokenPause(ctx, pause.Denom, pause.Info)
+	}
+
+	for _, freeze := range genState.FreezeEntries {
+		k.setFreezeInfo(ctx, freeze.TargetType, freeze.Target, freeze.Info)
+	}
+
+	if genState.PendingParams != nil {
+		k.setPendingParams(ctx, *genState.PendingParams)
+	}
+
+	for _, action := range genState.EmergencyActions {
+		k.setEmergencyAction(ctx, action)
+	}
+
+	if genState.EmergencyActionSeq != 0 {
+		k.setEmergencyActionSeq(ctx, genState.EmergencyActionSeq)
+	}
+
+	if genState.EmergencyConfig != nil {
+		k.setEmergencyConfig(ctx, *genState.EmergencyConfig)
+	}
 }
 
 func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
@@ -33,6 +61,13 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 	pools := []types.BondingCurvePool{}
 	marginPools := []types.MarginPool{}
 	marginPositions := []types.MarginPosition{}
+	var globalPause *types.PauseInfo
+	tokenPauses := []types.TokenPauseEntry{}
+	freezeEntries := []types.FreezeEntry{}
+	var pendingParams *types.PendingParams
+	emergencyActions := []types.EmergencyAction{}
+	var emergencyConfig *types.EmergencyConfig
+	emergencySeq := k.getEmergencyActionSeq(ctx)
 
 	store := k.getStore(ctx)
 	iterator := storetypes.KVStorePrefixIterator(store, types.TokenPoolKeyPrefix)
@@ -62,10 +97,57 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 		marginPositions = append(marginPositions, position)
 	}
 
+	if info, found := k.getGlobalPause(ctx); found {
+		globalPause = &info
+	}
+
+	pauseIter := storetypes.KVStorePrefixIterator(store, types.TokenPauseKeyPrefix)
+	defer pauseIter.Close()
+	for ; pauseIter.Valid(); pauseIter.Next() {
+		var info types.PauseInfo
+		k.cdc.MustUnmarshal(pauseIter.Value(), &info)
+		denom := string(pauseIter.Key())
+		tokenPauses = append(tokenPauses, types.TokenPauseEntry{Denom: denom, Info: info})
+	}
+
+	freezeIter := storetypes.KVStorePrefixIterator(store, types.FreezeKeyPrefix)
+	defer freezeIter.Close()
+	for ; freezeIter.Valid(); freezeIter.Next() {
+		var info types.FreezeInfo
+		k.cdc.MustUnmarshal(freezeIter.Value(), &info)
+		key := freezeIter.Key()
+		if len(key) == 0 {
+			continue
+		}
+		typeKey := types.FreezeTargetType(key[0])
+		target := string(key[1:])
+		freezeEntries = append(freezeEntries, types.FreezeEntry{TargetType: typeKey, Target: target, Info: info})
+	}
+
+	if pending, found := k.getPendingParams(ctx); found {
+		pendingCopy := pending
+		pendingParams = &pendingCopy
+	}
+
+	k.iterateEmergencyActions(ctx, 0, func(action types.EmergencyAction) bool {
+		emergencyActions = append(emergencyActions, action)
+		return false
+	})
+
+	config := k.getEmergencyConfig(ctx)
+	emergencyConfig = &config
+
 	return &types.GenesisState{
-		Params:          params,
-		Pools:           pools,
-		MarginPools:     marginPools,
-		MarginPositions: marginPositions,
+		Params:             params,
+		Pools:              pools,
+		MarginPools:        marginPools,
+		MarginPositions:    marginPositions,
+		GlobalPause:        globalPause,
+		TokenPauses:        tokenPauses,
+		FreezeEntries:      freezeEntries,
+		PendingParams:      pendingParams,
+		EmergencyActions:   emergencyActions,
+		EmergencyConfig:    emergencyConfig,
+		EmergencyActionSeq: emergencySeq,
 	}
 }

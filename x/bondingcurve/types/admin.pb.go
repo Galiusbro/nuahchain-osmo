@@ -7,15 +7,20 @@ import (
 	fmt "fmt"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
+	_ "google.golang.org/protobuf/types/known/durationpb"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+	time "time"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
+var _ = time.Kitchen
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
@@ -24,8 +29,9 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type PendingParams struct {
-	Params    *Params `protobuf:"bytes,1,opt,name=params,proto3" json:"params,omitempty"`
-	ApplyTime int64   `protobuf:"varint,2,opt,name=apply_time,json=applyTime,proto3" json:"apply_time,omitempty"`
+	Params      Params    `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
+	ApplyTime   time.Time `protobuf:"bytes,2,opt,name=apply_time,json=applyTime,proto3,stdtime" json:"apply_time"`
+	ApplyHeight uint64    `protobuf:"varint,3,opt,name=apply_height,json=applyHeight,proto3" json:"apply_height,omitempty"`
 }
 
 func (m *PendingParams) Reset()         { *m = PendingParams{} }
@@ -61,25 +67,32 @@ func (m *PendingParams) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_PendingParams proto.InternalMessageInfo
 
-func (m *PendingParams) GetParams() *Params {
+func (m *PendingParams) GetParams() Params {
 	if m != nil {
 		return m.Params
 	}
-	return nil
+	return Params{}
 }
 
-func (m *PendingParams) GetApplyTime() int64 {
+func (m *PendingParams) GetApplyTime() time.Time {
 	if m != nil {
 		return m.ApplyTime
+	}
+	return time.Time{}
+}
+
+func (m *PendingParams) GetApplyHeight() uint64 {
+	if m != nil {
+		return m.ApplyHeight
 	}
 	return 0
 }
 
 type PauseInfo struct {
-	Paused    bool   `protobuf:"varint,1,opt,name=paused,proto3" json:"paused,omitempty"`
-	Reason    string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	ResumeAt  int64  `protobuf:"varint,3,opt,name=resume_at,json=resumeAt,proto3" json:"resume_at,omitempty"`
-	UpdatedAt int64  `protobuf:"varint,4,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Paused    bool       `protobuf:"varint,1,opt,name=paused,proto3" json:"paused,omitempty"`
+	Reason    string     `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	ResumeAt  *time.Time `protobuf:"bytes,3,opt,name=resume_at,json=resumeAt,proto3,stdtime" json:"resume_at,omitempty"`
+	UpdatedAt *time.Time `protobuf:"bytes,4,opt,name=updated_at,json=updatedAt,proto3,stdtime" json:"updated_at,omitempty"`
 }
 
 func (m *PauseInfo) Reset()         { *m = PauseInfo{} }
@@ -129,25 +142,25 @@ func (m *PauseInfo) GetReason() string {
 	return ""
 }
 
-func (m *PauseInfo) GetResumeAt() int64 {
+func (m *PauseInfo) GetResumeAt() *time.Time {
 	if m != nil {
 		return m.ResumeAt
 	}
-	return 0
+	return nil
 }
 
-func (m *PauseInfo) GetUpdatedAt() int64 {
+func (m *PauseInfo) GetUpdatedAt() *time.Time {
 	if m != nil {
 		return m.UpdatedAt
 	}
-	return 0
+	return nil
 }
 
 type FreezeInfo struct {
-	Frozen     bool   `protobuf:"varint,1,opt,name=frozen,proto3" json:"frozen,omitempty"`
-	Reason     string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	UnfreezeAt int64  `protobuf:"varint,3,opt,name=unfreeze_at,json=unfreezeAt,proto3" json:"unfreeze_at,omitempty"`
-	UpdatedAt  int64  `protobuf:"varint,4,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Frozen     bool       `protobuf:"varint,1,opt,name=frozen,proto3" json:"frozen,omitempty"`
+	Reason     string     `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	UnfreezeAt *time.Time `protobuf:"bytes,3,opt,name=unfreeze_at,json=unfreezeAt,proto3,stdtime" json:"unfreeze_at,omitempty"`
+	UpdatedAt  *time.Time `protobuf:"bytes,4,opt,name=updated_at,json=updatedAt,proto3,stdtime" json:"updated_at,omitempty"`
 }
 
 func (m *FreezeInfo) Reset()         { *m = FreezeInfo{} }
@@ -197,35 +210,96 @@ func (m *FreezeInfo) GetReason() string {
 	return ""
 }
 
-func (m *FreezeInfo) GetUnfreezeAt() int64 {
+func (m *FreezeInfo) GetUnfreezeAt() *time.Time {
 	if m != nil {
 		return m.UnfreezeAt
 	}
-	return 0
+	return nil
 }
 
-func (m *FreezeInfo) GetUpdatedAt() int64 {
+func (m *FreezeInfo) GetUpdatedAt() *time.Time {
 	if m != nil {
 		return m.UpdatedAt
+	}
+	return nil
+}
+
+type EmergencyConfig struct {
+	Signers   []string   `protobuf:"bytes,1,rep,name=signers,proto3" json:"signers,omitempty"`
+	Threshold uint32     `protobuf:"varint,2,opt,name=threshold,proto3" json:"threshold,omitempty"`
+	UpdatedAt *time.Time `protobuf:"bytes,3,opt,name=updated_at,json=updatedAt,proto3,stdtime" json:"updated_at,omitempty"`
+}
+
+func (m *EmergencyConfig) Reset()         { *m = EmergencyConfig{} }
+func (m *EmergencyConfig) String() string { return proto.CompactTextString(m) }
+func (*EmergencyConfig) ProtoMessage()    {}
+func (*EmergencyConfig) Descriptor() ([]byte, []int) {
+	return fileDescriptor_56167239ab810e69, []int{3}
+}
+func (m *EmergencyConfig) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *EmergencyConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_EmergencyConfig.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *EmergencyConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EmergencyConfig.Merge(m, src)
+}
+func (m *EmergencyConfig) XXX_Size() int {
+	return m.Size()
+}
+func (m *EmergencyConfig) XXX_DiscardUnknown() {
+	xxx_messageInfo_EmergencyConfig.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EmergencyConfig proto.InternalMessageInfo
+
+func (m *EmergencyConfig) GetSigners() []string {
+	if m != nil {
+		return m.Signers
+	}
+	return nil
+}
+
+func (m *EmergencyConfig) GetThreshold() uint32 {
+	if m != nil {
+		return m.Threshold
 	}
 	return 0
 }
 
+func (m *EmergencyConfig) GetUpdatedAt() *time.Time {
+	if m != nil {
+		return m.UpdatedAt
+	}
+	return nil
+}
+
 type EmergencyAction struct {
-	Id          uint64   `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	ActionType  string   `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
-	Target      string   `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
-	RequestedAt int64    `protobuf:"varint,4,opt,name=requested_at,json=requestedAt,proto3" json:"requested_at,omitempty"`
-	ExecuteAt   int64    `protobuf:"varint,5,opt,name=execute_at,json=executeAt,proto3" json:"execute_at,omitempty"`
-	Signers     []string `protobuf:"bytes,6,rep,name=signers,proto3" json:"signers,omitempty"`
-	Reason      string   `protobuf:"bytes,7,opt,name=reason,proto3" json:"reason,omitempty"`
+	Id          uint64     `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ActionType  string     `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	Target      string     `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
+	RequestedAt *time.Time `protobuf:"bytes,4,opt,name=requested_at,json=requestedAt,proto3,stdtime" json:"requested_at,omitempty"`
+	ExecuteAt   *time.Time `protobuf:"bytes,5,opt,name=execute_at,json=executeAt,proto3,stdtime" json:"execute_at,omitempty"`
+	Signers     []string   `protobuf:"bytes,6,rep,name=signers,proto3" json:"signers,omitempty"`
+	Reason      string     `protobuf:"bytes,7,opt,name=reason,proto3" json:"reason,omitempty"`
+	Threshold   uint32     `protobuf:"varint,8,opt,name=threshold,proto3" json:"threshold,omitempty"`
 }
 
 func (m *EmergencyAction) Reset()         { *m = EmergencyAction{} }
 func (m *EmergencyAction) String() string { return proto.CompactTextString(m) }
 func (*EmergencyAction) ProtoMessage()    {}
 func (*EmergencyAction) Descriptor() ([]byte, []int) {
-	return fileDescriptor_56167239ab810e69, []int{3}
+	return fileDescriptor_56167239ab810e69, []int{4}
 }
 func (m *EmergencyAction) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -275,18 +349,18 @@ func (m *EmergencyAction) GetTarget() string {
 	return ""
 }
 
-func (m *EmergencyAction) GetRequestedAt() int64 {
+func (m *EmergencyAction) GetRequestedAt() *time.Time {
 	if m != nil {
 		return m.RequestedAt
 	}
-	return 0
+	return nil
 }
 
-func (m *EmergencyAction) GetExecuteAt() int64 {
+func (m *EmergencyAction) GetExecuteAt() *time.Time {
 	if m != nil {
 		return m.ExecuteAt
 	}
-	return 0
+	return nil
 }
 
 func (m *EmergencyAction) GetSigners() []string {
@@ -303,10 +377,18 @@ func (m *EmergencyAction) GetReason() string {
 	return ""
 }
 
+func (m *EmergencyAction) GetThreshold() uint32 {
+	if m != nil {
+		return m.Threshold
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterType((*PendingParams)(nil), "osmosis.bondingcurve.v1beta1.PendingParams")
 	proto.RegisterType((*PauseInfo)(nil), "osmosis.bondingcurve.v1beta1.PauseInfo")
 	proto.RegisterType((*FreezeInfo)(nil), "osmosis.bondingcurve.v1beta1.FreezeInfo")
+	proto.RegisterType((*EmergencyConfig)(nil), "osmosis.bondingcurve.v1beta1.EmergencyConfig")
 	proto.RegisterType((*EmergencyAction)(nil), "osmosis.bondingcurve.v1beta1.EmergencyAction")
 }
 
@@ -315,35 +397,43 @@ func init() {
 }
 
 var fileDescriptor_56167239ab810e69 = []byte{
-	// 442 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x92, 0xcd, 0x6e, 0xd3, 0x40,
-	0x14, 0x85, 0xe3, 0xa4, 0xa4, 0xf5, 0x0d, 0x3f, 0x92, 0x85, 0x90, 0x55, 0xc0, 0x84, 0x88, 0x45,
-	0x58, 0x60, 0x53, 0xba, 0x61, 0xc1, 0x26, 0x48, 0x20, 0xb1, 0x8b, 0xac, 0xae, 0xd8, 0x44, 0x63,
-	0xfb, 0xc6, 0x8c, 0x14, 0xcf, 0x98, 0xf9, 0x09, 0x4d, 0xc5, 0x43, 0xf0, 0x58, 0xac, 0x50, 0x97,
-	0x2c, 0x51, 0xf2, 0x22, 0x68, 0x7e, 0x5c, 0xd2, 0x05, 0xed, 0xce, 0xe7, 0xf8, 0xdc, 0xf9, 0xce,
-	0x8c, 0x2e, 0x4c, 0xb9, 0x6c, 0xb8, 0xa4, 0x32, 0x2b, 0x38, 0xab, 0x28, 0xab, 0x4b, 0x2d, 0xd6,
-	0x98, 0xad, 0x4f, 0x0a, 0x54, 0xe4, 0x24, 0x23, 0x55, 0x43, 0x59, 0xda, 0x0a, 0xae, 0x78, 0xf4,
-	0xc4, 0x27, 0xd3, 0xfd, 0x64, 0xea, 0x93, 0xc7, 0x0f, 0x6b, 0x5e, 0x73, 0x1b, 0xcc, 0xcc, 0x97,
-	0x9b, 0x39, 0x7e, 0x79, 0xe3, 0xe9, 0x2d, 0x11, 0xa4, 0x91, 0x2e, 0x3a, 0x59, 0xc1, 0xbd, 0x39,
-	0xda, 0xd0, 0xdc, 0xda, 0xd1, 0x3b, 0x18, 0xba, 0x40, 0x1c, 0x8c, 0x83, 0xe9, 0xe8, 0xcd, 0x8b,
-	0xf4, 0xa6, 0x02, 0xa9, 0x9b, 0xca, 0xfd, 0x4c, 0xf4, 0x14, 0x80, 0xb4, 0xed, 0x6a, 0xb3, 0x50,
-	0xb4, 0xc1, 0xb8, 0x3f, 0x0e, 0xa6, 0x83, 0x3c, 0xb4, 0xce, 0x19, 0x6d, 0x70, 0xf2, 0x0d, 0xc2,
-	0x39, 0xd1, 0x12, 0x3f, 0xb1, 0x25, 0x8f, 0x1e, 0x19, 0x92, 0x96, 0x58, 0x59, 0xd2, 0x51, 0xee,
-	0x95, 0xf1, 0x05, 0x12, 0xc9, 0x99, 0x9d, 0x0f, 0x73, 0xaf, 0xa2, 0xc7, 0x10, 0x0a, 0x94, 0xba,
-	0xc1, 0x05, 0x51, 0xf1, 0xc0, 0x1e, 0x7d, 0xe4, 0x8c, 0x99, 0x32, 0x60, 0xdd, 0x56, 0x44, 0x61,
-	0x65, 0xfe, 0x1e, 0x38, 0xb0, 0x77, 0x66, 0x6a, 0xf2, 0x1d, 0xe0, 0xa3, 0x40, 0xbc, 0xb8, 0x22,
-	0x2f, 0x05, 0xbf, 0x40, 0xd6, 0x91, 0x9d, 0xfa, 0x2f, 0xf9, 0x19, 0x8c, 0x34, 0x5b, 0xda, 0xf9,
-	0x7f, 0x6c, 0xe8, 0xac, 0xdb, 0xe9, 0xbf, 0x02, 0x78, 0xf0, 0xa1, 0x41, 0x51, 0x23, 0x2b, 0x37,
-	0xb3, 0x52, 0x51, 0xce, 0xa2, 0xfb, 0xd0, 0xa7, 0xee, 0xe6, 0x07, 0x79, 0x9f, 0x56, 0x86, 0x41,
-	0xec, 0x9f, 0x85, 0xda, 0xb4, 0xe8, 0x0b, 0x80, 0xb3, 0xce, 0x36, 0x2d, 0x9a, 0x72, 0x8a, 0x88,
-	0x1a, 0x1d, 0x3f, 0xcc, 0xbd, 0x8a, 0x9e, 0xc3, 0x5d, 0x81, 0x5f, 0x35, 0xca, 0x6b, 0xf4, 0xd1,
-	0x95, 0xe7, 0xea, 0xe1, 0x39, 0x96, 0x5a, 0xd9, 0xfa, 0x77, 0x5c, 0x3d, 0xef, 0xcc, 0x54, 0x14,
-	0xc3, 0xa1, 0xa4, 0x35, 0x43, 0x21, 0xe3, 0xe1, 0x78, 0x30, 0x0d, 0xf3, 0x4e, 0xee, 0x3d, 0xc8,
-	0xe1, 0xfe, 0x83, 0xbc, 0xcf, 0x7f, 0x6e, 0x93, 0xe0, 0x72, 0x9b, 0x04, 0x7f, 0xb6, 0x49, 0xf0,
-	0x63, 0x97, 0xf4, 0x2e, 0x77, 0x49, 0xef, 0xf7, 0x2e, 0xe9, 0x7d, 0x7e, 0x5b, 0x53, 0xf5, 0x45,
-	0x17, 0x69, 0xc9, 0x9b, 0xcc, 0x2f, 0xce, 0xab, 0x15, 0x29, 0x64, 0x27, 0xb2, 0xf5, 0xe9, 0xeb,
-	0xec, 0xfc, 0xfa, 0x62, 0x9a, 0x0b, 0xcb, 0x62, 0x68, 0x17, 0xf2, 0xf4, 0x6f, 0x00, 0x00, 0x00,
-	0xff, 0xff, 0x57, 0x94, 0x30, 0x42, 0x1b, 0x03, 0x00, 0x00,
+	// 571 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x94, 0x3d, 0x6f, 0xd3, 0x5e,
+	0x14, 0xc6, 0xe3, 0x34, 0xff, 0x36, 0xbe, 0x69, 0xff, 0x48, 0x57, 0x08, 0x45, 0x51, 0xe5, 0x94,
+	0x8a, 0x21, 0x0c, 0xd8, 0x94, 0x2e, 0x2c, 0x08, 0x25, 0x11, 0x08, 0xb6, 0xc8, 0xea, 0xc4, 0x12,
+	0x5d, 0xc7, 0x27, 0x8e, 0xa5, 0xd8, 0xd7, 0xdc, 0x97, 0xa8, 0xe9, 0x47, 0x60, 0xea, 0x47, 0x61,
+	0x67, 0x61, 0xec, 0xd8, 0x91, 0x09, 0x50, 0xf2, 0x45, 0xd0, 0x7d, 0x71, 0x9b, 0x44, 0x22, 0x6a,
+	0x24, 0x36, 0x9f, 0x73, 0xcf, 0x73, 0xf5, 0x7b, 0x9e, 0x9c, 0x5c, 0xd4, 0xa1, 0x3c, 0xa3, 0x3c,
+	0xe5, 0x41, 0x44, 0xf3, 0x38, 0xcd, 0x93, 0x91, 0x64, 0x33, 0x08, 0x66, 0x67, 0x11, 0x08, 0x72,
+	0x16, 0x90, 0x38, 0x4b, 0x73, 0xbf, 0x60, 0x54, 0x50, 0x7c, 0x6c, 0x27, 0xfd, 0xd5, 0x49, 0xdf,
+	0x4e, 0xb6, 0xbc, 0x84, 0xd2, 0x64, 0x0a, 0x81, 0x9e, 0x8d, 0xe4, 0x38, 0x88, 0x25, 0x23, 0x22,
+	0xa5, 0x56, 0xdd, 0x6a, 0x6f, 0x9e, 0x8b, 0x34, 0x03, 0x2e, 0x48, 0x56, 0xd8, 0x81, 0xc7, 0x09,
+	0x4d, 0xa8, 0xfe, 0x0c, 0xd4, 0x97, 0xed, 0x3e, 0xdf, 0x8a, 0x57, 0x10, 0x46, 0x32, 0x6e, 0x46,
+	0x4f, 0xbf, 0x39, 0xe8, 0x68, 0x00, 0x7a, 0x6a, 0xa0, 0xfb, 0xb8, 0x87, 0xf6, 0xcd, 0x44, 0xd3,
+	0x39, 0x71, 0x3a, 0x8d, 0x57, 0xcf, 0xfc, 0x6d, 0x16, 0x7c, 0xa3, 0xea, 0xd5, 0x6e, 0x7e, 0xb6,
+	0x2b, 0xa1, 0x55, 0xe2, 0x3e, 0x42, 0xa4, 0x28, 0xa6, 0xf3, 0xa1, 0xe2, 0x6d, 0x56, 0xf5, 0x3d,
+	0x2d, 0xdf, 0x98, 0xf1, 0x4b, 0x33, 0xfe, 0x45, 0x69, 0xa6, 0x57, 0x57, 0xea, 0xeb, 0x5f, 0x6d,
+	0x27, 0x74, 0xb5, 0x4e, 0x9d, 0xe0, 0xa7, 0xe8, 0xd0, 0x5c, 0x32, 0x81, 0x34, 0x99, 0x88, 0xe6,
+	0xde, 0x89, 0xd3, 0xa9, 0x85, 0x0d, 0xdd, 0xfb, 0xa0, 0x5b, 0x8a, 0xde, 0x1d, 0x10, 0xc9, 0xe1,
+	0x63, 0x3e, 0xa6, 0xf8, 0x89, 0x22, 0x97, 0x1c, 0x62, 0x4d, 0x5e, 0x0f, 0x6d, 0xa5, 0xfa, 0x0c,
+	0x08, 0xa7, 0xb9, 0x26, 0x71, 0x43, 0x5b, 0xe1, 0x37, 0xc8, 0x65, 0xc0, 0x65, 0x06, 0x43, 0x62,
+	0x6e, 0xdf, 0x0e, 0x59, 0xd3, 0x80, 0x75, 0x23, 0xe9, 0x0a, 0xfc, 0x16, 0x21, 0x59, 0xc4, 0x44,
+	0x40, 0xac, 0xf4, 0xb5, 0x07, 0xea, 0x5d, 0xab, 0xe9, 0x8a, 0xd3, 0xef, 0x0e, 0x42, 0xef, 0x19,
+	0xc0, 0xd5, 0x1d, 0xfe, 0x98, 0xd1, 0x2b, 0xc8, 0x4b, 0x7c, 0x53, 0xfd, 0x15, 0xbf, 0x8b, 0x1a,
+	0x32, 0x1f, 0x6b, 0xfd, 0x2e, 0x06, 0x50, 0x29, 0xfa, 0x17, 0x16, 0xbe, 0x38, 0xe8, 0xd1, 0xbb,
+	0x0c, 0x58, 0x02, 0xf9, 0x68, 0xde, 0xa7, 0xf9, 0x38, 0x4d, 0x70, 0x13, 0x1d, 0xf0, 0x34, 0xc9,
+	0x81, 0xa9, 0x0d, 0xda, 0xeb, 0xb8, 0x61, 0x59, 0xe2, 0x63, 0xe4, 0x8a, 0x09, 0x03, 0x3e, 0xa1,
+	0xd3, 0x58, 0x9b, 0x39, 0x0a, 0xef, 0x1b, 0x1b, 0x30, 0x7b, 0xbb, 0xc3, 0x7c, 0xad, 0xae, 0xc0,
+	0x74, 0x47, 0xea, 0x7f, 0x84, 0xff, 0x47, 0xd5, 0xd4, 0xec, 0x43, 0x2d, 0xac, 0xa6, 0x31, 0x6e,
+	0xa3, 0x06, 0xd1, 0x27, 0x43, 0x31, 0x2f, 0xc0, 0x26, 0x8a, 0x4c, 0xeb, 0x62, 0x5e, 0x80, 0x4a,
+	0x5b, 0x10, 0x96, 0x80, 0x21, 0x70, 0x43, 0x5b, 0xe1, 0x3e, 0x3a, 0x64, 0xf0, 0x59, 0x02, 0xdf,
+	0x31, 0xac, 0xc6, 0x9d, 0xca, 0xe4, 0x0d, 0x97, 0x30, 0x92, 0x42, 0xff, 0x62, 0xff, 0x3d, 0xd4,
+	0xa2, 0xd5, 0x74, 0xc5, 0x6a, 0xb6, 0xfb, 0xeb, 0xd9, 0xde, 0x6f, 0xc9, 0xc1, 0xda, 0x96, 0xac,
+	0x65, 0x5e, 0xdf, 0xc8, 0xbc, 0x17, 0xde, 0x2c, 0x3c, 0xe7, 0x76, 0xe1, 0x39, 0xbf, 0x17, 0x9e,
+	0x73, 0xbd, 0xf4, 0x2a, 0xb7, 0x4b, 0xaf, 0xf2, 0x63, 0xe9, 0x55, 0x3e, 0xbd, 0x4e, 0x52, 0x31,
+	0x91, 0x91, 0x3f, 0xa2, 0x59, 0x60, 0x1f, 0x80, 0x17, 0x53, 0x12, 0xf1, 0xb2, 0x08, 0x66, 0xe7,
+	0x2f, 0x83, 0xcb, 0xf5, 0x17, 0x46, 0x45, 0xca, 0xa3, 0x7d, 0x6d, 0xe4, 0xfc, 0x4f, 0x00, 0x00,
+	0x00, 0xff, 0xff, 0xfa, 0xfe, 0xc1, 0x4b, 0x25, 0x05, 0x00, 0x00,
 }
 
 func (m *PendingParams) Marshal() (dAtA []byte, err error) {
@@ -366,23 +456,29 @@ func (m *PendingParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.ApplyTime != 0 {
-		i = encodeVarintAdmin(dAtA, i, uint64(m.ApplyTime))
+	if m.ApplyHeight != 0 {
+		i = encodeVarintAdmin(dAtA, i, uint64(m.ApplyHeight))
 		i--
-		dAtA[i] = 0x10
+		dAtA[i] = 0x18
 	}
-	if m.Params != nil {
-		{
-			size, err := m.Params.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintAdmin(dAtA, i, uint64(size))
+	n1, err1 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.ApplyTime, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.ApplyTime):])
+	if err1 != nil {
+		return 0, err1
+	}
+	i -= n1
+	i = encodeVarintAdmin(dAtA, i, uint64(n1))
+	i--
+	dAtA[i] = 0x12
+	{
+		size, err := m.Params.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
 		}
-		i--
-		dAtA[i] = 0xa
+		i -= size
+		i = encodeVarintAdmin(dAtA, i, uint64(size))
 	}
+	i--
+	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
 }
 
@@ -406,15 +502,25 @@ func (m *PauseInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.UpdatedAt != 0 {
-		i = encodeVarintAdmin(dAtA, i, uint64(m.UpdatedAt))
+	if m.UpdatedAt != nil {
+		n3, err3 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.UpdatedAt, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.UpdatedAt):])
+		if err3 != nil {
+			return 0, err3
+		}
+		i -= n3
+		i = encodeVarintAdmin(dAtA, i, uint64(n3))
 		i--
-		dAtA[i] = 0x20
+		dAtA[i] = 0x22
 	}
-	if m.ResumeAt != 0 {
-		i = encodeVarintAdmin(dAtA, i, uint64(m.ResumeAt))
+	if m.ResumeAt != nil {
+		n4, err4 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.ResumeAt, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.ResumeAt):])
+		if err4 != nil {
+			return 0, err4
+		}
+		i -= n4
+		i = encodeVarintAdmin(dAtA, i, uint64(n4))
 		i--
-		dAtA[i] = 0x18
+		dAtA[i] = 0x1a
 	}
 	if len(m.Reason) > 0 {
 		i -= len(m.Reason)
@@ -456,15 +562,25 @@ func (m *FreezeInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.UpdatedAt != 0 {
-		i = encodeVarintAdmin(dAtA, i, uint64(m.UpdatedAt))
+	if m.UpdatedAt != nil {
+		n5, err5 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.UpdatedAt, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.UpdatedAt):])
+		if err5 != nil {
+			return 0, err5
+		}
+		i -= n5
+		i = encodeVarintAdmin(dAtA, i, uint64(n5))
 		i--
-		dAtA[i] = 0x20
+		dAtA[i] = 0x22
 	}
-	if m.UnfreezeAt != 0 {
-		i = encodeVarintAdmin(dAtA, i, uint64(m.UnfreezeAt))
+	if m.UnfreezeAt != nil {
+		n6, err6 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.UnfreezeAt, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.UnfreezeAt):])
+		if err6 != nil {
+			return 0, err6
+		}
+		i -= n6
+		i = encodeVarintAdmin(dAtA, i, uint64(n6))
 		i--
-		dAtA[i] = 0x18
+		dAtA[i] = 0x1a
 	}
 	if len(m.Reason) > 0 {
 		i -= len(m.Reason)
@@ -482,6 +598,53 @@ func (m *FreezeInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		}
 		i--
 		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *EmergencyConfig) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *EmergencyConfig) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *EmergencyConfig) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.UpdatedAt != nil {
+		n7, err7 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.UpdatedAt, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.UpdatedAt):])
+		if err7 != nil {
+			return 0, err7
+		}
+		i -= n7
+		i = encodeVarintAdmin(dAtA, i, uint64(n7))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Threshold != 0 {
+		i = encodeVarintAdmin(dAtA, i, uint64(m.Threshold))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Signers) > 0 {
+		for iNdEx := len(m.Signers) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Signers[iNdEx])
+			copy(dAtA[i:], m.Signers[iNdEx])
+			i = encodeVarintAdmin(dAtA, i, uint64(len(m.Signers[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+		}
 	}
 	return len(dAtA) - i, nil
 }
@@ -506,6 +669,11 @@ func (m *EmergencyAction) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.Threshold != 0 {
+		i = encodeVarintAdmin(dAtA, i, uint64(m.Threshold))
+		i--
+		dAtA[i] = 0x40
+	}
 	if len(m.Reason) > 0 {
 		i -= len(m.Reason)
 		copy(dAtA[i:], m.Reason)
@@ -522,15 +690,25 @@ func (m *EmergencyAction) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x32
 		}
 	}
-	if m.ExecuteAt != 0 {
-		i = encodeVarintAdmin(dAtA, i, uint64(m.ExecuteAt))
+	if m.ExecuteAt != nil {
+		n8, err8 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.ExecuteAt, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.ExecuteAt):])
+		if err8 != nil {
+			return 0, err8
+		}
+		i -= n8
+		i = encodeVarintAdmin(dAtA, i, uint64(n8))
 		i--
-		dAtA[i] = 0x28
+		dAtA[i] = 0x2a
 	}
-	if m.RequestedAt != 0 {
-		i = encodeVarintAdmin(dAtA, i, uint64(m.RequestedAt))
+	if m.RequestedAt != nil {
+		n9, err9 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.RequestedAt, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.RequestedAt):])
+		if err9 != nil {
+			return 0, err9
+		}
+		i -= n9
+		i = encodeVarintAdmin(dAtA, i, uint64(n9))
 		i--
-		dAtA[i] = 0x20
+		dAtA[i] = 0x22
 	}
 	if len(m.Target) > 0 {
 		i -= len(m.Target)
@@ -571,12 +749,12 @@ func (m *PendingParams) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.Params != nil {
-		l = m.Params.Size()
-		n += 1 + l + sovAdmin(uint64(l))
-	}
-	if m.ApplyTime != 0 {
-		n += 1 + sovAdmin(uint64(m.ApplyTime))
+	l = m.Params.Size()
+	n += 1 + l + sovAdmin(uint64(l))
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.ApplyTime)
+	n += 1 + l + sovAdmin(uint64(l))
+	if m.ApplyHeight != 0 {
+		n += 1 + sovAdmin(uint64(m.ApplyHeight))
 	}
 	return n
 }
@@ -594,11 +772,13 @@ func (m *PauseInfo) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovAdmin(uint64(l))
 	}
-	if m.ResumeAt != 0 {
-		n += 1 + sovAdmin(uint64(m.ResumeAt))
+	if m.ResumeAt != nil {
+		l = github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.ResumeAt)
+		n += 1 + l + sovAdmin(uint64(l))
 	}
-	if m.UpdatedAt != 0 {
-		n += 1 + sovAdmin(uint64(m.UpdatedAt))
+	if m.UpdatedAt != nil {
+		l = github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.UpdatedAt)
+		n += 1 + l + sovAdmin(uint64(l))
 	}
 	return n
 }
@@ -616,11 +796,35 @@ func (m *FreezeInfo) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovAdmin(uint64(l))
 	}
-	if m.UnfreezeAt != 0 {
-		n += 1 + sovAdmin(uint64(m.UnfreezeAt))
+	if m.UnfreezeAt != nil {
+		l = github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.UnfreezeAt)
+		n += 1 + l + sovAdmin(uint64(l))
 	}
-	if m.UpdatedAt != 0 {
-		n += 1 + sovAdmin(uint64(m.UpdatedAt))
+	if m.UpdatedAt != nil {
+		l = github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.UpdatedAt)
+		n += 1 + l + sovAdmin(uint64(l))
+	}
+	return n
+}
+
+func (m *EmergencyConfig) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Signers) > 0 {
+		for _, s := range m.Signers {
+			l = len(s)
+			n += 1 + l + sovAdmin(uint64(l))
+		}
+	}
+	if m.Threshold != 0 {
+		n += 1 + sovAdmin(uint64(m.Threshold))
+	}
+	if m.UpdatedAt != nil {
+		l = github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.UpdatedAt)
+		n += 1 + l + sovAdmin(uint64(l))
 	}
 	return n
 }
@@ -642,11 +846,13 @@ func (m *EmergencyAction) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovAdmin(uint64(l))
 	}
-	if m.RequestedAt != 0 {
-		n += 1 + sovAdmin(uint64(m.RequestedAt))
+	if m.RequestedAt != nil {
+		l = github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.RequestedAt)
+		n += 1 + l + sovAdmin(uint64(l))
 	}
-	if m.ExecuteAt != 0 {
-		n += 1 + sovAdmin(uint64(m.ExecuteAt))
+	if m.ExecuteAt != nil {
+		l = github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.ExecuteAt)
+		n += 1 + l + sovAdmin(uint64(l))
 	}
 	if len(m.Signers) > 0 {
 		for _, s := range m.Signers {
@@ -657,6 +863,9 @@ func (m *EmergencyAction) Size() (n int) {
 	l = len(m.Reason)
 	if l > 0 {
 		n += 1 + l + sovAdmin(uint64(l))
+	}
+	if m.Threshold != 0 {
+		n += 1 + sovAdmin(uint64(m.Threshold))
 	}
 	return n
 }
@@ -725,18 +934,15 @@ func (m *PendingParams) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Params == nil {
-				m.Params = &Params{}
-			}
 			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 2:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ApplyTime", wireType)
 			}
-			m.ApplyTime = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowAdmin
@@ -746,7 +952,40 @@ func (m *PendingParams) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ApplyTime |= int64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.ApplyTime, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ApplyHeight", wireType)
+			}
+			m.ApplyHeight = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAdmin
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ApplyHeight |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -854,10 +1093,10 @@ func (m *PauseInfo) Unmarshal(dAtA []byte) error {
 			m.Reason = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ResumeAt", wireType)
 			}
-			m.ResumeAt = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowAdmin
@@ -867,16 +1106,33 @@ func (m *PauseInfo) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ResumeAt |= int64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ResumeAt == nil {
+				m.ResumeAt = new(time.Time)
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(m.ResumeAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 4:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field UpdatedAt", wireType)
 			}
-			m.UpdatedAt = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowAdmin
@@ -886,11 +1142,28 @@ func (m *PauseInfo) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.UpdatedAt |= int64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.UpdatedAt == nil {
+				m.UpdatedAt = new(time.Time)
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(m.UpdatedAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipAdmin(dAtA[iNdEx:])
@@ -994,10 +1267,10 @@ func (m *FreezeInfo) Unmarshal(dAtA []byte) error {
 			m.Reason = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field UnfreezeAt", wireType)
 			}
-			m.UnfreezeAt = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowAdmin
@@ -1007,16 +1280,33 @@ func (m *FreezeInfo) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.UnfreezeAt |= int64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.UnfreezeAt == nil {
+				m.UnfreezeAt = new(time.Time)
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(m.UnfreezeAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 4:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field UpdatedAt", wireType)
 			}
-			m.UpdatedAt = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowAdmin
@@ -1026,11 +1316,165 @@ func (m *FreezeInfo) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.UpdatedAt |= int64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.UpdatedAt == nil {
+				m.UpdatedAt = new(time.Time)
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(m.UpdatedAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipAdmin(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *EmergencyConfig) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowAdmin
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: EmergencyConfig: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: EmergencyConfig: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Signers", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAdmin
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Signers = append(m.Signers, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Threshold", wireType)
+			}
+			m.Threshold = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAdmin
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Threshold |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UpdatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAdmin
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.UpdatedAt == nil {
+				m.UpdatedAt = new(time.Time)
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(m.UpdatedAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipAdmin(dAtA[iNdEx:])
@@ -1165,10 +1609,10 @@ func (m *EmergencyAction) Unmarshal(dAtA []byte) error {
 			m.Target = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 4:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field RequestedAt", wireType)
 			}
-			m.RequestedAt = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowAdmin
@@ -1178,16 +1622,33 @@ func (m *EmergencyAction) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.RequestedAt |= int64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.RequestedAt == nil {
+				m.RequestedAt = new(time.Time)
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(m.RequestedAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 5:
-			if wireType != 0 {
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ExecuteAt", wireType)
 			}
-			m.ExecuteAt = 0
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowAdmin
@@ -1197,11 +1658,28 @@ func (m *EmergencyAction) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ExecuteAt |= int64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			if msglen < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthAdmin
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ExecuteAt == nil {
+				m.ExecuteAt = new(time.Time)
+			}
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(m.ExecuteAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Signers", wireType)
@@ -1266,6 +1744,25 @@ func (m *EmergencyAction) Unmarshal(dAtA []byte) error {
 			}
 			m.Reason = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 8:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Threshold", wireType)
+			}
+			m.Threshold = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAdmin
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Threshold |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipAdmin(dAtA[iNdEx:])

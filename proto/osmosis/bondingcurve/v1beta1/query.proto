@@ -1,0 +1,68 @@
+syntax = "proto3";
+package osmosis.bondingcurve.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "osmosis/bondingcurve/v1beta1/admin.proto";
+import "osmosis/bondingcurve/v1beta1/params.proto";
+import "osmosis/bondingcurve/v1beta1/tx.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types";
+
+service Query {
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse);
+  rpc GlobalPause(QueryGlobalPauseRequest) returns (QueryGlobalPauseResponse);
+  rpc TokenPause(QueryTokenPauseRequest) returns (QueryTokenPauseResponse);
+  rpc Freeze(QueryFreezeRequest) returns (QueryFreezeResponse);
+  rpc PendingParams(QueryPendingParamsRequest) returns (QueryPendingParamsResponse);
+  rpc EmergencyActions(QueryEmergencyActionsRequest) returns (QueryEmergencyActionsResponse);
+  rpc EmergencyConfig(QueryEmergencyConfigRequest) returns (QueryEmergencyConfigResponse);
+}
+
+message QueryParamsRequest {}
+
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGlobalPauseRequest {}
+
+message QueryGlobalPauseResponse {
+  PauseInfo status = 1;
+}
+
+message QueryTokenPauseRequest {
+  string denom = 1;
+}
+
+message QueryTokenPauseResponse {
+  PauseInfo status = 1;
+}
+
+message QueryFreezeRequest {
+  FreezeTargetType target_type = 1;
+  string target = 2;
+}
+
+message QueryFreezeResponse {
+  FreezeInfo status = 1;
+}
+
+message QueryPendingParamsRequest {}
+
+message QueryPendingParamsResponse {
+  PendingParams pending_params = 1;
+}
+
+message QueryEmergencyActionsRequest {
+  uint64 limit = 1;
+}
+
+message QueryEmergencyActionsResponse {
+  repeated EmergencyAction actions = 1;
+}
+
+message QueryEmergencyConfigRequest {}
+
+message QueryEmergencyConfigResponse {
+  EmergencyConfig config = 1;
+}

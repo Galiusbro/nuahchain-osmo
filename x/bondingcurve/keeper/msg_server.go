@@ -3,10 +3,15 @@ package keeper
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/osmosis-labs/osmosis/osmomath"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	"github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types"
 )
@@ -26,6 +31,10 @@ func (s msgServer) BuyFromCurve(goCtx context.Context, msg *types.MsgBuyFromCurv
 
 	trader, err := sdk.AccAddressFromBech32(msg.Trader)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := s.ensureModuleActive(ctx, msg.Denom, trader); err != nil {
 		return nil, err
 	}
 
@@ -68,6 +77,18 @@ func (s msgServer) BuyFromCurve(goCtx context.Context, msg *types.MsgBuyFromCurv
 		return nil, err
 	}
 
+	totalPayment := types.CoinToDec(paymentCoin)
+	netPayment := totalPayment
+	feePaid := sdkmath.ZeroInt()
+
+	if params.ProtocolFeeRateDec().IsPositive() {
+		var feeErr error
+		netPayment, feePaid, feeErr = s.collectProtocolFee(ctx, msg.PaymentDenom, totalPayment, params.ProtocolFeeRateDec())
+		if feeErr != nil {
+			return nil, feeErr
+		}
+	}
+
 	tokensOutCoin, err := types.DecToCoin(tokensOutDec, msg.Denom)
 	if err != nil {
 		return nil, err
@@ -92,11 +113,10 @@ func (s msgServer) BuyFromCurve(goCtx context.Context, msg *types.MsgBuyFromCurv
 	// update pool
 	pool.SetTokensSold(tokensSold.Add(actualTokens))
 
-	actualPayment := types.CoinToDec(paymentCoin)
 	if msg.PaymentDenom == params.QuoteDenom {
-		pool.SetReserveNdollar(pool.ReserveNdollarDec().Add(actualPayment))
+		pool.SetReserveNdollar(pool.ReserveNdollarDec().Add(netPayment))
 	} else {
-		pool.SetReserveNuah(pool.ReserveNuahDec().Add(actualPayment))
+		pool.SetReserveNuah(pool.ReserveNuahDec().Add(netPayment))
 	}
 
 	lastPrice := types.CalculatePrice(pool.TokensSoldDec(), params)
@@ -108,19 +128,25 @@ func (s msgServer) BuyFromCurve(goCtx context.Context, msg *types.MsgBuyFromCurv
 		return nil, err
 	}
 
-	ctx.EventManager().EmitEvent(sdk.NewEvent(
-		types.EventTypeBuy,
+	attributes := []sdk.Attribute{
 		sdk.NewAttribute(types.AttributeKeyTrader, msg.Trader),
 		sdk.NewAttribute(types.AttributeKeyDenom, msg.Denom),
 		sdk.NewAttribute(types.AttributeKeyPaymentDenom, msg.PaymentDenom),
-		sdk.NewAttribute(types.AttributeKeyPaymentAmount, actualPayment.String()),
+		sdk.NewAttribute(types.AttributeKeyPaymentAmount, totalPayment.String()),
 		sdk.NewAttribute(types.AttributeKeyTokensOut, actualTokens.String()),
 		sdk.NewAttribute(types.AttributeKeyPrice, lastPrice.String()),
+	}
+	if feePaid.IsPositive() {
+		attributes = append(attributes, sdk.NewAttribute(types.AttributeKeyFeesPaid, osmomath.NewDecFromInt(feePaid).String()))
+	}
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		types.EventTypeBuy,
+		attributes...,
 	))
 
 	return &types.MsgBuyFromCurveResponse{
 		TokensOut: actualTokens.String(),
-		PricePaid: actualPayment.String(),
+		PricePaid: totalPayment.String(),
 	}, nil
 }
 
@@ -129,6 +155,10 @@ func (s msgServer) SellToCurve(goCtx context.Context, msg *types.MsgSellToCurve)
 
 	trader, err := sdk.AccAddressFromBech32(msg.Trader)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := s.ensureModuleActive(ctx, msg.Denom, trader); err != nil {
 		return nil, err
 	}
 
@@ -167,7 +197,20 @@ func (s msgServer) SellToCurve(goCtx context.Context, msg *types.MsgSellToCurve)
 		return nil, types.ErrInvalidAmount
 	}
 
-	actualPayment := types.CoinToDec(paymentCoin)
+	totalPayment := types.CoinToDec(paymentCoin)
+	netPayment := totalPayment
+	feePaid := sdkmath.ZeroInt()
+
+	if params.ProtocolFeeRateDec().IsPositive() {
+		var feeErr error
+		netPayment, feePaid, feeErr = s.collectProtocolFee(ctx, msg.PaymentDenom, totalPayment, params.ProtocolFeeRateDec())
+		if feeErr != nil {
+			return nil, feeErr
+		}
+		if feePaid.IsPositive() {
+			paymentCoin = sdk.NewCoin(paymentCoin.Denom, paymentCoin.Amount.Sub(feePaid))
+		}
+	}
 
 	tokensCoin, err := types.DecToCoin(tokenAmountDec, msg.Denom)
 	if err != nil {
@@ -189,18 +232,18 @@ func (s msgServer) SellToCurve(goCtx context.Context, msg *types.MsgSellToCurve)
 		if err != nil {
 			return nil, types.ErrInvalidAmount
 		}
-		if actualPayment.LT(minPayment) {
+		if netPayment.LT(minPayment) {
 			return nil, types.ErrMinPaymentNotMet
 		}
 	}
 
 	// ensure reserves sufficient
 	if msg.PaymentDenom == params.QuoteDenom {
-		if pool.ReserveNdollarDec().LT(actualPayment) {
+		if pool.ReserveNdollarDec().LT(totalPayment) {
 			return nil, types.ErrInsufficientLiquidity
 		}
 	} else {
-		if pool.ReserveNuahDec().LT(actualPayment) {
+		if pool.ReserveNuahDec().LT(totalPayment) {
 			return nil, types.ErrInsufficientLiquidity
 		}
 	}
@@ -220,9 +263,9 @@ func (s msgServer) SellToCurve(goCtx context.Context, msg *types.MsgSellToCurve)
 	// update pool
 	pool.SetTokensSold(tokensSold.Sub(actualTokens))
 	if msg.PaymentDenom == params.QuoteDenom {
-		pool.SetReserveNdollar(pool.ReserveNdollarDec().Sub(actualPayment))
+		pool.SetReserveNdollar(pool.ReserveNdollarDec().Sub(netPayment))
 	} else {
-		pool.SetReserveNuah(pool.ReserveNuahDec().Sub(actualPayment))
+		pool.SetReserveNuah(pool.ReserveNuahDec().Sub(netPayment))
 	}
 
 	lastPrice := types.CalculatePrice(pool.TokensSoldDec(), params)
@@ -233,19 +276,25 @@ func (s msgServer) SellToCurve(goCtx context.Context, msg *types.MsgSellToCurve)
 		return nil, err
 	}
 
-	ctx.EventManager().EmitEvent(sdk.NewEvent(
-		types.EventTypeSell,
+	attributes := []sdk.Attribute{
 		sdk.NewAttribute(types.AttributeKeyTrader, msg.Trader),
 		sdk.NewAttribute(types.AttributeKeyDenom, msg.Denom),
 		sdk.NewAttribute(types.AttributeKeyTokensIn, actualTokens.String()),
 		sdk.NewAttribute(types.AttributeKeyPaymentDenom, msg.PaymentDenom),
-		sdk.NewAttribute(types.AttributeKeyPaymentOut, actualPayment.String()),
+		sdk.NewAttribute(types.AttributeKeyPaymentOut, netPayment.String()),
 		sdk.NewAttribute(types.AttributeKeyPrice, lastPrice.String()),
+	}
+	if feePaid.IsPositive() {
+		attributes = append(attributes, sdk.NewAttribute(types.AttributeKeyFeesPaid, osmomath.NewDecFromInt(feePaid).String()))
+	}
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		types.EventTypeSell,
+		attributes...,
 	))
 
 	return &types.MsgSellToCurveResponse{
-		PaymentOut:    actualPayment.String(),
-		PriceReceived: actualPayment.String(),
+		PaymentOut:    netPayment.String(),
+		PriceReceived: netPayment.String(),
 	}, nil
 }
 
@@ -257,11 +306,16 @@ func (s msgServer) OpenMarginPosition(goCtx context.Context, msg *types.MsgOpenM
 		return nil, err
 	}
 
+	if err := s.ensureModuleActive(ctx, msg.Denom, trader); err != nil {
+		return nil, err
+	}
+
 	if msg.PositionType == types.PositionType_POSITION_TYPE_UNSPECIFIED {
 		return nil, types.ErrInvalidParams
 	}
 
-	if !types.ValidateLeverage(msg.Leverage) {
+	params := s.GetParams(ctx)
+	if !types.ValidateLeverage(msg.Leverage) || msg.Leverage > params.MaxLeverage {
 		return nil, types.ErrInvalidLeverage
 	}
 
@@ -284,8 +338,10 @@ func (s msgServer) OpenMarginPosition(goCtx context.Context, msg *types.MsgOpenM
 			return nil, types.ErrMinPositionNotMet
 		}
 	}
-
-	params := s.GetParams(ctx)
+	collateralRatio := positionSize.Quo(collateralDec)
+	if collateralRatio.LT(params.MinCollateralRatioDec()) {
+		return nil, types.ErrMarginInsufficient
+	}
 	if msg.CollateralDenom != params.QuoteDenom && msg.CollateralDenom != sdk.DefaultBondDenom {
 		return nil, types.ErrUnsupportedDenom
 	}
@@ -427,6 +483,10 @@ func (s msgServer) CloseMarginPosition(goCtx context.Context, msg *types.MsgClos
 
 	if position.Trader != msg.Trader {
 		return nil, types.ErrUnauthorizedPosition
+	}
+
+	if err := s.ensureModuleActive(ctx, position.Denom, trader); err != nil {
+		return nil, err
 	}
 
 	if position.Status != types.PositionStatus_POSITION_STATUS_OPEN {
@@ -594,6 +654,10 @@ func (s msgServer) LiquidateMarginPosition(goCtx context.Context, msg *types.Msg
 		return nil, types.ErrPositionClosed
 	}
 
+	if err := s.ensureModuleActive(ctx, position.Denom, liquidator); err != nil {
+		return nil, err
+	}
+
 	marginPool := s.ensureMarginPool(ctx, position.Denom)
 	updatedPool, priceInfo, err := s.updatePriceInfo(ctx, marginPool)
 	if err != nil {
@@ -663,6 +727,280 @@ func (s msgServer) LiquidateMarginPosition(goCtx context.Context, msg *types.Msg
 		LiquidatorReward: result.liquidatorReward.String(),
 		BadDebt:          result.badDebt.String(),
 	}, nil
+}
+
+func (s msgServer) UpdateParams(goCtx context.Context, msg *types.MsgUpdateParams) (*types.MsgUpdateParamsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if err := s.verifyAuthority(msg.Authority); err != nil {
+		return nil, err
+	}
+
+	if _, exists := s.getPendingParams(ctx); exists {
+		return nil, types.ErrPendingParamsExists
+	}
+
+	params := msg.Params
+	if err := params.Validate(); err != nil {
+		return nil, err
+	}
+	if params.MaxLeverage == 0 {
+		params.MaxLeverage = s.GetParams(ctx).MaxLeverage
+	}
+
+	applyTime := ctx.BlockTime().Add(types.SensitiveParamChangeDelay).UTC()
+	pending := types.PendingParams{
+		Params:      params,
+		ApplyTime:   applyTime,
+		ApplyHeight: uint64(ctx.BlockHeight()) + 1,
+	}
+
+	s.setPendingParams(ctx, pending)
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		types.EventTypeParamsQueued,
+		sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+		sdk.NewAttribute(types.AttributeKeyExecuteTime, applyTime.Format(time.RFC3339)),
+	))
+
+	return &types.MsgUpdateParamsResponse{PendingParams: &pending}, nil
+}
+
+func (s msgServer) SetEmergencyPause(goCtx context.Context, msg *types.MsgSetEmergencyPause) (*types.MsgSetEmergencyPauseResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if err := s.verifyAuthority(msg.Authority); err != nil {
+		return nil, err
+	}
+
+	var resumeDuration *time.Duration
+	if msg.ResumeIn < 0 {
+		return nil, types.ErrInvalidDuration
+	}
+	if msg.ResumeIn > 0 {
+		d := msg.ResumeIn
+		resumeDuration = &d
+	}
+
+	info := s.buildPauseInfo(msg.Paused, msg.Reason, resumeDuration, ctx.BlockTime())
+	s.setGlobalPause(ctx, info)
+
+	action, err := s.recordEmergencyAction(ctx, types.EventTypeGlobalPause, "", msg.Reason, msg.Signers)
+	if err != nil {
+		return nil, err
+	}
+
+	attributes := []sdk.Attribute{
+		sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+		sdk.NewAttribute(types.AttributeKeyPaused, strconv.FormatBool(msg.Paused)),
+		sdk.NewAttribute(types.AttributeKeyActionId, fmt.Sprintf("%d", action.Id)),
+	}
+	if msg.Reason != "" {
+		attributes = append(attributes, sdk.NewAttribute(types.AttributeKeyReason, msg.Reason))
+	}
+	if info.ResumeAt != nil {
+		attributes = append(attributes, sdk.NewAttribute(types.AttributeKeyResumeTime, info.ResumeAt.Format(time.RFC3339)))
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		types.EventTypeGlobalPause,
+		attributes...,
+	))
+
+	status := info
+	return &types.MsgSetEmergencyPauseResponse{Status: &status}, nil
+}
+
+func (s msgServer) SetTokenPause(goCtx context.Context, msg *types.MsgSetTokenPause) (*types.MsgSetTokenPauseResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if err := s.verifyAuthority(msg.Authority); err != nil {
+		return nil, err
+	}
+
+	if err := sdk.ValidateDenom(msg.Denom); err != nil {
+		return nil, err
+	}
+
+	var resumeDuration *time.Duration
+	if msg.ResumeIn < 0 {
+		return nil, types.ErrInvalidDuration
+	}
+	if msg.ResumeIn > 0 {
+		d := msg.ResumeIn
+		resumeDuration = &d
+	}
+
+	info := s.buildPauseInfo(msg.Paused, msg.Reason, resumeDuration, ctx.BlockTime())
+	if msg.Paused {
+		s.setTokenPause(ctx, msg.Denom, info)
+	} else {
+		s.deleteTokenPause(ctx, msg.Denom)
+	}
+
+	action, err := s.recordEmergencyAction(ctx, types.EventTypeTokenPause, msg.Denom, msg.Reason, msg.Signers)
+	if err != nil {
+		return nil, err
+	}
+
+	attributes := []sdk.Attribute{
+		sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+		sdk.NewAttribute(types.AttributeKeyDenom, msg.Denom),
+		sdk.NewAttribute(types.AttributeKeyPaused, strconv.FormatBool(msg.Paused)),
+		sdk.NewAttribute(types.AttributeKeyActionId, fmt.Sprintf("%d", action.Id)),
+	}
+	if msg.Reason != "" {
+		attributes = append(attributes, sdk.NewAttribute(types.AttributeKeyReason, msg.Reason))
+	}
+	if info.ResumeAt != nil {
+		attributes = append(attributes, sdk.NewAttribute(types.AttributeKeyResumeTime, info.ResumeAt.Format(time.RFC3339)))
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		types.EventTypeTokenPause,
+		attributes...,
+	))
+
+	status := info
+	return &types.MsgSetTokenPauseResponse{Status: &status}, nil
+}
+
+func (s msgServer) ForceLiquidation(goCtx context.Context, msg *types.MsgForceLiquidation) (*types.MsgForceLiquidationResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if err := s.verifyAuthority(msg.Authority); err != nil {
+		return nil, err
+	}
+
+	if len(msg.PositionIds) == 0 {
+		return nil, types.ErrInvalidParams
+	}
+
+	action, err := s.recordEmergencyAction(ctx, types.EventTypeForceLiquidation, fmt.Sprintf("%d_positions", len(msg.PositionIds)), msg.Reason, msg.Signers)
+	if err != nil {
+		return nil, err
+	}
+
+	processed := uint64(0)
+	processedIDs := make([]string, 0, len(msg.PositionIds))
+	for _, id := range msg.PositionIds {
+		ok, liquidateErr := s.forceLiquidation(ctx, id)
+		if liquidateErr != nil {
+			return nil, liquidateErr
+		}
+		if ok {
+			processed++
+			processedIDs = append(processedIDs, fmt.Sprintf("%d", id))
+		}
+	}
+
+	attributes := []sdk.Attribute{
+		sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+		sdk.NewAttribute(types.AttributeKeyPositionsProcessed, fmt.Sprintf("%d", processed)),
+		sdk.NewAttribute(types.AttributeKeyActionId, fmt.Sprintf("%d", action.Id)),
+	}
+	if msg.Reason != "" {
+		attributes = append(attributes, sdk.NewAttribute(types.AttributeKeyReason, msg.Reason))
+	}
+	if len(processedIDs) > 0 {
+		attributes = append(attributes, sdk.NewAttribute(types.AttributeKeyTarget, strings.Join(processedIDs, ",")))
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		types.EventTypeForceLiquidation,
+		attributes...,
+	))
+
+	return &types.MsgForceLiquidationResponse{PositionsProcessed: processed}, nil
+}
+
+func (s msgServer) SetFreeze(goCtx context.Context, msg *types.MsgSetFreeze) (*types.MsgSetFreezeResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if err := s.verifyAuthority(msg.Authority); err != nil {
+		return nil, err
+	}
+
+	if msg.TargetType == types.FreezeTargetType_FREEZE_TARGET_TYPE_UNSPECIFIED || msg.Target == "" {
+		return nil, types.ErrFreezeTargetInvalid
+	}
+
+	switch msg.TargetType {
+	case types.FreezeTargetType_FREEZE_TARGET_TYPE_ADDRESS:
+		if _, err := sdk.AccAddressFromBech32(msg.Target); err != nil {
+			return nil, err
+		}
+	case types.FreezeTargetType_FREEZE_TARGET_TYPE_TOKEN:
+		if err := sdk.ValidateDenom(msg.Target); err != nil {
+			return nil, err
+		}
+	}
+
+	var duration *time.Duration
+	if msg.Duration < 0 {
+		return nil, types.ErrInvalidDuration
+	}
+	if msg.Duration > 0 {
+		d := msg.Duration
+		duration = &d
+	}
+
+	info := s.buildFreezeInfo(msg.Frozen, msg.Reason, duration, ctx.BlockTime())
+	if msg.Frozen {
+		s.setFreezeInfo(ctx, msg.TargetType, msg.Target, info)
+	} else {
+		s.deleteFreezeInfo(ctx, msg.TargetType, msg.Target)
+	}
+
+	action, err := s.recordEmergencyAction(ctx, types.EventTypeFreeze, msg.Target, msg.Reason, msg.Signers)
+	if err != nil {
+		return nil, err
+	}
+
+	attributes := []sdk.Attribute{
+		sdk.NewAttribute(types.AttributeKeyAuthority, msg.Authority),
+		sdk.NewAttribute(types.AttributeKeyTarget, msg.Target),
+		sdk.NewAttribute(types.AttributeKeyFrozen, strconv.FormatBool(msg.Frozen)),
+		sdk.NewAttribute(types.AttributeKeyActionId, fmt.Sprintf("%d", action.Id)),
+	}
+	if msg.Reason != "" {
+		attributes = append(attributes, sdk.NewAttribute(types.AttributeKeyReason, msg.Reason))
+	}
+	if info.UnfreezeAt != nil {
+		attributes = append(attributes, sdk.NewAttribute(types.AttributeKeyResumeTime, info.UnfreezeAt.Format(time.RFC3339)))
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		types.EventTypeFreeze,
+		attributes...,
+	))
+
+	status := info
+	return &types.MsgSetFreezeResponse{Status: &status}, nil
+}
+
+func (s msgServer) collectProtocolFee(ctx sdk.Context, denom string, total osmomath.Dec, rate osmomath.Dec) (osmomath.Dec, sdkmath.Int, error) {
+	if !rate.IsPositive() || !total.IsPositive() {
+		return total, sdkmath.ZeroInt(), nil
+	}
+
+	feeDec := total.Mul(rate)
+	feeInt := feeDec.TruncateInt()
+	if !feeInt.IsPositive() {
+		return total, sdkmath.ZeroInt(), nil
+	}
+
+	feeCoin := sdk.NewCoin(denom, feeInt)
+	if err := s.bankKeeper.SendCoinsFromModuleToModule(sdk.WrapSDKContext(ctx), types.ModuleName, distrtypes.ModuleName, sdk.NewCoins(feeCoin)); err != nil {
+		return osmomath.Dec{}, sdkmath.Int{}, err
+	}
+
+	net := total.Sub(osmomath.NewDecFromInt(feeInt))
+	if net.IsNegative() {
+		net = osmomath.ZeroDec()
+	}
+
+	return net, feeInt, nil
 }
 
 func (s msgServer) distributeTokens(ctx sdk.Context, trader sdk.AccAddress, coin sdk.Coin) error {
