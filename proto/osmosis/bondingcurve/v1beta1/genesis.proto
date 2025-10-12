@@ -7,6 +7,7 @@ import "osmosis/bondingcurve/v1beta1/pool.proto";
 import "osmosis/bondingcurve/v1beta1/margin.proto";
 import "osmosis/bondingcurve/v1beta1/admin.proto";
 import "osmosis/bondingcurve/v1beta1/tx.proto";
+import "osmosis/bondingcurve/v1beta1/metrics.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types";
 
@@ -22,6 +23,10 @@ message GenesisState {
   repeated EmergencyAction emergency_actions = 9 [(gogoproto.nullable) = false];
   EmergencyConfig emergency_config = 10;
   uint64 emergency_action_seq = 11;
+  ModuleStats module_stats = 12;
+  repeated TokenStats token_stats = 13 [(gogoproto.nullable) = false];
+  repeated LiquidationRecord liquidation_records = 14 [(gogoproto.nullable) = false];
+  uint64 liquidation_seq = 15;
 }
 
 message TokenPauseEntry {

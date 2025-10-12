@@ -54,6 +54,20 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 	if genState.EmergencyConfig != nil {
 		k.setEmergencyConfig(ctx, *genState.EmergencyConfig)
 	}
+
+	if genState.ModuleStats != nil {
+		k.setModuleStats(ctx, *genState.ModuleStats)
+	}
+	for _, ts := range genState.TokenStats {
+		tsCopy := ts
+		k.setTokenStats(ctx, tsCopy)
+	}
+	if len(genState.LiquidationRecords) > 0 {
+		k.setLiquidationRecordsFromGenesis(ctx, genState.LiquidationRecords, genState.LiquidationSeq)
+	} else if genState.LiquidationSeq != 0 {
+		store := k.getStore(ctx)
+		store.Set(types.LiquidationSeqKey, sdk.Uint64ToBigEndian(genState.LiquidationSeq))
+	}
 }
 
 func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
@@ -70,6 +84,10 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 	emergencySeq := k.getEmergencyActionSeq(ctx)
 
 	store := k.getStore(ctx)
+	moduleStats := k.getModuleStats(ctx)
+	tokenStats := k.getAllTokenStats(ctx)
+	liquidationRecords := k.getAllLiquidationRecords(ctx)
+	liquidationSeq := sdk.BigEndianToUint64(store.Get(types.LiquidationSeqKey))
 	iterator := storetypes.KVStorePrefixIterator(store, types.TokenPoolKeyPrefix)
 	defer iterator.Close()
 
@@ -137,17 +155,21 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 	config := k.getEmergencyConfig(ctx)
 	emergencyConfig = &config
 
-	return &types.GenesisState{
-		Params:             params,
-		Pools:              pools,
-		MarginPools:        marginPools,
-		MarginPositions:    marginPositions,
-		GlobalPause:        globalPause,
-		TokenPauses:        tokenPauses,
-		FreezeEntries:      freezeEntries,
-		PendingParams:      pendingParams,
-		EmergencyActions:   emergencyActions,
-		EmergencyConfig:    emergencyConfig,
-		EmergencyActionSeq: emergencySeq,
-	}
+return &types.GenesisState{
+	Params:             params,
+	Pools:              pools,
+	MarginPools:        marginPools,
+	MarginPositions:    marginPositions,
+	GlobalPause:        globalPause,
+	TokenPauses:        tokenPauses,
+	FreezeEntries:      freezeEntries,
+	PendingParams:      pendingParams,
+	EmergencyActions:   emergencyActions,
+	EmergencyConfig:    emergencyConfig,
+	EmergencyActionSeq: emergencySeq,
+	ModuleStats:        &moduleStats,
+	TokenStats:         tokenStats,
+	LiquidationRecords: liquidationRecords,
+	LiquidationSeq:     liquidationSeq,
+}
 }

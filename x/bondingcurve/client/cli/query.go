@@ -31,6 +31,11 @@ func GetQueryCmd() *cobra.Command {
 		newQueryPendingParamsCmd(),
 		newQueryEmergencyActionsCmd(),
 		newQueryEmergencyConfigCmd(),
+		newListTokensCmd(),
+		newTokenStatsCmd(),
+		newModuleStatsCmd(),
+		newMarginPositionsCmd(),
+		newLiquidationsCmd(),
 	)
 
 	return cmd
@@ -229,6 +234,155 @@ func newQueryEmergencyConfigCmd() *cobra.Command {
 		},
 	}
 
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func newListTokensCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list-tokens",
+		Short: "List bonding curve tokens",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			limit, _ := cmd.Flags().GetUint64("limit")
+			offset, _ := cmd.Flags().GetUint64("offset")
+
+			queryClient := types.NewQueryClient(clientCtx)
+			res, err := queryClient.ListTokens(cmd.Context(), &types.QueryListTokensRequest{Limit: limit, Offset: offset})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	cmd.Flags().Uint64("limit", 100, "maximum number of tokens to return")
+	cmd.Flags().Uint64("offset", 0, "tokens offset")
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func newTokenStatsCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "token-stats [denom]",
+		Short: "Show statistics for a token",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+			res, err := queryClient.TokenStats(cmd.Context(), &types.QueryTokenStatsRequest{Denom: args[0]})
+			if err != nil {
+				return err
+			}
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func newModuleStatsCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "module-stats",
+		Short: "Show aggregated bonding curve statistics",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+			res, err := queryClient.ModuleStats(cmd.Context(), &types.QueryModuleStatsRequest{})
+			if err != nil {
+				return err
+			}
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func newMarginPositionsCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "margin-positions",
+		Short: "List margin positions",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			denom, _ := cmd.Flags().GetString("denom")
+			trader, _ := cmd.Flags().GetString("trader")
+			limit, _ := cmd.Flags().GetUint64("limit")
+			offset, _ := cmd.Flags().GetUint64("offset")
+
+			queryClient := types.NewQueryClient(clientCtx)
+			res, err := queryClient.MarginPositions(cmd.Context(), &types.QueryMarginPositionsRequest{
+				Denom:  denom,
+				Trader: trader,
+				Limit:  limit,
+				Offset: offset,
+			})
+			if err != nil {
+				return err
+			}
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	cmd.Flags().String("denom", "", "filter by token denom")
+	cmd.Flags().String("trader", "", "filter by trader address")
+	cmd.Flags().Uint64("limit", 100, "maximum number of positions to return")
+	cmd.Flags().Uint64("offset", 0, "positions offset")
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func newLiquidationsCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "liquidations",
+		Short: "Show recent liquidation records",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			denom, _ := cmd.Flags().GetString("denom")
+			trader, _ := cmd.Flags().GetString("trader")
+			limit, _ := cmd.Flags().GetUint64("limit")
+			offset, _ := cmd.Flags().GetUint64("offset")
+
+			queryClient := types.NewQueryClient(clientCtx)
+			res, err := queryClient.Liquidations(cmd.Context(), &types.QueryLiquidationsRequest{
+				Denom:  denom,
+				Trader: trader,
+				Limit:  limit,
+				Offset: offset,
+			})
+			if err != nil {
+				return err
+			}
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	cmd.Flags().String("denom", "", "filter by token denom")
+	cmd.Flags().String("trader", "", "filter by trader address")
+	cmd.Flags().Uint64("limit", 50, "maximum number of liquidation records to return")
+	cmd.Flags().Uint64("offset", 0, "liquidation records offset")
 	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }

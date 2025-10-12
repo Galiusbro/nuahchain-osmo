@@ -1,0 +1,61 @@
+syntax = "proto3";
+package osmosis.bondingcurve.v1beta1;
+
+import "google/protobuf/timestamp.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types";
+
+message ModuleStats {
+  string total_buy_volume = 1;
+  string total_sell_volume = 2;
+  string total_volume = 3;
+  string protocol_fees_collected = 4;
+  uint64 total_liquidations = 5;
+  uint64 total_margin_positions = 6;
+  uint64 total_tokens_created = 7;
+  google.protobuf.Timestamp last_updated = 8 [(gogoproto.stdtime) = true];
+}
+
+message TokenStats {
+  string denom = 1;
+  string total_volume = 2;
+  string buy_volume = 3;
+  string sell_volume = 4;
+  string protocol_fees_collected = 5;
+  uint64 trade_count = 6;
+  string last_price = 7;
+  google.protobuf.Timestamp last_trade_at = 8 [(gogoproto.stdtime) = true];
+}
+
+message TokenSummary {
+  string denom = 1;
+  string name = 2;
+  string symbol = 3;
+  string creator = 4;
+  bool curve_completed = 5;
+  string current_price = 6;
+  string tokens_sold = 7;
+  TokenStats stats = 8;
+}
+
+message LiquidationRecord {
+  uint64 id = 1;
+  uint64 position_id = 2;
+  string denom = 3;
+  string trader = 4;
+  string liquidator = 5;
+  string liquidation_type = 6;
+  string payout_amount = 7;
+  string liquidator_reward = 8;
+  string bad_debt = 9;
+  google.protobuf.Timestamp timestamp = 10 [(gogoproto.stdtime) = true];
+}
+
+message MarginSummary {
+  string denom = 1;
+  string total_collateral = 2;
+  string total_long_exposure = 3;
+  string total_short_exposure = 4;
+  uint64 open_positions = 5;
+}

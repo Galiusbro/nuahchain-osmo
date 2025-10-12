@@ -139,8 +139,9 @@ func newSetEmergencyPauseCmd() *cobra.Command {
 
 func newSetTokenPauseCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "set-token-pause [authority] [denom] [paused]",
-		Short: "Pause or resume a specific token",
+		Use:     "pause-token [authority] [denom] [paused]",
+		Aliases: []string{"set-token-pause"},
+		Short:   "Pause or resume a specific token",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			authority := args[0]
@@ -241,8 +242,9 @@ func newForceLiquidationCmd() *cobra.Command {
 
 func newSetFreezeCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "set-freeze [authority] [target-type] [target] [frozen]",
-		Short: "Freeze or unfreeze a token or address",
+		Use:     "freeze-address [authority] [target-type] [target] [frozen]",
+		Aliases: []string{"set-freeze"},
+		Short:   "Freeze or unfreeze a token or address",
 		Args:  cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			authority := args[0]

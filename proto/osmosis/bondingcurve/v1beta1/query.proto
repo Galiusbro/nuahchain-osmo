@@ -5,6 +5,8 @@ import "gogoproto/gogo.proto";
 import "osmosis/bondingcurve/v1beta1/admin.proto";
 import "osmosis/bondingcurve/v1beta1/params.proto";
 import "osmosis/bondingcurve/v1beta1/tx.proto";
+import "osmosis/bondingcurve/v1beta1/metrics.proto";
+import "osmosis/bondingcurve/v1beta1/margin.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types";
 
@@ -16,6 +18,11 @@ service Query {
   rpc PendingParams(QueryPendingParamsRequest) returns (QueryPendingParamsResponse);
   rpc EmergencyActions(QueryEmergencyActionsRequest) returns (QueryEmergencyActionsResponse);
   rpc EmergencyConfig(QueryEmergencyConfigRequest) returns (QueryEmergencyConfigResponse);
+  rpc ListTokens(QueryListTokensRequest) returns (QueryListTokensResponse);
+  rpc TokenStats(QueryTokenStatsRequest) returns (QueryTokenStatsResponse);
+  rpc ModuleStats(QueryModuleStatsRequest) returns (QueryModuleStatsResponse);
+  rpc MarginPositions(QueryMarginPositionsRequest) returns (QueryMarginPositionsResponse);
+  rpc Liquidations(QueryLiquidationsRequest) returns (QueryLiquidationsResponse);
 }
 
 message QueryParamsRequest {}
@@ -65,4 +72,50 @@ message QueryEmergencyConfigRequest {}
 
 message QueryEmergencyConfigResponse {
   EmergencyConfig config = 1;
+}
+
+message QueryListTokensRequest {
+  uint64 limit = 1;
+  uint64 offset = 2;
+}
+
+message QueryListTokensResponse {
+  repeated TokenSummary tokens = 1;
+}
+
+message QueryTokenStatsRequest {
+  string denom = 1;
+}
+
+message QueryTokenStatsResponse {
+  TokenStats stats = 1;
+}
+
+message QueryModuleStatsRequest {}
+
+message QueryModuleStatsResponse {
+  ModuleStats stats = 1;
+}
+
+message QueryMarginPositionsRequest {
+  string denom = 1;
+  string trader = 2;
+  uint64 limit = 3;
+  uint64 offset = 4;
+}
+
+message QueryMarginPositionsResponse {
+  repeated MarginPosition positions = 1;
+  MarginSummary summary = 2;
+}
+
+message QueryLiquidationsRequest {
+  string denom = 1;
+  string trader = 2;
+  uint64 limit = 3;
+  uint64 offset = 4;
+}
+
+message QueryLiquidationsResponse {
+  repeated LiquidationRecord records = 1;
 }

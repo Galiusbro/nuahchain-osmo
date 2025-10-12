@@ -144,6 +144,9 @@ func (s msgServer) BuyFromCurve(goCtx context.Context, msg *types.MsgBuyFromCurv
 		attributes...,
 	))
 
+	protocolFeeDec := osmomath.NewDecFromInt(feePaid)
+	s.recordTrade(ctx, msg.Denom, true, totalPayment, protocolFeeDec, lastPrice)
+
 	return &types.MsgBuyFromCurveResponse{
 		TokensOut: actualTokens.String(),
 		PricePaid: totalPayment.String(),
@@ -291,6 +294,9 @@ func (s msgServer) SellToCurve(goCtx context.Context, msg *types.MsgSellToCurve)
 		types.EventTypeSell,
 		attributes...,
 	))
+
+	protocolFeeDec := osmomath.NewDecFromInt(feePaid)
+	s.recordTrade(ctx, msg.Denom, false, netPayment, protocolFeeDec, lastPrice)
 
 	return &types.MsgSellToCurveResponse{
 		PaymentOut:    netPayment.String(),
@@ -459,6 +465,8 @@ func (s msgServer) OpenMarginPosition(goCtx context.Context, msg *types.MsgOpenM
 		sdk.NewAttribute(types.AttributeKeyLiquidationPrice, liquidationPrice.String()),
 		sdk.NewAttribute(types.AttributeKeyPositionId, fmt.Sprintf("%d", positionID)),
 	))
+
+	s.adjustOpenPositions(ctx, 1)
 
 	return &types.MsgOpenMarginPositionResponse{
 		PositionId:       positionID,
@@ -629,6 +637,8 @@ func (s msgServer) CloseMarginPosition(goCtx context.Context, msg *types.MsgClos
 		sdk.NewAttribute(types.AttributeKeyRealizedPnL, pnl.String()),
 		sdk.NewAttribute(types.AttributeKeyFeesPaid, fee.String()),
 	))
+
+	s.adjustOpenPositions(ctx, -1)
 
 	return &types.MsgCloseMarginPositionResponse{
 		PayoutAmount: actualPayoutDec.String(),

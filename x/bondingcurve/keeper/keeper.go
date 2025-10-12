@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
@@ -612,6 +613,24 @@ func (k Keeper) executeFullLiquidation(ctx sdk.Context, pool types.MarginPool, p
 		attributes...,
 	))
 
+	k.adjustOpenPositions(ctx, -1)
+
+	liquidatorStr := ""
+	if len(liquidator) > 0 {
+		liquidatorStr = liquidator.String()
+	}
+	k.recordLiquidation(ctx, types.LiquidationRecord{
+		PositionId:       position.Id,
+		Denom:            position.Denom,
+		Trader:           position.Trader,
+		Liquidator:       liquidatorStr,
+		LiquidationType:  "full",
+		PayoutAmount:     payout.String(),
+		LiquidatorReward: liquidatorReward.String(),
+		BadDebt:          badDebt.String(),
+		Timestamp:        &time.Time{},
+	})
+
 	return pool, liquidationResult{
 		liquidationType:  "full",
 		payout:           payout,
@@ -748,6 +767,22 @@ func (k Keeper) executePartialLiquidation(ctx sdk.Context, pool types.MarginPool
 		types.EventTypeCloseMargin,
 		attributes...,
 	))
+
+	liquidatorStr := ""
+	if len(liquidator) > 0 {
+		liquidatorStr = liquidator.String()
+	}
+	k.recordLiquidation(ctx, types.LiquidationRecord{
+		PositionId:       position.Id,
+		Denom:            position.Denom,
+		Trader:           position.Trader,
+		Liquidator:       liquidatorStr,
+		LiquidationType:  "partial",
+		PayoutAmount:     payout.String(),
+		LiquidatorReward: liquidatorReward.String(),
+		BadDebt:          badDebt.String(),
+		Timestamp:        &time.Time{},
+	})
 
 	return pool, liquidationResult{
 		liquidationType:  "partial",

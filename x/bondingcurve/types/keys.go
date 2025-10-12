@@ -28,6 +28,11 @@ var (
 	EmergencyActionSeqKey   = []byte{0x09}
 	EmergencyActionKeyPrefix = []byte{0x0A}
 	EmergencyConfigKey      = []byte{0x0B}
+	TokenStatsKeyPrefix     = []byte{0x0C}
+	ModuleStatsKey          = []byte{0x0D}
+	LiquidationLogKeyPrefix = []byte{0x0E}
+	LiquidationSeqKey       = []byte{0x0F}
+	LiquidationStartSeqKey  = []byte{0x10}
 )
 
 func TokenPoolKey(denom string) []byte {
@@ -61,4 +66,12 @@ func FreezeKey(targetType FreezeTargetType, target string) []byte {
 
 func EmergencyActionKey(id uint64) []byte {
 	return append(EmergencyActionKeyPrefix, sdk.Uint64ToBigEndian(id)...)
+}
+
+func TokenStatsKey(denom string) []byte {
+	return append(TokenStatsKeyPrefix, []byte(denom)...)
+}
+
+func LiquidationRecordKey(id uint64) []byte {
+	return append(LiquidationLogKeyPrefix, sdk.Uint64ToBigEndian(id)...)
 }

@@ -18,6 +18,8 @@ func DefaultGenesis() *GenesisState {
 		TokenPauses:     []TokenPauseEntry{},
 		FreezeEntries:   []FreezeEntry{},
 		EmergencyActions: []EmergencyAction{},
+		TokenStats:      []TokenStats{},
+		LiquidationRecords: []LiquidationRecord{},
 	}
 }
 
@@ -25,6 +27,21 @@ func DefaultGenesis() *GenesisState {
 func (gs GenesisState) Validate() error {
 	if err := gs.Params.Validate(); err != nil {
 		return err
+	}
+
+	if gs.ModuleStats != nil {
+		if _, err := osmomath.NewDecFromStr(gs.ModuleStats.TotalBuyVolume); err != nil {
+			return fmt.Errorf("invalid module total buy volume: %w", err)
+		}
+		if _, err := osmomath.NewDecFromStr(gs.ModuleStats.TotalSellVolume); err != nil {
+			return fmt.Errorf("invalid module total sell volume: %w", err)
+		}
+		if _, err := osmomath.NewDecFromStr(gs.ModuleStats.TotalVolume); err != nil {
+			return fmt.Errorf("invalid module total volume: %w", err)
+		}
+		if _, err := osmomath.NewDecFromStr(gs.ModuleStats.ProtocolFeesCollected); err != nil {
+			return fmt.Errorf("invalid module protocol fees: %w", err)
+		}
 	}
 
 	seenDenoms := make(map[string]struct{})
@@ -176,6 +193,74 @@ func (gs GenesisState) Validate() error {
 		if len(action.Signers) == 0 {
 			return fmt.Errorf("emergency action %d must include signers", action.Id)
 		}
+	}
+
+	tokenStatDenoms := make(map[string]struct{})
+	for _, stat := range gs.TokenStats {
+		if stat.Denom == "" {
+			return fmt.Errorf("token stats denom cannot be empty")
+		}
+		if _, exists := tokenStatDenoms[stat.Denom]; exists {
+			return fmt.Errorf("duplicate token stats denom: %s", stat.Denom)
+		}
+		tokenStatDenoms[stat.Denom] = struct{}{}
+		if stat.TotalVolume != "" {
+			if _, err := osmomath.NewDecFromStr(stat.TotalVolume); err != nil {
+				return fmt.Errorf("invalid token total volume for %s: %w", stat.Denom, err)
+			}
+		}
+		if stat.BuyVolume != "" {
+			if _, err := osmomath.NewDecFromStr(stat.BuyVolume); err != nil {
+				return fmt.Errorf("invalid token buy volume for %s: %w", stat.Denom, err)
+			}
+		}
+		if stat.SellVolume != "" {
+			if _, err := osmomath.NewDecFromStr(stat.SellVolume); err != nil {
+				return fmt.Errorf("invalid token sell volume for %s: %w", stat.Denom, err)
+			}
+		}
+		if stat.ProtocolFeesCollected != "" {
+			if _, err := osmomath.NewDecFromStr(stat.ProtocolFeesCollected); err != nil {
+				return fmt.Errorf("invalid token protocol fees for %s: %w", stat.Denom, err)
+			}
+		}
+	}
+
+	liquidationIDs := make(map[uint64]struct{})
+	var maxLiquidationID uint64
+	for _, record := range gs.LiquidationRecords {
+		if record.Id == 0 {
+			return fmt.Errorf("liquidation record id must be > 0")
+		}
+		if _, exists := liquidationIDs[record.Id]; exists {
+			return fmt.Errorf("duplicate liquidation record id: %d", record.Id)
+		}
+		liquidationIDs[record.Id] = struct{}{}
+		if record.Denom == "" {
+			return fmt.Errorf("liquidation record %d denom cannot be empty", record.Id)
+		}
+		if record.PayoutAmount != "" {
+			if _, err := osmomath.NewDecFromStr(record.PayoutAmount); err != nil {
+				return fmt.Errorf("invalid liquidation payout for id %d: %w", record.Id, err)
+			}
+		}
+		if record.LiquidatorReward != "" {
+			if _, err := osmomath.NewDecFromStr(record.LiquidatorReward); err != nil {
+				return fmt.Errorf("invalid liquidation reward for id %d: %w", record.Id, err)
+			}
+		}
+		if record.BadDebt != "" {
+			if _, err := osmomath.NewDecFromStr(record.BadDebt); err != nil {
+				return fmt.Errorf("invalid liquidation bad debt for id %d: %w", record.Id, err)
+			}
+		}
+		if record.Id > maxLiquidationID {
+			maxLiquidationID = record.Id
+		}
+	}
+
+	if len(gs.LiquidationRecords) > 0 && gs.LiquidationSeq != 0 && gs.LiquidationSeq < maxLiquidationID {
+		return fmt.Errorf("liquidation seq %d less than max record id %d", gs.LiquidationSeq, maxLiquidationID)
 	}
 
 	if gs.PendingParams != nil {
