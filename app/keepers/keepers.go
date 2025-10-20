@@ -44,6 +44,8 @@ import (
 	icacontrollertypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/controller/types"
 
 	appparams "github.com/osmosis-labs/osmosis/v30/app/params"
+	assetskeeper "github.com/osmosis-labs/osmosis/v30/x/assets/keeper"
+	assetstypes "github.com/osmosis-labs/osmosis/v30/x/assets/types"
 	claimskeeper "github.com/osmosis-labs/osmosis/v30/x/claims/keeper"
 	claimstypes "github.com/osmosis-labs/osmosis/v30/x/claims/types"
 	"github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool"
@@ -169,6 +171,7 @@ type AppKeepers struct {
 	// "Normal" keepers
 	AccountKeeper                *authkeeper.AccountKeeper
 	BankKeeper                   *bankkeeper.BaseKeeper
+	AssetsKeeper                 *assetskeeper.Keeper
 	AuthzKeeper                  *authzkeeper.Keeper
 	StakingKeeper                *stakingkeeper.Keeper
 	DistrKeeper                  *distrkeeper.Keeper
@@ -267,6 +270,12 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 		bApp.Logger(),
 	)
 	appKeepers.BankKeeper = &bankKeeper
+
+	assetsKeeper := assetskeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[assetstypes.StoreKey],
+	)
+	appKeepers.AssetsKeeper = &assetsKeeper
 
 	// Initialize authenticators
 	appKeepers.AuthenticatorManager = authenticator.NewAuthenticatorManager()
@@ -1117,5 +1126,6 @@ func KVStoreKeys() []string {
 		premiumtypes.StoreKey,
 		claimstypes.StoreKey,
 		treasurytypes.StoreKey,
+		assetstypes.StoreKey,
 	}
 }

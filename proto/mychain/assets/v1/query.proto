@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package mychain.assets.v1;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "google/api/annotations.proto";
+import "mychain/assets/v1/genesis.proto";
+
+option go_package = "x/assets/types";
+
+service Query {
+  rpc Asset(QueryAssetRequest) returns (QueryAssetResponse) {
+    option (google.api.http).get = "/mychain/assets/v1/assets/{symbol}";
+  }
+  rpc Assets(QueryAssetsRequest) returns (QueryAssetsResponse) {
+    option (google.api.http).get = "/mychain/assets/v1/assets";
+  }
+}
+
+message QueryAssetRequest { string symbol = 1; }
+
+message QueryAssetResponse { Asset asset = 1; }
+
+message QueryAssetsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAssetsResponse {
+  repeated Asset assets = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}

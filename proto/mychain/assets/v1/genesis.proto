@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package mychain.assets.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "x/assets/types";
+
+message GenesisState {
+  repeated Asset assets = 1;
+}
+
+message Asset {
+  string symbol = 1;
+  string name = 2;
+  string type = 3;
+  uint32 decimals = 4;
+  string status = 5;
+}

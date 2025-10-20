@@ -1,0 +1,64 @@
+[global]
+log_level = 'info'
+
+[mode]
+
+[mode.clients]
+enabled = true
+refresh = true
+misbehaviour = true
+
+[mode.connections]
+enabled = false
+
+[mode.channels]
+enabled = false
+
+[mode.packets]
+enabled = false
+
+# NUAH Chain Configuration
+[[chains]]
+id = 'nuahchain-1'
+type = 'CosmosSdk'
+rpc_addr = 'http://localhost:26657'
+grpc_addr = 'http://localhost:9090'
+event_source = { mode = 'push', url = 'ws://localhost:26657/websocket', batch_delay = '500ms' }
+rpc_timeout = '10s'
+account_prefix = 'nuah'
+key_name = 'test-relayer'
+address_type = { derivation = 'cosmos' }
+store_prefix = 'ibc'
+default_gas = 100000
+max_gas = 400000
+gas_price = { price = 0.001, denom = 'unuah' }
+gas_multiplier = 1.1
+max_msg_num = 30
+max_tx_size = 2097152
+clock_drift = '5s'
+max_block_time = '30s'
+trusting_period = '14days'
+trust_threshold = { numerator = '1', denominator = '3' }
+
+# Osmosis Testnet Configuration
+[[chains]]
+id = 'osmo-test-5'
+type = 'CosmosSdk'
+rpc_addr = 'https://rpc.testnet.osmosis.zone:443'
+grpc_addr = 'https://grpc.testnet.osmosis.zone:443'
+event_source = { mode = 'push', url = 'wss://rpc.testnet.osmosis.zone:443/websocket', batch_delay = '500ms' }
+rpc_timeout = '10s'
+account_prefix = 'osmo'
+key_name = 'osmosis-test-relayer'
+address_type = { derivation = 'cosmos' }
+store_prefix = 'ibc'
+default_gas = 100000
+max_gas = 400000
+gas_price = { price = 0.0025, denom = 'uosmo' }
+gas_multiplier = 1.1
+max_msg_num = 30
+max_tx_size = 2097152
+clock_drift = '5s'
+max_block_time = '30s'
+trusting_period = '14days'
+trust_threshold = { numerator = '1', denominator = '3' }

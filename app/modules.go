@@ -93,6 +93,8 @@ import (
 	appparams "github.com/osmosis-labs/osmosis/v30/app/params"
 	_ "github.com/osmosis-labs/osmosis/v30/client/docs/statik"
 	"github.com/osmosis-labs/osmosis/v30/simulation/simtypes"
+	assets "github.com/osmosis-labs/osmosis/v30/x/assets"
+	assetstypes "github.com/osmosis-labs/osmosis/v30/x/assets/types"
 	"github.com/osmosis-labs/osmosis/v30/x/bondingcurve"
 	bondingcurvetypes "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types"
 	concentratedliquidity "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/clmodule"
@@ -246,6 +248,7 @@ func appModules(
 		roles.NewAppModule(appCodec, *app.RolesKeeper),
 		policy.NewAppModule(appCodec, *app.PolicyKeeper),
 		premium.NewAppModule(appCodec, *app.PremiumKeeper),
+		assets.NewAppModule(appCodec, *app.AssetsKeeper),
 		treasury.NewAppModule(appCodec, *app.TreasuryKeeper),
 		claims.NewAppModule(appCodec, *app.ClaimsKeeper),
 		usdoracle.NewAppModule(appCodec, *app.USDOracleKeeper),
@@ -355,6 +358,7 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		premiumtypes.ModuleName,
 		treasurytypes.ModuleName,
 		claimstypes.ModuleName,
+		assetstypes.ModuleName,
 	}
 }
 

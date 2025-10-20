@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package mychain.assets.v1;
+
+import "cosmos/msg/v1/msg.proto";
+import "google/api/annotations.proto";
+import "mychain/assets/v1/genesis.proto";
+
+option go_package = "x/assets/types";
+
+service Msg {
+  rpc EnsureAsset(MsgEnsureAsset) returns (MsgEnsureAssetResponse) {
+    option (google.api.http).post = "/mychain/assets/v1/ensure";
+  }
+}
+
+message MsgEnsureAsset {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1;
+  string symbol = 2;
+}
+
+message MsgEnsureAssetResponse {
+  Asset asset = 1;
+}

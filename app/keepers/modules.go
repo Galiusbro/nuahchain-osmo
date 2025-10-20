@@ -41,6 +41,7 @@ import (
 	"github.com/skip-mev/block-sdk/v2/x/auction"
 
 	_ "github.com/osmosis-labs/osmosis/v30/client/docs/statik"
+	assets "github.com/osmosis-labs/osmosis/v30/x/assets"
 	"github.com/osmosis-labs/osmosis/v30/x/bondingcurve"
 	claims "github.com/osmosis-labs/osmosis/v30/x/claims"
 	clclient "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/client"
@@ -152,6 +153,7 @@ func NewAppModuleBasics(cdc codec.Codec) module.BasicManager {
 		roles.AppModuleBasic{},
 		policy.AppModuleBasic{},
 		premium.AppModuleBasic{},
+		assets.NewAppModuleBasic(cdc),
 		treasury.AppModuleBasic{},
 		claims.AppModuleBasic{},
 		usdoracle.AppModuleBasic{},
@@ -230,6 +232,7 @@ var AppModuleBasics = module.NewBasicManager(
 	roles.AppModuleBasic{},
 	policy.AppModuleBasic{},
 	premium.AppModuleBasic{},
+	assets.AppModuleBasic{},
 	treasury.AppModuleBasic{},
 	claims.AppModuleBasic{},
 	usdoracle.AppModuleBasic{},
