@@ -308,7 +308,7 @@ message QueryParamsResponse { Params params = 1; }
 
 🔹 Промпт 8. Модуль stablecoin (NDOLLAR эмиссия/сжигание)
 Промпт:
-Создай proto/mychain/stablecoin/v1/stablecoin.proto:
+Создай proto/osmosis/stablecoin/v1/stablecoin.proto:
 
 syntax = "proto3";
 package mychain.stablecoin.v1;

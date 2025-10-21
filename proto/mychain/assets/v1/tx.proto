@@ -12,6 +12,12 @@ service Msg {
   rpc EnsureAsset(MsgEnsureAsset) returns (MsgEnsureAssetResponse) {
     option (google.api.http).post = "/mychain/assets/v1/ensure";
   }
+  rpc BuyAsset(MsgBuyAsset) returns (MsgBuyAssetResponse) {
+    option (google.api.http).post = "/mychain/assets/v1/buy";
+  }
+  rpc SellAsset(MsgSellAsset) returns (MsgSellAssetResponse) {
+    option (google.api.http).post = "/mychain/assets/v1/sell";
+  }
 }
 
 message MsgEnsureAsset {
@@ -22,4 +28,26 @@ message MsgEnsureAsset {
 
 message MsgEnsureAssetResponse {
   Asset asset = 1;
+}
+
+message MsgBuyAsset {
+  option (cosmos.msg.v1.signer) = "buyer";
+  string buyer = 1;
+  string symbol = 2;
+  string amount_NDOLLAR = 3;
+}
+
+message MsgBuyAssetResponse {
+  string base_amount = 1;
+}
+
+message MsgSellAsset {
+  option (cosmos.msg.v1.signer) = "seller";
+  string seller = 1;
+  string symbol = 2;
+  string base_amount = 3;
+}
+
+message MsgSellAssetResponse {
+  string payout_NDOLLAR = 1;
 }

@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc"
 )
 
-// REST handlers are not exposed for the assets Msg service yet. Stub out the
-// standard gateway registration helpers to keep the linker satisfied.
+// REST handlers are intentionally omitted for the assets Msg service. The
+// generated stubs satisfy linker expectations without exposing HTTP routes.
 
 func RegisterMsgHandlerServer(context.Context, *runtime.ServeMux, MsgServer) error {
 	return nil

@@ -15,12 +15,16 @@ var (
 // RegisterLegacyAminoCodec registers the necessary x/assets interfaces and concrete types.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgEnsureAsset{}, "assets/EnsureAsset", nil)
+	cdc.RegisterConcrete(&MsgBuyAsset{}, "assets/BuyAsset", nil)
+	cdc.RegisterConcrete(&MsgSellAsset{}, "assets/SellAsset", nil)
 }
 
 // RegisterInterfaces registers the x/assets module interfaces.
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgEnsureAsset{},
+		&MsgBuyAsset{},
+		&MsgSellAsset{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

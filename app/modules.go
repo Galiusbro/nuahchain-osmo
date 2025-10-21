@@ -97,10 +97,14 @@ import (
 	assetstypes "github.com/osmosis-labs/osmosis/v30/x/assets/types"
 	"github.com/osmosis-labs/osmosis/v30/x/bondingcurve"
 	bondingcurvetypes "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types"
+	collateral "github.com/osmosis-labs/osmosis/v30/x/collateral"
+	collateraltypes "github.com/osmosis-labs/osmosis/v30/x/collateral/types"
 	concentratedliquidity "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/clmodule"
 	concentratedliquiditytypes "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/types"
 	cwpoolmodule "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/module"
 	cosmwasmpooltypes "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/types"
+	fees "github.com/osmosis-labs/osmosis/v30/x/fees"
+	feetypes "github.com/osmosis-labs/osmosis/v30/x/fees/types"
 	freeaccount "github.com/osmosis-labs/osmosis/v30/x/freeaccount"
 	freeaccounttypes "github.com/osmosis-labs/osmosis/v30/x/freeaccount/types"
 	"github.com/osmosis-labs/osmosis/v30/x/gamm"
@@ -121,6 +125,10 @@ import (
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v30/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v30/x/protorev"
 	protorevtypes "github.com/osmosis-labs/osmosis/v30/x/protorev/types"
+	risk "github.com/osmosis-labs/osmosis/v30/x/risk"
+	risktypes "github.com/osmosis-labs/osmosis/v30/x/risk/types"
+	stablecoin "github.com/osmosis-labs/osmosis/v30/x/stablecoin"
+	stablecointypes "github.com/osmosis-labs/osmosis/v30/x/stablecoin/types"
 	superfluid "github.com/osmosis-labs/osmosis/v30/x/superfluid"
 	superfluidtypes "github.com/osmosis-labs/osmosis/v30/x/superfluid/types"
 	"github.com/osmosis-labs/osmosis/v30/x/tokenfactory"
@@ -176,6 +184,11 @@ var moduleAccountPermissions = map[string][]string{
 	pegkeepertypes.ModuleName:                nil,
 	treasurytypes.ModuleName:                 nil,
 	exchangetypes.ModuleName:                 {authtypes.Minter, authtypes.Burner},
+	assetstypes.ModuleName:                   {authtypes.Minter, authtypes.Burner},
+	stablecointypes.ModuleName:               nil,
+	risktypes.ModuleName:                     nil,
+	collateraltypes.ModuleName:               nil,
+	feetypes.ModuleName:                      nil,
 }
 
 // appModules return modules to initialize module manager.
@@ -251,6 +264,10 @@ func appModules(
 		policy.NewAppModule(appCodec, *app.PolicyKeeper),
 		premium.NewAppModule(appCodec, *app.PremiumKeeper),
 		oracle.NewAppModule(appCodec, *app.OracleKeeper),
+		fees.NewAppModule(appCodec, *app.FeesKeeper),
+		collateral.NewAppModule(appCodec, *app.CollateralKeeper),
+		risk.NewAppModule(appCodec, *app.RiskKeeper),
+		stablecoin.NewAppModule(appCodec, *app.StablecoinKeeper),
 		assets.NewAppModule(appCodec, *app.AssetsKeeper),
 		treasury.NewAppModule(appCodec, *app.TreasuryKeeper),
 		claims.NewAppModule(appCodec, *app.ClaimsKeeper),
@@ -359,6 +376,10 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		rolestypes.ModuleName,
 		policytypes.ModuleName,
 		premiumtypes.ModuleName,
+		feetypes.ModuleName,
+		collateraltypes.ModuleName,
+		risktypes.ModuleName,
+		stablecointypes.ModuleName,
 		treasurytypes.ModuleName,
 		claimstypes.ModuleName,
 		oracletypes.ModuleName,

@@ -48,10 +48,14 @@ import (
 	assetstypes "github.com/osmosis-labs/osmosis/v30/x/assets/types"
 	claimskeeper "github.com/osmosis-labs/osmosis/v30/x/claims/keeper"
 	claimstypes "github.com/osmosis-labs/osmosis/v30/x/claims/types"
+	collateralkeeper "github.com/osmosis-labs/osmosis/v30/x/collateral/keeper"
+	collateraltypes "github.com/osmosis-labs/osmosis/v30/x/collateral/types"
 	"github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool"
 	cosmwasmpooltypes "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/types"
 	downtimedetector "github.com/osmosis-labs/osmosis/v30/x/downtime-detector"
 	downtimetypes "github.com/osmosis-labs/osmosis/v30/x/downtime-detector/types"
+	feeskeeper "github.com/osmosis-labs/osmosis/v30/x/fees/keeper"
+	feetypes "github.com/osmosis-labs/osmosis/v30/x/fees/types"
 	"github.com/osmosis-labs/osmosis/v30/x/gamm"
 	ibcratelimit "github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit"
 	ibcratelimittypes "github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit/types"
@@ -66,8 +70,12 @@ import (
 	premiumkeeper "github.com/osmosis-labs/osmosis/v30/x/premium/keeper"
 	premiumtypes "github.com/osmosis-labs/osmosis/v30/x/premium/types"
 	"github.com/osmosis-labs/osmosis/v30/x/protorev"
+	riskkeeper "github.com/osmosis-labs/osmosis/v30/x/risk/keeper"
+	risktypes "github.com/osmosis-labs/osmosis/v30/x/risk/types"
 	roleskeeper "github.com/osmosis-labs/osmosis/v30/x/roles/keeper"
 	rolestypes "github.com/osmosis-labs/osmosis/v30/x/roles/types"
+	stablecoinkeeper "github.com/osmosis-labs/osmosis/v30/x/stablecoin/keeper"
+	stablecointypes "github.com/osmosis-labs/osmosis/v30/x/stablecoin/types"
 	treasurykeeper "github.com/osmosis-labs/osmosis/v30/x/treasury/keeper"
 	treasurytypes "github.com/osmosis-labs/osmosis/v30/x/treasury/types"
 	ibchooks "github.com/osmosis-labs/osmosis/x/ibc-hooks"
@@ -219,6 +227,10 @@ type AppKeepers struct {
 	PremiumKeeper                *premiumkeeper.Keeper
 	ClaimsKeeper                 *claimskeeper.Keeper
 	TreasuryKeeper               *treasurykeeper.Keeper
+	FeesKeeper                   *feeskeeper.Keeper
+	RiskKeeper                   *riskkeeper.Keeper
+	StablecoinKeeper             *stablecoinkeeper.Keeper
+	CollateralKeeper             *collateralkeeper.Keeper
 	OracleKeeper                 *oraclekeeper.Keeper
 
 	// IBC modules
@@ -274,11 +286,12 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 	)
 	appKeepers.BankKeeper = &bankKeeper
 
-	assetsKeeper := assetskeeper.NewKeeper(
+	collateralKeeper := collateralkeeper.NewKeeper(
 		appCodec,
-		appKeepers.keys[assetstypes.StoreKey],
+		appKeepers.keys[collateraltypes.StoreKey],
+		appKeepers.BankKeeper,
 	)
-	appKeepers.AssetsKeeper = &assetsKeeper
+	appKeepers.CollateralKeeper = &collateralKeeper
 
 	// Initialize authenticators
 	appKeepers.AuthenticatorManager = authenticator.NewAuthenticatorManager()
@@ -298,6 +311,35 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 		govModuleAddr.String(),
 	)
 	appKeepers.OracleKeeper = &oracleKeeper
+
+	feesKeeper := feeskeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[feetypes.StoreKey],
+	)
+	appKeepers.FeesKeeper = &feesKeeper
+
+	stablecoinKeeper := stablecoinkeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[stablecointypes.StoreKey],
+	)
+	appKeepers.StablecoinKeeper = &stablecoinKeeper
+
+	riskKeeper := riskkeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[risktypes.StoreKey],
+		govModuleAddr.String(),
+	)
+	appKeepers.RiskKeeper = &riskKeeper
+
+	assetsKeeper := assetskeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[assetstypes.StoreKey],
+		appKeepers.BankKeeper,
+		appKeepers.OracleKeeper,
+		appKeepers.FeesKeeper,
+		appKeepers.StablecoinKeeper,
+	)
+	appKeepers.AssetsKeeper = &assetsKeeper
 
 	smartAccountKeeper := smartaccountkeeper.NewKeeper(
 		appCodec,
@@ -1138,5 +1180,9 @@ func KVStoreKeys() []string {
 		treasurytypes.StoreKey,
 		assetstypes.StoreKey,
 		oracletypes.StoreKey,
+		stablecointypes.StoreKey,
+		collateraltypes.StoreKey,
+		risktypes.StoreKey,
+		feetypes.StoreKey,
 	}
 }

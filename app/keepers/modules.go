@@ -44,11 +44,13 @@ import (
 	assets "github.com/osmosis-labs/osmosis/v30/x/assets"
 	"github.com/osmosis-labs/osmosis/v30/x/bondingcurve"
 	claims "github.com/osmosis-labs/osmosis/v30/x/claims"
+	collateral "github.com/osmosis-labs/osmosis/v30/x/collateral"
 	clclient "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/client"
 	concentratedliquidity "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/clmodule"
 	cwpoolclient "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/client"
 	cosmwasmpoolmodule "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/module"
 	downtimemodule "github.com/osmosis-labs/osmosis/v30/x/downtime-detector/module"
+	"github.com/osmosis-labs/osmosis/v30/x/fees"
 	freeaccount "github.com/osmosis-labs/osmosis/v30/x/freeaccount"
 	"github.com/osmosis-labs/osmosis/v30/x/gamm"
 	gammclient "github.com/osmosis-labs/osmosis/v30/x/gamm/client"
@@ -67,7 +69,9 @@ import (
 	poolmanager "github.com/osmosis-labs/osmosis/v30/x/poolmanager/module"
 	premium "github.com/osmosis-labs/osmosis/v30/x/premium"
 	"github.com/osmosis-labs/osmosis/v30/x/protorev"
+	risk "github.com/osmosis-labs/osmosis/v30/x/risk"
 	roles "github.com/osmosis-labs/osmosis/v30/x/roles"
+	stablecoin "github.com/osmosis-labs/osmosis/v30/x/stablecoin"
 	superfluid "github.com/osmosis-labs/osmosis/v30/x/superfluid"
 	superfluidclient "github.com/osmosis-labs/osmosis/v30/x/superfluid/client"
 	"github.com/osmosis-labs/osmosis/v30/x/tokenfactory"
@@ -155,6 +159,10 @@ func NewAppModuleBasics(cdc codec.Codec) module.BasicManager {
 		policy.AppModuleBasic{},
 		premium.AppModuleBasic{},
 		oracle.NewAppModuleBasic(cdc),
+		fees.NewAppModuleBasic(cdc),
+		collateral.NewAppModuleBasic(cdc),
+		risk.NewAppModuleBasic(cdc),
+		stablecoin.NewAppModuleBasic(cdc),
 		assets.NewAppModuleBasic(cdc),
 		treasury.AppModuleBasic{},
 		claims.AppModuleBasic{},
@@ -234,6 +242,10 @@ var AppModuleBasics = module.NewBasicManager(
 	roles.AppModuleBasic{},
 	policy.AppModuleBasic{},
 	premium.AppModuleBasic{},
+	fees.AppModuleBasic{},
+	collateral.AppModuleBasic{},
+	risk.AppModuleBasic{},
+	stablecoin.AppModuleBasic{},
 	oracle.AppModuleBasic{},
 	assets.AppModuleBasic{},
 	treasury.AppModuleBasic{},

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package mychain.fees.v1;
+
+option go_package = "x/fees/types";
+
+message Params {
+  string trade_fee_rate = 1; // e.g. "0.003"
+}
+
+message QueryParamsRequest {}
+
+message QueryParamsResponse {
+  Params params = 1;
+}
+
+service Query {
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse);
+}
+
+message GenesisState {
+  Params params = 1;
+}

@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package osmosis.collateral.v1;
+
+import "cosmos/msg/v1/msg.proto";
+import "google/api/annotations.proto";
+
+option go_package = "x/collateral/types";
+
+message Position {
+  string owner = 1;
+  string denom = 2;
+  string amount = 3;
+}
+
+message MsgDeposit {
+  option (cosmos.msg.v1.signer) = "depositor";
+  string depositor = 1;
+  string amount = 2;
+}
+message MsgDepositResponse {}
+
+message MsgWithdraw {
+  option (cosmos.msg.v1.signer) = "owner";
+  string owner = 1;
+  string amount = 2;
+}
+message MsgWithdrawResponse {}
+
+service Msg {
+  rpc Deposit(MsgDeposit) returns (MsgDepositResponse);
+  rpc Withdraw(MsgWithdraw) returns (MsgWithdrawResponse);
+}
+service Query {
+  rpc Collateral(QueryCollateralRequest) returns (QueryCollateralResponse) {
+    option (google.api.http) = {
+      get: "/osmosis/collateral/v1/collateral/{owner}"
+    };
+  }
+}
+message QueryCollateralRequest { string owner = 1; }
+message QueryCollateralResponse { repeated Position positions = 1; }

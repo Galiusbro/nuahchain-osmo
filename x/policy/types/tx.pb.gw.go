@@ -508,13 +508,13 @@ func RegisterMsgHandlerClient(ctx context.Context, mux *runtime.ServeMux, client
 }
 
 var (
-	pattern_Msg_CreatePolicy_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"osmosis", "policy", "v1beta1", "policies"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_CreatePolicy_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"osmosis", "policy", "v1beta1", "policies"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_UpdatePolicyAttributes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"osmosis", "policy", "v1beta1", "policies", "policy_id", "attributes"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_UpdatePolicyAttributes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"osmosis", "policy", "v1beta1", "policies", "policy_id", "attributes"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_CancelPolicy_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"osmosis", "policy", "v1beta1", "policies", "policy_id", "cancel"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_CancelPolicy_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"osmosis", "policy", "v1beta1", "policies", "policy_id", "cancel"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_UpdatePolicyStatus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"osmosis", "policy", "v1beta1", "policies", "policy_id", "status"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_UpdatePolicyStatus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"osmosis", "policy", "v1beta1", "policies", "policy_id", "status"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

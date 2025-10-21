@@ -716,21 +716,21 @@ func RegisterMsgHandlerClient(ctx context.Context, mux *runtime.ServeMux, client
 }
 
 var (
-	pattern_Msg_UpdateParams_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "update_params"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_UpdateParams_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "update_params"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_UpdateUSDPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "update_usd_price"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_UpdateUSDPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "update_usd_price"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_UpdateTokenPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "update_token_price"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_UpdateTokenPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "update_token_price"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_AddSupportedToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "add_supported_token"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_AddSupportedToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "add_supported_token"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_RemoveSupportedToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "remove_supported_token"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_RemoveSupportedToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "remove_supported_token"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_UpdateSupportedToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "update_supported_token"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_UpdateSupportedToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "update_supported_token"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_SetPriceSources_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "set_price_sources"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_SetPriceSources_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "set_price_sources"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_UpdatePriceSource_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "update_price_source"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_UpdatePriceSource_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "update_price_source"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

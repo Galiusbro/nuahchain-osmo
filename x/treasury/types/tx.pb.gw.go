@@ -623,15 +623,15 @@ func RegisterMsgHandlerClient(ctx context.Context, mux *runtime.ServeMux, client
 }
 
 var (
-	pattern_Msg_CreateTreasuryPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"osmosis", "treasury", "v1beta1", "pools"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_CreateTreasuryPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"osmosis", "treasury", "v1beta1", "pools"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_UpdateTreasuryPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"osmosis", "treasury", "v1beta1", "pools", "pool_id"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_UpdateTreasuryPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"osmosis", "treasury", "v1beta1", "pools", "pool_id"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_DepositToTreasury_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"osmosis", "treasury", "v1beta1", "pools", "pool_id", "deposit"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_DepositToTreasury_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"osmosis", "treasury", "v1beta1", "pools", "pool_id", "deposit"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_WithdrawFromTreasury_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"osmosis", "treasury", "v1beta1", "pools", "pool_id", "withdraw"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_WithdrawFromTreasury_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"osmosis", "treasury", "v1beta1", "pools", "pool_id", "withdraw"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Msg_SetPoolReserves_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"osmosis", "treasury", "v1beta1", "pools", "pool_id", "reserves"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Msg_SetPoolReserves_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"osmosis", "treasury", "v1beta1", "pools", "pool_id", "reserves"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

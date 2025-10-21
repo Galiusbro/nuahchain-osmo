@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -70,6 +71,12 @@ func (k Keeper) GetPrice(ctx sdk.Context, symbol string) (*types.Price, bool) {
 	var price types.Price
 	k.cdc.MustUnmarshal(bz, &price)
 	return &price, true
+}
+
+// GetPriceWithContext retrieves a price by symbol using context.Context.
+func (k Keeper) GetPriceWithContext(ctx context.Context, symbol string) (*types.Price, bool) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	return k.GetPrice(sdkCtx, symbol)
 }
 
 // EnsureSymbol sanitizes the provided symbol string.

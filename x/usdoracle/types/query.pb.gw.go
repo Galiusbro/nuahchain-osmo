@@ -1007,27 +1007,27 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 }
 
 var (
-	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "params"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "params"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetUSDPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "usd_price"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetUSDPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "usd_price"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetTokenPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"osmosis", "usdoracle", "token_price", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetTokenPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"osmosis", "usdoracle", "token_price", "denom"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetAllTokenPrices_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "all_token_prices"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetAllTokenPrices_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "all_token_prices"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetSupportedTokens_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "supported_tokens"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetSupportedTokens_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "supported_tokens"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetTokenInfo_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"osmosis", "usdoracle", "token_info", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetTokenInfo_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"osmosis", "usdoracle", "token_info", "denom"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetPriceHistory_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "price_history"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetPriceHistory_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "price_history"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetTokenPriceHistory_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"osmosis", "usdoracle", "token_price_history", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetTokenPriceHistory_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"osmosis", "usdoracle", "token_price_history", "denom"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetPriceDeviation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "price_deviation"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetPriceDeviation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"osmosis", "usdoracle", "price_deviation"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetTokenPriceDeviation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"osmosis", "usdoracle", "token_price_deviation", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetTokenPriceDeviation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"osmosis", "usdoracle", "token_price_deviation", "denom"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_GetPriceAggregation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"osmosis", "usdoracle", "price_aggregation", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetPriceAggregation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"osmosis", "usdoracle", "price_aggregation", "denom"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package osmosis.risk.v1;
+
+import "cosmos/msg/v1/msg.proto";
+import "google/api/annotations.proto";
+
+option go_package = "x/risk/types";
+
+message RiskParams {
+  string symbol = 1;
+  string max_leverage = 2;
+  string maintenance_margin = 3;
+  string initial_margin = 4;
+}
+
+message MsgSetRiskParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  string authority = 1;
+  RiskParams params = 2;
+}
+
+message MsgSetRiskParamsResponse {}
+
+service Msg {
+  rpc SetRiskParams(MsgSetRiskParams) returns (MsgSetRiskParamsResponse);
+}
+
+service Query {
+  rpc RiskParams(QueryRiskParamsRequest) returns (QueryRiskParamsResponse) {
+    option (google.api.http) = {
+      get: "/osmosis/risk/v1/risk_params/{symbol}"
+    };
+  }
+}
+
+message QueryRiskParamsRequest { string symbol = 1; }
+
+message QueryRiskParamsResponse { RiskParams params = 1; }
