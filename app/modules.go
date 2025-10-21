@@ -113,6 +113,8 @@ import (
 	lockuptypes "github.com/osmosis-labs/osmosis/v30/x/lockup/types"
 	"github.com/osmosis-labs/osmosis/v30/x/mint"
 	minttypes "github.com/osmosis-labs/osmosis/v30/x/mint/types"
+	oracle "github.com/osmosis-labs/osmosis/v30/x/oracle"
+	oracletypes "github.com/osmosis-labs/osmosis/v30/x/oracle/types"
 	poolincentives "github.com/osmosis-labs/osmosis/v30/x/pool-incentives"
 	poolincentivestypes "github.com/osmosis-labs/osmosis/v30/x/pool-incentives/types"
 	poolmanager "github.com/osmosis-labs/osmosis/v30/x/poolmanager/module"
@@ -248,6 +250,7 @@ func appModules(
 		roles.NewAppModule(appCodec, *app.RolesKeeper),
 		policy.NewAppModule(appCodec, *app.PolicyKeeper),
 		premium.NewAppModule(appCodec, *app.PremiumKeeper),
+		oracle.NewAppModule(appCodec, *app.OracleKeeper),
 		assets.NewAppModule(appCodec, *app.AssetsKeeper),
 		treasury.NewAppModule(appCodec, *app.TreasuryKeeper),
 		claims.NewAppModule(appCodec, *app.ClaimsKeeper),
@@ -358,6 +361,7 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		premiumtypes.ModuleName,
 		treasurytypes.ModuleName,
 		claimstypes.ModuleName,
+		oracletypes.ModuleName,
 		assetstypes.ModuleName,
 	}
 }

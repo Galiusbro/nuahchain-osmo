@@ -55,6 +55,8 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/gamm"
 	ibcratelimit "github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit"
 	ibcratelimittypes "github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit/types"
+	oraclekeeper "github.com/osmosis-labs/osmosis/v30/x/oracle/keeper"
+	oracletypes "github.com/osmosis-labs/osmosis/v30/x/oracle/types"
 	pegkeeperkeeper "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/keeper"
 	pegkeepertypes "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/types"
 	policykeeper "github.com/osmosis-labs/osmosis/v30/x/policy/keeper"
@@ -217,6 +219,7 @@ type AppKeepers struct {
 	PremiumKeeper                *premiumkeeper.Keeper
 	ClaimsKeeper                 *claimskeeper.Keeper
 	TreasuryKeeper               *treasurykeeper.Keeper
+	OracleKeeper                 *oraclekeeper.Keeper
 
 	// IBC modules
 	// transfer module
@@ -288,6 +291,13 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 		authenticator.NewPartitionedAllOf(appKeepers.AuthenticatorManager),
 	})
 	govModuleAddr := appKeepers.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
+
+	oracleKeeper := oraclekeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[oracletypes.StoreKey],
+		govModuleAddr.String(),
+	)
+	appKeepers.OracleKeeper = &oracleKeeper
 
 	smartAccountKeeper := smartaccountkeeper.NewKeeper(
 		appCodec,
@@ -1127,5 +1137,6 @@ func KVStoreKeys() []string {
 		claimstypes.StoreKey,
 		treasurytypes.StoreKey,
 		assetstypes.StoreKey,
+		oracletypes.StoreKey,
 	}
 }

@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-10-20T21:39:16Z",
+  "data_source": "TwelveData API",
+  "api_key": "01124156c61844b386a6f017d1836e0c",
+  "market_data": [
+{"meta":{"symbol":"EUR/USD","interval":"1day","currency_base":"Euro","currency_quote":"US Dollar","type":"Physical Currency"},"values":[{"datetime":"2025-10-21","open":"1.1641","high":"1.16444","low":"1.16403","close":"1.16424"}],"status":"ok"}
+{"meta":{"symbol":"GBP/USD","interval":"1day","currency_base":"British Pound","currency_quote":"US Dollar","type":"Physical Currency"},"values":[{"datetime":"2025-10-21","open":"1.34066","high":"1.34262","low":"1.34046","close":"1.34081"}],"status":"ok"}
+{"meta":{"symbol":"USD/JPY","interval":"1day","currency_base":"US Dollar","currency_quote":"Japanese Yen","type":"Physical Currency"},"values":[{"datetime":"2025-10-21","open":"150.69099","high":"150.76601","low":"150.63699","close":"150.69200"}],"status":"ok"}
+{"meta":{"symbol":"USD/CHF","interval":"1day","currency_base":"US Dollar","currency_quote":"Swiss Franc","type":"Physical Currency"},"values":[{"datetime":"2025-10-21","open":"0.79220003","high":"0.79259998","low":"0.79071999","close":"0.79202002"}],"status":"ok"}
+{"meta":{"symbol":"AUD/USD","interval":"1day","currency_base":"Australian Dollar","currency_quote":"US Dollar","type":"Physical Currency"},"values":[{"datetime":"2025-10-21","open":"0.65150827","high":"0.65167809","low":"0.65142339","close":"0.65163559"}],"status":"ok"}
+{"meta":{"symbol":"USD/CAD","interval":"1day","currency_base":"US Dollar","currency_quote":"Canadian Dollar","type":"Physical Currency"},"values":[{"datetime":"2025-10-21","open":"1.40325","high":"1.40395","low":"1.40270","close":"1.40339"}],"status":"ok"}
+{"meta":{"symbol":"USD/RUB","interval":"1day","currency_base":"US Dollar","currency_quote":"Russian Ruble","type":"Physical Currency"},"values":[{"datetime":"2025-10-21","open":"80.91000","high":"80.91000","low":"80.91000","close":"80.91000"}],"status":"ok"}
+{"meta":{"symbol":"USD/CNY","interval":"1day","currency_base":"US Dollar","currency_quote":"Chinese Yuan","type":"Physical Currency"},"values":[{"datetime":"2025-10-20","open":"7.12590","high":"7.12670","low":"7.11900","close":"7.11910"}],"status":"ok"}
+  ]
+}

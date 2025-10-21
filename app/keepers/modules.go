@@ -58,6 +58,7 @@ import (
 	limitedaccount "github.com/osmosis-labs/osmosis/v30/x/limitedaccount"
 	"github.com/osmosis-labs/osmosis/v30/x/lockup"
 	"github.com/osmosis-labs/osmosis/v30/x/mint"
+	oracle "github.com/osmosis-labs/osmosis/v30/x/oracle"
 	"github.com/osmosis-labs/osmosis/v30/x/pegkeeper"
 	policy "github.com/osmosis-labs/osmosis/v30/x/policy"
 	poolincentives "github.com/osmosis-labs/osmosis/v30/x/pool-incentives"
@@ -153,6 +154,7 @@ func NewAppModuleBasics(cdc codec.Codec) module.BasicManager {
 		roles.AppModuleBasic{},
 		policy.AppModuleBasic{},
 		premium.AppModuleBasic{},
+		oracle.NewAppModuleBasic(cdc),
 		assets.NewAppModuleBasic(cdc),
 		treasury.AppModuleBasic{},
 		claims.AppModuleBasic{},
@@ -232,6 +234,7 @@ var AppModuleBasics = module.NewBasicManager(
 	roles.AppModuleBasic{},
 	policy.AppModuleBasic{},
 	premium.AppModuleBasic{},
+	oracle.AppModuleBasic{},
 	assets.AppModuleBasic{},
 	treasury.AppModuleBasic{},
 	claims.AppModuleBasic{},

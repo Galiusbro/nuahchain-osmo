@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package mychain.oracle.v1;
+
+import "cosmos/msg/v1/msg.proto";
+import "google/api/annotations.proto";
+
+option go_package = "x/oracle/types";
+
+message Price {
+  string symbol = 1;
+  string value = 2;
+}
+
+message QueryPriceRequest {
+  string symbol = 1;
+}
+
+message QueryPriceResponse {
+  Price price = 1;
+}
+
+service Query {
+  rpc Price(QueryPriceRequest) returns (QueryPriceResponse) {
+    option (google.api.http).get = "/mychain/oracle/v1/price/{symbol}";
+  }
+}
+
+service Msg {
+  rpc SetPrice(MsgSetPrice) returns (MsgSetPriceResponse) {
+    option (google.api.http).post = "/mychain/oracle/v1/set-price";
+  }
+}
+
+message MsgSetPrice {
+  option (cosmos.msg.v1.signer) = "authority";
+  string authority = 1;
+  string symbol = 2;
+  string value = 3;
+}
+
+message MsgSetPriceResponse {}
+
+message GenesisState {
+  repeated Price prices = 1;
+}
