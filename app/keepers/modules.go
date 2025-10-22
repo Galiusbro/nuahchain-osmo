@@ -57,6 +57,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit/ibcratelimitmodule"
 	"github.com/osmosis-labs/osmosis/v30/x/incentives"
 	incentivesclient "github.com/osmosis-labs/osmosis/v30/x/incentives/client"
+	leverage "github.com/osmosis-labs/osmosis/v30/x/leverage"
 	limitedaccount "github.com/osmosis-labs/osmosis/v30/x/limitedaccount"
 	"github.com/osmosis-labs/osmosis/v30/x/lockup"
 	"github.com/osmosis-labs/osmosis/v30/x/mint"
@@ -162,6 +163,7 @@ func NewAppModuleBasics(cdc codec.Codec) module.BasicManager {
 		fees.NewAppModuleBasic(cdc),
 		collateral.NewAppModuleBasic(cdc),
 		risk.NewAppModuleBasic(cdc),
+		leverage.NewAppModuleBasic(cdc),
 		stablecoin.NewAppModuleBasic(cdc),
 		assets.NewAppModuleBasic(cdc),
 		treasury.AppModuleBasic{},
@@ -244,6 +246,7 @@ var AppModuleBasics = module.NewBasicManager(
 	premium.AppModuleBasic{},
 	fees.AppModuleBasic{},
 	collateral.AppModuleBasic{},
+	leverage.AppModuleBasic{},
 	risk.AppModuleBasic{},
 	stablecoin.AppModuleBasic{},
 	oracle.AppModuleBasic{},

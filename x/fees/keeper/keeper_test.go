@@ -12,8 +12,10 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/legacy"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"github.com/osmosis-labs/osmosis/v30/x/fees/keeper"
 	"github.com/osmosis-labs/osmosis/v30/x/fees/types"
@@ -21,16 +23,23 @@ import (
 
 func setupKeeper(t *testing.T) (keeper.Keeper, sdk.Context) {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
+	paramsKey := storetypes.NewKVStoreKey(paramtypes.StoreKey)
+	transientKey := storetypes.NewTransientStoreKey(paramtypes.TStoreKey)
 	db := dbm.NewMemDB()
 	stateStore := store.NewCommitMultiStore(db, log.NewNopLogger(), metrics.NewNoOpMetrics())
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(paramsKey, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(transientKey, storetypes.StoreTypeTransient, nil)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
 	registry := codectypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(registry)
 
-	k := keeper.NewKeeper(cdc, storeKey)
+	paramSubspace := paramtypes.NewSubspace(cdc, legacy.Cdc, paramsKey, transientKey, types.ModuleName)
+
+	k := keeper.NewKeeper(cdc, paramSubspace)
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
+	require.NoError(t, k.SetParams(ctx, types.DefaultParams()))
 
 	return k, ctx
 }

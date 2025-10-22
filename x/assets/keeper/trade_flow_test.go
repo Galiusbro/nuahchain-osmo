@@ -15,6 +15,8 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/assets/types"
 	feetypes "github.com/osmosis-labs/osmosis/v30/x/fees/types"
 	oracletypes "github.com/osmosis-labs/osmosis/v30/x/oracle/types"
+	stablecoinkeeper "github.com/osmosis-labs/osmosis/v30/x/stablecoin/keeper"
+	stablecointypes "github.com/osmosis-labs/osmosis/v30/x/stablecoin/types"
 )
 
 func TestBuyAssetAppliesFeeAndBurnsRemainder(t *testing.T) {
@@ -128,4 +130,45 @@ func mustInt(value string) sdkmath.Int {
 		panic("invalid integer string")
 	}
 	return intVal
+}
+
+func TestStablecoinCoverageTracksTrades(t *testing.T) {
+	s := new(apptesting.KeeperTestHelper)
+	s.SetT(t)
+	s.Setup()
+
+	ctx := s.Ctx
+	trader := s.TestAccs[0]
+
+	startBalance := sdkmath.NewInt(5000)
+	require.NoError(t, banktestutil.FundAccount(ctx, s.App.BankKeeper, trader, sdk.NewCoins(sdk.NewCoin(types.NDollarDenom, startBalance))))
+
+	require.NoError(t, s.App.FeesKeeper.SetParams(ctx, feetypes.NewParams("0.1")))
+	s.App.OracleKeeper.SetPrice(ctx, &oracletypes.Price{Symbol: "GOLD", Value: "2000"})
+
+	assetSrv := keeper.NewMsgServer(*s.App.AssetsKeeper)
+	buyResp, err := assetSrv.BuyAsset(sdk.WrapSDKContext(ctx), types.NewMsgBuyAsset(trader.String(), "GOLD", "1000"))
+	require.NoError(t, err)
+
+	stableQuery := stablecoinkeeper.NewQueryServer(*s.App.StablecoinKeeper)
+	coverageAfterBuy, err := stableQuery.Coverage(sdk.WrapSDKContext(ctx), &stablecointypes.QueryCoverageRequest{})
+	require.NoError(t, err)
+	require.Equal(t, "-900", coverageAfterBuy.Outstanding)
+	require.Equal(t, "100", coverageAfterBuy.ReserveBalance)
+	require.Equal(t, sdkmath.LegacyZeroDec().String(), coverageAfterBuy.CoverageRatio)
+
+	s.App.OracleKeeper.SetPrice(ctx, &oracletypes.Price{Symbol: "GOLD", Value: "3000"})
+	_, err = assetSrv.SellAsset(sdk.WrapSDKContext(ctx), types.NewMsgSellAsset(trader.String(), "GOLD", buyResp.BaseAmount))
+	require.NoError(t, err)
+
+	coverageAfterSell, err := stableQuery.Coverage(sdk.WrapSDKContext(ctx), &stablecointypes.QueryCoverageRequest{})
+	require.NoError(t, err)
+	require.Equal(t, "450", coverageAfterSell.Outstanding)
+	require.Equal(t, "235", coverageAfterSell.ReserveBalance)
+	outstandingInt, ok := sdkmath.NewIntFromString(coverageAfterSell.Outstanding)
+	require.True(t, ok)
+	reserveInt, ok := sdkmath.NewIntFromString(coverageAfterSell.ReserveBalance)
+	require.True(t, ok)
+	expectedRatio := osmomath.NewDecFromInt(reserveInt).Quo(osmomath.NewDecFromInt(outstandingInt)).String()
+	require.Equal(t, expectedRatio, coverageAfterSell.CoverageRatio)
 }

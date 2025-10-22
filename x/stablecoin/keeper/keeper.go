@@ -4,25 +4,40 @@ import (
 	"fmt"
 
 	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
+	osmomath "github.com/osmosis-labs/osmosis/osmomath"
+	feetypes "github.com/osmosis-labs/osmosis/v30/x/fees/types"
 	"github.com/osmosis-labs/osmosis/v30/x/stablecoin/types"
-
-	storetypes "cosmossdk.io/store/types"
 )
 
 // Keeper provides access to stablecoin statistics.
 type Keeper struct {
-	cdc      codec.BinaryCodec
-	storeKey storetypes.StoreKey
+	cdc        codec.BinaryCodec
+	storeKey   storetypes.StoreKey
+	bankKeeper types.BankKeeper
+	paramstore paramtypes.Subspace
 }
 
 // NewKeeper creates a new stablecoin keeper instance.
-func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey) Keeper {
+func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey, bankKeeper types.BankKeeper, ps paramtypes.Subspace) Keeper {
+	if bankKeeper == nil {
+		panic("bank keeper cannot be nil")
+	}
+
+	if ps.Name() != "" && !ps.HasKeyTable() {
+		ps = ps.WithKeyTable(types.ParamKeyTable())
+	}
+
 	return Keeper{
-		cdc:      cdc,
-		storeKey: storeKey,
+		cdc:        cdc,
+		storeKey:   storeKey,
+		bankKeeper: bankKeeper,
+		paramstore: ps,
 	}
 }
 
@@ -65,6 +80,13 @@ func (k Keeper) GetStats(ctx sdk.Context) types.Stats {
 
 // InitGenesis initializes module state from genesis data.
 func (k Keeper) InitGenesis(ctx sdk.Context, state *types.GenesisState) {
+	if state == nil {
+		stats := types.NewStats(sdkmath.ZeroInt(), sdkmath.ZeroInt())
+		k.setTotalMinted(ctx, parseInt(stats.TotalMinted))
+		k.SetParams(ctx, types.DefaultParams())
+		return
+	}
+
 	stats := state.GetStats()
 	if stats == nil {
 		stats = &types.Stats{}
@@ -75,12 +97,66 @@ func (k Keeper) InitGenesis(ctx sdk.Context, state *types.GenesisState) {
 
 	k.setTotalMinted(ctx, minted)
 	k.setTotalBurned(ctx, burned)
+
+	if state.Params != nil {
+		k.SetParams(ctx, *state.Params)
+	} else {
+		k.SetParams(ctx, types.DefaultParams())
+	}
 }
 
 // ExportGenesis exports current module state.
 func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 	stats := k.GetStats(ctx)
-	return &types.GenesisState{Stats: &stats}
+	params := k.GetParams(ctx)
+	return &types.GenesisState{Stats: &stats, Params: &params}
+}
+
+func (k Keeper) getReserveBalance(ctx sdk.Context) sdkmath.Int {
+	addr := authtypes.NewModuleAddress(feetypes.ModuleName)
+	coin := k.bankKeeper.GetBalance(ctx.Context(), addr, types.NDollarDenom)
+	return coin.Amount
+}
+
+func (k Keeper) coverageMetrics(ctx sdk.Context) (sdkmath.Int, sdkmath.Int, string) {
+	stats := k.GetStats(ctx)
+	outstanding := parseInt(stats.Outstanding)
+	reserve := k.getReserveBalance(ctx)
+	ratio := osmomath.ZeroDec()
+
+	if outstanding.IsPositive() {
+		reserveDec := osmomath.NewDecFromInt(reserve)
+		outstandingDec := osmomath.NewDecFromInt(outstanding)
+		if !outstandingDec.IsZero() {
+			ratio = reserveDec.Quo(outstandingDec)
+		}
+	}
+
+	return outstanding, reserve, ratio.String()
+}
+
+// GetParams returns the module parameters.
+func (k Keeper) GetParams(ctx sdk.Context) types.Params {
+	if k.paramstore.Name() == "" {
+		return types.DefaultParams()
+	}
+
+	var params types.Params
+	k.paramstore.GetParamSet(ctx, &params)
+	return params
+}
+
+// SetParams stores the module parameters.
+func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
+	if err := params.Validate(); err != nil {
+		panic(err)
+	}
+
+	if k.paramstore.Name() == "" {
+		return
+	}
+
+	k.paramstore.SetParamSet(ctx, &params)
 }
 
 func (k Keeper) getTotalMinted(ctx sdk.Context) sdkmath.Int {

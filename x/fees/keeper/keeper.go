@@ -3,37 +3,39 @@ package keeper
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"github.com/osmosis-labs/osmosis/v30/x/fees/types"
 
-	storetypes "cosmossdk.io/store/types"
 	osmomath "github.com/osmosis-labs/osmosis/osmomath"
 )
 
 // Keeper provides access to fee parameters.
 type Keeper struct {
-	cdc      codec.BinaryCodec
-	storeKey storetypes.StoreKey
+	cdc        codec.BinaryCodec
+	paramstore paramtypes.Subspace
 }
 
 // NewKeeper creates a new fees keeper instance.
-func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey) Keeper {
+func NewKeeper(cdc codec.BinaryCodec, ps paramtypes.Subspace) Keeper {
+	if ps.Name() != "" && !ps.HasKeyTable() {
+		ps = ps.WithKeyTable(types.ParamKeyTable())
+	}
+
 	return Keeper{
-		cdc:      cdc,
-		storeKey: storeKey,
+		cdc:        cdc,
+		paramstore: ps,
 	}
 }
 
 // GetParams returns the current module parameters.
 func (k Keeper) GetParams(ctx sdk.Context) types.Params {
-	store := ctx.KVStore(k.storeKey)
-	bz := store.Get([]byte(types.ParamsKey))
-	if bz == nil {
+	if k.paramstore.Name() == "" {
 		return types.DefaultParams()
 	}
 
 	var params types.Params
-	k.cdc.MustUnmarshal(bz, &params)
+	k.paramstore.GetParamSet(ctx, &params)
 	return params
 }
 
@@ -43,9 +45,11 @@ func (k Keeper) SetParams(ctx sdk.Context, params types.Params) error {
 		return err
 	}
 
-	store := ctx.KVStore(k.storeKey)
-	bz := k.cdc.MustMarshal(&params)
-	store.Set([]byte(types.ParamsKey), bz)
+	if k.paramstore.Name() == "" {
+		return nil
+	}
+
+	k.paramstore.SetParamSet(ctx, &params)
 	return nil
 }
 

@@ -9,13 +9,19 @@ import (
 // DefaultGenesis returns the default genesis state.
 func DefaultGenesis() *GenesisState {
 	stats := NewStats(sdkmath.ZeroInt(), sdkmath.ZeroInt())
-	return &GenesisState{Stats: &stats}
+	params := DefaultParams()
+	return &GenesisState{Stats: &stats, Params: &params}
 }
 
 // Validate validates the genesis state contents.
 func (gs *GenesisState) Validate() error {
 	if gs == nil || gs.Stats == nil {
 		return fmt.Errorf("stats cannot be nil")
+	}
+	if gs.Params != nil {
+		if err := gs.Params.Validate(); err != nil {
+			return err
+		}
 	}
 
 	if _, ok := sdkmath.NewIntFromString(gs.Stats.TotalMinted); !ok {

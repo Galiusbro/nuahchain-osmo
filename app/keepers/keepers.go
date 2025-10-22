@@ -59,6 +59,8 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/x/gamm"
 	ibcratelimit "github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit"
 	ibcratelimittypes "github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit/types"
+	leveragekeeper "github.com/osmosis-labs/osmosis/v30/x/leverage/keeper"
+	leveragetypes "github.com/osmosis-labs/osmosis/v30/x/leverage/types"
 	oraclekeeper "github.com/osmosis-labs/osmosis/v30/x/oracle/keeper"
 	oracletypes "github.com/osmosis-labs/osmosis/v30/x/oracle/types"
 	pegkeeperkeeper "github.com/osmosis-labs/osmosis/v30/x/pegkeeper/keeper"
@@ -231,6 +233,7 @@ type AppKeepers struct {
 	RiskKeeper                   *riskkeeper.Keeper
 	StablecoinKeeper             *stablecoinkeeper.Keeper
 	CollateralKeeper             *collateralkeeper.Keeper
+	LeverageKeeper               *leveragekeeper.Keeper
 	OracleKeeper                 *oraclekeeper.Keeper
 
 	// IBC modules
@@ -314,13 +317,15 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 
 	feesKeeper := feeskeeper.NewKeeper(
 		appCodec,
-		appKeepers.keys[feetypes.StoreKey],
+		appKeepers.GetSubspace(feetypes.ModuleName),
 	)
 	appKeepers.FeesKeeper = &feesKeeper
 
 	stablecoinKeeper := stablecoinkeeper.NewKeeper(
 		appCodec,
 		appKeepers.keys[stablecointypes.StoreKey],
+		appKeepers.BankKeeper,
+		appKeepers.GetSubspace(stablecointypes.ModuleName),
 	)
 	appKeepers.StablecoinKeeper = &stablecoinKeeper
 
@@ -328,8 +333,17 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 		appCodec,
 		appKeepers.keys[risktypes.StoreKey],
 		govModuleAddr.String(),
+		appKeepers.GetSubspace(risktypes.ModuleName),
 	)
 	appKeepers.RiskKeeper = &riskKeeper
+
+	leverageKeeper := leveragekeeper.NewKeeper(
+		appCodec,
+		appKeepers.keys[leveragetypes.StoreKey],
+		appKeepers.BankKeeper,
+		appKeepers.OracleKeeper,
+	)
+	appKeepers.LeverageKeeper = &leverageKeeper
 
 	assetsKeeper := assetskeeper.NewKeeper(
 		appCodec,
@@ -1183,6 +1197,7 @@ func KVStoreKeys() []string {
 		stablecointypes.StoreKey,
 		collateraltypes.StoreKey,
 		risktypes.StoreKey,
+		leveragetypes.StoreKey,
 		feetypes.StoreKey,
 	}
 }

@@ -9,6 +9,8 @@ const (
 	RouterKey = ModuleName
 	// MemStoreKey defines the in-memory store key.
 	MemStoreKey = "mem_stablecoin"
+	// NDollarDenom defines the denom used for NDOLLAR accounting.
+	NDollarDenom = "NDOLLAR"
 )
 
 var (

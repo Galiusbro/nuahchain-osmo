@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -13,8 +14,10 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/legacy"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"github.com/osmosis-labs/osmosis/v30/x/stablecoin/keeper"
 	"github.com/osmosis-labs/osmosis/v30/x/stablecoin/types"
@@ -22,18 +25,31 @@ import (
 
 func setupKeeper(t *testing.T) (keeper.Keeper, sdk.Context) {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
+	paramsKey := storetypes.NewKVStoreKey(paramtypes.StoreKey)
+	transientKey := storetypes.NewTransientStoreKey(paramtypes.TStoreKey)
 	db := dbm.NewMemDB()
 	stateStore := store.NewCommitMultiStore(db, log.NewNopLogger(), metrics.NewNoOpMetrics())
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(paramsKey, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(transientKey, storetypes.StoreTypeTransient, nil)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
 	registry := codectypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(registry)
 
-	k := keeper.NewKeeper(cdc, storeKey)
+	paramSubspace := paramtypes.NewSubspace(cdc, legacy.Cdc, paramsKey, transientKey, types.ModuleName)
+
+	k := keeper.NewKeeper(cdc, storeKey, mockBankKeeper{}, paramSubspace)
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
+	k.SetParams(ctx, types.DefaultParams())
 
 	return k, ctx
+}
+
+type mockBankKeeper struct{}
+
+func (mockBankKeeper) GetBalance(context.Context, sdk.AccAddress, string) sdk.Coin {
+	return sdk.NewCoin(types.NDollarDenom, sdkmath.ZeroInt())
 }
 
 func TestRecordMintBurnAndStats(t *testing.T) {
@@ -55,4 +71,14 @@ func TestRecordMintBurnAndStats(t *testing.T) {
 	require.Equal(t, sdkmath.NewInt(160), minted)
 	require.Equal(t, sdkmath.NewInt(45), burned)
 	require.Equal(t, sdkmath.NewInt(115), outstanding)
+}
+
+func TestParamsManagement(t *testing.T) {
+	k, ctx := setupKeeper(t)
+
+	params := types.NewParams("custom")
+	k.SetParams(ctx, params)
+
+	stored := k.GetParams(ctx)
+	require.Equal(t, params, stored)
 }

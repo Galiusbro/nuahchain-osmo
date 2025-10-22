@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-package mychain.fees.v1;
+package osmosis.fees.v1;
 
 option go_package = "x/fees/types";
 
 message Params {
-  string trade_fee_rate = 1; // e.g. "0.003"
+  string param_name = 1;
 }
 
 message QueryParamsRequest {}

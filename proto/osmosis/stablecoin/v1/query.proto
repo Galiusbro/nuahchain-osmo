@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package osmosis.stablecoin.v1;
+
+import "google/api/annotations.proto";
+import "osmosis/stablecoin/v1/stablecoin.proto";
+
+option go_package = "x/stablecoin/types";
+
+message QueryCoverageRequest {}
+message QueryCoverageResponse {
+  string outstanding = 1;
+  string reserve_balance = 2;
+  string coverage_ratio = 3;
+}
+
+service Query {
+  rpc Stats(QueryStatsRequest) returns (QueryStatsResponse) {
+    option (google.api.http) = {
+      get: "/osmosis/stablecoin/v1/stats"
+    };
+  }
+
+  rpc Coverage(QueryCoverageRequest) returns (QueryCoverageResponse) {
+    option (google.api.http) = {
+      get: "/osmosis/stablecoin/v1/coverage"
+    };
+  }
+}

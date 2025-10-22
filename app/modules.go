@@ -113,6 +113,8 @@ import (
 	ibcratelimittypes "github.com/osmosis-labs/osmosis/v30/x/ibc-rate-limit/types"
 	"github.com/osmosis-labs/osmosis/v30/x/incentives"
 	incentivestypes "github.com/osmosis-labs/osmosis/v30/x/incentives/types"
+	leverage "github.com/osmosis-labs/osmosis/v30/x/leverage"
+	leveragetypes "github.com/osmosis-labs/osmosis/v30/x/leverage/types"
 	"github.com/osmosis-labs/osmosis/v30/x/lockup"
 	lockuptypes "github.com/osmosis-labs/osmosis/v30/x/lockup/types"
 	"github.com/osmosis-labs/osmosis/v30/x/mint"
@@ -188,6 +190,7 @@ var moduleAccountPermissions = map[string][]string{
 	stablecointypes.ModuleName:               nil,
 	risktypes.ModuleName:                     nil,
 	collateraltypes.ModuleName:               nil,
+	leveragetypes.ModuleName:                 nil,
 	feetypes.ModuleName:                      nil,
 }
 
@@ -267,6 +270,7 @@ func appModules(
 		fees.NewAppModule(appCodec, *app.FeesKeeper),
 		collateral.NewAppModule(appCodec, *app.CollateralKeeper),
 		risk.NewAppModule(appCodec, *app.RiskKeeper),
+		leverage.NewAppModule(appCodec, *app.LeverageKeeper),
 		stablecoin.NewAppModule(appCodec, *app.StablecoinKeeper),
 		assets.NewAppModule(appCodec, *app.AssetsKeeper),
 		treasury.NewAppModule(appCodec, *app.TreasuryKeeper),
@@ -377,6 +381,7 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		policytypes.ModuleName,
 		premiumtypes.ModuleName,
 		feetypes.ModuleName,
+		leveragetypes.ModuleName,
 		collateraltypes.ModuleName,
 		risktypes.ModuleName,
 		stablecointypes.ModuleName,

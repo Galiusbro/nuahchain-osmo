@@ -12,8 +12,10 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/legacy"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"github.com/osmosis-labs/osmosis/v30/x/risk/keeper"
 	"github.com/osmosis-labs/osmosis/v30/x/risk/types"
@@ -24,18 +26,26 @@ const authority = "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn"
 func setupKeeper(t *testing.T) (keeper.Keeper, sdk.Context) {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 	memKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
+	paramsKey := storetypes.NewKVStoreKey(paramtypes.StoreKey)
+	transientKey := storetypes.NewTransientStoreKey(paramtypes.TStoreKey)
 
 	db := dbm.NewMemDB()
 	stateStore := store.NewCommitMultiStore(db, log.NewNopLogger(), metrics.NewNoOpMetrics())
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(memKey, storetypes.StoreTypeMemory, nil)
+	stateStore.MountStoreWithDB(paramsKey, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(transientKey, storetypes.StoreTypeTransient, nil)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
-	k := keeper.NewKeeper(cdc, storeKey, authority)
+	paramSubspace := paramtypes.NewSubspace(cdc, legacy.Cdc, paramsKey, transientKey, types.ModuleName)
+
+	k := keeper.NewKeeper(cdc, storeKey, authority, paramSubspace)
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
+	// initialize default params for tests
+	k.SetParams(ctx, types.DefaultParams())
 
 	return k, ctx
 }
@@ -61,6 +71,7 @@ func TestInitAndExportGenesis(t *testing.T) {
 	k, ctx := setupKeeper(t)
 
 	gen := &types.GenesisState{
+		Params: func() *types.Params { p := types.NewParams("custom"); return &p }(),
 		RiskParams: []*types.RiskParams{
 			{
 				Symbol:            "ETH",
@@ -76,4 +87,16 @@ func TestInitAndExportGenesis(t *testing.T) {
 	out := k.ExportGenesis(ctx)
 	require.Len(t, out.RiskParams, 1)
 	require.Equal(t, "ETH", out.RiskParams[0].Symbol)
+	require.NotNil(t, out.Params)
+	require.Equal(t, "custom", out.Params.ParamName)
+}
+
+func TestParamsManagement(t *testing.T) {
+	k, ctx := setupKeeper(t)
+
+	params := types.NewParams("updated")
+	k.SetParams(ctx, params)
+
+	stored := k.GetParams(ctx)
+	require.Equal(t, params, stored)
 }

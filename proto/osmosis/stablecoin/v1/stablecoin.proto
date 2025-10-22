@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package osmosis.stablecoin.v1;
 
-import "google/api/annotations.proto";
+import "osmosis/stablecoin/v1/params.proto";
 
 option go_package = "x/stablecoin/types";
 
@@ -14,15 +14,7 @@ message Stats {
 
 message QueryStatsRequest {}
 message QueryStatsResponse { Stats stats = 1; }
-
-service Query {
-  rpc Stats(QueryStatsRequest) returns (QueryStatsResponse) {
-    option (google.api.http) = {
-      get: "/osmosis/stablecoin/v1/stats"
-    };
-  }
-}
-
 message GenesisState {
   Stats stats = 1;
+  Params params = 2;
 }

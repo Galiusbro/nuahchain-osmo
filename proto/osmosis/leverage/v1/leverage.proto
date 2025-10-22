@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package osmosis.leverage.v1;
+
+import "cosmos/msg/v1/msg.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/leverage/types";
+
+enum Side { SIDE_UNSPECIFIED = 0; SIDE_LONG = 1; SIDE_SHORT = 2; }
+
+message Position {
+  uint64 id = 1;
+  string owner = 2;
+  string symbol = 3;
+  Side side = 4;
+  string base_qty = 5;
+  string entry_price = 6;
+  string leverage = 7;
+}
+
+message MsgOpenPosition {
+  option (cosmos.msg.v1.signer) = "owner";
+  string owner = 1;
+  string symbol = 2;
+  Side side = 3;
+  string quote_NDOLLAR = 4;
+  string leverage = 5;
+}
+message MsgOpenPositionResponse { Position position = 1; }
+
+message MsgClosePosition {
+  option (cosmos.msg.v1.signer) = "owner";
+  string owner = 1;
+  uint64 id = 2;
+}
+message MsgClosePositionResponse { string pnl = 1; }
+
+service Msg {
+  rpc OpenPosition(MsgOpenPosition) returns (MsgOpenPositionResponse);
+  rpc ClosePosition(MsgClosePosition) returns (MsgClosePositionResponse);
+}
+
+service Query {
+  rpc Position(QueryPositionRequest) returns (QueryPositionResponse) {
+    option (google.api.http) = {
+      get: "/osmosis/leverage/v1/position/{id}"
+    };
+  }
+}
+message QueryPositionRequest { uint64 id = 1; }
+message QueryPositionResponse { Position position = 1; }
+
+message GenesisState {
+  uint64 next_position_id = 1;
+  repeated Position positions = 2;
+}

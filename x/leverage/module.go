@@ -1,4 +1,4 @@
-package fees
+package leverage
 
 import (
 	"context"
@@ -15,8 +15,8 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
-	"github.com/osmosis-labs/osmosis/v30/x/fees/keeper"
-	"github.com/osmosis-labs/osmosis/v30/x/fees/types"
+	"github.com/osmosis-labs/osmosis/v30/x/leverage/keeper"
+	"github.com/osmosis-labs/osmosis/v30/x/leverage/types"
 )
 
 var (
@@ -28,17 +28,20 @@ var (
 	_ module.HasConsensusVersion = AppModule{}
 )
 
-// AppModuleBasic implements the stateless module methods.
+// AppModuleBasic handles stateless functionality.
 type AppModuleBasic struct{}
 
-// NewAppModuleBasic constructs a new AppModuleBasic instance.
 func NewAppModuleBasic(_ codec.BinaryCodec) AppModuleBasic { return AppModuleBasic{} }
 
 func (AppModuleBasic) Name() string { return types.ModuleName }
 
-func (AppModuleBasic) RegisterLegacyAminoCodec(_ *codec.LegacyAmino) {}
+func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
+	types.RegisterCodec(cdc)
+}
 
-func (AppModuleBasic) RegisterInterfaces(_ cdctypes.InterfaceRegistry) {}
+func (AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
+	types.RegisterInterfaces(reg)
+}
 
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(types.DefaultGenesis())
@@ -48,68 +51,57 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingCo
 	if len(bz) == 0 {
 		return nil
 	}
-
 	var state types.GenesisState
 	if err := cdc.UnmarshalJSON(bz, &state); err != nil {
-		return fmt.Errorf("failed to unmarshal fees genesis: %w", err)
+		return fmt.Errorf("failed to unmarshal leverage genesis: %w", err)
 	}
 	return state.Validate()
 }
 
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	_ = clientCtx
-	_ = mux
+	types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)) //nolint:errcheck
 }
 
 func (AppModuleBasic) GetTxCmd() *cobra.Command { return nil }
 
 func (AppModuleBasic) GetQueryCmd() *cobra.Command { return nil }
 
-// AppModule implements the full module interface.
+// AppModule implements module.AppModule.
 type AppModule struct {
 	AppModuleBasic
 	keeper keeper.Keeper
 }
 
-// NewAppModule creates a new AppModule object.
-func NewAppModule(_ codec.Codec, keeper keeper.Keeper) AppModule {
-	return AppModule{AppModuleBasic: AppModuleBasic{}, keeper: keeper}
+func NewAppModule(_ codec.Codec, k keeper.Keeper) AppModule {
+	return AppModule{AppModuleBasic: AppModuleBasic{}, keeper: k}
 }
 
 func (AppModule) IsAppModule()        {}
 func (AppModule) IsOnePerModuleType() {}
 
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQueryServer(am.keeper))
+	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
+	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQueryServerImpl(am.keeper))
 }
 
 func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, bz json.RawMessage) {
 	if len(bz) == 0 {
-		_ = am.keeper.SetParams(ctx, types.DefaultParams())
+		am.keeper.InitGenesis(ctx, types.DefaultGenesis())
 		return
 	}
-
-	var genState types.GenesisState
-	cdc.MustUnmarshalJSON(bz, &genState)
-	if err := genState.Validate(); err != nil {
+	var state types.GenesisState
+	cdc.MustUnmarshalJSON(bz, &state)
+	if err := state.Validate(); err != nil {
 		panic(err)
 	}
-	params := genState.GetParams()
-	if params == nil {
-		defaultParams := types.DefaultParams()
-		params = &defaultParams
-	}
-	if err := am.keeper.SetParams(ctx, *params); err != nil {
-		panic(err)
-	}
+	am.keeper.InitGenesis(ctx, &state)
 }
 
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
-	params := am.keeper.GetParams(ctx)
-	state := types.GenesisState{Params: &params}
-	return cdc.MustMarshalJSON(&state)
+	state := am.keeper.ExportGenesis(ctx)
+	return cdc.MustMarshalJSON(state)
 }
 
 func (AppModule) ConsensusVersion() uint64 { return 1 }

@@ -118,11 +118,11 @@
 Промпт:
 Создай минимальный модуль x/assets.Требования:
 * Каталоги:
-    * proto/mychain/assets/v1/
+    * proto/osmosis/assets/v1/
     * x/assets/ (keeper, types, module)
     * app/, cmd/
-* Создай proto/mychain/assets/v1/genesis.proto с:syntax = "proto3";
-* package mychain.assets.v1;
+* Создай proto/osmosis/assets/v1/genesis.proto с:syntax = "proto3";
+* package osmosis.assets.v1;
 * import "cosmos/base/v1beta1/coin.proto";
 * option go_package = "x/assets/types";
 * message GenesisState {
@@ -142,20 +142,20 @@
 🔹 Промпт 2. Query сервис для assets
 Цель: Добавить gRPC-запросы и Keeper API.
 Промпт:
-В proto/mychain/assets/v1/query.proto создай:
+В proto/osmosis/assets/v1/query.proto создай:
 
 syntax = "proto3";
-package mychain.assets.v1;
+package osmosis.assets.v1;
 import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagiNUAHion.proto";
 option go_package = "x/assets/types";
 
 service Query {
   rpc Asset(QueryAssetRequest) returns (QueryAssetResponse) {
-    option (google.api.http).get = "/mychain/assets/v1/assets/{symbol}";
+    option (google.api.http).get = "/osmosis/assets/v1/assets/{symbol}";
   }
   rpc Assets(QueryAssetsRequest) returns (QueryAssetsResponse) {
-    option (google.api.http).get = "/mychain/assets/v1/assets";
+    option (google.api.http).get = "/osmosis/assets/v1/assets";
   }
 }
 
@@ -164,24 +164,24 @@ message QueryAssetResponse { Asset asset = 1; }
 message QueryAssetsRequest { cosmos.base.query.v1beta1.PageRequest pagiNUAHion = 1; }
 message QueryAssetsResponse { repeated Asset assets = 1; cosmos.base.query.v1beta1.PageResponse pagiNUAHion = 2; }
 Реализуй Keeper и gRPC-сервер.Добавь CLI-команды:
-* mychaind q assets asset EUR
-* mychaind q assets assets
+* osmosisd q assets asset EUR
+* osmosisd q assets assets
 Тест:Создай запись в хранилище и запроси через CLI → возвращает JSON с Asset.
 
 🔹 Промпт 3. MsgEnsureAsset — автоматическое создание актива
 Цель: Добавить сообщение для автосоздания актива.
 Промпт:
-Создай proto/mychain/assets/v1/tx.proto:
+Создай proto/osmosis/assets/v1/tx.proto:
 
 syntax = "proto3";
-package mychain.assets.v1;
+package osmosis.assets.v1;
 import "cosmos/msg/v1/msg.proto";
 import "google/api/annotations.proto";
 option go_package = "x/assets/types";
 
 service Msg {
   rpc EnsureAsset(MsgEnsureAsset) returns (MsgEnsureAssetResponse) {
-    option (google.api.http).post = "/mychain/assets/v1/ensure";
+    option (google.api.http).post = "/osmosis/assets/v1/ensure";
   }
 }
 
@@ -200,10 +200,10 @@ Keeper должен:
 🔹 Промпт 4. Модуль oracle (цены)
 Цель: добавить proto и базовую функциональность оракула.
 Промпт:
-Создай proto/mychain/oracle/v1/oracle.proto:
+Создай proto/osmosis/oracle/v1/oracle.proto:
 
 syntax = "proto3";
-package mychain.oracle.v1;
+package osmosis.oracle.v1;
 import "google/api/annotations.proto";
 option go_package = "x/oracle/types";
 
@@ -217,13 +217,13 @@ message QueryPriceResponse { Price price = 1; }
 
 service Query {
   rpc Price(QueryPriceRequest) returns (QueryPriceResponse) {
-    option (google.api.http).get = "/mychain/oracle/v1/price/{symbol}";
+    option (google.api.http).get = "/osmosis/oracle/v1/price/{symbol}";
   }
 }
 
 service Msg {
   rpc SetPrice(MsgSetPrice) returns (MsgSetPriceResponse) {
-    option (google.api.http).post = "/mychain/oracle/v1/set-price";
+    option (google.api.http).post = "/osmosis/oracle/v1/set-price";
   }
 }
 
@@ -240,10 +240,10 @@ message MsgSetPriceResponse {}
 🔹 Промпт 5. MsgBuyAsset — покупка актива за NDOLLAR
 Цель: добавить логику покупки и mint.
 Промпт:
-Добавь в proto/mychain/assets/v1/tx.proto новое сообщение:
+Добавь в proto/osmosis/assets/v1/tx.proto новое сообщение:
 
 rpc BuyAsset(MsgBuyAsset) returns (MsgBuyAssetResponse) {
-  option (google.api.http).post = "/mychain/assets/v1/buy";
+  option (google.api.http).post = "/osmosis/assets/v1/buy";
 }
 
 message MsgBuyAsset {
@@ -271,7 +271,7 @@ Keeper логика:
 Добавь в тот же tx.proto:
 
 rpc SellAsset(MsgSellAsset) returns (MsgSellAssetResponse) {
-  option (google.api.http).post = "/mychain/assets/v1/sell";
+  option (google.api.http).post = "/osmosis/assets/v1/sell";
 }
 
 message MsgSellAsset {
@@ -292,10 +292,10 @@ Keeper:
 
 🔹 Промпт 7. Модуль fees (комиссии)
 Промпт:
-Создай proto/mychain/fees/v1/fees.proto:
+Создай proto/osmosis/fees/v1/fees.proto:
 
 syntax = "proto3";
-package mychain.fees.v1;
+package osmosis.fees.v1;
 option go_package = "x/fees/types";
 
 message Params {
@@ -311,7 +311,7 @@ message QueryParamsResponse { Params params = 1; }
 Создай proto/osmosis/stablecoin/v1/stablecoin.proto:
 
 syntax = "proto3";
-package mychain.stablecoin.v1;
+package osmosis.stablecoin.v1;
 option go_package = "x/stablecoin/types";
 
 message Stats {
@@ -331,10 +331,10 @@ service Query {
 
 🔹 Промпт 9. Модуль risk (лимиты плеча)
 Промпт:
-Создай proto/mychain/risk/v1/risk.proto:
+Создай proto/osmosis/risk/v1/risk.proto:
 
 syntax = "proto3";
-package mychain.risk.v1;
+package osmosis.risk.v1;
 option go_package = "x/risk/types";
 
 message RiskParams {
@@ -361,10 +361,10 @@ message QueryRiskParamsResponse { RiskParams params = 1; }
 
 🔹 Промпт 10. Модуль collateral (залог)
 Промпт:
-proto/mychain/collateral/v1/collateral.proto:
+proto/osmosis/collateral/v1/collateral.proto:
 
 syntax = "proto3";
-package mychain.collateral.v1;
+package osmosis.collateral.v1;
 option go_package = "x/collateral/types";
 
 message Position {
@@ -399,10 +399,10 @@ message QueryCollateralResponse { repeated Position positions = 1; }
 
 🔹 Промпт 11. Модуль leverage (открытие позиции)
 Промпт:
-proto/mychain/leverage/v1/leverage.proto:
+proto/osmosis/leverage/v1/leverage.proto:
 
 syntax = "proto3";
-package mychain.leverage.v1;
+package osmosis.leverage.v1;
 option go_package = "x/leverage/types";
 
 enum Side { SIDE_UNSPECIFIED = 0; SIDE_LONG = 1; SIDE_SHORT = 2; }
@@ -446,7 +446,7 @@ message QueryPositionResponse { Position position = 1; }
 
 🔹 Промпт 12. Модуль fees + stablecoin интеграция и отчёт устойчивости
 Промпт:
-Добавь proto/mychain/stablecoin/v1/query.proto:
+Добавь proto/osmosis/stablecoin/v1/query.proto:
 
 service Query {
   rpc Coverage(QueryCoverageRequest) returns (QueryCoverageResponse);

@@ -31,3 +31,19 @@ func (q queryServer) Stats(goCtx context.Context, _ *types.QueryStatsRequest) (*
 	stats := q.GetStats(ctx)
 	return &types.QueryStatsResponse{Stats: &stats}, nil
 }
+
+// Coverage handles the Query/Coverage RPC.
+func (q queryServer) Coverage(goCtx context.Context, _ *types.QueryCoverageRequest) (*types.QueryCoverageResponse, error) {
+	if goCtx == nil {
+		return nil, status.Error(codes.Internal, "context cannot be nil")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	outstanding, reserve, ratio := q.coverageMetrics(ctx)
+
+	return &types.QueryCoverageResponse{
+		Outstanding:    outstanding.String(),
+		ReserveBalance: reserve.String(),
+		CoverageRatio:  ratio,
+	}, nil
+}
