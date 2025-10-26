@@ -11,6 +11,7 @@ import (
 	tendermint "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 
 	"cosmossdk.io/x/evidence"
+	feegrantmodule "cosmossdk.io/x/feegrant/module"
 	"cosmossdk.io/x/upgrade"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -123,6 +124,7 @@ func NewAppModuleBasics(cdc codec.Codec) module.BasicManager {
 		crisis.AppModuleBasic{},
 		slashing.AppModuleBasic{},
 		authzmodule.AppModuleBasic{},
+		feegrantmodule.AppModuleBasic{},
 		consensus.AppModuleBasic{},
 		ibc.AppModuleBasic{},
 		upgrade.AppModuleBasic{},

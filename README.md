@@ -42,6 +42,29 @@ may find that it is not highly performant or prone to crashing.
 For the most up to date documentation please visit
 [docs.osmosis.zone](https://docs.osmosis.zone/)
 
+## AI Trader Delegation Helper
+
+Use `scripts/ai_trader_grant.sh` to delegate trading rights to an automated agent without re‑signing every deal. The script walks you through:
+
+- granting `MsgBuyAsset` and `MsgSellAsset` permissions via `authz`;
+- optionally creating a `feegrant` allowance so the bot pays fees from a capped NDOLLAR budget;
+- generating the exact `nuahd` commands (dry-run by default) and executing them once you confirm.
+
+Quick start:
+
+```bash
+scripts/ai_trader_grant.sh \
+  --chain-id nuahchain-1 \
+  --granter-key my_user_key \
+  --grantee-address nuah1traderaddress... \
+  --spend-limit 5000000factory/creator/ndollar \
+  --authz-days 30 \
+  --feegrant-days 7 \
+  --execute
+```
+
+After running, verify the grants with `nuahd q authz grants <granter> <grantee>` and `nuahd q feegrant grant <granter> <grantee>`. See `docs/ai_trading_automation_plan.md` for the broader automation roadmap.
+
 ## Joining the Mainnet
 
 [Please visit the official instructions on how to join the Mainnet

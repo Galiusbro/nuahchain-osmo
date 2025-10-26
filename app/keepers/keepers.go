@@ -3,6 +3,8 @@ package keepers
 import (
 	evidencekeeper "cosmossdk.io/x/evidence/keeper"
 	evidencetypes "cosmossdk.io/x/evidence/types"
+	feegranttypes "cosmossdk.io/x/feegrant"
+	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	"github.com/CosmWasm/wasmd/x/wasm"
@@ -185,6 +187,7 @@ type AppKeepers struct {
 	BankKeeper                   *bankkeeper.BaseKeeper
 	AssetsKeeper                 *assetskeeper.Keeper
 	AuthzKeeper                  *authzkeeper.Keeper
+	FeegrantKeeper               *feegrantkeeper.Keeper
 	StakingKeeper                *stakingkeeper.Keeper
 	DistrKeeper                  *distrkeeper.Keeper
 	DowntimeKeeper               *downtimedetector.Keeper
@@ -388,6 +391,13 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 		appKeepers.AccountKeeper,
 	)
 	appKeepers.AuthzKeeper = &authzKeeper
+
+	feegrantKeeper := feegrantkeeper.NewKeeper(
+		appCodec,
+		runtime.NewKVStoreService(appKeepers.keys[feegranttypes.StoreKey]),
+		appKeepers.AccountKeeper,
+	)
+	appKeepers.FeegrantKeeper = &feegrantKeeper
 
 	stakingKeeper := stakingkeeper.NewKeeper(
 		appCodec,
@@ -1168,6 +1178,7 @@ func KVStoreKeys() []string {
 		concentratedliquiditytypes.StoreKey,
 		poolmanagertypes.StoreKey,
 		authzkeeper.StoreKey,
+		feegranttypes.StoreKey,
 		txfeestypes.StoreKey,
 		superfluidtypes.StoreKey,
 		wasmtypes.StoreKey,

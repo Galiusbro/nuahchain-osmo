@@ -1,0 +1,47 @@
+# AI Trader Bot Configuration (YAML)
+
+bot:
+  name: "ai-trader"
+  granter_address: "nuah1granter1234567890abcdefghijklmnopqrstuvwxyz"
+  grantee_address: "nuah1grantee1234567890abcdefghijklmnopqrstuvwxyz"
+  chain_id: "nuahchain-1"
+  node_url: "http://localhost:26657"
+  trading_interval: "30s"
+  enabled: true
+
+limits:
+  max_daily_volume: "1000000factory/test/ndollar"
+  max_single_trade: "10000factory/test/ndollar"
+  min_single_trade: "100factory/test/ndollar"
+  allowed_symbols:
+    - "BTC"
+    - "ETH"
+    - "OSMO"
+  max_trades_per_day: 100
+  max_trades_per_hour: 10
+
+risk_management:
+  stop_loss_percentage: 0.1
+  take_profit_percentage: 0.2
+  max_price_deviation: 0.05
+  cool_down_period: "5m"
+  emergency_stop:
+    max_daily_loss: "100000factory/test/ndollar"
+    max_consecutive_losses: 5
+    max_oracle_downtime: "10m"
+
+data_sources:
+  price_update_interval: "10s"
+  max_price_age: "30s"
+  oracle:
+    query_timeout: "5s"
+    max_retries: 3
+    retry_delay: "1s"
+
+monitoring:
+  log_level: "info"
+  log_format: "json"
+  enable_metrics: true
+  metrics_port: 8080
+  enable_audit: true
+  audit_file: "audit.log"
