@@ -39,6 +39,11 @@ func (k Keeper) Authority() string {
 	return k.authority
 }
 
+// StoreKey returns the keeper store key.
+func (k Keeper) StoreKey() storetypes.StoreKey {
+	return k.storeKey
+}
+
 // SetPrice sets the price for a given symbol.
 func (k Keeper) SetPrice(ctx sdk.Context, price *types.Price) {
 	if price == nil {

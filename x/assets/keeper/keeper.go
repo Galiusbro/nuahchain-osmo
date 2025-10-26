@@ -202,6 +202,11 @@ func (k Keeper) getPrice(ctx sdk.Context, symbol string) (*oracletypes.Price, er
 	return price, nil
 }
 
+// GetPrice retrieves a price from the oracle (public method for testing)
+func (k Keeper) GetPrice(ctx sdk.Context, symbol string) (*oracletypes.Price, error) {
+	return k.getPrice(ctx, symbol)
+}
+
 // SellAsset executes the sale of the given asset amount for NDOLLAR.
 func (k Keeper) SellAsset(ctx sdk.Context, seller sdk.AccAddress, symbol string, baseAmount osmomath.Dec) (sdk.Coin, sdkmath.Int, error) {
 	if !baseAmount.IsPositive() {

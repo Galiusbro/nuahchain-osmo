@@ -1,0 +1,136 @@
+# Oracle Data Sources Configuration
+# This file defines the data sources for price scraping
+
+sources:
+  forex:
+    - name: "investing.com"
+      url: "https://www.investing.com/currencies/{symbol}"
+      selector: ".instrument-price_last__KQzyA"
+      rate_limit: "1s"
+      weight: 0.3
+      enabled: true
+      timeout: "10s"
+      retries: 3
+      description: "Investing.com forex rates"
+
+    - name: "x-rates.com"
+      url: "https://www.x-rates.com/table/?from=USD&amount=1"
+      selector: "td.rtRates"
+      rate_limit: "2s"
+      weight: 0.2
+      enabled: true
+      timeout: "10s"
+      retries: 3
+      description: "X-Rates currency converter"
+
+    - name: "oanda.com"
+      url: "https://www.oanda.com/currency/converter/"
+      selector: ".currency-converter__rate"
+      rate_limit: "3s"
+      weight: 0.25
+      enabled: true
+      timeout: "10s"
+      retries: 3
+      description: "OANDA currency rates"
+
+  crypto:
+    - name: "coinmarketcap.com"
+      url: "https://coinmarketcap.com/currencies/{symbol}/"
+      selector: ".priceValue"
+      rate_limit: "2s"
+      weight: 0.4
+      enabled: true
+      timeout: "10s"
+      retries: 3
+      description: "CoinMarketCap crypto prices"
+
+    - name: "coingecko.com"
+      url: "https://www.coingecko.com/en/coins/{symbol}"
+      selector: ".no-wrap"
+      rate_limit: "1s"
+      weight: 0.3
+      enabled: true
+      timeout: "10s"
+      retries: 3
+      description: "CoinGecko crypto prices"
+
+  commodities:
+    - name: "kitco.com"
+      url: "https://www.kitco.com/gold-price-today-usa/"
+      selector: ".spot-price"
+      rate_limit: "5s"
+      weight: 0.5
+      enabled: true
+      timeout: "10s"
+      retries: 3
+      description: "Kitco precious metals prices"
+
+    - name: "tradingview.com"
+      url: "https://www.tradingview.com/symbols/{symbol}/"
+      selector: ".tv-symbol-price-quote__value"
+      rate_limit: "3s"
+      weight: 0.3
+      enabled: true
+      timeout: "15s"
+      retries: 3
+      description: "TradingView commodity prices"
+
+  stocks:
+    - name: "yahoo.com/finance"
+      url: "https://finance.yahoo.com/quote/{symbol}"
+      selector: '[data-field="regularMarketPrice"]'
+      rate_limit: "2s"
+      weight: 0.4
+      enabled: true
+      timeout: "10s"
+      retries: 3
+      description: "Yahoo Finance stock prices"
+
+    - name: "marketwatch.com"
+      url: "https://www.marketwatch.com/investing/stock/{symbol}"
+      selector: ".intraday__price"
+      rate_limit: "3s"
+      weight: 0.3
+      enabled: true
+      timeout: "10s"
+      retries: 3
+      description: "MarketWatch stock prices"
+
+# Global scraping settings
+global:
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+  max_concurrent: 5
+  default_timeout: "10s"
+  default_retries: 3
+  rate_limit_buffer: "100ms"
+
+# Symbol mappings for different asset types
+symbol_mappings:
+  forex:
+    "EUR/USD": "eur-usd"
+    "GBP/USD": "gbp-usd"
+    "USD/JPY": "usd-jpy"
+    "USD/CHF": "usd-chf"
+    "AUD/USD": "aud-usd"
+    "USD/CAD": "usd-cad"
+
+  crypto:
+    "BTC/USD": "bitcoin"
+    "ETH/USD": "ethereum"
+    "LTC/USD": "litecoin"
+    "XRP/USD": "ripple"
+    "ADA/USD": "cardano"
+
+  commodities:
+    "XAU/USD": "gold"
+    "XAG/USD": "silver"
+    "XPT/USD": "platinum"
+    "XPD/USD": "palladium"
+    "OIL/USD": "crude-oil"
+
+  stocks:
+    "AAPL": "AAPL"
+    "GOOGL": "GOOGL"
+    "MSFT": "MSFT"
+    "TSLA": "TSLA"
+    "AMZN": "AMZN"

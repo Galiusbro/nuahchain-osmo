@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package mychain.oracle.v1;
+package osmosis.oracle.v1;
 
 import "cosmos/msg/v1/msg.proto";
 import "google/api/annotations.proto";
@@ -10,6 +10,9 @@ option go_package = "x/oracle/types";
 message Price {
   string symbol = 1;
   string value = 2;
+  string source = 3;      // Data source name
+  int64 timestamp = 4;    // Unix timestamp
+  float confidence = 5;   // Confidence score (0-1)
 }
 
 message QueryPriceRequest {
@@ -22,13 +25,13 @@ message QueryPriceResponse {
 
 service Query {
   rpc Price(QueryPriceRequest) returns (QueryPriceResponse) {
-    option (google.api.http).get = "/mychain/oracle/v1/price/{symbol}";
+    option (google.api.http).get = "/osmosis/oracle/v1/price/{symbol}";
   }
 }
 
 service Msg {
   rpc SetPrice(MsgSetPrice) returns (MsgSetPriceResponse) {
-    option (google.api.http).post = "/mychain/oracle/v1/set-price";
+    option (google.api.http).post = "/osmosis/oracle/v1/set-price";
   }
 }
 

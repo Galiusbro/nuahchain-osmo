@@ -79,14 +79,19 @@ func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 // AppModule implements the full module interface.
 type AppModule struct {
 	AppModuleBasic
-	keeper keeper.Keeper
+	keeper    keeper.Keeper
+	apiKeeper *keeper.APIKeeper
 }
 
 // NewAppModule creates a new AppModule object.
-func NewAppModule(_ codec.Codec, keeper keeper.Keeper) AppModule {
+func NewAppModule(cdc codec.Codec, k keeper.Keeper) AppModule {
+	// Create APIKeeper using the base keeper's properties
+	apiKeeper := keeper.NewAPIKeeper(cdc.(codec.BinaryCodec), k.StoreKey(), k.Authority())
+
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
-		keeper:         keeper,
+		keeper:         k,
+		apiKeeper:      apiKeeper,
 	}
 }
 
@@ -124,6 +129,48 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 
 func (AppModule) ConsensusVersion() uint64 { return 1 }
 
-func (am AppModule) BeginBlock(context.Context) error { return nil }
+func (am AppModule) BeginBlock(ctx context.Context) error {
+	// Update prices every 5 minutes (300 blocks assuming 1 second block time)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	blockHeight := sdkCtx.BlockHeight()
+
+	// Update prices every 300 blocks (5 minutes)
+	if blockHeight%300 == 0 {
+		am.updatePrices(sdkCtx)
+	}
+
+	return nil
+}
+
+// updatePrices updates prices for default symbols
+func (am AppModule) updatePrices(ctx sdk.Context) {
+	if am.apiKeeper == nil {
+		return
+	}
+
+	// Get default symbols
+	symbols := am.apiKeeper.GetDefaultSymbols()
+
+	// Update prices for each category
+	for category, symbolList := range symbols {
+		am.apiKeeper.Logger(ctx).Info("Updating prices", "category", category, "count", len(symbolList))
+
+		// Update first few symbols from each category to avoid rate limits
+		maxSymbols := 3
+		if len(symbolList) < maxSymbols {
+			maxSymbols = len(symbolList)
+		}
+
+		for i := 0; i < maxSymbols; i++ {
+			symbol := symbolList[i]
+			err := am.apiKeeper.UpdatePriceFromAPI(ctx, symbol)
+			if err != nil {
+				am.apiKeeper.Logger(ctx).Error("Failed to update price", "symbol", symbol, "error", err)
+			} else {
+				am.apiKeeper.Logger(ctx).Info("Updated price", "symbol", symbol)
+			}
+		}
+	}
+}
 
 func (am AppModule) EndBlock(context.Context) error { return nil }

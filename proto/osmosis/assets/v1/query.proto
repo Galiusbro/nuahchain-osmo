@@ -1,19 +1,19 @@
 syntax = "proto3";
 
-package mychain.assets.v1;
+package osmosis.assets.v1;
 
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "google/api/annotations.proto";
-import "mychain/assets/v1/genesis.proto";
+import "osmosis/assets/v1/genesis.proto";
 
 option go_package = "x/assets/types";
 
 service Query {
   rpc Asset(QueryAssetRequest) returns (QueryAssetResponse) {
-    option (google.api.http).get = "/mychain/assets/v1/assets/{symbol}";
+    option (google.api.http).get = "/osmosis/assets/v1/assets/{symbol}";
   }
   rpc Assets(QueryAssetsRequest) returns (QueryAssetsResponse) {
-    option (google.api.http).get = "/mychain/assets/v1/assets";
+    option (google.api.http).get = "/osmosis/assets/v1/assets";
   }
 }
 

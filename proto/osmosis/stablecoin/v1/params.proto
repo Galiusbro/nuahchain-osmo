@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-package osmosis.stablecoin.v1;
-
-option go_package = "x/stablecoin/types";
-
-message Params {
-  string param_name = 1;
-}

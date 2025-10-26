@@ -1,22 +1,22 @@
 syntax = "proto3";
 
-package mychain.assets.v1;
+package osmosis.assets.v1;
 
 import "cosmos/msg/v1/msg.proto";
 import "google/api/annotations.proto";
-import "mychain/assets/v1/genesis.proto";
+import "osmosis/assets/v1/genesis.proto";
 
 option go_package = "x/assets/types";
 
 service Msg {
   rpc EnsureAsset(MsgEnsureAsset) returns (MsgEnsureAssetResponse) {
-    option (google.api.http).post = "/mychain/assets/v1/ensure";
+    option (google.api.http).post = "/osmosis/assets/v1/ensure";
   }
   rpc BuyAsset(MsgBuyAsset) returns (MsgBuyAssetResponse) {
-    option (google.api.http).post = "/mychain/assets/v1/buy";
+    option (google.api.http).post = "/osmosis/assets/v1/buy";
   }
   rpc SellAsset(MsgSellAsset) returns (MsgSellAssetResponse) {
-    option (google.api.http).post = "/mychain/assets/v1/sell";
+    option (google.api.http).post = "/osmosis/assets/v1/sell";
   }
 }
 
