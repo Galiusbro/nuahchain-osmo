@@ -11,17 +11,18 @@ import (
 )
 
 var (
-	KeyBondingCurveWallet = []byte("BondingCurveWallet")
-	KeyQuoteDenom         = []byte("QuoteDenom")
-	KeyMaxSupply          = []byte("MaxSupply")
-	KeyStartPrice         = []byte("StartPrice")
-	KeyEndPrice           = []byte("EndPrice")
-	KeyTokenCreationFee   = []byte("TokenCreationFee")
-	KeyFounderClaimPeriod = []byte("FounderClaimPeriod")
-	KeyMaxLeverage        = []byte("MaxLeverage")
-	KeyLiquidationPenalty = []byte("LiquidationPenalty")
-	KeyProtocolFeeRate    = []byte("ProtocolFeeRate")
-	KeyMinCollateralRatio = []byte("MinCollateralRatio")
+	KeyBondingCurveWallet   = []byte("BondingCurveWallet")
+	KeyQuoteDenom           = []byte("QuoteDenom")
+	KeyMaxSupply            = []byte("MaxSupply")
+	KeyStartPrice           = []byte("StartPrice")
+	KeyEndPrice             = []byte("EndPrice")
+	KeyTokenCreationFee     = []byte("TokenCreationFee")
+	KeyFounderClaimPeriod   = []byte("FounderClaimPeriod")
+	KeyMaxLeverage          = []byte("MaxLeverage")
+	KeyLiquidationPenalty   = []byte("LiquidationPenalty")
+	KeyProtocolFeeRate      = []byte("ProtocolFeeRate")
+	KeyMinCollateralRatio   = []byte("MinCollateralRatio")
+	KeyMarginTradingEnabled = []byte("MarginTradingEnabled")
 )
 
 func ParamKeyTable() paramtypes.KeyTable {
@@ -40,35 +41,38 @@ func NewParams(
 	liquidationPenalty osmomath.Dec,
 	protocolFeeRate osmomath.Dec,
 	minCollateralRatio osmomath.Dec,
+	marginTradingEnabled bool,
 ) Params {
 	return Params{
-		BondingCurveWallet: wallet,
-		QuoteDenom:         quoteDenom,
-		MaxSupply:          maxSupply,
-		StartPrice:         startPrice,
-		EndPrice:           endPrice,
-		TokenCreationFee:   tokenCreationFee,
-		FounderClaimPeriod: founderClaim,
-		MaxLeverage:        maxLeverage,
-		LiquidationPenalty: liquidationPenalty.String(),
-		ProtocolFeeRate:    protocolFeeRate.String(),
-		MinCollateralRatio: minCollateralRatio.String(),
+		BondingCurveWallet:   wallet,
+		QuoteDenom:           quoteDenom,
+		MaxSupply:            maxSupply,
+		StartPrice:           startPrice,
+		EndPrice:             endPrice,
+		TokenCreationFee:     tokenCreationFee,
+		FounderClaimPeriod:   founderClaim,
+		MaxLeverage:          maxLeverage,
+		LiquidationPenalty:   liquidationPenalty.String(),
+		ProtocolFeeRate:      protocolFeeRate.String(),
+		MinCollateralRatio:   minCollateralRatio.String(),
+		MarginTradingEnabled: marginTradingEnabled,
 	}
 }
 
 func DefaultParams() Params {
 	return Params{
-		BondingCurveWallet: "",
-		QuoteDenom:         "undollar",
-		MaxSupply:          "30000000.0",
-		StartPrice:         "0.0002",
-		EndPrice:           "1.0",
-		TokenCreationFee:   sdk.NewInt64Coin("undollar", 5_000_000),
-		FounderClaimPeriod: time.Hour,
-		MaxLeverage:        MaxMarginLeverage,
-		LiquidationPenalty: osmomath.NewDecWithPrec(5, 2).String(), // 5%
-		ProtocolFeeRate:    osmomath.NewDecWithPrec(3, 3).String(), // 0.3%
-		MinCollateralRatio: osmomath.NewDecWithPrec(1, 1).String(), // 10%
+		BondingCurveWallet:   "",
+		QuoteDenom:           "undollar",
+		MaxSupply:            "30000000.0",
+		StartPrice:           "0.0002",
+		EndPrice:             "1.0",
+		TokenCreationFee:     sdk.NewInt64Coin("undollar", 5_000_000),
+		FounderClaimPeriod:   time.Hour,
+		MaxLeverage:          MaxMarginLeverage,
+		LiquidationPenalty:   osmomath.NewDecWithPrec(5, 2).String(), // 5%
+		ProtocolFeeRate:      osmomath.NewDecWithPrec(3, 3).String(), // 0.3%
+		MinCollateralRatio:   osmomath.NewDecWithPrec(1, 1).String(), // 10%
+		MarginTradingEnabled: false,                                  // Disabled by default
 	}
 }
 
@@ -141,6 +145,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyLiquidationPenalty, &p.LiquidationPenalty, validateDecString),
 		paramtypes.NewParamSetPair(KeyProtocolFeeRate, &p.ProtocolFeeRate, validateDecString),
 		paramtypes.NewParamSetPair(KeyMinCollateralRatio, &p.MinCollateralRatio, validateDecString),
+		paramtypes.NewParamSetPair(KeyMarginTradingEnabled, &p.MarginTradingEnabled, validateBool),
 	}
 }
 
@@ -236,6 +241,14 @@ func validatePositiveDecRange(valueStr, name string, min, max osmomath.Dec) erro
 	}
 	if value.GT(max) {
 		return fmt.Errorf("%s must be less than or equal to %s", name, max.String())
+	}
+	return nil
+}
+
+func validateBool(i any) error {
+	_, ok := i.(bool)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 	return nil
 }

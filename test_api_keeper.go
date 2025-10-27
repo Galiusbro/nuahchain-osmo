@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gp/projects/alex/dollar/nuahchain_osmosis/x/oracle/sources"
+	"github.com/osmosis-labs/osmosis/v30/x/oracle/sources"
 )
 
 func main() {
@@ -128,4 +128,3 @@ func main() {
 
 	fmt.Println("\n🏁 Тест завершен!")
 }
-

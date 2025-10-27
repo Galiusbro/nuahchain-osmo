@@ -34,4 +34,5 @@ var (
 	ErrInvalidDuration         = errorsmod.Register(ModuleName, 29, "invalid duration")
 	ErrEmergencyThreshold      = errorsmod.Register(ModuleName, 30, "insufficient emergency signers")
 	ErrFreezeTargetInvalid     = errorsmod.Register(ModuleName, 31, "invalid freeze target")
+	ErrMarginTradingDisabled   = errorsmod.Register(ModuleName, 32, "margin trading is disabled")
 )

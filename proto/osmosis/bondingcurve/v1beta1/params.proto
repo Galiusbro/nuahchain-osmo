@@ -19,4 +19,5 @@ message Params {
   string liquidation_penalty = 9;
   string protocol_fee_rate = 10;
   string min_collateral_ratio = 11;
+  bool margin_trading_enabled = 12;
 }

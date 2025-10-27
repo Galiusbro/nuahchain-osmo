@@ -1881,3 +1881,83 @@ func (s *KeeperTestSuite) TestLiquidationPrioritization() {
 		}
 	}
 }
+
+func (s *KeeperTestSuite) TestOpenMarginPositionDisabled() {
+	// Disable margin trading
+	params := s.App.BondingCurveKeeper.GetParams(s.Ctx)
+	params.MarginTradingEnabled = false
+	s.App.BondingCurveKeeper.SetParams(s.Ctx, params)
+
+	s.setupMarginLiquidity(sdkmath.NewInt(1_000_000), osmomath.OneDec())
+
+	_, err := s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "100.0",
+		Leverage:         5,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		MinPositionSize:  "400.0",
+	})
+	s.Require().Error(err)
+	s.Require().Equal(types.ErrMarginTradingDisabled, err)
+}
+
+func (s *KeeperTestSuite) TestCloseMarginPositionDisabled() {
+	// First create a position with margin trading enabled
+	s.setupMarginLiquidity(sdkmath.NewInt(1_000_000), osmomath.OneDec())
+
+	openResp, err := s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "100.0",
+		Leverage:         5,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		MinPositionSize:  "400.0",
+	})
+	s.Require().NoError(err)
+
+	// Now disable margin trading
+	params := s.App.BondingCurveKeeper.GetParams(s.Ctx)
+	params.MarginTradingEnabled = false
+	s.App.BondingCurveKeeper.SetParams(s.Ctx, params)
+
+	// Try to close the position - should fail
+	_, err = s.msgServer.CloseMarginPosition(s.Ctx, &types.MsgCloseMarginPosition{
+		Trader:     s.trader.String(),
+		PositionId: openResp.PositionId,
+		MinPayout:  "50.0",
+	})
+	s.Require().Error(err)
+	s.Require().Equal(types.ErrMarginTradingDisabled, err)
+}
+
+func (s *KeeperTestSuite) TestLiquidateMarginPositionDisabled() {
+	// First create a position with margin trading enabled
+	s.setupMarginLiquidity(sdkmath.NewInt(1_000_000), osmomath.OneDec())
+
+	openResp, err := s.msgServer.OpenMarginPosition(s.Ctx, &types.MsgOpenMarginPosition{
+		Trader:           s.trader.String(),
+		Denom:            s.denom,
+		CollateralDenom:  s.quoteDenom,
+		CollateralAmount: "100.0",
+		Leverage:         5,
+		PositionType:     types.PositionType_POSITION_TYPE_LONG,
+		MinPositionSize:  "400.0",
+	})
+	s.Require().NoError(err)
+
+	// Now disable margin trading
+	params := s.App.BondingCurveKeeper.GetParams(s.Ctx)
+	params.MarginTradingEnabled = false
+	s.App.BondingCurveKeeper.SetParams(s.Ctx, params)
+
+	// Try to liquidate the position - should fail
+	_, err = s.msgServer.LiquidateMarginPosition(s.Ctx, &types.MsgLiquidateMarginPosition{
+		Liquidator: s.TestAccs[6].String(),
+		PositionId: openResp.PositionId,
+	})
+	s.Require().Error(err)
+	s.Require().Equal(types.ErrMarginTradingDisabled, err)
+}

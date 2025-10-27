@@ -321,6 +321,9 @@ func (s msgServer) OpenMarginPosition(goCtx context.Context, msg *types.MsgOpenM
 	}
 
 	params := s.GetParams(ctx)
+	if !params.MarginTradingEnabled {
+		return nil, types.ErrMarginTradingDisabled
+	}
 	if !types.ValidateLeverage(msg.Leverage) || msg.Leverage > params.MaxLeverage {
 		return nil, types.ErrInvalidLeverage
 	}
@@ -502,6 +505,9 @@ func (s msgServer) CloseMarginPosition(goCtx context.Context, msg *types.MsgClos
 	}
 
 	params := s.GetParams(ctx)
+	if !params.MarginTradingEnabled {
+		return nil, types.ErrMarginTradingDisabled
+	}
 	pool := s.ensurePool(ctx, position.Denom)
 	marginPool := s.ensureMarginPool(ctx, position.Denom)
 
@@ -666,6 +672,11 @@ func (s msgServer) LiquidateMarginPosition(goCtx context.Context, msg *types.Msg
 
 	if err := s.ensureModuleActive(ctx, position.Denom, liquidator); err != nil {
 		return nil, err
+	}
+
+	params := s.GetParams(ctx)
+	if !params.MarginTradingEnabled {
+		return nil, types.ErrMarginTradingDisabled
 	}
 
 	marginPool := s.ensureMarginPool(ctx, position.Denom)
