@@ -9,11 +9,15 @@ import (
 type Service struct {
 	fetcher Fetcher
 	store   *InMemoryStore
+	repo    Repository
 }
 
 func NewService(fetcher Fetcher) *Service {
 	return &Service{fetcher: fetcher, store: NewInMemoryStore()}
 }
+
+// WithRepository sets a persistent repository for the service.
+func (s *Service) WithRepository(r Repository) *Service { s.repo = r; return s }
 
 func (s *Service) Latest(ctx context.Context, symbol string) (Price, error) {
 	if p, ok := s.store.GetLatest(symbol); ok && time.Since(p.Timestamp) < 30*time.Second {
@@ -24,6 +28,9 @@ func (s *Service) Latest(ctx context.Context, symbol string) (Price, error) {
 		return Price{}, err
 	}
 	s.store.UpsertLatest(p)
+	if s.repo != nil {
+		_ = s.repo.SaveLatest(p)
+	}
 	return p, nil
 }
 
@@ -37,5 +44,8 @@ func (s *Service) OHLCV(ctx context.Context, symbol string, tf Timeframe, limit 
 		return nil, err
 	}
 	s.store.AppendCandles(symbol, tf, bars)
+	if s.repo != nil {
+		_ = s.repo.AppendCandles(symbol, tf, bars)
+	}
 	return s.store.GetCandles(symbol, tf, limit), nil
 }

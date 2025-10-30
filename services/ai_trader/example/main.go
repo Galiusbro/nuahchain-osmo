@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/client"
@@ -40,6 +41,11 @@ func main() {
 	// Addresses for authz execution (example placeholders)
 	grantee := "nuah1granteeaddress..."
 	granter := "nuah1granteraddress..."
+
+	// Start minimal REST for market data (for observability)
+	mux := http.NewServeMux()
+	md.NewREST(market).Register(mux)
+	go func() { _ = http.ListenAndServe(":18080", mux) }()
 
 	// Decide and (optionally) execute
 	res, decision, err := cli.DecideAndExecute(context.Background(), decider, symbols, grantee, granter)

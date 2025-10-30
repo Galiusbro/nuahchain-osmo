@@ -13,8 +13,12 @@ import (
 // Spot:  v7/finance/quote?symbols=SYMB
 // OHLCV: v8/finance/chart/SYMB?interval=1m&range=1d  (range will be adjusted by timeframe)
 type YahooHTTPFetcher struct {
-	client  *http.Client
-	baseURL string
+	client    *http.Client
+	baseURL   string
+	retries   int
+	backoff   time.Duration
+	rateLimit time.Duration
+	lastAt    time.Time
 }
 
 func NewYahooHTTPFetcher(timeout time.Duration) *YahooHTTPFetcher {
@@ -22,8 +26,11 @@ func NewYahooHTTPFetcher(timeout time.Duration) *YahooHTTPFetcher {
 		timeout = 8 * time.Second
 	}
 	return &YahooHTTPFetcher{
-		client:  &http.Client{Timeout: timeout},
-		baseURL: "https://query1.finance.yahoo.com",
+		client:    &http.Client{Timeout: timeout},
+		baseURL:   "https://query1.finance.yahoo.com",
+		retries:   3,
+		backoff:   500 * time.Millisecond,
+		rateLimit: 1500 * time.Millisecond,
 	}
 }
 
@@ -40,34 +47,55 @@ type yahooQuoteResp struct {
 }
 
 func (y *YahooHTTPFetcher) GetSpot(ctx context.Context, symbol string) (Price, error) {
-	u := fmt.Sprintf("%s/v7/finance/quote?symbols=%s", y.baseURL, url.QueryEscape(symbol))
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
-	if err != nil {
-		return Price{}, err
+	// Use v8 chart endpoint directly for freshest price
+	u := fmt.Sprintf("%s/v8/finance/chart/%s?interval=1m&range=1d", y.baseURL, url.PathEscape(symbol))
+	var lastErr error
+	for i := 0; i <= y.retries; i++ {
+		resp, err := y.doGET(ctx, u)
+		if err != nil {
+			lastErr = err
+			time.Sleep(y.backoff * time.Duration(i+1))
+			continue
+		}
+		if resp.StatusCode != 200 {
+			lastErr = fmt.Errorf("yahoo chart http %d", resp.StatusCode)
+			resp.Body.Close()
+			time.Sleep(y.backoff * time.Duration(i+1))
+			continue
+		}
+		var cr yahooChartResp
+		if err := json.NewDecoder(resp.Body).Decode(&cr); err != nil {
+			resp.Body.Close()
+			return Price{}, err
+		}
+		resp.Body.Close()
+		if len(cr.Chart.Result) == 0 {
+			return Price{}, fmt.Errorf("yahoo chart empty")
+		}
+		r := cr.Chart.Result[0]
+		// prefer meta.regularMarketPrice if present, else last close
+		val := ""
+		if r.Meta.RegularMarketPrice != 0 {
+			val = fmt.Sprintf("%f", r.Meta.RegularMarketPrice)
+		} else if len(r.Indicators.Quote) > 0 && len(r.Indicators.Quote[0].Close) > 0 {
+			last := r.Indicators.Quote[0].Close[len(r.Indicators.Quote[0].Close)-1]
+			val = fmt.Sprintf("%f", last)
+		}
+		if val == "" {
+			return Price{}, fmt.Errorf("yahoo chart no price")
+		}
+		return Price{Symbol: symbol, Value: val, Source: y.Name(), Timestamp: time.Now().UTC()}, nil
 	}
-	resp, err := y.client.Do(req)
-	if err != nil {
-		return Price{}, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		return Price{}, fmt.Errorf("yahoo quote http %d", resp.StatusCode)
-	}
-	var qr yahooQuoteResp
-	if err := json.NewDecoder(resp.Body).Decode(&qr); err != nil {
-		return Price{}, err
-	}
-	if len(qr.QuoteResponse.Result) == 0 {
-		return Price{}, fmt.Errorf("yahoo quote empty")
-	}
-	r := qr.QuoteResponse.Result[0]
-	return Price{Symbol: r.Symbol, Value: fmt.Sprintf("%f", r.RegularMarketPrice), Source: y.Name(), Timestamp: time.Now().UTC()}, nil
+	return Price{}, lastErr
 }
 
 // chart response subset
 type yahooChartResp struct {
 	Chart struct {
 		Result []struct {
+			Meta struct {
+				RegularMarketPrice float64 `json:"regularMarketPrice"`
+			} `json:"meta"`
 			Timestamp  []int64 `json:"timestamp"`
 			Indicators struct {
 				Quote []struct {
@@ -89,46 +117,52 @@ func (y *YahooHTTPFetcher) GetOHLCV(ctx context.Context, symbol string, tf Timef
 	}
 	// Yahoo returns up to range; we will slice at the end if needed.
 	u := fmt.Sprintf("%s/v8/finance/chart/%s?interval=%s&range=%s", y.baseURL, url.PathEscape(symbol), interval, rng)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
-	if err != nil {
-		return nil, err
+	var lastErr error
+	for i := 0; i <= y.retries; i++ {
+		resp, err := y.doGET(ctx, u)
+		if err != nil {
+			lastErr = err
+			time.Sleep(y.backoff * time.Duration(i+1))
+			continue
+		}
+		if resp.StatusCode != 200 {
+			lastErr = fmt.Errorf("yahoo chart http %d", resp.StatusCode)
+			resp.Body.Close()
+			time.Sleep(y.backoff * time.Duration(i+1))
+			continue
+		}
+		var cr yahooChartResp
+		if err := json.NewDecoder(resp.Body).Decode(&cr); err != nil {
+			resp.Body.Close()
+			return nil, err
+		}
+		resp.Body.Close()
+		if len(cr.Chart.Result) == 0 {
+			return nil, fmt.Errorf("yahoo chart empty")
+		}
+		r := cr.Chart.Result[0]
+		if len(r.Timestamp) == 0 || len(r.Indicators.Quote) == 0 {
+			return nil, fmt.Errorf("yahoo chart no data")
+		}
+		q := r.Indicators.Quote[0]
+		n := min(len(r.Timestamp), min(len(q.Open), min(len(q.High), min(len(q.Low), len(q.Close)))))
+		out := make([]Candle, 0, n)
+		for i := 0; i < n; i++ {
+			out = append(out, Candle{
+				T: time.Unix(r.Timestamp[i], 0).UTC(),
+				O: fmt.Sprintf("%f", q.Open[i]),
+				H: fmt.Sprintf("%f", q.High[i]),
+				L: fmt.Sprintf("%f", q.Low[i]),
+				C: fmt.Sprintf("%f", q.Close[i]),
+				V: "",
+			})
+		}
+		if limit < len(out) {
+			out = out[len(out)-limit:]
+		}
+		return out, nil
 	}
-	resp, err := y.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("yahoo chart http %d", resp.StatusCode)
-	}
-	var cr yahooChartResp
-	if err := json.NewDecoder(resp.Body).Decode(&cr); err != nil {
-		return nil, err
-	}
-	if len(cr.Chart.Result) == 0 {
-		return nil, fmt.Errorf("yahoo chart empty")
-	}
-	r := cr.Chart.Result[0]
-	if len(r.Timestamp) == 0 || len(r.Indicators.Quote) == 0 {
-		return nil, fmt.Errorf("yahoo chart no data")
-	}
-	q := r.Indicators.Quote[0]
-	n := min(len(r.Timestamp), min(len(q.Open), min(len(q.High), min(len(q.Low), len(q.Close)))))
-	out := make([]Candle, 0, n)
-	for i := 0; i < n; i++ {
-		out = append(out, Candle{
-			T: time.Unix(r.Timestamp[i], 0).UTC(),
-			O: fmt.Sprintf("%f", q.Open[i]),
-			H: fmt.Sprintf("%f", q.High[i]),
-			L: fmt.Sprintf("%f", q.Low[i]),
-			C: fmt.Sprintf("%f", q.Close[i]),
-			V: "", // volume optional
-		})
-	}
-	if limit < len(out) {
-		out = out[len(out)-limit:]
-	}
-	return out, nil
+	return nil, lastErr
 }
 
 func mapTimeframe(tf Timeframe) (interval string, rng string) {
@@ -151,4 +185,22 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// doGET adds headers and basic rate-limiting similar to oracle scraper.
+func (y *YahooHTTPFetcher) doGET(ctx context.Context, u string) (*http.Response, error) {
+	if since := time.Since(y.lastAt); since < y.rateLimit {
+		time.Sleep(y.rateLimit - since)
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36")
+	req.Header.Set("Accept", "application/json,text/plain,*/*")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+	req.Header.Set("Connection", "keep-alive")
+	resp, err := y.client.Do(req)
+	y.lastAt = time.Now()
+	return resp, err
 }
