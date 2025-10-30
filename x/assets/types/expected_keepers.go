@@ -24,6 +24,11 @@ type BankKeeper interface {
 // OracleKeeper defines the expected methods from the oracle keeper.
 type OracleKeeper interface {
 	GetPrice(ctx sdk.Context, symbol string) (*oracletypes.Price, bool)
+	// GetPriceWithFallback should attempt to fetch price from external API if not in store
+	GetPriceWithFallback(ctx sdk.Context, symbol string) (*oracletypes.Price, bool)
+	// EnsureFreshPrice must fetch and persist the latest price from the oracle backend
+	// before returning it. Implementations should return an error if the price cannot be refreshed.
+	EnsureFreshPrice(ctx sdk.Context, symbol string) (*oracletypes.Price, error)
 }
 
 // FeesKeeper defines the expected methods from the fees keeper.

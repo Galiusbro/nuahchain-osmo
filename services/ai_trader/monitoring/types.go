@@ -5,26 +5,30 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/client/trading"
 )
 
 // AuditEvent represents a single audit event in the AI trader system
 type AuditEvent struct {
-	ID          string                 `json:"id"`
-	Timestamp   time.Time              `json:"timestamp"`
-	EventType   EventType              `json:"event_type"`
-	Trader      string                 `json:"trader"`
-	Symbol      string                 `json:"symbol,omitempty"`
-	Action      string                 `json:"action,omitempty"`
-	Amount      sdk.Coin               `json:"amount,omitempty"`
-	Price       string                 `json:"price,omitempty"`
-	TxHash      string                 `json:"tx_hash,omitempty"`
-	Success     bool                   `json:"success"`
-	Reason      string                 `json:"reason,omitempty"`
-	Violations  []string               `json:"violations,omitempty"`
-	Warnings    []string               `json:"warnings,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
-	RiskLevel   RiskLevel              `json:"risk_level"`
-	PolicyCheck PolicyCheckResult      `json:"policy_check,omitempty"`
+	ID           string                 `json:"id"`
+	Timestamp    time.Time              `json:"timestamp"`
+	EventType    EventType              `json:"event_type"`
+	Trader       string                 `json:"trader"`
+	Symbol       string                 `json:"symbol,omitempty"`
+	Action       string                 `json:"action,omitempty"`
+	Amount       sdk.Coin               `json:"amount,omitempty"`
+	Market       trading.TradeMarket    `json:"market,omitempty"`
+	PaymentDenom string                 `json:"payment_denom,omitempty"`
+	Price        string                 `json:"price,omitempty"`
+	TxHash       string                 `json:"tx_hash,omitempty"`
+	Success      bool                   `json:"success"`
+	Reason       string                 `json:"reason,omitempty"`
+	Violations   []string               `json:"violations,omitempty"`
+	Warnings     []string               `json:"warnings,omitempty"`
+	Metadata     map[string]interface{} `json:"metadata,omitempty"`
+	RiskLevel    RiskLevel              `json:"risk_level"`
+	PolicyCheck  PolicyCheckResult      `json:"policy_check,omitempty"`
 }
 
 // EventType represents the type of audit event
@@ -131,12 +135,14 @@ type SystemMetrics struct {
 
 // TradeRequest represents a trade request (from risk engine)
 type TradeRequest struct {
-	Symbol    string    `json:"symbol"`
-	Action    string    `json:"action"`
-	Amount    sdk.Coin  `json:"amount"`
-	Price     string    `json:"price"`
-	Timestamp time.Time `json:"timestamp"`
-	Trader    string    `json:"trader"`
+	Symbol       string              `json:"symbol"`
+	Action       string              `json:"action"`
+	Amount       sdk.Coin            `json:"amount"`
+	Price        string              `json:"price"`
+	Timestamp    time.Time           `json:"timestamp"`
+	Trader       string              `json:"trader"`
+	Market       trading.TradeMarket `json:"market,omitempty"`
+	PaymentDenom string              `json:"payment_denom,omitempty"`
 }
 
 // Helper functions

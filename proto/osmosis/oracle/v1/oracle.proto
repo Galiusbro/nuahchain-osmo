@@ -23,9 +23,32 @@ message QueryPriceResponse {
   Price price = 1;
 }
 
+message QueryPriceHistoryRequest {
+  string symbol = 1;
+  int64 start_time = 2;  // Unix timestamp
+  int64 end_time = 3;    // Unix timestamp
+  int32 limit = 4;       // Max number of records (default: 100)
+}
+
+message QueryPriceHistoryResponse {
+  repeated PriceHistoryEntry entries = 1;
+}
+
+message PriceHistoryEntry {
+  string symbol = 1;
+  string value = 2;
+  string source = 3;
+  int64 timestamp = 4;
+  float confidence = 5;
+  int64 block_height = 6;  // Block height when price was recorded
+}
+
 service Query {
   rpc Price(QueryPriceRequest) returns (QueryPriceResponse) {
     option (google.api.http).get = "/osmosis/oracle/v1/price/{symbol}";
+  }
+  rpc PriceHistory(QueryPriceHistoryRequest) returns (QueryPriceHistoryResponse) {
+    option (google.api.http).get = "/osmosis/oracle/v1/price-history/{symbol}";
   }
 }
 

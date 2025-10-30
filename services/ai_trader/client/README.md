@@ -98,13 +98,25 @@ result, err := tradingClient.BuyAsset(ctx, buyer, "BTC", "1000000")
 // Sell asset
 result, err := tradingClient.SellAsset(ctx, seller, "BTC", "0.02")
 
-// Execute trade request
+// Execute trade request against the assets module
 req := &trading.TradeRequest{
     Symbol: "BTC",
     Amount: "1000000",
     Type:   "buy",
+    Market: trading.MarketAssets,
 }
 result, err := tradingClient.ExecuteTrade(ctx, trader, req)
+
+// Execute trade request against the bonding curve module
+curveReq := &trading.TradeRequest{
+    Symbol:       "factory/nuah1example/token",
+    Amount:       "250.0",               // payment amount for buys
+    Type:         "buy",
+    Market:       trading.MarketBondingCurve,
+    PaymentDenom: "NDOLLAR",             // optional, defaults to NDOLLAR
+    MinOutput:    "120.0",               // optional slippage protection
+}
+curveResult, err := tradingClient.ExecuteTrade(ctx, trader, curveReq)
 ```
 
 ### Authz Client
@@ -115,6 +127,10 @@ result, err := authzClient.ExecuteBuyAsset(ctx, grantee, granter, "BTC", "100000
 
 // Execute delegated sell
 result, err := authzClient.ExecuteSellAsset(ctx, grantee, granter, "BTC", "0.02")
+
+// Execute delegated bonding curve trades
+curveBuy, err := authzClient.ExecuteBuyFromCurve(ctx, grantee, granter, "factory/nuah1example/token", "NDOLLAR", "250.0", "120.0")
+curveSell, err := authzClient.ExecuteSellToCurve(ctx, grantee, granter, "factory/nuah1example/token", "75.0", "NDOLLAR", "70.0")
 
 // Execute multiple operations
 msgs := []sdk.Msg{
@@ -142,27 +158,42 @@ type PriceData struct {
 
 ```go
 type TradingDecision struct {
-    Symbol     string  `json:"symbol"`
-    Action     string  `json:"action"`     // "buy", "sell", "hold"
-    Amount     string  `json:"amount"`
-    Price      string  `json:"price"`
-    Reason     string  `json:"reason"`
-    Confidence float32 `json:"confidence"`
+    Symbol       string              `json:"symbol"`
+    Action       string              `json:"action"`     // "buy", "sell", "hold"
+    Amount       string              `json:"amount"`
+    Price        string              `json:"price"`
+    Reason       string              `json:"reason"`
+    Confidence   float32             `json:"confidence"`
+    Market       trading.TradeMarket `json:"market,omitempty"`
+    PaymentDenom string              `json:"payment_denom,omitempty"` // optional for bonding curve trades
+    MinOutput    string              `json:"min_output,omitempty"`    // optional slippage control
 }
+
+### TradeMarket
+
+```go
+const (
+    MarketAssets       trading.TradeMarket = "assets"
+    MarketBondingCurve trading.TradeMarket = "bondingcurve"
+)
+```
 ```
 
 ### TradeResponse
 
 ```go
 type TradeResponse struct {
-    Symbol    string    `json:"symbol"`
-    Type      string    `json:"type"`
-    Amount    string    `json:"amount"`
-    Result    string    `json:"result"`
-    TxHash    string    `json:"tx_hash"`
-    Timestamp time.Time `json:"timestamp"`
-    Success   bool      `json:"success"`
-    Error     string    `json:"error,omitempty"`
+    Symbol       string              `json:"symbol"`
+    Type         string              `json:"type"`
+    Amount       string              `json:"amount"`
+    Result       string              `json:"result"`
+    ResultDenom  string              `json:"result_denom,omitempty"`
+    PaymentDenom string              `json:"payment_denom,omitempty"`
+    Market       trading.TradeMarket `json:"market"`
+    TxHash       string              `json:"tx_hash"`
+    Timestamp    time.Time           `json:"timestamp"`
+    Success      bool                `json:"success"`
+    Error        string              `json:"error,omitempty"`
 }
 ```
 

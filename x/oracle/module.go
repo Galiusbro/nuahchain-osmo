@@ -168,9 +168,38 @@ func (am AppModule) updatePrices(ctx sdk.Context) {
 				am.apiKeeper.Logger(ctx).Error("Failed to update price", "symbol", symbol, "error", err)
 			} else {
 				am.apiKeeper.Logger(ctx).Info("Updated price", "symbol", symbol)
+
+				// Store price history
+				am.storePriceHistory(ctx, symbol)
 			}
 		}
 	}
+}
+
+// storePriceHistory stores the current price as a history entry
+func (am AppModule) storePriceHistory(ctx sdk.Context, symbol string) {
+	price, found := am.apiKeeper.GetPrice(ctx, symbol)
+	if !found {
+		return
+	}
+
+	// Create history entry
+	historyEntry := &types.PriceHistoryEntry{
+		Symbol:      price.Symbol,
+		Value:       price.Value,
+		Source:      price.Source,
+		Timestamp:   price.Timestamp,
+		Confidence:  price.Confidence,
+		BlockHeight: ctx.BlockHeight(),
+	}
+
+	// Store in history
+	am.apiKeeper.SetPriceHistory(ctx, historyEntry)
+
+	am.apiKeeper.Logger(ctx).Info("Stored price history",
+		"symbol", symbol,
+		"price", price.Value,
+		"block_height", ctx.BlockHeight())
 }
 
 func (am AppModule) EndBlock(context.Context) error { return nil }

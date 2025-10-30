@@ -60,8 +60,8 @@ func newEnsureAssetCmd() *cobra.Command {
 
 func newBuyAssetCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "buy [symbol] [amount_ndollar]",
-		Short: "Buy an asset using NDOLLAR",
+		Use:   "buy [symbol] [coin]",
+		Short: "Buy an asset using NDOLLAR or unuah (e.g., 1000NDOLLAR or 1000unuah)",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
@@ -72,13 +72,22 @@ func newBuyAssetCmd() *cobra.Command {
 			symbol := strings.TrimSpace(args[0])
 			coin, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
-				return err
-			}
-			if !strings.EqualFold(coin.Denom, types.NDollarDenom) {
-				return fmt.Errorf("amount must be provided in %s", types.NDollarDenom)
+				return fmt.Errorf("invalid coin format: %w (expected format: amount+denom, e.g., 1000NDOLLAR or 1000unuah)", err)
 			}
 
-			msg := types.NewMsgBuyAsset(clientCtx.GetFromAddress().String(), symbol, coin.Amount.String())
+			// Support both NDOLLAR and unuah (including factory/*/ndollar format)
+			isNDollar := strings.EqualFold(coin.Denom, types.NDollarDenom) || (strings.HasPrefix(coin.Denom, "factory/") && strings.HasSuffix(coin.Denom, "/ndollar"))
+			if !isNDollar && !strings.EqualFold(coin.Denom, "unuah") {
+				return fmt.Errorf("denom must be %s (or factory/*/ndollar) or unuah, got %s", types.NDollarDenom, coin.Denom)
+			}
+
+			// Create message with new format (denom + amount)
+			msg := &types.MsgBuyAsset{
+				Buyer:  clientCtx.GetFromAddress().String(),
+				Symbol: symbol,
+				Denom:  coin.Denom,
+				Amount: coin.Amount.String(),
+			}
 
 			if err := msg.ValidateBasic(); err != nil {
 				return err

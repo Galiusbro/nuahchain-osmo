@@ -89,12 +89,30 @@ func (m *MsgBuyAsset) ValidateBasic() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("symbol cannot be empty")
 	}
 
-	if strings.TrimSpace(m.Amount_NDOLLAR) == "" {
-		return sdkerrors.ErrInvalidRequest.Wrap("amount_ndollar cannot be empty")
-	}
-
-	if _, ok := sdkmath.NewIntFromString(m.Amount_NDOLLAR); !ok {
-		return sdkerrors.ErrInvalidRequest.Wrap("amount_ndollar must be an integer")
+	// Support both old (amount_NDOLLAR) and new (denom + amount) format
+	if m.Denom != "" && m.Amount != "" {
+		// New format: validate denom and amount
+		// Allow both "NDOLLAR" and factory/*/ndollar formats
+		isNDollar := m.Denom == NDollarDenom || (strings.HasPrefix(m.Denom, "factory/") && strings.HasSuffix(m.Denom, "/ndollar"))
+		if !isNDollar && m.Denom != "unuah" {
+			return sdkerrors.ErrInvalidRequest.Wrapf("denom must be %s (or factory/*/ndollar) or unuah, got %s", NDollarDenom, m.Denom)
+		}
+		if strings.TrimSpace(m.Amount) == "" {
+			return sdkerrors.ErrInvalidRequest.Wrap("amount cannot be empty")
+		}
+		if _, ok := sdkmath.NewIntFromString(m.Amount); !ok {
+			return sdkerrors.ErrInvalidRequest.Wrap("amount must be an integer")
+		}
+	} else if m.Amount_NDOLLAR != "" {
+		// Old format: validate amount_NDOLLAR (deprecated but still supported)
+		if strings.TrimSpace(m.Amount_NDOLLAR) == "" {
+			return sdkerrors.ErrInvalidRequest.Wrap("amount_ndollar cannot be empty")
+		}
+		if _, ok := sdkmath.NewIntFromString(m.Amount_NDOLLAR); !ok {
+			return sdkerrors.ErrInvalidRequest.Wrap("amount_ndollar must be an integer")
+		}
+	} else {
+		return sdkerrors.ErrInvalidRequest.Wrap("either amount_NDOLLAR (deprecated) or denom+amount must be provided")
 	}
 
 	return nil

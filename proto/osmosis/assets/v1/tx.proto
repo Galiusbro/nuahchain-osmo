@@ -34,7 +34,9 @@ message MsgBuyAsset {
   option (cosmos.msg.v1.signer) = "buyer";
   string buyer = 1;
   string symbol = 2;
-  string amount_NDOLLAR = 3;
+  string amount_NDOLLAR = 3; // deprecated: use amount and denom instead
+  string denom = 4; // denom to use for payment (NDOLLAR or unuah)
+  string amount = 5; // amount in the specified denom
 }
 
 message MsgBuyAssetResponse {

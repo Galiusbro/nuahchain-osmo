@@ -165,3 +165,20 @@ func (d DurationString) ParseDuration() (time.Duration, error) {
 
 	return duration, nil
 }
+
+// LLMConfig defines LLM provider settings (kept separate to avoid breaking existing Config).
+type LLMConfig struct {
+	Provider    string        `json:"provider" yaml:"provider"`
+	APIKey      string        `json:"api_key" yaml:"api_key"`
+	Model       string        `json:"model" yaml:"model"`
+	Temperature float64       `json:"temperature" yaml:"temperature"`
+	MaxTokens   int           `json:"max_tokens" yaml:"max_tokens"`
+	Timeout     time.Duration `json:"timeout" yaml:"timeout"`
+}
+
+// MarketDataConfig defines market data source settings.
+type MarketDataConfig struct {
+	Source          string        `json:"source" yaml:"source"`
+	Timeframes      []string      `json:"timeframes" yaml:"timeframes"`
+	RefreshInterval time.Duration `json:"refresh_interval" yaml:"refresh_interval"`
+}

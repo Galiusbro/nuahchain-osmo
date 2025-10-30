@@ -1,6 +1,8 @@
 package keeper_test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -19,6 +21,56 @@ import (
 	stablecointypes "github.com/osmosis-labs/osmosis/v30/x/stablecoin/types"
 )
 
+type mockOracleKeeper struct {
+	prices map[string]oracletypes.Price
+}
+
+func newMockOracleKeeper() *mockOracleKeeper {
+	return &mockOracleKeeper{prices: make(map[string]oracletypes.Price)}
+}
+
+func (m *mockOracleKeeper) SetStaticPrice(ctx sdk.Context, symbol, value string) {
+	clean := strings.TrimSpace(symbol)
+	if clean == "" {
+		panic("mock oracle symbol cannot be empty")
+	}
+	m.prices[clean] = oracletypes.Price{
+		Symbol:     clean,
+		Value:      value,
+		Source:     "mock",
+		Timestamp:  ctx.BlockTime().Unix(),
+		Confidence: 1,
+	}
+}
+
+func (m *mockOracleKeeper) GetPrice(_ sdk.Context, symbol string) (*oracletypes.Price, bool) {
+	price, ok := m.prices[strings.TrimSpace(symbol)]
+	if !ok {
+		return nil, false
+	}
+	priceCopy := price
+	return &priceCopy, true
+}
+
+func (m *mockOracleKeeper) GetPriceWithFallback(ctx sdk.Context, symbol string) (*oracletypes.Price, bool) {
+	return m.GetPrice(ctx, symbol)
+}
+
+func (m *mockOracleKeeper) EnsureFreshPrice(ctx sdk.Context, symbol string) (*oracletypes.Price, error) {
+	clean := strings.TrimSpace(symbol)
+	if clean == "" {
+		return nil, fmt.Errorf("mock oracle: invalid symbol")
+	}
+	price, ok := m.prices[clean]
+	if !ok {
+		return nil, fmt.Errorf("mock oracle: price for %s not set", clean)
+	}
+	price.Timestamp = ctx.BlockTime().Unix()
+	m.prices[clean] = price
+	priceCopy := price
+	return &priceCopy, nil
+}
+
 func TestBuyAssetAppliesFeeAndBurnsRemainder(t *testing.T) {
 	s := new(apptesting.KeeperTestHelper)
 	s.SetT(t)
@@ -31,17 +83,26 @@ func TestBuyAssetAppliesFeeAndBurnsRemainder(t *testing.T) {
 	require.NoError(t, banktestutil.FundAccount(ctx, s.App.BankKeeper, buyer, sdk.NewCoins(sdk.NewCoin(types.NDollarDenom, startBalance))))
 
 	require.NoError(t, s.App.FeesKeeper.SetParams(ctx, feetypes.NewParams("0.1")))
-	s.App.OracleKeeper.SetPrice(ctx, &oracletypes.Price{Symbol: "GOLD", Value: "2000"})
+	feeRate := s.App.FeesKeeper.GetTradeFeeRate(ctx)
 
-	srv := keeper.NewMsgServer(*s.App.AssetsKeeper)
-	resp, err := srv.BuyAsset(sdk.WrapSDKContext(ctx), types.NewMsgBuyAsset(buyer.String(), "GOLD", "1000"))
+	oracleKeeper := newMockOracleKeeper()
+	oracleKeeper.SetStaticPrice(ctx, "GOLD", "2000")
+	assetsKeeper := keeper.NewKeeper(
+		s.App.AppCodec(),
+		s.App.GetKey(types.StoreKey),
+		s.App.BankKeeper,
+		oracleKeeper,
+		s.App.FeesKeeper,
+		s.App.StablecoinKeeper,
+	)
+
+	srv := keeper.NewMsgServer(assetsKeeper)
+	resp, err := srv.BuyAsset(ctx, types.NewMsgBuyAsset(buyer.String(), "GOLD", "1000"))
 	require.NoError(t, err)
 
-	feeRate := osmomath.MustNewDecFromStr("0.1")
 	amountND := sdkmath.NewInt(1000)
-	feeInt := feeRate.Mul(osmomath.NewDecFromInt(amountND)).TruncateInt() // 100
-	netND := amountND.Sub(feeInt)                                         // 900
-
+	feeInt := feeRate.Mul(osmomath.NewDecFromInt(amountND)).TruncateInt()
+	netND := amountND.Sub(feeInt)
 	baseDec := osmomath.MustNewDecFromStr(resp.BaseAmount)
 	expectedBase := osmomath.NewDecFromInt(netND).Quo(osmomath.MustNewDecFromStr("2000"))
 	tolerance := osmomath.MustNewDecFromStr("0.000000000000000001")
@@ -77,20 +138,30 @@ func TestSellAssetAppliesFeeAndRewardsUser(t *testing.T) {
 	require.NoError(t, banktestutil.FundAccount(ctx, s.App.BankKeeper, trader, sdk.NewCoins(sdk.NewCoin(types.NDollarDenom, startBalance))))
 
 	require.NoError(t, s.App.FeesKeeper.SetParams(ctx, feetypes.NewParams("0.1")))
-	s.App.OracleKeeper.SetPrice(ctx, &oracletypes.Price{Symbol: "GOLD", Value: "2000"})
+	feeRate := s.App.FeesKeeper.GetTradeFeeRate(ctx)
 
-	srv := keeper.NewMsgServer(*s.App.AssetsKeeper)
-	buyResp, err := srv.BuyAsset(sdk.WrapSDKContext(ctx), types.NewMsgBuyAsset(trader.String(), "GOLD", "1000"))
+	oracleKeeper := newMockOracleKeeper()
+	oracleKeeper.SetStaticPrice(ctx, "GOLD", "2000")
+	assetsKeeper := keeper.NewKeeper(
+		s.App.AppCodec(),
+		s.App.GetKey(types.StoreKey),
+		s.App.BankKeeper,
+		oracleKeeper,
+		s.App.FeesKeeper,
+		s.App.StablecoinKeeper,
+	)
+
+	srv := keeper.NewMsgServer(assetsKeeper)
+	buyResp, err := srv.BuyAsset(ctx, types.NewMsgBuyAsset(trader.String(), "GOLD", "1000"))
 	require.NoError(t, err)
 
-	s.App.OracleKeeper.SetPrice(ctx, &oracletypes.Price{Symbol: "GOLD", Value: "3000"})
-	sellResp, err := srv.SellAsset(sdk.WrapSDKContext(ctx), types.NewMsgSellAsset(trader.String(), "GOLD", buyResp.BaseAmount))
+	oracleKeeper.SetStaticPrice(ctx, "GOLD", "3000")
+	sellResp, err := srv.SellAsset(ctx, types.NewMsgSellAsset(trader.String(), "GOLD", buyResp.BaseAmount))
 	require.NoError(t, err)
 
-	feeRate := osmomath.MustNewDecFromStr("0.1")
 	amountND := sdkmath.NewInt(1000)
-	feeBuy := feeRate.Mul(osmomath.NewDecFromInt(amountND)).TruncateInt() // 100
-	netBuy := amountND.Sub(feeBuy)                                        // 900
+	feeBuy := feeRate.Mul(osmomath.NewDecFromInt(amountND)).TruncateInt()
+	netBuy := amountND.Sub(feeBuy)
 
 	baseDec := osmomath.MustNewDecFromStr(buyResp.BaseAmount)
 	expectedBase := osmomath.NewDecFromInt(netBuy).Quo(osmomath.MustNewDecFromStr("2000"))
@@ -98,9 +169,9 @@ func TestSellAssetAppliesFeeAndRewardsUser(t *testing.T) {
 	require.True(t, baseDec.Sub(expectedBase).Abs().LTE(tolerance))
 
 	payoutDec := expectedBase.Mul(osmomath.MustNewDecFromStr("3000"))
-	payoutInt := payoutDec.TruncateInt()            // 1350
-	feeSell := payoutDec.Mul(feeRate).TruncateInt() // 135
-	netSell := payoutInt.Sub(feeSell)               // 1215
+	payoutInt := payoutDec.TruncateInt()
+	feeSell := payoutDec.Mul(feeRate).TruncateInt()
+	netSell := payoutInt.Sub(feeSell)
 	require.Equal(t, netSell.String(), sellResp.Payout_NDOLLAR)
 
 	finalNDBalance := s.App.BankKeeper.GetBalance(ctx, trader, types.NDollarDenom)
@@ -118,7 +189,7 @@ func TestSellAssetAppliesFeeAndRewardsUser(t *testing.T) {
 	minted := mustInt(stats.TotalMinted)
 	burned := mustInt(stats.TotalBurned)
 	require.Equal(t, payoutInt, minted)
-	require.Equal(t, sdkmath.NewInt(900), burned)
+	require.Equal(t, netBuy, burned)
 }
 
 func mustInt(value string) sdkmath.Int {
@@ -144,27 +215,47 @@ func TestStablecoinCoverageTracksTrades(t *testing.T) {
 	require.NoError(t, banktestutil.FundAccount(ctx, s.App.BankKeeper, trader, sdk.NewCoins(sdk.NewCoin(types.NDollarDenom, startBalance))))
 
 	require.NoError(t, s.App.FeesKeeper.SetParams(ctx, feetypes.NewParams("0.1")))
-	s.App.OracleKeeper.SetPrice(ctx, &oracletypes.Price{Symbol: "GOLD", Value: "2000"})
+	feeRate := s.App.FeesKeeper.GetTradeFeeRate(ctx)
 
-	assetSrv := keeper.NewMsgServer(*s.App.AssetsKeeper)
-	buyResp, err := assetSrv.BuyAsset(sdk.WrapSDKContext(ctx), types.NewMsgBuyAsset(trader.String(), "GOLD", "1000"))
+	oracleKeeper := newMockOracleKeeper()
+	oracleKeeper.SetStaticPrice(ctx, "GOLD", "2000")
+	assetsKeeper := keeper.NewKeeper(
+		s.App.AppCodec(),
+		s.App.GetKey(types.StoreKey),
+		s.App.BankKeeper,
+		oracleKeeper,
+		s.App.FeesKeeper,
+		s.App.StablecoinKeeper,
+	)
+
+	assetSrv := keeper.NewMsgServer(assetsKeeper)
+	amountND := sdkmath.NewInt(1000)
+	buyResp, err := assetSrv.BuyAsset(ctx, types.NewMsgBuyAsset(trader.String(), "GOLD", amountND.String()))
 	require.NoError(t, err)
 
 	stableQuery := stablecoinkeeper.NewQueryServer(*s.App.StablecoinKeeper)
-	coverageAfterBuy, err := stableQuery.Coverage(sdk.WrapSDKContext(ctx), &stablecointypes.QueryCoverageRequest{})
+	coverageAfterBuy, err := stableQuery.Coverage(ctx, &stablecointypes.QueryCoverageRequest{})
 	require.NoError(t, err)
-	require.Equal(t, "-900", coverageAfterBuy.Outstanding)
-	require.Equal(t, "100", coverageAfterBuy.ReserveBalance)
+	feeBuy := feeRate.Mul(osmomath.NewDecFromInt(amountND)).TruncateInt()
+	netBuy := amountND.Sub(feeBuy)
+	require.Equal(t, netBuy.Neg().String(), coverageAfterBuy.Outstanding)
+	require.Equal(t, feeBuy.String(), coverageAfterBuy.ReserveBalance)
 	require.Equal(t, sdkmath.LegacyZeroDec().String(), coverageAfterBuy.CoverageRatio)
 
-	s.App.OracleKeeper.SetPrice(ctx, &oracletypes.Price{Symbol: "GOLD", Value: "3000"})
-	_, err = assetSrv.SellAsset(sdk.WrapSDKContext(ctx), types.NewMsgSellAsset(trader.String(), "GOLD", buyResp.BaseAmount))
+	oracleKeeper.SetStaticPrice(ctx, "GOLD", "3000")
+	_, err = assetSrv.SellAsset(ctx, types.NewMsgSellAsset(trader.String(), "GOLD", buyResp.BaseAmount))
 	require.NoError(t, err)
 
-	coverageAfterSell, err := stableQuery.Coverage(sdk.WrapSDKContext(ctx), &stablecointypes.QueryCoverageRequest{})
+	coverageAfterSell, err := stableQuery.Coverage(ctx, &stablecointypes.QueryCoverageRequest{})
 	require.NoError(t, err)
-	require.Equal(t, "450", coverageAfterSell.Outstanding)
-	require.Equal(t, "235", coverageAfterSell.ReserveBalance)
+	baseDec := osmomath.MustNewDecFromStr(buyResp.BaseAmount)
+	payoutDec := baseDec.Mul(osmomath.MustNewDecFromStr("3000"))
+	payoutInt := payoutDec.TruncateInt()
+	feeSell := payoutDec.Mul(feeRate).TruncateInt()
+	expectedOutstanding := payoutInt.Sub(netBuy)
+	expectedReserve := feeBuy.Add(feeSell)
+	require.Equal(t, expectedOutstanding.String(), coverageAfterSell.Outstanding)
+	require.Equal(t, expectedReserve.String(), coverageAfterSell.ReserveBalance)
 	outstandingInt, ok := sdkmath.NewIntFromString(coverageAfterSell.Outstanding)
 	require.True(t, ok)
 	reserveInt, ok := sdkmath.NewIntFromString(coverageAfterSell.ReserveBalance)

@@ -11,6 +11,7 @@ import (
 	osmomath "github.com/osmosis-labs/osmosis/osmomath"
 
 	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/client/oracle"
+	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/client/trading"
 	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/config"
 )
 
@@ -71,12 +72,14 @@ type SymbolStats struct {
 
 // TradeRequest represents a trade request for policy evaluation
 type TradeRequest struct {
-	Symbol    string    `json:"symbol"`
-	Action    string    `json:"action"` // "buy" or "sell"
-	Amount    sdk.Coin  `json:"amount"`
-	Price     string    `json:"price"`
-	Timestamp time.Time `json:"timestamp"`
-	Trader    string    `json:"trader"`
+	Symbol       string              `json:"symbol"`
+	Action       string              `json:"action"` // "buy" or "sell"
+	Amount       sdk.Coin            `json:"amount"`
+	Price        string              `json:"price"`
+	Timestamp    time.Time           `json:"timestamp"`
+	Trader       string              `json:"trader"`
+	Market       trading.TradeMarket `json:"market,omitempty"`
+	PaymentDenom string              `json:"payment_denom,omitempty"`
 }
 
 // PolicyResult represents the result of policy evaluation

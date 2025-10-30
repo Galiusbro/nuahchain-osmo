@@ -39,3 +39,40 @@ func (q queryServer) Price(goCtx context.Context, req *types.QueryPriceRequest) 
 
 	return &types.QueryPriceResponse{Price: price}, nil
 }
+
+func (q queryServer) PriceHistory(goCtx context.Context, req *types.QueryPriceHistoryRequest) (*types.QueryPriceHistoryResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "request cannot be nil")
+	}
+	symbol := strings.TrimSpace(req.Symbol)
+	if symbol == "" {
+		return nil, status.Error(codes.InvalidArgument, "symbol cannot be empty")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Set default limit if not provided
+	limit := req.Limit
+	if limit <= 0 {
+		limit = 100
+	}
+	if limit > 1000 {
+		limit = 1000 // Cap at 1000 to prevent excessive queries
+	}
+
+	var entries []*types.PriceHistoryEntry
+	var err error
+
+	// If time range is specified, use it; otherwise get latest entries
+	if req.StartTime > 0 && req.EndTime > 0 {
+		entries, err = q.GetPriceHistory(ctx, symbol, req.StartTime, req.EndTime, limit)
+	} else {
+		entries, err = q.GetLatestPriceHistory(ctx, symbol, limit)
+	}
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryPriceHistoryResponse{Entries: entries}, nil
+}

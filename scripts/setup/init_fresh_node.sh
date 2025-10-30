@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Скрипт для полной инициализации узла с нуля
-# Удаляет все данные, создает новые ключи и настраивает генезис
-# Подготавливает ноду для работы с ndollar токенами
+# Script for full node initialization from scratch
+# Deletes all data, creates new keys and sets up genesis
+# Prepares node for working with ndollar tokens
 
 set -e
 
-# Цветовые коды для вывода
+# Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -15,13 +15,13 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Конфигурация (с поддержкой переменных окружения)
+# Configuration (with environment variable support)
 CHAIN_ID="${CHAIN_ID:-nuahchain}"
 MONIKER="${MONIKER:-test-node}"
 KEYRING_BACKEND="${KEYRING_BACKEND:-test}"
 GENESIS_FILE="$HOME/.nuahd/config/genesis.json"
 
-# Функции для вывода
+# Functions for output
 print_status() {
     echo -e "${GREEN}✅ $1${NC}"
 }
@@ -46,7 +46,7 @@ print_header() {
     echo -e "${PURPLE}$1${NC}"
 }
 
-# Проверка наличия бинарного файла
+# Check for binary file
 check_binary() {
     if [ ! -f "./build/nuahd" ]; then
         print_error "nuahd binary not found in ./build/"
@@ -56,7 +56,7 @@ check_binary() {
     print_status "nuahd binary found"
 }
 
-# Проверка наличия jq
+# Check for jq
 check_jq() {
     if ! command -v jq &> /dev/null; then
         print_error "jq is required but not installed"
@@ -66,154 +66,154 @@ check_jq() {
     print_status "jq found"
 }
 
-print_header "🚀 Инициализация свежей ноды Nuah Chain"
+print_header "🚀 Full node initialization from scratch"
 print_header "======================================"
 echo ""
 
-# Предварительные проверки
+# Preliminary checks
 check_binary
 check_jq
 
-print_step "🧹 Очистка существующих данных..."
+print_step "🧹 Cleaning existing data..."
 
-# Остановка узла если запущен
-print_info "Остановка узла если запущен..."
+# Stopping node if running
+print_info "Stopping node if running..."
 pkill nuahd || true
 sleep 2
 
-# Удаление всех ключей
-print_info "Удаление всех ключей..."
+# Deleting all keys
+print_info "Deleting all keys..."
 ./build/nuahd keys list --keyring-backend $KEYRING_BACKEND 2>/dev/null | grep -E "^- name:" | awk '{print $3}' | xargs -I {} ./build/nuahd keys delete {} --yes --keyring-backend $KEYRING_BACKEND 2>/dev/null || true
 
-# Удаление данных узла
-print_info "Удаление данных узла..."
+# Deleting node data
+print_info "Deleting node data..."
 rm -rf ~/.nuahd
 
-print_status "Очистка завершена"
+print_status "Cleaning completed"
 
-print_step "🔧 Инициализация нового узла..."
+print_step "🔧 Initializing new node..."
 
-# Инициализация узла
+# Initializing node
 ./build/nuahd init $MONIKER --chain-id $CHAIN_ID
-print_status "Узел инициализирован"
+print_status "Node initialized"
 
-print_step "🔑 Создание ключей..."
+print_step "🔑 Creating keys..."
 
-# Создание ключей для тестирования
+# Creating keys for testing
 ./build/nuahd keys add validator --keyring-backend $KEYRING_BACKEND
 ./build/nuahd keys add alice --keyring-backend $KEYRING_BACKEND
 ./build/nuahd keys add bob --keyring-backend $KEYRING_BACKEND
 
-# Получение адресов
+# Getting addresses
 VALIDATOR_ADDR=$(./build/nuahd keys show validator -a --keyring-backend $KEYRING_BACKEND)
 ALICE_ADDR=$(./build/nuahd keys show alice -a --keyring-backend $KEYRING_BACKEND)
 BOB_ADDR=$(./build/nuahd keys show bob -a --keyring-backend $KEYRING_BACKEND)
 
-print_status "Ключи созданы:"
+print_status "Keys created:"
 echo "  Validator: $VALIDATOR_ADDR"
 echo "  Alice: $ALICE_ADDR"
 echo "  Bob: $BOB_ADDR"
 
-print_step "💰 Настройка генезиса с начальными балансами..."
+print_step "💰 Setting up genesis with initial balances..."
 
-# В development режиме добавляем unuah токены (это наш нативный токен для стейкинга)
-# В production режиме добавляем unuah токены
+# In development mode, add unuah tokens (this is our native token for staking)
+# In production mode, add unuah tokens
 if [ "${ENVIRONMENT:-development}" = "production" ]; then
-    print_info "Production режим: добавляем unuah токены..."
+    print_info "Production mode: adding unuah tokens..."
     ./build/nuahd add-genesis-account $VALIDATOR_ADDR 10000000000unuah
     ./build/nuahd add-genesis-account $ALICE_ADDR 1000000000unuah
     ./build/nuahd add-genesis-account $BOB_ADDR 1000000000unuah
 else
-    print_info "Development режим: добавляем unuah токены..."
+    print_info "Development mode: adding unuah tokens..."
     ./build/nuahd add-genesis-account $VALIDATOR_ADDR 10000000000unuah
-    ./build/nuahd add-genesis-account $ALICE_ADDR 1000000000unuah  
+    ./build/nuahd add-genesis-account $ALICE_ADDR 1000000000unuah
     ./build/nuahd add-genesis-account $BOB_ADDR 1000000000unuah
 fi
 
 GENTX_AMOUNT="1000000000unuah"
 
-print_status "Аккаунты добавлены в генезис"
+print_status "Accounts added to genesis"
 
-# Создание gentx для валидатора
-print_info "Создание gentx для валидатора..."
+# Creating gentx for validator
+print_info "Creating gentx for validator..."
 ./build/nuahd gentx validator $GENTX_AMOUNT --chain-id $CHAIN_ID --keyring-backend $KEYRING_BACKEND --from validator
 
-# Сбор gentx
-print_info "Сбор gentx..."
+# Collecting gentx
+print_info "Collecting gentx..."
 ./build/nuahd collect-gentxs
 
-print_status "Gentx настроен"
+print_status "Gentx configured"
 
-print_step "🔧 Настройка параметров генезиса..."
+print_step "🔧 Setting up genesis parameters..."
 
-# Замена stake на unuah в genesis.json
-print_info "Замена 'stake' на 'unuah' в genesis.json..."
+# Replacing stake with unuah in genesis.json
+print_info "Replacing 'stake' with 'unuah' in genesis.json..."
 sed -i '' 's/"stake"/"unuah"/g' $GENESIS_FILE
 
-# Добавление валидатора в whitelisted_fee_token_setters
-print_info "Добавление валидатора в whitelisted_fee_token_setters..."
+# Adding validator to whitelisted_fee_token_setters
+print_info "Adding validator to whitelisted_fee_token_setters..."
 jq --arg validator "$VALIDATOR_ADDR" '.app_state.txfees.params.whitelisted_fee_token_setters = [$validator]' $GENESIS_FILE > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json $GENESIS_FILE
 
-# Настройка параметров для тестирования
-print_info "Настройка параметров для тестирования..."
+# Setting up parameters for testing
+print_info "Setting up parameters for testing..."
 
-# Уменьшение времени блока для быстрого тестирования
+# Reducing block time for fast testing
 jq '.consensus_params.block.time_iota_ms = "1000"' $GENESIS_FILE > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json $GENESIS_FILE
 
-# Настройка параметров токенфабрики
+# Setting up tokenfactory parameters
 jq '.app_state.tokenfactory.params.denom_creation_fee = [{"denom": "unuah", "amount": "1000000"}]' $GENESIS_FILE > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json $GENESIS_FILE
 
-print_status "Параметры генезиса настроены"
+print_status "Genesis parameters configured"
 
-# Проверка конфигурации
-print_step "🔍 Проверка конфигурации..."
+# Checking configuration
+print_step "🔍 Checking configuration..."
 
-print_info "Проверка базовой деноминации..."
+print_info "Checking base denomination..."
 BASE_DENOM=$(jq -r '.app_state.staking.params.bond_denom' $GENESIS_FILE)
 if [ "$BASE_DENOM" = "unuah" ]; then
-    print_status "Базовая деноминация: $BASE_DENOM ✓"
+    print_status "Base denomination: $BASE_DENOM ✓"
 else
-    print_error "Неправильная базовая деноминация: $BASE_DENOM"
+    print_error "Incorrect base denomination: $BASE_DENOM"
     exit 1
 fi
 
-print_info "Проверка whitelisted_fee_token_setters..."
+print_info "Checking whitelisted_fee_token_setters..."
 WHITELIST_COUNT=$(jq '.app_state.txfees.params.whitelisted_fee_token_setters | length' $GENESIS_FILE)
 if [ "$WHITELIST_COUNT" -gt 0 ]; then
-    print_status "Whitelisted fee token setters настроены ✓"
+    print_status "Whitelisted fee token setters configured ✓"
     jq -r '.app_state.txfees.params.whitelisted_fee_token_setters[]' $GENESIS_FILE | while read addr; do
         echo "  - $addr"
     done
 else
-    print_warning "Whitelisted fee token setters пусты"
+    print_warning "Whitelisted fee token setters is empty"
 fi
 
-# Валидация генезиса (опционально)
+# Validation of genesis (optional)
 if [ "${SKIP_VALIDATION:-false}" != "true" ]; then
-    print_info "Валидация генезиса..."
+    print_info "Validation of genesis..."
     if ./build/nuahd validate-genesis $GENESIS_FILE; then
-        print_status "Генезис валиден ✓"
+        print_status "Genesis is valid ✓"
     else
-        print_warning "Валидация генезиса не прошла, но продолжаем..."
+        print_warning "Validation of genesis failed, but continuing..."
     fi
 fi
 
 print_header "=================================================="
-print_header "✅ Узел успешно инициализирован! ✅"
+print_header "✅ Node successfully initialized! ✅"
 print_header "=================================================="
 echo ""
-print_info "Следующие шаги:"
-echo "  1. Запустите узел: ./build/nuahd start"
-echo "  2. Настройте ndollar: ./scripts/setup/setup_ndollar.sh"
+print_info "Next steps:"
+echo "  1. Start node: ./build/nuahd start"
+echo "  2. Setup ndollar: ./scripts/setup/setup_ndollar.sh"
 echo ""
-print_info "Адреса аккаунтов:"
+print_info "Account addresses:"
 echo "  Validator: $VALIDATOR_ADDR"
 echo "  Alice: $ALICE_ADDR"
 echo "  Bob: $BOB_ADDR"
 echo ""
-print_info "Конфигурация:"
+print_info "Configuration:"
 echo "  Chain ID: $CHAIN_ID"
 echo "  Keyring Backend: $KEYRING_BACKEND"
 echo "  Genesis File: $GENESIS_FILE"
 echo ""
-print_status "Готово к настройке ndollar токенов! 🎉"
+print_status "Ready to setup ndollar tokens! 🎉"

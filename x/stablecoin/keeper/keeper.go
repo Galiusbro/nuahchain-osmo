@@ -114,7 +114,7 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 
 func (k Keeper) getReserveBalance(ctx sdk.Context) sdkmath.Int {
 	addr := authtypes.NewModuleAddress(feetypes.ModuleName)
-	coin := k.bankKeeper.GetBalance(ctx.Context(), addr, types.NDollarDenom)
+	coin := k.bankKeeper.GetBalance(ctx, addr, types.NDollarDenom)
 	return coin.Amount
 }
 

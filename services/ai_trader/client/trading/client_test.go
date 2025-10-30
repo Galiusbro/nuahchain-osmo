@@ -20,6 +20,7 @@ func TestTradingClient_ValidateTradeRequest(t *testing.T) {
 				Symbol: "BTC",
 				Amount: "1000000",
 				Type:   "buy",
+				Market: trading.MarketAssets,
 			},
 			expectedError: false,
 		},
@@ -29,8 +30,30 @@ func TestTradingClient_ValidateTradeRequest(t *testing.T) {
 				Symbol: "BTC",
 				Amount: "0.02",
 				Type:   "sell",
+				Market: trading.MarketAssets,
 			},
 			expectedError: false,
+		},
+		{
+			name: "valid bonding curve buy with explicit payment denom",
+			request: &trading.TradeRequest{
+				Symbol:       "factory/nuah1example/token",
+				Amount:       "100.5",
+				Type:         "buy",
+				Market:       trading.MarketBondingCurve,
+				PaymentDenom: "NDOLLAR",
+			},
+			expectedError: false,
+		},
+		{
+			name: "invalid market",
+			request: &trading.TradeRequest{
+				Symbol: "BTC",
+				Amount: "1000000",
+				Type:   "buy",
+				Market: "invalid",
+			},
+			expectedError: true,
 		},
 		{
 			name:          "nil request",

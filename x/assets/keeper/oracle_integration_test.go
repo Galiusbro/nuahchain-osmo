@@ -54,6 +54,14 @@ func (r *RealOracleKeeper) GetPrice(ctx sdk.Context, symbol string) (*oracletype
 	return price, found
 }
 
+func (r *RealOracleKeeper) GetPriceWithFallback(ctx sdk.Context, symbol string) (*oracletypes.Price, bool) {
+	return r.apiKeeper.GetPriceWithFallback(ctx, symbol)
+}
+
+func (r *RealOracleKeeper) EnsureFreshPrice(ctx sdk.Context, symbol string) (*oracletypes.Price, error) {
+	return r.apiKeeper.EnsureFreshPrice(ctx, symbol)
+}
+
 func setupKeeperWithRealOracle(t *testing.T) (keeper.Keeper, sdk.Context, *RealOracleKeeper) {
 	t.Helper()
 

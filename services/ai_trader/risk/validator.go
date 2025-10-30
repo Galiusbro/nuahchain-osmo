@@ -8,6 +8,7 @@ import (
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/client/trading"
 	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/config"
 )
 
@@ -102,12 +103,14 @@ func (pv *PolicyValidator) GenerateRandomTradeRequest() *TradeRequest {
 	price := fmt.Sprintf("%.2f", basePrice*priceMultiplier)
 
 	return &TradeRequest{
-		Symbol:    symbol,
-		Action:    action,
-		Amount:    amount,
-		Price:     price,
-		Timestamp: time.Now(),
-		Trader:    "cosmos1test1234567890abcdefghijklmnopqrstuvwxyz",
+		Symbol:       symbol,
+		Action:       action,
+		Amount:       amount,
+		Price:        price,
+		Timestamp:    time.Now(),
+		Trader:       "cosmos1test1234567890abcdefghijklmnopqrstuvwxyz",
+		Market:       trading.MarketAssets,
+		PaymentDenom: amount.Denom,
 	}
 }
 

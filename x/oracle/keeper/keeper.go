@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -82,6 +83,77 @@ func (k Keeper) GetPrice(ctx sdk.Context, symbol string) (*types.Price, bool) {
 func (k Keeper) GetPriceWithContext(ctx context.Context, symbol string) (*types.Price, bool) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	return k.GetPrice(sdkCtx, symbol)
+}
+
+// SetPriceHistory stores a price history entry
+func (k Keeper) SetPriceHistory(ctx sdk.Context, entry *types.PriceHistoryEntry) {
+	if entry == nil {
+		return
+	}
+	cleanSymbol := EnsureSymbol(entry.Symbol)
+	if cleanSymbol == "" {
+		return
+	}
+
+	entryCopy := *entry
+	entryCopy.Symbol = cleanSymbol
+
+	store := ctx.KVStore(k.storeKey)
+	store.Set(types.PriceHistoryKey(entryCopy.Symbol, entryCopy.Timestamp), k.cdc.MustMarshal(&entryCopy))
+}
+
+// GetPriceHistory retrieves price history for a symbol within a time range
+func (k Keeper) GetPriceHistory(ctx sdk.Context, symbol string, startTime, endTime int64, limit int32) ([]*types.PriceHistoryEntry, error) {
+	symbol = EnsureSymbol(symbol)
+	if symbol == "" {
+		return nil, fmt.Errorf("invalid symbol")
+	}
+
+	store := ctx.KVStore(k.storeKey)
+	prefix := types.PriceHistoryPrefix(symbol)
+	iterator := store.Iterator(prefix, storetypes.PrefixEndBytes(prefix))
+	defer iterator.Close()
+
+	var entries []*types.PriceHistoryEntry
+	count := int32(0)
+
+	for ; iterator.Valid() && count < limit; iterator.Next() {
+		var entry types.PriceHistoryEntry
+		k.cdc.MustUnmarshal(iterator.Value(), &entry)
+
+		// Filter by time range
+		if entry.Timestamp >= startTime && entry.Timestamp <= endTime {
+			entries = append(entries, &entry)
+			count++
+		}
+	}
+
+	return entries, nil
+}
+
+// GetLatestPriceHistory retrieves the most recent price history entries for a symbol
+func (k Keeper) GetLatestPriceHistory(ctx sdk.Context, symbol string, limit int32) ([]*types.PriceHistoryEntry, error) {
+	symbol = EnsureSymbol(symbol)
+	if symbol == "" {
+		return nil, fmt.Errorf("invalid symbol")
+	}
+
+	store := ctx.KVStore(k.storeKey)
+	prefix := types.PriceHistoryPrefix(symbol)
+	iterator := store.ReverseIterator(prefix, storetypes.PrefixEndBytes(prefix))
+	defer iterator.Close()
+
+	var entries []*types.PriceHistoryEntry
+	count := int32(0)
+
+	for ; iterator.Valid() && count < limit; iterator.Next() {
+		var entry types.PriceHistoryEntry
+		k.cdc.MustUnmarshal(iterator.Value(), &entry)
+		entries = append(entries, &entry)
+		count++
+	}
+
+	return entries, nil
 }
 
 // EnsureSymbol sanitizes the provided symbol string.

@@ -3,6 +3,7 @@ package authz
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -11,7 +12,8 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authztypes "github.com/cosmos/cosmos-sdk/x/authz"
-	"github.com/osmosis-labs/osmosis/v30/x/assets/types"
+	assetstypes "github.com/osmosis-labs/osmosis/v30/x/assets/types"
+	bondingtypes "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types"
 )
 
 // Client represents an authz client for executing delegated operations
@@ -91,7 +93,7 @@ func (c *Client) ExecuteBuyAsset(ctx context.Context, grantee string, granter st
 	}
 
 	// Create buy asset message with granter as the signer
-	buyMsg := types.NewMsgBuyAsset(granter, symbol, amountNDOLLAR)
+	buyMsg := assetstypes.NewMsgBuyAsset(granter, symbol, amountNDOLLAR)
 
 	// Validate the message
 	if err := buyMsg.ValidateBasic(); err != nil {
@@ -154,7 +156,7 @@ func (c *Client) ExecuteSellAsset(ctx context.Context, grantee string, granter s
 	}
 
 	// Create sell asset message with granter as the signer
-	sellMsg := types.NewMsgSellAsset(granter, symbol, baseAmount)
+	sellMsg := assetstypes.NewMsgSellAsset(granter, symbol, baseAmount)
 
 	// Validate the message
 	if err := sellMsg.ValidateBasic(); err != nil {
@@ -181,6 +183,128 @@ func (c *Client) ExecuteSellAsset(ctx context.Context, grantee string, granter s
 			Success:   false,
 			Error:     err.Error(),
 		}, fmt.Errorf("failed to execute delegated sell transaction: %w", err)
+	}
+
+	return &ExecResponse{
+		Timestamp: time.Now(),
+		Success:   true,
+		Results:   resp.Results,
+	}, nil
+}
+
+// ExecuteBuyFromCurve executes a delegated bonding curve buy operation.
+func (c *Client) ExecuteBuyFromCurve(ctx context.Context, grantee, granter, denom, paymentDenom, paymentAmount, minTokensOut string) (*ExecResponse, error) {
+	if grantee == "" {
+		return nil, fmt.Errorf("grantee address is required")
+	}
+	if granter == "" {
+		return nil, fmt.Errorf("granter address is required")
+	}
+	if denom == "" {
+		return nil, fmt.Errorf("denom is required")
+	}
+	if strings.TrimSpace(paymentAmount) == "" {
+		return nil, fmt.Errorf("payment amount is required")
+	}
+
+	if _, err := sdk.AccAddressFromBech32(grantee); err != nil {
+		return nil, fmt.Errorf("invalid grantee address: %w", err)
+	}
+
+	if _, err := sdk.AccAddressFromBech32(granter); err != nil {
+		return nil, fmt.Errorf("invalid granter address: %w", err)
+	}
+
+	if strings.TrimSpace(paymentDenom) == "" {
+		paymentDenom = assetstypes.NDollarDenom
+	}
+
+	buyMsg := &bondingtypes.MsgBuyFromCurve{
+		Trader:        granter,
+		Denom:         denom,
+		PaymentDenom:  paymentDenom,
+		PaymentAmount: paymentAmount,
+		MinTokensOut:  minTokensOut,
+	}
+
+	msgAny, err := codectypes.NewAnyWithValue(buyMsg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to pack message: %w", err)
+	}
+
+	execMsg := &authztypes.MsgExec{
+		Grantee: grantee,
+		Msgs:    []*codectypes.Any{msgAny},
+	}
+
+	resp, err := c.client.Exec(ctx, execMsg)
+	if err != nil {
+		return &ExecResponse{
+			Timestamp: time.Now(),
+			Success:   false,
+			Error:     err.Error(),
+		}, fmt.Errorf("failed to execute delegated bonding curve buy transaction: %w", err)
+	}
+
+	return &ExecResponse{
+		Timestamp: time.Now(),
+		Success:   true,
+		Results:   resp.Results,
+	}, nil
+}
+
+// ExecuteSellToCurve executes a delegated bonding curve sell operation.
+func (c *Client) ExecuteSellToCurve(ctx context.Context, grantee, granter, denom, tokenAmount, paymentDenom, minPaymentOut string) (*ExecResponse, error) {
+	if grantee == "" {
+		return nil, fmt.Errorf("grantee address is required")
+	}
+	if granter == "" {
+		return nil, fmt.Errorf("granter address is required")
+	}
+	if denom == "" {
+		return nil, fmt.Errorf("denom is required")
+	}
+	if strings.TrimSpace(tokenAmount) == "" {
+		return nil, fmt.Errorf("token amount is required")
+	}
+
+	if _, err := sdk.AccAddressFromBech32(grantee); err != nil {
+		return nil, fmt.Errorf("invalid grantee address: %w", err)
+	}
+
+	if _, err := sdk.AccAddressFromBech32(granter); err != nil {
+		return nil, fmt.Errorf("invalid granter address: %w", err)
+	}
+
+	if strings.TrimSpace(paymentDenom) == "" {
+		paymentDenom = assetstypes.NDollarDenom
+	}
+
+	sellMsg := &bondingtypes.MsgSellToCurve{
+		Trader:        granter,
+		Denom:         denom,
+		TokenAmount:   tokenAmount,
+		PaymentDenom:  paymentDenom,
+		MinPaymentOut: minPaymentOut,
+	}
+
+	msgAny, err := codectypes.NewAnyWithValue(sellMsg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to pack message: %w", err)
+	}
+
+	execMsg := &authztypes.MsgExec{
+		Grantee: grantee,
+		Msgs:    []*codectypes.Any{msgAny},
+	}
+
+	resp, err := c.client.Exec(ctx, execMsg)
+	if err != nil {
+		return &ExecResponse{
+			Timestamp: time.Now(),
+			Success:   false,
+			Error:     err.Error(),
+		}, fmt.Errorf("failed to execute delegated bonding curve sell transaction: %w", err)
 	}
 
 	return &ExecResponse{

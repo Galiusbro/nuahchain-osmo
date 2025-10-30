@@ -311,12 +311,13 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 	})
 	govModuleAddr := appKeepers.AccountKeeper.GetModuleAddress(govtypes.ModuleName)
 
-	oracleKeeper := oraclekeeper.NewKeeper(
+	// Use API-enabled keeper so dependent modules can fetch on-demand
+	oracleAPIKeeper := oraclekeeper.NewAPIKeeper(
 		appCodec,
 		appKeepers.keys[oracletypes.StoreKey],
 		govModuleAddr.String(),
 	)
-	appKeepers.OracleKeeper = &oracleKeeper
+	appKeepers.OracleKeeper = &oracleAPIKeeper.Keeper
 
 	feesKeeper := feeskeeper.NewKeeper(
 		appCodec,
@@ -352,7 +353,7 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 		appCodec,
 		appKeepers.keys[assetstypes.StoreKey],
 		appKeepers.BankKeeper,
-		appKeepers.OracleKeeper,
+		oracleAPIKeeper,
 		appKeepers.FeesKeeper,
 		appKeepers.StablecoinKeeper,
 	)

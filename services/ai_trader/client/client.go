@@ -99,12 +99,21 @@ func (c *Client) GetAuthzClient() *authz.Client {
 
 // TradingDecision represents a trading decision
 type TradingDecision struct {
-	Symbol     string  `json:"symbol"`
-	Action     string  `json:"action"` // "buy", "sell", "hold"
-	Amount     string  `json:"amount"`
-	Price      string  `json:"price"`
-	Reason     string  `json:"reason"`
-	Confidence float32 `json:"confidence"`
+	Symbol       string              `json:"symbol"`
+	Action       string              `json:"action"` // "buy", "sell", "hold"
+	Amount       string              `json:"amount"`
+	Price        string              `json:"price"`
+	Reason       string              `json:"reason"`
+	Confidence   float32             `json:"confidence"`
+	Market       trading.TradeMarket `json:"market,omitempty"`
+	PaymentDenom string              `json:"payment_denom,omitempty"` // Optional for assets (defaults to NDOLLAR), used for bonding curve trades
+	MinOutput    string              `json:"min_output,omitempty"`    // Optional bonding curve slippage control
+}
+
+// DecisionMaker abstracts an AI decision engine (e.g., risk.AIDecider).
+// It returns a TradingDecision that can be executed by this client.
+type DecisionMaker interface {
+	MakeAIDecision(ctx context.Context, symbols []string) (*TradingDecision, error)
 }
 
 // ExecuteTradingDecision executes a trading decision using delegated permissions
@@ -121,19 +130,60 @@ func (c *Client) ExecuteTradingDecision(ctx context.Context, decision *TradingDe
 		return nil, fmt.Errorf("granter address is required")
 	}
 
-	switch decision.Action {
-	case "buy":
-		return c.authzClient.ExecuteBuyAsset(ctx, grantee, granter, decision.Symbol, decision.Amount)
-	case "sell":
-		return c.authzClient.ExecuteSellAsset(ctx, grantee, granter, decision.Symbol, decision.Amount)
-	case "hold":
+	if decision.Action == "hold" {
 		return &authz.ExecResponse{
 			Timestamp: time.Now(),
 			Success:   true,
 		}, nil
+	}
+
+	market := decision.Market
+	if market == "" {
+		market = trading.MarketAssets
+	}
+
+	switch market {
+	case trading.MarketAssets:
+		switch decision.Action {
+		case "buy":
+			return c.authzClient.ExecuteBuyAsset(ctx, grantee, granter, decision.Symbol, decision.Amount)
+		case "sell":
+			return c.authzClient.ExecuteSellAsset(ctx, grantee, granter, decision.Symbol, decision.Amount)
+		default:
+			return nil, fmt.Errorf("invalid trading action: %s", decision.Action)
+		}
+	case trading.MarketBondingCurve:
+		switch decision.Action {
+		case "buy":
+			return c.authzClient.ExecuteBuyFromCurve(ctx, grantee, granter, decision.Symbol, decision.PaymentDenom, decision.Amount, decision.MinOutput)
+		case "sell":
+			return c.authzClient.ExecuteSellToCurve(ctx, grantee, granter, decision.Symbol, decision.Amount, decision.PaymentDenom, decision.MinOutput)
+		default:
+			return nil, fmt.Errorf("invalid trading action: %s", decision.Action)
+		}
 	default:
 		return nil, fmt.Errorf("invalid trading action: %s", decision.Action)
 	}
+}
+
+// DecideAndExecute asks a DecisionMaker for a decision and executes it via authz.
+func (c *Client) DecideAndExecute(ctx context.Context, dm DecisionMaker, symbols []string, grantee, granter string) (*authz.ExecResponse, *TradingDecision, error) {
+	if dm == nil {
+		return nil, nil, fmt.Errorf("decision maker is required")
+	}
+	decision, err := dm.MakeAIDecision(ctx, symbols)
+	if err != nil {
+		return nil, nil, err
+	}
+	if decision == nil {
+		return nil, nil, fmt.Errorf("empty decision")
+	}
+	// For hold, skip execution but return decision
+	if decision.Action == "hold" {
+		return &authz.ExecResponse{Timestamp: time.Now(), Success: true}, decision, nil
+	}
+	res, err := c.ExecuteTradingDecision(ctx, decision, grantee, granter)
+	return res, decision, err
 }
 
 // GetPriceData gets price data for a symbol
@@ -157,13 +207,10 @@ func (c *Client) IsPriceStale(price *oracle.PriceData, maxAge time.Duration) boo
 }
 
 // ExecuteDirectTrade executes a direct trade (without authz delegation)
-func (c *Client) ExecuteDirectTrade(ctx context.Context, trader string, symbol string, action string, amount string) (*trading.TradeResponse, error) {
-	req := &trading.TradeRequest{
-		Symbol: symbol,
-		Amount: amount,
-		Type:   action,
+func (c *Client) ExecuteDirectTrade(ctx context.Context, trader string, req *trading.TradeRequest) (*trading.TradeResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("trade request is required")
 	}
-
 	return c.tradingClient.ExecuteTrade(ctx, trader, req)
 }
 

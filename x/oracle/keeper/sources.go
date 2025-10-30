@@ -110,6 +110,25 @@ func (k *APIKeeper) GetPriceWithFallback(ctx sdk.Context, symbol string) (*oracl
 	return price, found
 }
 
+// EnsureFreshPrice updates the price from the external source and returns the refreshed value.
+func (k *APIKeeper) EnsureFreshPrice(ctx sdk.Context, symbol string) (*oracletypes.Price, error) {
+	symbol = EnsureSymbol(symbol)
+	if symbol == "" {
+		return nil, fmt.Errorf("invalid symbol")
+	}
+
+	if err := k.UpdatePriceFromAPI(ctx, symbol); err != nil {
+		return nil, fmt.Errorf("failed to refresh price for %s: %w", symbol, err)
+	}
+
+	price, found := k.GetPrice(ctx, symbol)
+	if !found {
+		return nil, fmt.Errorf("price for %s not found after refresh", symbol)
+	}
+
+	return price, nil
+}
+
 // UpdateAllPrices updates prices for all configured symbols
 func (k *APIKeeper) UpdateAllPrices(ctx sdk.Context, symbols []string) map[string]error {
 	results := make(map[string]error)

@@ -194,6 +194,202 @@ func (m *QueryPriceResponse) GetPrice() *Price {
 	return nil
 }
 
+type QueryPriceHistoryRequest struct {
+	Symbol    string `protobuf:"bytes,1,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	StartTime int64  `protobuf:"varint,2,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime   int64  `protobuf:"varint,3,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	Limit     int32  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
+}
+
+func (m *QueryPriceHistoryRequest) Reset()         { *m = QueryPriceHistoryRequest{} }
+func (m *QueryPriceHistoryRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryPriceHistoryRequest) ProtoMessage()    {}
+func (*QueryPriceHistoryRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_197afab758528777, []int{3}
+}
+func (m *QueryPriceHistoryRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryPriceHistoryRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryPriceHistoryRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryPriceHistoryRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryPriceHistoryRequest.Merge(m, src)
+}
+func (m *QueryPriceHistoryRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryPriceHistoryRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryPriceHistoryRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryPriceHistoryRequest proto.InternalMessageInfo
+
+func (m *QueryPriceHistoryRequest) GetSymbol() string {
+	if m != nil {
+		return m.Symbol
+	}
+	return ""
+}
+
+func (m *QueryPriceHistoryRequest) GetStartTime() int64 {
+	if m != nil {
+		return m.StartTime
+	}
+	return 0
+}
+
+func (m *QueryPriceHistoryRequest) GetEndTime() int64 {
+	if m != nil {
+		return m.EndTime
+	}
+	return 0
+}
+
+func (m *QueryPriceHistoryRequest) GetLimit() int32 {
+	if m != nil {
+		return m.Limit
+	}
+	return 0
+}
+
+type QueryPriceHistoryResponse struct {
+	Entries []*PriceHistoryEntry `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
+}
+
+func (m *QueryPriceHistoryResponse) Reset()         { *m = QueryPriceHistoryResponse{} }
+func (m *QueryPriceHistoryResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryPriceHistoryResponse) ProtoMessage()    {}
+func (*QueryPriceHistoryResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_197afab758528777, []int{4}
+}
+func (m *QueryPriceHistoryResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryPriceHistoryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryPriceHistoryResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryPriceHistoryResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryPriceHistoryResponse.Merge(m, src)
+}
+func (m *QueryPriceHistoryResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryPriceHistoryResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryPriceHistoryResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryPriceHistoryResponse proto.InternalMessageInfo
+
+func (m *QueryPriceHistoryResponse) GetEntries() []*PriceHistoryEntry {
+	if m != nil {
+		return m.Entries
+	}
+	return nil
+}
+
+type PriceHistoryEntry struct {
+	Symbol      string  `protobuf:"bytes,1,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	Value       string  `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	Source      string  `protobuf:"bytes,3,opt,name=source,proto3" json:"source,omitempty"`
+	Timestamp   int64   `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Confidence  float32 `protobuf:"fixed32,5,opt,name=confidence,proto3" json:"confidence,omitempty"`
+	BlockHeight int64   `protobuf:"varint,6,opt,name=block_height,json=blockHeight,proto3" json:"block_height,omitempty"`
+}
+
+func (m *PriceHistoryEntry) Reset()         { *m = PriceHistoryEntry{} }
+func (m *PriceHistoryEntry) String() string { return proto.CompactTextString(m) }
+func (*PriceHistoryEntry) ProtoMessage()    {}
+func (*PriceHistoryEntry) Descriptor() ([]byte, []int) {
+	return fileDescriptor_197afab758528777, []int{5}
+}
+func (m *PriceHistoryEntry) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *PriceHistoryEntry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_PriceHistoryEntry.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *PriceHistoryEntry) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PriceHistoryEntry.Merge(m, src)
+}
+func (m *PriceHistoryEntry) XXX_Size() int {
+	return m.Size()
+}
+func (m *PriceHistoryEntry) XXX_DiscardUnknown() {
+	xxx_messageInfo_PriceHistoryEntry.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PriceHistoryEntry proto.InternalMessageInfo
+
+func (m *PriceHistoryEntry) GetSymbol() string {
+	if m != nil {
+		return m.Symbol
+	}
+	return ""
+}
+
+func (m *PriceHistoryEntry) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
+func (m *PriceHistoryEntry) GetSource() string {
+	if m != nil {
+		return m.Source
+	}
+	return ""
+}
+
+func (m *PriceHistoryEntry) GetTimestamp() int64 {
+	if m != nil {
+		return m.Timestamp
+	}
+	return 0
+}
+
+func (m *PriceHistoryEntry) GetConfidence() float32 {
+	if m != nil {
+		return m.Confidence
+	}
+	return 0
+}
+
+func (m *PriceHistoryEntry) GetBlockHeight() int64 {
+	if m != nil {
+		return m.BlockHeight
+	}
+	return 0
+}
+
 type MsgSetPrice struct {
 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
 	Symbol    string `protobuf:"bytes,2,opt,name=symbol,proto3" json:"symbol,omitempty"`
@@ -204,7 +400,7 @@ func (m *MsgSetPrice) Reset()         { *m = MsgSetPrice{} }
 func (m *MsgSetPrice) String() string { return proto.CompactTextString(m) }
 func (*MsgSetPrice) ProtoMessage()    {}
 func (*MsgSetPrice) Descriptor() ([]byte, []int) {
-	return fileDescriptor_197afab758528777, []int{3}
+	return fileDescriptor_197afab758528777, []int{6}
 }
 func (m *MsgSetPrice) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -261,7 +457,7 @@ func (m *MsgSetPriceResponse) Reset()         { *m = MsgSetPriceResponse{} }
 func (m *MsgSetPriceResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgSetPriceResponse) ProtoMessage()    {}
 func (*MsgSetPriceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_197afab758528777, []int{4}
+	return fileDescriptor_197afab758528777, []int{7}
 }
 func (m *MsgSetPriceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -298,7 +494,7 @@ func (m *GenesisState) Reset()         { *m = GenesisState{} }
 func (m *GenesisState) String() string { return proto.CompactTextString(m) }
 func (*GenesisState) ProtoMessage()    {}
 func (*GenesisState) Descriptor() ([]byte, []int) {
-	return fileDescriptor_197afab758528777, []int{5}
+	return fileDescriptor_197afab758528777, []int{8}
 }
 func (m *GenesisState) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -338,6 +534,9 @@ func init() {
 	proto.RegisterType((*Price)(nil), "osmosis.oracle.v1.Price")
 	proto.RegisterType((*QueryPriceRequest)(nil), "osmosis.oracle.v1.QueryPriceRequest")
 	proto.RegisterType((*QueryPriceResponse)(nil), "osmosis.oracle.v1.QueryPriceResponse")
+	proto.RegisterType((*QueryPriceHistoryRequest)(nil), "osmosis.oracle.v1.QueryPriceHistoryRequest")
+	proto.RegisterType((*QueryPriceHistoryResponse)(nil), "osmosis.oracle.v1.QueryPriceHistoryResponse")
+	proto.RegisterType((*PriceHistoryEntry)(nil), "osmosis.oracle.v1.PriceHistoryEntry")
 	proto.RegisterType((*MsgSetPrice)(nil), "osmosis.oracle.v1.MsgSetPrice")
 	proto.RegisterType((*MsgSetPriceResponse)(nil), "osmosis.oracle.v1.MsgSetPriceResponse")
 	proto.RegisterType((*GenesisState)(nil), "osmosis.oracle.v1.GenesisState")
@@ -346,36 +545,46 @@ func init() {
 func init() { proto.RegisterFile("osmosis/oracle/v1/oracle.proto", fileDescriptor_197afab758528777) }
 
 var fileDescriptor_197afab758528777 = []byte{
-	// 454 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x93, 0xcf, 0x8b, 0xd3, 0x40,
-	0x14, 0xc7, 0x3b, 0x8d, 0x29, 0xf6, 0xad, 0x2c, 0xec, 0xf8, 0x2b, 0x94, 0x32, 0xd4, 0xb8, 0x4a,
-	0x55, 0x4c, 0xdc, 0x7a, 0xf3, 0x24, 0x22, 0x78, 0x5a, 0xd0, 0xee, 0xcd, 0xdb, 0x6c, 0x7c, 0xc6,
-	0x81, 0x26, 0x13, 0xf3, 0x26, 0x65, 0x8b, 0xc8, 0xc2, 0x9e, 0x04, 0x2f, 0x82, 0xff, 0x88, 0x7f,
-	0x86, 0xc7, 0x05, 0x2f, 0x1e, 0xa5, 0x15, 0xfc, 0x37, 0x64, 0x27, 0xd3, 0x6d, 0xa0, 0x75, 0xbd,
-	0xe5, 0x7d, 0xdf, 0xf7, 0xf1, 0x3e, 0xf9, 0xce, 0x0c, 0x08, 0x4d, 0x99, 0x26, 0x45, 0xb1, 0x2e,
-	0x65, 0x32, 0xc1, 0x78, 0xba, 0xe7, 0xbe, 0xa2, 0xa2, 0xd4, 0x46, 0xf3, 0x1d, 0xd7, 0x8f, 0x9c,
-	0x3a, 0xdd, 0xeb, 0xdd, 0x4c, 0xac, 0x16, 0x67, 0x94, 0x9e, 0xd9, 0x33, 0x4a, 0x6b, 0x6f, 0xaf,
-	0x9f, 0x6a, 0x9d, 0x4e, 0x30, 0x96, 0x85, 0x8a, 0x65, 0x9e, 0x6b, 0x23, 0x8d, 0xd2, 0x39, 0xd5,
-	0xdd, 0xf0, 0x33, 0x03, 0xff, 0x65, 0xa9, 0x12, 0xe4, 0x37, 0xa0, 0x43, 0xb3, 0xec, 0x50, 0x4f,
-	0x02, 0x36, 0x60, 0xc3, 0xee, 0xd8, 0x55, 0xfc, 0x1a, 0xf8, 0x53, 0x39, 0xa9, 0x30, 0x68, 0x5b,
-	0xb9, 0x2e, 0xac, 0x5b, 0x57, 0x65, 0x82, 0x81, 0xe7, 0xdc, 0xb6, 0xe2, 0x7d, 0xe8, 0x1a, 0x95,
-	0x21, 0x19, 0x99, 0x15, 0xc1, 0xa5, 0x01, 0x1b, 0x7a, 0xe3, 0x95, 0xc0, 0x05, 0x40, 0xa2, 0xf3,
-	0xb7, 0xea, 0x0d, 0xe6, 0x09, 0x06, 0xfe, 0x80, 0x0d, 0xdb, 0xe3, 0x86, 0x12, 0x3e, 0x80, 0x9d,
-	0x57, 0x15, 0x96, 0x33, 0x4b, 0x34, 0xc6, 0xf7, 0x15, 0x92, 0xf9, 0x17, 0x58, 0xf8, 0x1c, 0x78,
-	0xd3, 0x4c, 0x85, 0xce, 0x09, 0x79, 0x04, 0x7e, 0x71, 0x26, 0x58, 0xf3, 0xd6, 0x28, 0x88, 0xd6,
-	0xa2, 0x8a, 0xea, 0x81, 0xda, 0x16, 0x2a, 0xd8, 0xda, 0xa7, 0xf4, 0x00, 0x4d, 0x9d, 0x42, 0x1f,
-	0xba, 0xb2, 0x32, 0xef, 0x74, 0xa9, 0xcc, 0xcc, 0xed, 0x5b, 0x09, 0x0d, 0x94, 0xf6, 0xe6, 0x8c,
-	0xbc, 0x46, 0x46, 0x4f, 0xb6, 0x4f, 0xfe, 0x7c, 0xbb, 0xbf, 0x9a, 0x0e, 0xaf, 0xc3, 0xd5, 0xc6,
-	0xaa, 0x25, 0x71, 0xf8, 0x14, 0xae, 0xbc, 0xc0, 0x1c, 0x49, 0xd1, 0x81, 0x91, 0x06, 0xf9, 0x23,
-	0xe8, 0x58, 0x34, 0x0a, 0xd8, 0xc0, 0xbb, 0xf0, 0x17, 0x9c, 0x6f, 0xf4, 0x89, 0x81, 0x6f, 0xa3,
-	0xe0, 0xc7, 0xcb, 0xd3, 0xdc, 0xdd, 0x30, 0xb4, 0x16, 0x6d, 0xef, 0xce, 0x7f, 0x5c, 0x8e, 0xf0,
-	0xde, 0xc9, 0x8f, 0xdf, 0x5f, 0xdb, 0xb7, 0xf9, 0xad, 0x78, 0xfd, 0x5e, 0x5a, 0x84, 0xf8, 0x43,
-	0x1d, 0xc4, 0xc7, 0xd1, 0x31, 0x78, 0xfb, 0x94, 0xf2, 0x23, 0xb8, 0x7c, 0x1e, 0xa9, 0xd8, 0xb0,
-	0xa4, 0x91, 0x43, 0xef, 0xee, 0xc5, 0xfd, 0x73, 0x8a, 0x5d, 0x4b, 0x21, 0xc2, 0xfe, 0x06, 0x0a,
-	0x42, 0xf3, 0xd0, 0x92, 0x3c, 0x1b, 0x7e, 0x9f, 0x0b, 0x76, 0x3a, 0x17, 0xec, 0xd7, 0x5c, 0xb0,
-	0x2f, 0x0b, 0xd1, 0x3a, 0x5d, 0x88, 0xd6, 0xcf, 0x85, 0x68, 0xbd, 0xde, 0x3e, 0x5a, 0x0e, 0x98,
-	0x59, 0x81, 0x74, 0xd8, 0xb1, 0x2f, 0xe0, 0xf1, 0xdf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x9f, 0x69,
-	0x15, 0x43, 0x6d, 0x03, 0x00, 0x00,
+	// 615 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x54, 0x3f, 0x6f, 0xd3, 0x5e,
+	0x14, 0xed, 0x8b, 0x7f, 0x4e, 0x9b, 0x9b, 0xaa, 0x52, 0xdf, 0xaf, 0x80, 0x1b, 0x05, 0x2b, 0x35,
+	0x05, 0xa5, 0x94, 0xc6, 0x34, 0x6c, 0x0c, 0x08, 0x21, 0x10, 0x5d, 0x2a, 0x81, 0xcb, 0x04, 0x43,
+	0xe5, 0xba, 0x17, 0xe7, 0x09, 0xdb, 0xcf, 0xf8, 0xbd, 0x54, 0xb5, 0x10, 0xaa, 0xd4, 0x95, 0x05,
+	0x89, 0x95, 0x9d, 0x95, 0x99, 0x4f, 0xc0, 0x58, 0x89, 0x85, 0x11, 0x25, 0x48, 0x7c, 0x0d, 0x94,
+	0x67, 0x27, 0x31, 0x4a, 0xd2, 0x32, 0xb2, 0xf9, 0x9e, 0x73, 0xae, 0xef, 0xb9, 0x7f, 0x6c, 0x30,
+	0xb9, 0x08, 0xb9, 0x60, 0xc2, 0xe6, 0x89, 0xeb, 0x05, 0x68, 0x1f, 0x6d, 0xe7, 0x4f, 0xad, 0x38,
+	0xe1, 0x92, 0xd3, 0xe5, 0x9c, 0x6f, 0xe5, 0xe8, 0xd1, 0x76, 0xed, 0x8a, 0xa7, 0x30, 0x3b, 0x14,
+	0xfe, 0x40, 0x1e, 0x0a, 0x3f, 0xd3, 0xd6, 0xea, 0x3e, 0xe7, 0x7e, 0x80, 0xb6, 0x1b, 0x33, 0xdb,
+	0x8d, 0x22, 0x2e, 0x5d, 0xc9, 0x78, 0x24, 0x32, 0xd6, 0x7a, 0x47, 0x40, 0x7f, 0x92, 0x30, 0x0f,
+	0xe9, 0x65, 0x28, 0x8b, 0x34, 0x3c, 0xe0, 0x81, 0x41, 0x1a, 0xa4, 0x59, 0x71, 0xf2, 0x88, 0xae,
+	0x80, 0x7e, 0xe4, 0x06, 0x5d, 0x34, 0x4a, 0x0a, 0xce, 0x02, 0xa5, 0xe6, 0xdd, 0xc4, 0x43, 0x43,
+	0xcb, 0xd5, 0x2a, 0xa2, 0x75, 0xa8, 0x48, 0x16, 0xa2, 0x90, 0x6e, 0x18, 0x1b, 0xff, 0x35, 0x48,
+	0x53, 0x73, 0xc6, 0x00, 0x35, 0x01, 0x3c, 0x1e, 0xbd, 0x64, 0x87, 0x18, 0x79, 0x68, 0xe8, 0x0d,
+	0xd2, 0x2c, 0x39, 0x05, 0xc4, 0xda, 0x84, 0xe5, 0xa7, 0x5d, 0x4c, 0x52, 0xe5, 0xc8, 0xc1, 0xd7,
+	0x5d, 0x14, 0x72, 0x96, 0x31, 0xeb, 0x21, 0xd0, 0xa2, 0x58, 0xc4, 0x3c, 0x12, 0x48, 0x5b, 0xa0,
+	0xc7, 0x03, 0x40, 0x89, 0xab, 0x6d, 0xa3, 0x35, 0x31, 0xaa, 0x56, 0x96, 0x90, 0xc9, 0xac, 0x53,
+	0x02, 0xc6, 0xf8, 0x35, 0x3b, 0x4c, 0x48, 0x9e, 0xa4, 0x17, 0x94, 0xa6, 0x57, 0x01, 0x84, 0x74,
+	0x13, 0xb9, 0x3f, 0x68, 0x4d, 0x0d, 0x46, 0x73, 0x2a, 0x0a, 0x79, 0xc6, 0x42, 0xa4, 0xab, 0xb0,
+	0x80, 0xd1, 0x61, 0x46, 0x6a, 0x8a, 0x9c, 0xc7, 0xe8, 0x50, 0x51, 0x2b, 0xa0, 0x07, 0x2c, 0x64,
+	0x52, 0xcd, 0x46, 0x77, 0xb2, 0xc0, 0x7a, 0x01, 0xab, 0x53, 0x3c, 0xe4, 0x1d, 0xdd, 0x83, 0x79,
+	0x8c, 0x64, 0xc2, 0x50, 0x18, 0xa4, 0xa1, 0x35, 0xab, 0xed, 0xf5, 0x59, 0x3d, 0xe5, 0x99, 0x8f,
+	0x22, 0x99, 0xa4, 0xce, 0x30, 0xc9, 0xfa, 0x42, 0x60, 0x79, 0x82, 0xfe, 0x17, 0xd6, 0x4d, 0xd7,
+	0x60, 0xf1, 0x20, 0xe0, 0xde, 0xab, 0xfd, 0x0e, 0x32, 0xbf, 0x23, 0x8d, 0xb2, 0x7a, 0x41, 0x55,
+	0x61, 0x3b, 0x0a, 0xb2, 0x18, 0x54, 0x77, 0x85, 0xbf, 0x87, 0x32, 0x3b, 0xd2, 0x3a, 0x54, 0xdc,
+	0xae, 0xec, 0xf0, 0x84, 0xc9, 0x34, 0x37, 0x3e, 0x06, 0x0a, 0x3d, 0x95, 0xa6, 0xf7, 0xa4, 0x15,
+	0x7a, 0xba, 0xbb, 0x74, 0xfa, 0xeb, 0xf3, 0xcd, 0x71, 0xb6, 0x75, 0x09, 0xfe, 0x2f, 0x94, 0x1a,
+	0x8e, 0xdf, 0xba, 0x0f, 0x8b, 0x8f, 0x31, 0x42, 0xc1, 0xc4, 0x9e, 0x74, 0x25, 0xd2, 0xdb, 0x50,
+	0x56, 0x97, 0x33, 0xdc, 0xc6, 0xec, 0x0b, 0xcb, 0x75, 0xed, 0x4f, 0x25, 0xd0, 0xd5, 0x7a, 0xe9,
+	0xc9, 0xf0, 0x63, 0x9b, 0xb6, 0xc2, 0x89, 0xcb, 0xaf, 0x5d, 0xbf, 0x40, 0x95, 0x3b, 0xdc, 0x38,
+	0xfd, 0xf6, 0xf3, 0x43, 0xe9, 0x1a, 0x5d, 0xb3, 0x27, 0x7f, 0x1b, 0xca, 0x82, 0xfd, 0x26, 0x1b,
+	0xc4, 0x5b, 0xfa, 0x91, 0xc0, 0x62, 0xf1, 0x16, 0xe8, 0xe6, 0xb9, 0x25, 0xfe, 0xfc, 0x1c, 0x6a,
+	0xb7, 0xfe, 0x4e, 0x9c, 0xdb, 0xda, 0x56, 0xb6, 0x36, 0xe9, 0xc6, 0x2c, 0x5b, 0x5b, 0x9d, 0x2c,
+	0x63, 0x64, 0xaf, 0x7d, 0x02, 0xda, 0xae, 0xf0, 0xe9, 0x31, 0x2c, 0x8c, 0x36, 0x6e, 0x4e, 0xa9,
+	0x59, 0x58, 0x53, 0xed, 0xc6, 0xf9, 0xfc, 0xc8, 0xcd, 0xba, 0x72, 0x63, 0x5a, 0xf5, 0x29, 0x6e,
+	0x04, 0xca, 0x2d, 0xe5, 0xe8, 0x41, 0xf3, 0x6b, 0xcf, 0x24, 0x67, 0x3d, 0x93, 0xfc, 0xe8, 0x99,
+	0xe4, 0x7d, 0xdf, 0x9c, 0x3b, 0xeb, 0x9b, 0x73, 0xdf, 0xfb, 0xe6, 0xdc, 0xf3, 0xa5, 0xe3, 0x61,
+	0x82, 0x4c, 0x63, 0x14, 0x07, 0x65, 0xf5, 0xff, 0xbc, 0xf3, 0x3b, 0x00, 0x00, 0xff, 0xff, 0x6b,
+	0x48, 0xe3, 0xfb, 0xab, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -391,6 +600,7 @@ const _ = grpc.SupportPackageIsVersion4
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type QueryClient interface {
 	Price(ctx context.Context, in *QueryPriceRequest, opts ...grpc.CallOption) (*QueryPriceResponse, error)
+	PriceHistory(ctx context.Context, in *QueryPriceHistoryRequest, opts ...grpc.CallOption) (*QueryPriceHistoryResponse, error)
 }
 
 type queryClient struct {
@@ -410,9 +620,19 @@ func (c *queryClient) Price(ctx context.Context, in *QueryPriceRequest, opts ...
 	return out, nil
 }
 
+func (c *queryClient) PriceHistory(ctx context.Context, in *QueryPriceHistoryRequest, opts ...grpc.CallOption) (*QueryPriceHistoryResponse, error) {
+	out := new(QueryPriceHistoryResponse)
+	err := c.cc.Invoke(ctx, "/osmosis.oracle.v1.Query/PriceHistory", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	Price(context.Context, *QueryPriceRequest) (*QueryPriceResponse, error)
+	PriceHistory(context.Context, *QueryPriceHistoryRequest) (*QueryPriceHistoryResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -421,6 +641,9 @@ type UnimplementedQueryServer struct {
 
 func (*UnimplementedQueryServer) Price(ctx context.Context, req *QueryPriceRequest) (*QueryPriceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Price not implemented")
+}
+func (*UnimplementedQueryServer) PriceHistory(ctx context.Context, req *QueryPriceHistoryRequest) (*QueryPriceHistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PriceHistory not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -445,6 +668,24 @@ func _Query_Price_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_PriceHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryPriceHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).PriceHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/osmosis.oracle.v1.Query/PriceHistory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).PriceHistory(ctx, req.(*QueryPriceHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "osmosis.oracle.v1.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -452,6 +693,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Price",
 			Handler:    _Query_Price_Handler,
+		},
+		{
+			MethodName: "PriceHistory",
+			Handler:    _Query_PriceHistory_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -650,6 +895,148 @@ func (m *QueryPriceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryPriceHistoryRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryPriceHistoryRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryPriceHistoryRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Limit != 0 {
+		i = encodeVarintOracle(dAtA, i, uint64(m.Limit))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.EndTime != 0 {
+		i = encodeVarintOracle(dAtA, i, uint64(m.EndTime))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.StartTime != 0 {
+		i = encodeVarintOracle(dAtA, i, uint64(m.StartTime))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Symbol) > 0 {
+		i -= len(m.Symbol)
+		copy(dAtA[i:], m.Symbol)
+		i = encodeVarintOracle(dAtA, i, uint64(len(m.Symbol)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryPriceHistoryResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryPriceHistoryResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryPriceHistoryResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Entries) > 0 {
+		for iNdEx := len(m.Entries) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Entries[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintOracle(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *PriceHistoryEntry) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *PriceHistoryEntry) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *PriceHistoryEntry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.BlockHeight != 0 {
+		i = encodeVarintOracle(dAtA, i, uint64(m.BlockHeight))
+		i--
+		dAtA[i] = 0x30
+	}
+	if m.Confidence != 0 {
+		i -= 4
+		encoding_binary.LittleEndian.PutUint32(dAtA[i:], uint32(math.Float32bits(float32(m.Confidence))))
+		i--
+		dAtA[i] = 0x2d
+	}
+	if m.Timestamp != 0 {
+		i = encodeVarintOracle(dAtA, i, uint64(m.Timestamp))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Source) > 0 {
+		i -= len(m.Source)
+		copy(dAtA[i:], m.Source)
+		i = encodeVarintOracle(dAtA, i, uint64(len(m.Source)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Value) > 0 {
+		i -= len(m.Value)
+		copy(dAtA[i:], m.Value)
+		i = encodeVarintOracle(dAtA, i, uint64(len(m.Value)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Symbol) > 0 {
+		i -= len(m.Symbol)
+		copy(dAtA[i:], m.Symbol)
+		i = encodeVarintOracle(dAtA, i, uint64(len(m.Symbol)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *MsgSetPrice) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -814,6 +1201,73 @@ func (m *QueryPriceResponse) Size() (n int) {
 	if m.Price != nil {
 		l = m.Price.Size()
 		n += 1 + l + sovOracle(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryPriceHistoryRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Symbol)
+	if l > 0 {
+		n += 1 + l + sovOracle(uint64(l))
+	}
+	if m.StartTime != 0 {
+		n += 1 + sovOracle(uint64(m.StartTime))
+	}
+	if m.EndTime != 0 {
+		n += 1 + sovOracle(uint64(m.EndTime))
+	}
+	if m.Limit != 0 {
+		n += 1 + sovOracle(uint64(m.Limit))
+	}
+	return n
+}
+
+func (m *QueryPriceHistoryResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Entries) > 0 {
+		for _, e := range m.Entries {
+			l = e.Size()
+			n += 1 + l + sovOracle(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *PriceHistoryEntry) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Symbol)
+	if l > 0 {
+		n += 1 + l + sovOracle(uint64(l))
+	}
+	l = len(m.Value)
+	if l > 0 {
+		n += 1 + l + sovOracle(uint64(l))
+	}
+	l = len(m.Source)
+	if l > 0 {
+		n += 1 + l + sovOracle(uint64(l))
+	}
+	if m.Timestamp != 0 {
+		n += 1 + sovOracle(uint64(m.Timestamp))
+	}
+	if m.Confidence != 0 {
+		n += 5
+	}
+	if m.BlockHeight != 0 {
+		n += 1 + sovOracle(uint64(m.BlockHeight))
 	}
 	return n
 }
@@ -1192,6 +1646,424 @@ func (m *QueryPriceResponse) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipOracle(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthOracle
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryPriceHistoryRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowOracle
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryPriceHistoryRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryPriceHistoryRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Symbol", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOracle
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthOracle
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthOracle
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Symbol = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartTime", wireType)
+			}
+			m.StartTime = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOracle
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.StartTime |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EndTime", wireType)
+			}
+			m.EndTime = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOracle
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.EndTime |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Limit", wireType)
+			}
+			m.Limit = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOracle
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Limit |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipOracle(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthOracle
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryPriceHistoryResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowOracle
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryPriceHistoryResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryPriceHistoryResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Entries", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOracle
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthOracle
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthOracle
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Entries = append(m.Entries, &PriceHistoryEntry{})
+			if err := m.Entries[len(m.Entries)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipOracle(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthOracle
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *PriceHistoryEntry) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowOracle
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: PriceHistoryEntry: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: PriceHistoryEntry: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Symbol", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOracle
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthOracle
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthOracle
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Symbol = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOracle
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthOracle
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthOracle
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Value = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Source", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOracle
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthOracle
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthOracle
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Source = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Timestamp", wireType)
+			}
+			m.Timestamp = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOracle
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Timestamp |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 5 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Confidence", wireType)
+			}
+			var v uint32
+			if (iNdEx + 4) > l {
+				return io.ErrUnexpectedEOF
+			}
+			v = uint32(encoding_binary.LittleEndian.Uint32(dAtA[iNdEx:]))
+			iNdEx += 4
+			m.Confidence = float32(math.Float32frombits(v))
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BlockHeight", wireType)
+			}
+			m.BlockHeight = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowOracle
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.BlockHeight |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipOracle(dAtA[iNdEx:])

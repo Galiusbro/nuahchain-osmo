@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -53,6 +54,14 @@ type dummyOracleKeeper struct{}
 
 func (dummyOracleKeeper) GetPrice(_ sdk.Context, _ string) (*oracletypes.Price, bool) {
 	return nil, false
+}
+
+func (dummyOracleKeeper) GetPriceWithFallback(_ sdk.Context, _ string) (*oracletypes.Price, bool) {
+	return nil, false
+}
+
+func (dummyOracleKeeper) EnsureFreshPrice(_ sdk.Context, symbol string) (*oracletypes.Price, error) {
+	return nil, fmt.Errorf("price refresh unsupported for symbol %s", symbol)
 }
 
 type dummyFeesKeeper struct{}

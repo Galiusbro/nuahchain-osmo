@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"strings"
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -60,20 +61,57 @@ func (m msgServer) BuyAsset(goCtx context.Context, msg *types.MsgBuyAsset) (*typ
 		return nil, err
 	}
 
-	amountND, ok := sdkmath.NewIntFromString(msg.Amount_NDOLLAR)
-	if !ok {
-		return nil, sdkerrors.ErrInvalidRequest.Wrap("amount_ndollar must be an integer")
-	}
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	buyer, err := sdk.AccAddressFromBech32(msg.Buyer)
 	if err != nil {
 		return nil, sdkerrors.ErrInvalidAddress.Wrapf("invalid buyer: %v", err)
 	}
 
-	_, baseAmountDec, err := m.Keeper.BuyAsset(ctx, buyer, msg.Symbol, amountND)
-	if err != nil {
-		return nil, sdkerrors.ErrInvalidRequest.Wrap(err.Error())
+	var payment sdk.Coin
+	var amountNDStr string
+
+	// Support both old (amount_NDOLLAR) and new (denom + amount) format
+	if msg.Denom != "" && msg.Amount != "" {
+		// New format: denom + amount
+		amount, ok := sdkmath.NewIntFromString(msg.Amount)
+		if !ok {
+			return nil, sdkerrors.ErrInvalidRequest.Wrap("amount must be an integer")
+		}
+		payment = sdk.NewCoin(msg.Denom, amount)
+		amountNDStr = msg.Amount
+	} else if msg.Amount_NDOLLAR != "" {
+		// Old format: amount_NDOLLAR (deprecated but still supported)
+		amountND, ok := sdkmath.NewIntFromString(msg.Amount_NDOLLAR)
+		if !ok {
+			return nil, sdkerrors.ErrInvalidRequest.Wrap("amount_ndollar must be an integer")
+		}
+		payment = sdk.NewCoin(types.NDollarDenom, amountND)
+		amountNDStr = msg.Amount_NDOLLAR
+	} else {
+		return nil, sdkerrors.ErrInvalidRequest.Wrap("either amount_NDOLLAR (deprecated) or denom+amount must be provided")
+	}
+
+	var baseAmountDec osmomath.Dec
+	// Check if payment is NDOLLAR (either "NDOLLAR" or factory/*/ndollar format)
+	isNDollar := payment.Denom == types.NDollarDenom || (strings.HasPrefix(payment.Denom, "factory/") && strings.HasSuffix(payment.Denom, "/ndollar"))
+
+	if isNDollar {
+		// Use old method for backward compatibility when denom is exactly "NDOLLAR"
+		if payment.Denom == types.NDollarDenom {
+			_, baseAmountDec, err = m.Keeper.BuyAsset(ctx, buyer, msg.Symbol, payment.Amount)
+		} else {
+			// Use new method for factory/*/ndollar format
+			_, baseAmountDec, err = m.Keeper.BuyAssetWithPayment(ctx, buyer, msg.Symbol, payment)
+		}
+		if err != nil {
+			return nil, sdkerrors.ErrInvalidRequest.Wrap(err.Error())
+		}
+	} else {
+		// Use new method for unuah or other denoms
+		_, baseAmountDec, err = m.Keeper.BuyAssetWithPayment(ctx, buyer, msg.Symbol, payment)
+		if err != nil {
+			return nil, sdkerrors.ErrInvalidRequest.Wrap(err.Error())
+		}
 	}
 
 	ctx.EventManager().EmitEvent(
@@ -81,7 +119,7 @@ func (m msgServer) BuyAsset(goCtx context.Context, msg *types.MsgBuyAsset) (*typ
 			types.EventTypeAssetBought,
 			sdk.NewAttribute(types.AttributeKeySymbol, msg.Symbol),
 			sdk.NewAttribute(types.AttributeKeyBuyer, msg.Buyer),
-			sdk.NewAttribute(types.AttributeKeyAmountNDOLLAR, msg.Amount_NDOLLAR),
+			sdk.NewAttribute(types.AttributeKeyAmountNDOLLAR, amountNDStr),
 			sdk.NewAttribute(types.AttributeKeyBaseAmount, baseAmountDec.String()),
 		),
 	)

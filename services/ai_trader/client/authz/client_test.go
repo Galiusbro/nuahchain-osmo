@@ -1,14 +1,22 @@
 package authz_test
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/client/authz"
-	"github.com/osmosis-labs/osmosis/v30/x/assets/types"
+	assetstypes "github.com/osmosis-labs/osmosis/v30/x/assets/types"
 )
+
+const testAddrLen = 20
+
+func testAddress(b byte) string {
+	addr := sdk.AccAddress(bytes.Repeat([]byte{b}, testAddrLen))
+	return addr.String()
+}
 
 func TestAuthzClient_ValidateExecRequest(t *testing.T) {
 	tests := []struct {
@@ -19,8 +27,8 @@ func TestAuthzClient_ValidateExecRequest(t *testing.T) {
 		{
 			name: "valid request",
 			request: &authz.ExecRequest{
-				Grantee: "cosmos1qk93t4j0yyzgqgt6k5qf8deh8fq6smpn3ntu3x",
-				Msgs:    []sdk.Msg{types.NewMsgBuyAsset("cosmos1p9qh4ldfd6n0qehujsal4k7g0e37kel90rc4ts", "BTC", "1000000")},
+				Grantee: testAddress(1),
+				Msgs:    []sdk.Msg{assetstypes.NewMsgBuyAsset(testAddress(2), "BTC", "1000000")},
 			},
 			expectedError: false,
 		},
@@ -33,14 +41,14 @@ func TestAuthzClient_ValidateExecRequest(t *testing.T) {
 			name: "empty grantee",
 			request: &authz.ExecRequest{
 				Grantee: "",
-				Msgs:    []sdk.Msg{types.NewMsgBuyAsset("cosmos1p9qh4ldfd6n0qehujsal4k7g0e37kel90rc4ts", "BTC", "1000000")},
+				Msgs:    []sdk.Msg{assetstypes.NewMsgBuyAsset(testAddress(2), "BTC", "1000000")},
 			},
 			expectedError: true,
 		},
 		{
 			name: "empty messages",
 			request: &authz.ExecRequest{
-				Grantee: "cosmos1qk93t4j0yyzgqgt6k5qf8deh8fq6smpn3ntu3x",
+				Grantee: testAddress(1),
 				Msgs:    []sdk.Msg{},
 			},
 			expectedError: true,
@@ -49,7 +57,7 @@ func TestAuthzClient_ValidateExecRequest(t *testing.T) {
 			name: "invalid grantee address",
 			request: &authz.ExecRequest{
 				Grantee: "invalid_address",
-				Msgs:    []sdk.Msg{types.NewMsgBuyAsset("cosmos1p9qh4ldfd6n0qehujsal4k7g0e37kel90rc4ts", "BTC", "1000000")},
+				Msgs:    []sdk.Msg{assetstypes.NewMsgBuyAsset(testAddress(2), "BTC", "1000000")},
 			},
 			expectedError: true,
 		},
