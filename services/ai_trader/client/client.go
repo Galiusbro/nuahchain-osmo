@@ -8,6 +8,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/client/authz"
 	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/client/oracle"
 	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/client/trading"
+	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/shared"
 )
 
 // Client represents the main AI trader client that combines oracle, trading, and authz functionality
@@ -130,7 +131,7 @@ func (c *Client) ExecuteTradingDecision(ctx context.Context, decision *TradingDe
 		return nil, fmt.Errorf("granter address is required")
 	}
 
-	if decision.Action == "hold" {
+	if decision.Action == shared.ActionHold {
 		return &authz.ExecResponse{
 			Timestamp: time.Now(),
 			Success:   true,

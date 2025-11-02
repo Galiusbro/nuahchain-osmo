@@ -2,12 +2,16 @@ package config
 
 import (
 	"fmt"
+	"strings"
 )
 
 // Config represents the AI trader configuration
 type Config struct {
 	// Bot settings
 	Bot BotConfig `toml:"bot" yaml:"bot"`
+
+	// API settings (REST, rate limits)
+	API APIConfig `toml:"api" yaml:"api"`
 
 	// Trading limits and policies
 	Limits TradingLimits `toml:"limits" yaml:"limits"`
@@ -140,10 +144,24 @@ type Monitoring struct {
 	AuditLogPath string `toml:"audit_log_path" yaml:"audit_log_path"`
 }
 
+// APIConfig defines REST API limits and settings.
+type APIConfig struct {
+	RateLimit    int            `toml:"rate_limit" yaml:"rate_limit"`
+	RateInterval DurationString `toml:"rate_interval" yaml:"rate_interval"`
+	Bind         string         `toml:"bind" yaml:"bind"`
+	TLSCertPath  string         `toml:"tls_cert" yaml:"tls_cert"`
+	TLSKeyPath   string         `toml:"tls_key" yaml:"tls_key"`
+	CORSOrigins  []string       `toml:"cors_origins" yaml:"cors_origins"`
+}
+
 // Validate validates the configuration
 func (c *Config) Validate() error {
 	if err := c.Bot.Validate(); err != nil {
 		return fmt.Errorf("bot config validation failed: %w", err)
+	}
+
+	if err := c.API.Normalize(); err != nil {
+		return fmt.Errorf("api config normalization failed: %w", err)
 	}
 
 	if err := c.Limits.Validate(); err != nil {
@@ -162,6 +180,23 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("monitoring validation failed: %w", err)
 	}
 
+	return nil
+}
+
+// Normalize validates and fills defaults for API config.
+func (a *APIConfig) Normalize() error {
+	if a.RateLimit <= 0 {
+		a.RateLimit = 60
+	}
+	if a.RateInterval.duration == "" {
+		a.RateInterval = DurationString{duration: "1m"}
+	}
+	if _, err := a.RateInterval.ParseDuration(); err != nil {
+		return fmt.Errorf("invalid rate interval: %w", err)
+	}
+	if strings.TrimSpace(a.Bind) == "" {
+		a.Bind = "127.0.0.1:8080"
+	}
 	return nil
 }
 

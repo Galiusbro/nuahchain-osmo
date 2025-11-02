@@ -3,13 +3,19 @@ package marketdata
 import (
 	"context"
 	"errors"
+	"math"
 	"strconv"
 	"time"
 )
 
 type IndicatorResult struct {
-	MA  map[int]string `json:"ma,omitempty"`
-	EMA map[int]string `json:"ema,omitempty"`
+	MA         map[int]string `json:"ma,omitempty"`
+	EMA        map[int]string `json:"ema,omitempty"`
+	RSI        string         `json:"rsi,omitempty"`
+	MACD       string         `json:"macd,omitempty"`
+	MACDSignal string         `json:"macd_signal,omitempty"`
+	MACDHist   string         `json:"macd_hist,omitempty"`
+	ATR        string         `json:"atr,omitempty"`
 }
 
 // Indicators computes requested indicators using repo/store data.
@@ -55,6 +61,11 @@ func (s *Service) Indicators(ctx context.Context, symbol string, tf Timeframe, m
 			out.EMA[w] = ema(closes, w)
 		}
 	}
+	// RSI(14), MACD(12,26,9), ATR(14)
+	out.RSI = rsi(candles, 14)
+	macdVal, macdSig, macdHist := macd(closes, 12, 26, 9)
+	out.MACD, out.MACDSignal, out.MACDHist = macdVal, macdSig, macdHist
+	out.ATR = atr(candles, 14)
 	return out, nil
 }
 
@@ -99,4 +110,102 @@ func sliceMax(arr []int) int {
 		}
 	}
 	return m
+}
+
+// rsi computes RSI using Wilder's smoothing
+func rsi(candles []Candle, period int) string {
+	if period <= 0 || len(candles) < period+1 {
+		return ""
+	}
+	gains, losses := 0.0, 0.0
+	for i := 1; i <= period; i++ {
+		change := atof(candles[i].C) - atof(candles[i-1].C)
+		if change > 0 {
+			gains += change
+		} else {
+			losses += -change
+		}
+	}
+	avgGain := gains / float64(period)
+	avgLoss := losses / float64(period)
+	for i := period + 1; i < len(candles); i++ {
+		change := atof(candles[i].C) - atof(candles[i-1].C)
+		gain, loss := 0.0, 0.0
+		if change > 0 {
+			gain = change
+		} else {
+			loss = -change
+		}
+		avgGain = (avgGain*float64(period-1) + gain) / float64(period)
+		avgLoss = (avgLoss*float64(period-1) + loss) / float64(period)
+	}
+	if avgLoss == 0 {
+		return "100.000000"
+	}
+	rs := avgGain / avgLoss
+	r := 100 - (100 / (1 + rs))
+	return ftoa(r)
+}
+
+// macd returns MACD line, signal, histogram
+func macd(closes []string, fast, slow, signal int) (string, string, string) {
+	if len(closes) < slow+signal {
+		return "", "", ""
+	}
+	// helper ema float series
+	toFloat := func(n int) []float64 {
+		arr := make([]float64, len(closes))
+		for i := range closes {
+			arr[i] = atof(closes[i])
+		}
+		return arr
+	}
+	series := toFloat(len(closes))
+	emaN := func(src []float64, n int) []float64 {
+		k := 2.0 / (float64(n) + 1)
+		out := make([]float64, len(src))
+		sum := 0.0
+		for i := 0; i < n; i++ {
+			sum += src[i]
+		}
+		out[n-1] = sum / float64(n)
+		for i := n; i < len(src); i++ {
+			out[i] = src[i]*k + out[i-1]*(1-k)
+		}
+		return out
+	}
+	emaFast := emaN(series, fast)
+	emaSlow := emaN(series, slow)
+	macdLine := make([]float64, len(series))
+	for i := 0; i < len(series); i++ {
+		macdLine[i] = emaFast[i] - emaSlow[i]
+	}
+	sig := emaN(macdLine, signal)
+	hist := macdLine[len(macdLine)-1] - sig[len(sig)-1]
+	return ftoa(macdLine[len(macdLine)-1]), ftoa(sig[len(sig)-1]), ftoa(hist)
+}
+
+// atr computes Average True Range
+func atr(candles []Candle, period int) string {
+	if period <= 0 || len(candles) < period+1 {
+		return ""
+	}
+	trs := make([]float64, 0, len(candles)-1)
+	for i := 1; i < len(candles); i++ {
+		h := atof(candles[i].H)
+		l := atof(candles[i].L)
+		pc := atof(candles[i-1].C)
+		tr := math.Max(h-l, math.Max(math.Abs(h-pc), math.Abs(l-pc)))
+		trs = append(trs, tr)
+	}
+	// Wilder's smoothing
+	sum := 0.0
+	for i := 0; i < period; i++ {
+		sum += trs[i]
+	}
+	atr := sum / float64(period)
+	for i := period; i < len(trs); i++ {
+		atr = (atr*float64(period-1) + trs[i]) / float64(period)
+	}
+	return ftoa(atr)
 }

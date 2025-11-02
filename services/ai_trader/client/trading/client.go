@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/osmosis-labs/osmosis/v30/services/ai_trader/shared"
 	assetstypes "github.com/osmosis-labs/osmosis/v30/x/assets/types"
 	bondingtypes "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types"
 )
@@ -321,9 +322,9 @@ func (c *Client) ExecuteTrade(ctx context.Context, trader string, req *TradeRequ
 	switch market {
 	case MarketAssets:
 		switch req.Type {
-		case "buy":
+		case shared.ActionBuy:
 			return c.BuyAsset(ctx, trader, req.Symbol, req.Amount)
-		case "sell":
+		case shared.ActionSell:
 			return c.SellAsset(ctx, trader, req.Symbol, req.Amount)
 		default:
 			return nil, fmt.Errorf("invalid trade type: %s, must be 'buy' or 'sell'", req.Type)

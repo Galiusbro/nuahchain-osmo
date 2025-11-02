@@ -294,6 +294,8 @@ func TestDefaultConfig(t *testing.T) {
 	assert.Equal(t, "ai-trader", config.Bot.Name)
 	assert.Equal(t, DurationString{duration: "30s"}, config.Bot.TradingInterval)
 	assert.True(t, config.Bot.Enabled)
+	assert.Equal(t, 60, config.API.RateLimit)
+	assert.Equal(t, DurationString{duration: "1m"}, config.API.RateInterval)
 
 	assert.Equal(t, "factory/test/ndollar", config.Limits.MaxDailyVolume.Denom)
 	assert.Equal(t, int64(1000000), config.Limits.MaxDailyVolume.Amount.Int64())

@@ -253,8 +253,10 @@ blocks.db
 
 # Python
 **/venv/*
-**/*.pyc
+.env
 
+**/*.pyc
+**/__pycache__/
 # Ignore binary created from localnuah scripts
 tests/cl-genesis-positions/script
 tests/cl-genesis-positions/*.json

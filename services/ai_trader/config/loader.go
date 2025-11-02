@@ -91,6 +91,14 @@ func SaveConfig(config *Config, configPath string) error {
 				"trading_interval": config.Bot.TradingInterval.String(),
 				"enabled":          config.Bot.Enabled,
 			},
+			"api": map[string]interface{}{
+				"rate_limit":    config.API.RateLimit,
+				"rate_interval": config.API.RateInterval.String(),
+				"bind":          config.API.Bind,
+				"tls_cert":      config.API.TLSCertPath,
+				"tls_key":       config.API.TLSKeyPath,
+				"cors_origins":  config.API.CORSOrigins,
+			},
 			"limits": map[string]interface{}{
 				"max_daily_volume":    config.Limits.MaxDailyVolume.String(),
 				"max_single_trade":    config.Limits.MaxSingleTrade.String(),
@@ -161,6 +169,12 @@ func DefaultConfig() *Config {
 			TradingInterval: DurationString{duration: "30s"},
 			Enabled:         true,
 		},
+	API: APIConfig{
+		RateLimit:    60,
+		RateInterval: DurationString{duration: "1m"},
+		Bind:         "127.0.0.1:8080",
+		CORSOrigins:  []string{"http://localhost"},
+	},
 		Limits: TradingLimits{
 			MaxDailyVolume:   CoinString{Coin: sdk.NewCoin("factory/test/ndollar", math.NewInt(1000000))},
 			MaxSingleTrade:   CoinString{Coin: sdk.NewCoin("factory/test/ndollar", math.NewInt(10000))},

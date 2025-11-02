@@ -5,9 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
-	"strings"
+	"regexp"
 	"time"
 )
 
@@ -18,6 +19,7 @@ type GroqClient struct {
 	model   string
 	baseURL string
 	timeout time.Duration
+	lastRaw string
 }
 
 type groqChatRequest struct {
@@ -49,7 +51,7 @@ func NewGroq(apiKey, model string, timeout time.Duration) *GroqClient {
 		apiKey = "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"
 	}
 	if model == "" {
-		model = "llama-3.1-70b-versatile"
+		model = "llama-3.3-70b-versatile"
 	}
 	return &GroqClient{
 		http:    newHTTPClient(timeout),
@@ -61,6 +63,9 @@ func NewGroq(apiKey, model string, timeout time.Duration) *GroqClient {
 }
 
 func (g *GroqClient) Name() string { return "groq" }
+
+// LastRaw returns last raw content from the model (best effort).
+func (g *GroqClient) LastRaw() string { return g.lastRaw }
 
 // GenerateDecision calls Groq to obtain a structured DecisionOut.
 func (g *GroqClient) GenerateDecision(ctx context.Context, in PromptInput) (DecisionOut, error) {
@@ -89,24 +94,43 @@ func (g *GroqClient) GenerateDecision(ctx context.Context, in PromptInput) (Deci
 		return out, fmt.Errorf("groq http status %d", resp.StatusCode)
 	}
 
+	// Read body once for optional debug and JSON decode
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return out, err
+	}
+	if os.Getenv("GROQ_DEBUG") == "1" {
+		fmt.Printf("[GROQ HTTP %d]\n%s\n", resp.StatusCode, string(bodyBytes))
+	}
 	var gr groqChatResponse
-	if err := json.NewDecoder(resp.Body).Decode(&gr); err != nil {
+	if err := json.Unmarshal(bodyBytes, &gr); err != nil {
 		return out, err
 	}
 	if len(gr.Choices) == 0 {
 		return out, fmt.Errorf("groq: empty choices")
 	}
 	content := gr.Choices[0].Message.Content
-	// Expect JSON in content; extract first JSON object
-	dec := json.NewDecoder(strings.NewReader(content))
-	if err := dec.Decode(&out); err != nil {
+	if os.Getenv("GROQ_DEBUG") == "1" {
+		fmt.Printf("[GROQ RAW]\n%s\n", content)
+	}
+	g.lastRaw = content
+	// Expect JSON in content; try strict parse first
+	if err := json.Unmarshal([]byte(content), &out); err != nil {
+		// Try to extract first JSON object with a liberal regex
+		re := regexp.MustCompile(`\{[\s\S]*\}`)
+		if loc := re.FindStringIndex(content); loc != nil {
+			snippet := content[loc[0]:loc[1]]
+			if e2 := json.Unmarshal([]byte(snippet), &out); e2 == nil {
+				return out, nil
+			}
+		}
 		return out, fmt.Errorf("groq: invalid JSON response: %w", err)
 	}
 	return out, nil
 }
 
 func (g *GroqClient) buildRequestBody(in PromptInput) ([]byte, error) {
-	sys := "You are a trading decision assistant. Respond ONLY with strict JSON matching the provided schema."
+	sys := "You are a trading decision assistant. Respond ONLY with strict JSON matching the schema. The 'action' MUST be one of: buy, sell, hold (lowercase). No prose, no markdown."
 	userPayload := struct {
 		Schema      map[string]any `json:"schema"`
 		Input       PromptInput    `json:"input"`

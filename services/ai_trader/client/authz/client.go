@@ -362,6 +362,63 @@ func (c *Client) ExecuteMultipleOperations(ctx context.Context, grantee string, 
 	}, nil
 }
 
+// GrantTradingAuthorizations issues generic authorizations for trading-related message types.
+func (c *Client) GrantTradingAuthorizations(ctx context.Context, granter, grantee string, expiration time.Time, includeBonding bool) ([]string, error) {
+	if strings.TrimSpace(granter) == "" {
+		return nil, fmt.Errorf("granter address is required")
+	}
+	if strings.TrimSpace(grantee) == "" {
+		return nil, fmt.Errorf("grantee address is required")
+	}
+	granterAddr, err := sdk.AccAddressFromBech32(granter)
+	if err != nil {
+		return nil, fmt.Errorf("invalid granter address: %w", err)
+	}
+	granteeAddr, err := sdk.AccAddressFromBech32(grantee)
+	if err != nil {
+		return nil, fmt.Errorf("invalid grantee address: %w", err)
+	}
+	if expiration.IsZero() {
+		expiration = time.Now().UTC().Add(30 * 24 * time.Hour)
+	}
+	expiration = expiration.UTC()
+	if !expiration.After(time.Now().UTC()) {
+		expiration = time.Now().UTC().Add(24 * time.Hour)
+	}
+	msgs := []sdk.Msg{
+		&assetstypes.MsgBuyAsset{},
+		&assetstypes.MsgSellAsset{},
+	}
+	if includeBonding {
+		msgs = append(msgs,
+			&bondingtypes.MsgBuyFromCurve{},
+			&bondingtypes.MsgSellToCurve{},
+		)
+	}
+	granted := make([]string, 0, len(msgs))
+	for _, msg := range msgs {
+		msgType := sdk.MsgTypeURL(msg)
+		if err := c.grantGenericAuthorization(ctx, granterAddr, granteeAddr, msgType, expiration); err != nil {
+			return granted, err
+		}
+		granted = append(granted, msgType)
+	}
+	return granted, nil
+}
+
+func (c *Client) grantGenericAuthorization(ctx context.Context, granter, grantee sdk.AccAddress, msgType string, expiration time.Time) error {
+	authorization := authztypes.NewGenericAuthorization(msgType)
+	exp := expiration
+	msg, err := authztypes.NewMsgGrant(granter, grantee, authorization, &exp)
+	if err != nil {
+		return fmt.Errorf("failed to create grant message: %w", err)
+	}
+	if _, err := c.client.Grant(ctx, msg); err != nil {
+		return fmt.Errorf("grant failed: %w", err)
+	}
+	return nil
+}
+
 // ValidateExecRequest validates an exec request
 func (c *Client) ValidateExecRequest(req *ExecRequest) error {
 	if req == nil {

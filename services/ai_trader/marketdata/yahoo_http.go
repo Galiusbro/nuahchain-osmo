@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"time"
@@ -13,12 +14,13 @@ import (
 // Spot:  v7/finance/quote?symbols=SYMB
 // OHLCV: v8/finance/chart/SYMB?interval=1m&range=1d  (range will be adjusted by timeframe)
 type YahooHTTPFetcher struct {
-	client    *http.Client
-	baseURL   string
-	retries   int
-	backoff   time.Duration
-	rateLimit time.Duration
-	lastAt    time.Time
+	client     *http.Client
+	hosts      []string
+	userAgents []string
+	retries    int
+	backoff    time.Duration
+	rateLimit  time.Duration
+	lastAt     time.Time
 }
 
 func NewYahooHTTPFetcher(timeout time.Duration) *YahooHTTPFetcher {
@@ -26,8 +28,15 @@ func NewYahooHTTPFetcher(timeout time.Duration) *YahooHTTPFetcher {
 		timeout = 8 * time.Second
 	}
 	return &YahooHTTPFetcher{
-		client:    &http.Client{Timeout: timeout},
-		baseURL:   "https://query1.finance.yahoo.com",
+		client: &http.Client{Timeout: timeout},
+		hosts:  []string{"https://query1.finance.yahoo.com", "https://query2.finance.yahoo.com"},
+		userAgents: []string{
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+			"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+			"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0",
+			"Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15",
+		},
 		retries:   3,
 		backoff:   500 * time.Millisecond,
 		rateLimit: 1500 * time.Millisecond,
@@ -37,30 +46,39 @@ func NewYahooHTTPFetcher(timeout time.Duration) *YahooHTTPFetcher {
 func (y *YahooHTTPFetcher) Name() string { return "yahoo_http" }
 
 // quote response subset
-type yahooQuoteResp struct {
-	QuoteResponse struct {
-		Result []struct {
-			Symbol             string  `json:"symbol"`
-			RegularMarketPrice float64 `json:"regularMarketPrice"`
-		} `json:"result"`
-	} `json:"quoteResponse"`
-}
+// kept for reference; v7 quote not used currently due to reliability issues
+// type yahooQuoteResp struct {
+//     QuoteResponse struct {
+//         Result []struct {
+//             Symbol             string  `json:"symbol"`
+//             RegularMarketPrice float64 `json:"regularMarketPrice"`
+//         } `json:"result"`
+//     } `json:"quoteResponse"`
+// }
 
 func (y *YahooHTTPFetcher) GetSpot(ctx context.Context, symbol string) (Price, error) {
 	// Use v8 chart endpoint directly for freshest price
-	u := fmt.Sprintf("%s/v8/finance/chart/%s?interval=1m&range=1d", y.baseURL, url.PathEscape(symbol))
+	base := y.hosts[rand.Intn(len(y.hosts))]
+	u := fmt.Sprintf("%s/v8/finance/chart/%s?interval=1m&range=1d", base, url.PathEscape(symbol))
 	var lastErr error
 	for i := 0; i <= y.retries; i++ {
 		resp, err := y.doGET(ctx, u)
 		if err != nil {
 			lastErr = err
-			time.Sleep(y.backoff * time.Duration(i+1))
+			time.Sleep(y.jitterBackoff(i))
+			continue
+		}
+		if resp.StatusCode == 429 {
+			// Respect Retry-After if present, else exponential backoff with jitter
+			ra := resp.Header.Get("Retry-After")
+			resp.Body.Close()
+			y.sleepRetryAfter(ra, i)
 			continue
 		}
 		if resp.StatusCode != 200 {
 			lastErr = fmt.Errorf("yahoo chart http %d", resp.StatusCode)
 			resp.Body.Close()
-			time.Sleep(y.backoff * time.Duration(i+1))
+			time.Sleep(y.jitterBackoff(i))
 			continue
 		}
 		var cr yahooChartResp
@@ -116,19 +134,26 @@ func (y *YahooHTTPFetcher) GetOHLCV(ctx context.Context, symbol string, tf Timef
 		limit = 50
 	}
 	// Yahoo returns up to range; we will slice at the end if needed.
-	u := fmt.Sprintf("%s/v8/finance/chart/%s?interval=%s&range=%s", y.baseURL, url.PathEscape(symbol), interval, rng)
+	base := y.hosts[rand.Intn(len(y.hosts))]
+	u := fmt.Sprintf("%s/v8/finance/chart/%s?interval=%s&range=%s", base, url.PathEscape(symbol), interval, rng)
 	var lastErr error
 	for i := 0; i <= y.retries; i++ {
 		resp, err := y.doGET(ctx, u)
 		if err != nil {
 			lastErr = err
-			time.Sleep(y.backoff * time.Duration(i+1))
+			time.Sleep(y.jitterBackoff(i))
+			continue
+		}
+		if resp.StatusCode == 429 {
+			ra := resp.Header.Get("Retry-After")
+			resp.Body.Close()
+			y.sleepRetryAfter(ra, i)
 			continue
 		}
 		if resp.StatusCode != 200 {
 			lastErr = fmt.Errorf("yahoo chart http %d", resp.StatusCode)
 			resp.Body.Close()
-			time.Sleep(y.backoff * time.Duration(i+1))
+			time.Sleep(y.jitterBackoff(i))
 			continue
 		}
 		var cr yahooChartResp
@@ -172,7 +197,8 @@ func mapTimeframe(tf Timeframe) (interval string, rng string) {
 	case TF5m:
 		return "5m", "5d"
 	case TF1h:
-		return "1h", "1mo"
+		// Yahoo prefers 60m for hourly
+		return "60m", "1mo"
 	case TF1d:
 		return "1d", "1y"
 	default:
@@ -196,11 +222,36 @@ func (y *YahooHTTPFetcher) doGET(ctx context.Context, u string) (*http.Response,
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36")
+	// rotate User-Agent per request
+	req.Header.Set("User-Agent", y.userAgents[rand.Intn(len(y.userAgents))])
 	req.Header.Set("Accept", "application/json,text/plain,*/*")
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
 	req.Header.Set("Connection", "keep-alive")
 	resp, err := y.client.Do(req)
 	y.lastAt = time.Now()
 	return resp, err
+}
+
+// jitterBackoff returns exponential backoff with jitter
+func (y *YahooHTTPFetcher) jitterBackoff(attempt int) time.Duration {
+	if attempt < 0 {
+		attempt = 0
+	}
+	base := y.backoff * time.Duration(1<<attempt)
+	jitter := time.Duration(rand.Int63n(int64(base/2 + 1)))
+	return base + jitter
+}
+
+// sleepRetryAfter respects Retry-After header when present; falls back to jittered backoff
+func (y *YahooHTTPFetcher) sleepRetryAfter(retryAfter string, attempt int) {
+	if retryAfter == "" {
+		time.Sleep(y.jitterBackoff(attempt))
+		return
+	}
+	if secs, err := time.ParseDuration(retryAfter + "s"); err == nil {
+		time.Sleep(secs)
+		return
+	}
+	// Some providers send integer seconds; fallback covered above. If parsing fails, use backoff.
+	time.Sleep(y.jitterBackoff(attempt))
 }
