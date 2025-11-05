@@ -254,6 +254,9 @@ blocks.db
 # Python
 **/venv/*
 .env
+example
+osmosisd
+nuahchain.tar.gz
 
 **/*.pyc
 **/__pycache__/
