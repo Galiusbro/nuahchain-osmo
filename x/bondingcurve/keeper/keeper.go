@@ -828,6 +828,16 @@ func (k Keeper) updateTokenState(ctx sdk.Context, denom string, sold osmomath.De
 }
 
 func (k Keeper) bondingCurveWallet(ctx sdk.Context) (sdk.AccAddress, error) {
+	// First, try to get the address from usertoken params (where tokens are actually sent)
+	userTokenParams := k.userTokenKeeper.GetParams(ctx)
+	if userTokenParams.BondingCurveWallet != "" {
+		addr, err := sdk.AccAddressFromBech32(userTokenParams.BondingCurveWallet)
+		if err == nil {
+			return addr, nil
+		}
+	}
+
+	// Fallback to bondingcurve's own params
 	params := k.GetParams(ctx)
 	if params.BondingCurveWallet == "" {
 		return k.GetModuleAddress(), nil

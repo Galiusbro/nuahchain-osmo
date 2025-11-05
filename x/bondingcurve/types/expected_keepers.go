@@ -25,6 +25,7 @@ type UserTokenKeeper interface {
 	GetToken(ctx sdk.Context, denom string) (usertokentypes.Token, bool)
 	UpdateToken(ctx sdk.Context, token usertokentypes.Token) error
 	IterateTokens(ctx sdk.Context, cb func(token usertokentypes.Token) bool)
+	GetParams(ctx sdk.Context) usertokentypes.Params
 }
 
 type PoolManagerKeeper interface {

@@ -7,6 +7,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Authentication errors
+var (
+	ErrServiceNotInitialized = errors.New("authentication service not initialized")
+	ErrMissingToken          = errors.New("authorization header required")
+	ErrInvalidTokenFormat    = errors.New("invalid authorization header format")
+)
+
 // Service handles authentication business logic
 type Service struct {
 	repo            *Repository
@@ -191,4 +198,9 @@ func (s *Service) ValidateToken(token string) (*User, error) {
 // GetUserWallet gets wallet for a user
 func (s *Service) GetUserWallet(userID int64) (*Wallet, error) {
 	return s.repo.GetWalletByUserID(userID)
+}
+
+// GetWalletByAddress gets wallet by address
+func (s *Service) GetWalletByAddress(address string) (*Wallet, error) {
+	return s.repo.GetWalletByAddress(address)
 }

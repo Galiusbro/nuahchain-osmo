@@ -9,10 +9,11 @@ import (
 
 // Config represents the server configuration
 type Config struct {
-	Server   ServerConfig   `yaml:"server"`
-	Database DatabaseConfig `yaml:"database"`
-	Logger   LoggerConfig   `yaml:"logger"`
-	Auth     AuthConfig     `yaml:"auth"`
+	Server     ServerConfig     `yaml:"server"`
+	Database   DatabaseConfig   `yaml:"database"`
+	Logger     LoggerConfig     `yaml:"logger"`
+	Auth       AuthConfig       `yaml:"auth"`
+	Blockchain BlockchainConfig `yaml:"blockchain"`
 }
 
 // ServerConfig contains HTTP server settings
@@ -93,6 +94,15 @@ type AuthConfig struct {
 	RefreshExpiry time.Duration `yaml:"refresh_expiry"`
 }
 
+// BlockchainConfig contains blockchain connection settings
+type BlockchainConfig struct {
+	// Node URL for gRPC connection
+	NodeURL string `yaml:"node_url"`
+
+	// Chain ID
+	ChainID string `yaml:"chain_id"`
+}
+
 // Load loads and returns the server configuration
 func Load() (*Config, error) {
 	cfg := &Config{
@@ -125,6 +135,10 @@ func Load() (*Config, error) {
 			JWTSecret:     getEnv("JWT_SECRET", "your-secret-key-change-in-production"),
 			TokenExpiry:   24 * time.Hour,
 			RefreshExpiry: 7 * 24 * time.Hour,
+		},
+		Blockchain: BlockchainConfig{
+			NodeURL: getEnv("BLOCKCHAIN_NODE_URL", "localhost:9090"),
+			ChainID: getEnv("BLOCKCHAIN_CHAIN_ID", "nuahchain"),
 		},
 	}
 
@@ -159,6 +173,10 @@ func (c *Config) Validate() error {
 
 	if err := c.Logger.Validate(); err != nil {
 		return fmt.Errorf("logger config validation failed: %w", err)
+	}
+
+	if err := c.Blockchain.Validate(); err != nil {
+		return fmt.Errorf("blockchain config validation failed: %w", err)
 	}
 
 	return nil
@@ -236,6 +254,19 @@ func getEnvBool(key string, defaultValue bool) bool {
 		return value == "true" || value == "1" || value == "yes"
 	}
 	return defaultValue
+}
+
+// Validate validates blockchain configuration
+func (b *BlockchainConfig) Validate() error {
+	if b.NodeURL == "" {
+		return fmt.Errorf("blockchain node URL is required")
+	}
+
+	if b.ChainID == "" {
+		return fmt.Errorf("blockchain chain ID is required")
+	}
+
+	return nil
 }
 
 // Validate validates logger configuration

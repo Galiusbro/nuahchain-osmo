@@ -407,7 +407,7 @@ func TestDetailedDataOutput(t *testing.T) {
 				}
 			}
 
-			t.Logf("\n" + strings.Repeat("=", 60))
+            t.Logf("\n%s", strings.Repeat("=", 60))
 
 			// Add delay between requests
 			time.Sleep(client.GetRateLimit())

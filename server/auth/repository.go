@@ -178,6 +178,25 @@ func (r *Repository) GetWalletByID(id int64) (*Wallet, error) {
 	return wallet, nil
 }
 
+// GetWalletByAddress gets a wallet by address
+func (r *Repository) GetWalletByAddress(address string) (*Wallet, error) {
+	wallet := &Wallet{}
+	err := r.db.QueryRow(`
+		SELECT id, user_id, address, encrypted_private_key, mnemonic_encrypted, created_at, updated_at
+		FROM wallets WHERE address = $1
+	`, address).Scan(
+		&wallet.ID, &wallet.UserID, &wallet.Address, &wallet.EncryptedPrivateKey,
+		&wallet.MnemonicEncrypted, &wallet.CreatedAt, &wallet.UpdatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("wallet not found")
+		}
+		return nil, err
+	}
+	return wallet, nil
+}
+
 // CreateSession creates a new session
 func (r *Repository) CreateSession(userID int64, token, refreshToken string, expiresAt, refreshExpiresAt time.Time, ipAddress, userAgent *string) (*Session, error) {
 	var sessionID int64

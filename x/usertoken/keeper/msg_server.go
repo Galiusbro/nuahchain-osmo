@@ -10,6 +10,7 @@ import (
 	"github.com/osmosis-labs/osmosis/osmomath"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	"github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
 )
@@ -64,6 +65,24 @@ func (s msgServer) CreateToken(goCtx context.Context, msg *types.MsgCreateToken)
 	if err != nil {
 		return nil, types.ErrTokenFactory.Wrap(err.Error())
 	}
+
+	// Set denom metadata to include human-readable unit with 6 decimals for better UX
+	// Base is the factory denom (exponent 0), display uses the token symbol (lowercased) with exponent 6
+	displayUnit := strings.ToLower(strings.TrimSpace(msg.Symbol))
+	if displayUnit == "" {
+		displayUnit = denom
+	}
+	metadata := banktypes.Metadata{
+		DenomUnits: []*banktypes.DenomUnit{
+			{Denom: denom, Exponent: 0},
+			{Denom: displayUnit, Exponent: 6},
+		},
+		Base:    denom,
+		Display: displayUnit,
+		Name:    strings.TrimSpace(msg.Name),
+		Symbol:  strings.ToUpper(strings.TrimSpace(msg.Symbol)),
+	}
+	s.bankKeeper.SetDenomMetaData(ctx, metadata)
 
 	if err := s.chargeCreationFee(ctx, creatorAddr, params.TokenCreationFee); err != nil {
 		return nil, err

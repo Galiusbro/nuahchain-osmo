@@ -45,7 +45,12 @@ func (s msgServer) BuyFromCurve(goCtx context.Context, msg *types.MsgBuyFromCurv
 
 	params := s.GetParams(ctx)
 
-	if msg.PaymentDenom != params.QuoteDenom && msg.PaymentDenom != sdk.DefaultBondDenom {
+	// Allow undollar (quote denom), unuah (default bond denom), or any denom that matches default bond denom
+	isValidDenom := msg.PaymentDenom == params.QuoteDenom ||
+		msg.PaymentDenom == sdk.DefaultBondDenom ||
+		msg.PaymentDenom == "unuah" ||
+		msg.PaymentDenom == "undollar"
+	if !isValidDenom {
 		return nil, types.ErrInvalidPaymentDenom
 	}
 
@@ -72,7 +77,7 @@ func (s msgServer) BuyFromCurve(goCtx context.Context, msg *types.MsgBuyFromCurv
 		return nil, types.ErrInvalidAmount
 	}
 
-	err = s.bankKeeper.SendCoinsFromAccountToModule(sdk.WrapSDKContext(ctx), trader, types.ModuleName, sdk.NewCoins(paymentCoin))
+	err = s.bankKeeper.SendCoinsFromAccountToModule(ctx, trader, types.ModuleName, sdk.NewCoins(paymentCoin))
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +177,12 @@ func (s msgServer) SellToCurve(goCtx context.Context, msg *types.MsgSellToCurve)
 
 	params := s.GetParams(ctx)
 
-	if msg.PaymentDenom != params.QuoteDenom && msg.PaymentDenom != sdk.DefaultBondDenom {
+	// Allow undollar (quote denom), unuah (default bond denom), or any denom that matches default bond denom
+	isValidDenom := msg.PaymentDenom == params.QuoteDenom ||
+		msg.PaymentDenom == sdk.DefaultBondDenom ||
+		msg.PaymentDenom == "unuah" ||
+		msg.PaymentDenom == "undollar"
+	if !isValidDenom {
 		return nil, types.ErrInvalidPaymentDenom
 	}
 
@@ -240,15 +250,13 @@ func (s msgServer) SellToCurve(goCtx context.Context, msg *types.MsgSellToCurve)
 		}
 	}
 
-	// ensure reserves sufficient
-	if msg.PaymentDenom == params.QuoteDenom {
-		if pool.ReserveNdollarDec().LT(totalPayment) {
-			return nil, types.ErrInsufficientLiquidity
-		}
-	} else {
-		if pool.ReserveNuahDec().LT(totalPayment) {
-			return nil, types.ErrInsufficientLiquidity
-		}
+	// ensure module has sufficient balance to pay out (check actual balance, not pool reserves)
+	// Use netPayment (after fees) since that's what we actually pay out
+	moduleAddr := s.GetModuleAddress()
+	moduleBalance := s.bankKeeper.GetBalance(ctx, moduleAddr, msg.PaymentDenom)
+	moduleBalanceDec := types.CoinToDec(moduleBalance)
+	if moduleBalanceDec.LT(netPayment) {
+		return nil, types.ErrInsufficientLiquidity
 	}
 
 	// transfer tokens from trader back to module wallet
@@ -258,7 +266,7 @@ func (s msgServer) SellToCurve(goCtx context.Context, msg *types.MsgSellToCurve)
 	}
 
 	// pay out quote
-	err = s.bankKeeper.SendCoinsFromModuleToAccount(sdk.WrapSDKContext(ctx), types.ModuleName, trader, sdk.NewCoins(paymentCoin))
+	err = s.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, trader, sdk.NewCoins(paymentCoin))
 	if err != nil {
 		return nil, err
 	}
@@ -417,7 +425,7 @@ func (s msgServer) OpenMarginPosition(goCtx context.Context, msg *types.MsgOpenM
 		return nil, types.ErrInvalidAmount
 	}
 
-	if err := s.bankKeeper.SendCoinsFromAccountToModule(sdk.WrapSDKContext(ctx), trader, types.ModuleName, sdk.NewCoins(collateralCoin)); err != nil {
+	if err := s.bankKeeper.SendCoinsFromAccountToModule(ctx, trader, types.ModuleName, sdk.NewCoins(collateralCoin)); err != nil {
 		return nil, err
 	}
 
@@ -629,7 +637,7 @@ func (s msgServer) CloseMarginPosition(goCtx context.Context, msg *types.MsgClos
 	s.setMarginPosition(ctx, position)
 
 	if payoutCoin.Amount.IsPositive() {
-		if err := s.bankKeeper.SendCoinsFromModuleToAccount(sdk.WrapSDKContext(ctx), types.ModuleName, trader, sdk.NewCoins(payoutCoin)); err != nil {
+		if err := s.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, trader, sdk.NewCoins(payoutCoin)); err != nil {
 			return nil, err
 		}
 	}
@@ -1012,7 +1020,7 @@ func (s msgServer) collectProtocolFee(ctx sdk.Context, denom string, total osmom
 	}
 
 	feeCoin := sdk.NewCoin(denom, feeInt)
-	if err := s.bankKeeper.SendCoinsFromModuleToModule(sdk.WrapSDKContext(ctx), types.ModuleName, distrtypes.ModuleName, sdk.NewCoins(feeCoin)); err != nil {
+	if err := s.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, distrtypes.ModuleName, sdk.NewCoins(feeCoin)); err != nil {
 		return osmomath.Dec{}, sdkmath.Int{}, err
 	}
 
@@ -1034,7 +1042,7 @@ func (s msgServer) distributeTokens(ctx sdk.Context, trader sdk.AccAddress, coin
 		return s.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, trader, sdk.NewCoins(coin))
 	}
 
-	return s.bankKeeper.SendCoins(sdk.WrapSDKContext(ctx), wallet, trader, sdk.NewCoins(coin))
+	return s.bankKeeper.SendCoins(ctx, wallet, trader, sdk.NewCoins(coin))
 }
 
 func (s msgServer) receiveTokens(ctx sdk.Context, trader sdk.AccAddress, coin sdk.Coin) error {
@@ -1047,7 +1055,7 @@ func (s msgServer) receiveTokens(ctx sdk.Context, trader sdk.AccAddress, coin sd
 		return s.bankKeeper.SendCoinsFromAccountToModule(ctx, trader, types.ModuleName, sdk.NewCoins(coin))
 	}
 
-	return s.bankKeeper.SendCoins(sdk.WrapSDKContext(ctx), trader, wallet, sdk.NewCoins(coin))
+	return s.bankKeeper.SendCoins(ctx, trader, wallet, sdk.NewCoins(coin))
 }
 
 // getDexPoolPrice retrieves the current price from the DEX pool

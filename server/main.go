@@ -8,14 +8,22 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/osmosis-labs/osmosis/v30/server/api"
+	"github.com/osmosis-labs/osmosis/v30/server/assets"
 	"github.com/osmosis-labs/osmosis/v30/server/auth"
+	"github.com/osmosis-labs/osmosis/v30/server/blockchain"
 	"github.com/osmosis-labs/osmosis/v30/server/config"
 	"github.com/osmosis-labs/osmosis/v30/server/database"
 	"github.com/osmosis-labs/osmosis/v30/server/logger"
+	"github.com/osmosis-labs/osmosis/v30/server/transactions"
+	"github.com/osmosis-labs/osmosis/v30/server/usertokens"
 )
 
 func main() {
+	// Load .env file (ignore error if file doesn't exist)
+	_ = godotenv.Load()
+
 	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
@@ -70,6 +78,30 @@ func main() {
 		cfg.Auth.RefreshExpiry,
 	)
 	api.SetAuthService(authService)
+
+	// Initialize transactions repository (для записи всех операций в БД)
+	transactionsRepo := transactions.NewRepository(db.DB)
+	appLogger.Info("Transactions repository initialized")
+
+	// Initialize blockchain client
+	blockchainCli, err := blockchain.NewClient(cfg.Blockchain.NodeURL, cfg.Blockchain.ChainID)
+	if err != nil {
+		appLogger.WithError(err).Fatal("Failed to initialize blockchain client")
+	}
+	defer blockchainCli.Close()
+	appLogger.Info("Blockchain client connected successfully")
+
+	// Initialize user token service
+	userTokenService := usertokens.NewService(authRepo, blockchainCli, transactionsRepo)
+	usertokens.SetService(userTokenService)
+	usertokens.SetAuthService(authService)
+	appLogger.Info("User token service initialized")
+
+	// Initialize asset service
+	assetService := assets.NewService(authRepo, blockchainCli, transactionsRepo)
+	assets.SetService(assetService)
+	assets.SetAuthService(authService)
+	appLogger.Info("Asset service initialized")
 
 	// Create HTTP router and set database health checker
 	router := api.NewRouter(appLogger)

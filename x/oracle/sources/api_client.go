@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -69,6 +70,33 @@ type PriceData struct {
 
 // GetPriceFromYahooFinance fetches price data from Yahoo Finance API
 func (c *APIClient) GetPriceFromYahooFinance(symbol string) (*PriceData, error) {
+	priceData, err := c.fetchPriceFromYahoo(symbol)
+	if err == nil {
+		return priceData, nil
+	}
+
+	// Attempt automatic resolution via Yahoo search for common 404/no data errors.
+	if fallbackSymbol, ok := c.shouldAttemptFallback(symbol, err); ok {
+		resolvedPrice, fallbackErr := c.fetchPriceFromYahoo(fallbackSymbol)
+		if fallbackErr == nil {
+			// Preserve original symbol for downstream consumers but annotate source.
+			resolvedPrice.Symbol = symbol
+			resolvedPrice.Source = fmt.Sprintf("Yahoo Finance (%s)", fallbackSymbol)
+			return resolvedPrice, nil
+		}
+
+		// Provide combined context when fallback fetch fails.
+		return nil, fmt.Errorf(
+			"failed to fetch price for %s (resolved to %s): %w (original error: %v)",
+			symbol, fallbackSymbol, fallbackErr, err,
+		)
+	}
+
+	return nil, err
+}
+
+// fetchPriceFromYahoo performs a single Yahoo Finance v8 price request.
+func (c *APIClient) fetchPriceFromYahoo(symbol string) (*PriceData, error) {
 	url := fmt.Sprintf("https://query1.finance.yahoo.com/v8/finance/chart/%s", symbol)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -85,7 +113,7 @@ func (c *APIClient) GetPriceFromYahooFinance(symbol string) (*PriceData, error) 
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("HTTP error: %d", resp.StatusCode)
 	}
 
@@ -123,6 +151,51 @@ func (c *APIClient) GetPriceFromYahooFinance(symbol string) (*PriceData, error) 
 	}
 
 	return priceData, nil
+}
+
+// shouldAttemptFallback decides whether we should try resolving the symbol via search.
+// It returns the resolved symbol (if found) and a boolean indicating if fallback should proceed.
+func (c *APIClient) shouldAttemptFallback(originalSymbol string, fetchErr error) (string, bool) {
+	if fetchErr == nil {
+		return "", false
+	}
+
+	errMsg := fetchErr.Error()
+	// Only attempt fallback for 4xx / no data scenarios.
+	if !(containsOneOf(errMsg, "HTTP error: 404", "HTTP error: 400", "no data found")) {
+		return "", false
+	}
+
+	results, err := c.SearchSymbols(originalSymbol)
+	if err != nil || len(results) == 0 {
+		return "", false
+	}
+
+	for _, result := range results {
+		rawSymbol, ok := result["symbol"].(string)
+		if !ok {
+			continue
+		}
+		candidate := strings.TrimSpace(rawSymbol)
+		if candidate == "" {
+			continue
+		}
+		if !strings.EqualFold(candidate, originalSymbol) {
+			return candidate, true
+		}
+	}
+
+	return "", false
+}
+
+// containsOneOf checks if the given string contains any of the provided substrings.
+func containsOneOf(s string, candidates ...string) bool {
+	for _, candidate := range candidates {
+		if strings.Contains(s, candidate) {
+			return true
+		}
+	}
+	return false
 }
 
 // GetHistoricalData fetches historical price data
