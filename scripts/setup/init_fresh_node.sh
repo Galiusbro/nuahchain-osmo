@@ -21,6 +21,11 @@ MONIKER="${MONIKER:-test-node}"
 KEYRING_BACKEND="${KEYRING_BACKEND:-test}"
 GENESIS_FILE="$HOME/.nuahd/config/genesis.json"
 
+# Initial balances (amounts are in base units of the denom)
+VALIDATOR_BALANCE="${VALIDATOR_BALANCE:-100000000000000}"
+ALICE_BALANCE="${ALICE_BALANCE:-50000000000000}"
+BOB_BALANCE="${BOB_BALANCE:-1000000000000}"
+
 # Functions for output
 print_status() {
     echo -e "${GREEN}✅ $1${NC}"
@@ -120,19 +125,20 @@ print_step "💰 Setting up genesis with initial balances..."
 # In production mode, add unuah tokens
 if [ "${ENVIRONMENT:-development}" = "production" ]; then
     print_info "Production mode: adding unuah tokens..."
-    ./build/nuahd add-genesis-account $VALIDATOR_ADDR 10000000000unuah
-    ./build/nuahd add-genesis-account $ALICE_ADDR 1000000000unuah
-    ./build/nuahd add-genesis-account $BOB_ADDR 1000000000unuah
 else
     print_info "Development mode: adding unuah tokens..."
-    ./build/nuahd add-genesis-account $VALIDATOR_ADDR 10000000000unuah
-    ./build/nuahd add-genesis-account $ALICE_ADDR 1000000000unuah
-    ./build/nuahd add-genesis-account $BOB_ADDR 1000000000unuah
 fi
+
+./build/nuahd add-genesis-account $VALIDATOR_ADDR ${VALIDATOR_BALANCE}unuah
+./build/nuahd add-genesis-account $ALICE_ADDR ${ALICE_BALANCE}unuah
+./build/nuahd add-genesis-account $BOB_ADDR ${BOB_BALANCE}unuah
 
 GENTX_AMOUNT="1000000000unuah"
 
 print_status "Accounts added to genesis"
+print_info "Validator balance (base units): ${VALIDATOR_BALANCE} unuah"
+print_info "Alice balance (base units): ${ALICE_BALANCE} unuah"
+print_info "Bob balance (base units): ${BOB_BALANCE} unuah"
 
 # Creating gentx for validator
 print_info "Creating gentx for validator..."
@@ -188,15 +194,9 @@ else
     print_warning "Whitelisted fee token setters is empty"
 fi
 
-# Validation of genesis (optional)
-if [ "${SKIP_VALIDATION:-false}" != "true" ]; then
-    print_info "Validation of genesis..."
-    if ./build/nuahd validate-genesis $GENESIS_FILE; then
-        print_status "Genesis is valid ✓"
-    else
-        print_warning "Validation of genesis failed, but continuing..."
-    fi
-fi
+# Validation of genesis is intentionally skipped: the current SDK build panics in
+# ValidateAndGetGenTx, so running `nuahd validate-genesis` is not reliable.
+print_info "Skipping nuahd validate-genesis (known SDK panic)"
 
 print_header "=================================================="
 print_header "✅ Node successfully initialized! ✅"

@@ -32,6 +32,7 @@ BASE_DENOM="unuah"
 GENESIS_MODE="${GENESIS_MODE:-false}"  # Set to true to modify genesis instead of runtime
 TEST_MODE="${TEST_MODE:-false}"       # Set to true for dry run
 KEYRING_BACKEND="${KEYRING_BACKEND:-test}"  # Keyring backend для команд
+AUTO_CONFIRM="${AUTO_CONFIRM:-false}"  # Skip interactive confirmations
 
 # Logging functions
 print_status() {
@@ -162,50 +163,56 @@ add_ndollar_to_genesis() {
 
     # Add ndollar token metadata to genesis
     print_info "Adding N$ token metadata to genesis..."
-    local metadata='{
-        "description": "'$NDOLLAR_DESCRIPTION'",
-        "denom_units": [
-            {
-                "denom": "'$NDOLLAR_DENOM'",
-                "exponent": 0,
-                "aliases": ["microndollar", "undollar"]
-            },
-            {
-                "denom": "mndollar",
-                "exponent": 3,
-                "aliases": ["millindollar"]
-            },
-            {
-                "denom": "ndollar",
-                "exponent": 6,
-                "aliases": ["NDOLLAR", "'$NDOLLAR_NAME'"]
-            }
-        ],
-        "base": "'$NDOLLAR_DENOM'",
-        "display": "ndollar",
-        "name": "'$NDOLLAR_NAME'",
-        "symbol": "NDOLLAR"
-    }'
+    local metadata=$(jq -n \
+        --arg description "$NDOLLAR_DESCRIPTION" \
+        --arg denom "$NDOLLAR_DENOM" \
+        --arg name "$NDOLLAR_NAME" '{
+            description: $description,
+            denom_units: [
+                { denom: $denom, exponent: 0, aliases: ["microndollar", "undollar"] },
+                { denom: "mndollar", exponent: 3, aliases: ["millindollar"] },
+                { denom: "ndollar", exponent: 6, aliases: ["NDOLLAR", $name] }
+            ],
+            base: $denom,
+            display: "ndollar",
+            name: $name,
+            symbol: "NDOLLAR"
+        }')
 
-    # Add metadata to genesis
-    jq --argjson metadata "$metadata" '.app_state.bank.denom_metadata += [$metadata]' $GENESIS_FILE > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json $GENESIS_FILE
+    jq --argjson metadata "$metadata" --arg denom "$NDOLLAR_DENOM" '
+        .app_state.bank.denom_metadata = (
+            (.app_state.bank.denom_metadata // [])
+            | map(select((.base // "") != $denom))
+            + [$metadata]
+        )
+    ' "$GENESIS_FILE" > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json "$GENESIS_FILE"
 
     # Add initial ndollar supply to validator account
     print_info "Adding initial N$ supply to validator account..."
     jq --arg validator "$VALIDATOR_ADDR" --arg denom "$NDOLLAR_DENOM" --arg amount "$INITIAL_SUPPLY" '
-        .app_state.bank.balances |= map(
-            if .address == $validator then
-                .coins += [{"denom": $denom, "amount": $amount}]
+        .app_state.bank.balances = (
+            if (.app_state.bank.balances // []) | map(.address) | index($validator) then
+                (.app_state.bank.balances // []) | map(
+                    if .address == $validator then
+                        .coins = ((.coins // [])
+                            | map(select(.denom != $denom))
+                            + [{"denom": $denom, "amount": $amount}])
+                    else . end
+                )
             else
-                .
+                (.app_state.bank.balances // []) + [{"address": $validator, "coins": [{"denom": $denom, "amount": $amount}]}]
             end
         )
-    ' $GENESIS_FILE > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json $GENESIS_FILE
+    ' "$GENESIS_FILE" > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json "$GENESIS_FILE"
 
     # Update total supply
     jq --arg denom "$NDOLLAR_DENOM" --arg amount "$INITIAL_SUPPLY" '
-        .app_state.bank.supply += [{"denom": $denom, "amount": $amount}]
-    ' $GENESIS_FILE > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json $GENESIS_FILE
+        .app_state.bank.supply = (
+            (.app_state.bank.supply // [])
+            | map(select(.denom != $denom))
+            + [{"denom": $denom, "amount": $amount}]
+        )
+    ' "$GENESIS_FILE" > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json "$GENESIS_FILE"
 
     # Add unuah tokens to supply if they exist in balances but not in supply
     print_info "Checking and adding unuah tokens to supply..."
@@ -225,10 +232,12 @@ add_ndollar_to_genesis() {
     # Add ndollar to fee tokens in genesis
     print_info "Adding N$ to fee tokens in genesis..."
     jq --arg denom "$NDOLLAR_DENOM" '
-        .app_state.txfees.feetokens += [{
-            "denom": $denom
-        }]
-    ' $GENESIS_FILE > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json $GENESIS_FILE
+        .app_state.txfees.feetokens = (
+            (.app_state.txfees.feetokens // [])
+            | map(select(.denom != $denom))
+            + [{"denom": $denom}]
+        )
+    ' "$GENESIS_FILE" > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json "$GENESIS_FILE"
 
     print_status "N$ token added to genesis successfully"
 }
@@ -263,6 +272,14 @@ create_ndollar_token() {
 
     print_step "Creating N$ (Ndollar) token..."
 
+    # Detect existing denomination
+    local existing_denoms=$(./build/nuahd query tokenfactory denoms-from-creator $VALIDATOR_ADDR --output json 2>/dev/null | jq -r '.denoms[]?')
+    NDOLLAR_DENOM="factory/$VALIDATOR_ADDR/$NDOLLAR_SUBDENOM"
+    if echo "$existing_denoms" | grep -q "$NDOLLAR_DENOM"; then
+        print_warning "N$ denomination already exists. Skipping creation."
+        return 0
+    fi
+
     # Create the token denomination
     execute_cmd "./build/nuahd tx tokenfactory create-denom $NDOLLAR_SUBDENOM \
         --from validator \
@@ -275,13 +292,11 @@ create_ndollar_token() {
     # Wait for transaction to be processed
     sleep 3
 
-    # Get the full denomination
-    NDOLLAR_DENOM="factory/$VALIDATOR_ADDR/$NDOLLAR_SUBDENOM"
     print_status "N$ token created with denomination: $NDOLLAR_DENOM"
-    
+
     # Set token metadata
     set_ndollar_metadata
-    
+
     # Mint initial supply
     mint_initial_supply
 }
@@ -331,6 +346,12 @@ set_ndollar_metadata() {
 mint_initial_supply() {
     print_step "Minting initial N$ supply..."
 
+    local current_balance=$(./build/nuahd query bank balance $VALIDATOR_ADDR $NDOLLAR_DENOM --output json 2>/dev/null | jq -r '.amount // "0"')
+    if [[ "$current_balance" != "0" ]]; then
+        print_info "Validator already holds $current_balance micro N$. Skipping mint."
+        return 0
+    fi
+
     execute_cmd "./build/nuahd tx tokenfactory mint $INITIAL_SUPPLY$NDOLLAR_DENOM $VALIDATOR_ADDR \
         --from validator \
         --chain-id $CHAIN_ID \
@@ -352,29 +373,37 @@ create_nuah_ndollar_pool() {
 
     print_step "Creating NUAH/N$ liquidity pool..."
 
+    # Skip if pool already exists
+    local existing_pool=$(./build/nuahd query poolmanager all-pools --output json 2>/dev/null | jq -r '.pools[]? | select(.pool_assets[]?.token.denom == "'$NDOLLAR_DENOM'") | select(.pool_assets[]?.token.denom == "unuah") | .id' | head -1)
+    if [[ -n "$existing_pool" && "$existing_pool" != "null" ]]; then
+        print_info "NUAH/N$ pool already exists (ID: $existing_pool). Skipping creation."
+        echo "$existing_pool" > ./pool_id.txt
+        return 0
+    fi
+
     # Check available balances first
     print_info "Checking available token balances..."
     local nuah_balance=$(./build/nuahd query bank balance $VALIDATOR_ADDR unuah --output json | jq -r '.amount // "0"')
     local ndollar_balance=$(./build/nuahd query bank balance $VALIDATOR_ADDR $NDOLLAR_DENOM --output json | jq -r '.amount // "0"')
-    
+
     print_info "Available NUAH balance: $nuah_balance unuah"
     print_info "Available N$ balance: $ndollar_balance $NDOLLAR_DENOM"
 
     # Calculate safe amounts (use 80% of available balance to leave room for fees)
     local safe_nuah=$((nuah_balance * 80 / 100))
     local safe_ndollar=$((ndollar_balance * 80 / 100))
-    
+
     # Use minimum of the two amounts to maintain 1:1 ratio
     local pool_amount=$safe_nuah
     if [[ $safe_ndollar -lt $safe_nuah ]]; then
         pool_amount=$safe_ndollar
     fi
-    
+
     # Ensure minimum pool amount (at least 1000 tokens)
     if [[ $pool_amount -lt 1000000000 ]]; then
         pool_amount=1000000000  # 1000 tokens in micro units
     fi
-    
+
     print_info "Using $pool_amount micro tokens for each asset in the pool"
 
     local swap_fee="0.003000000000000000"  # 0.3% swap fee
@@ -403,55 +432,31 @@ EOF
 
     # Clean up pool file
     rm -f "$pool_file"
-    
+
     # Wait for transaction to be processed
     sleep 5
-    
+
     # Get the pool ID for later use in fee abstraction
     print_info "Retrieving created pool ID..."
     local pool_id=$(./build/nuahd query poolmanager all-pools --output json | jq -r '.pools[0].id // "1"')
     print_status "Created liquidity pool with ID: $pool_id"
-    
+
     # Store pool ID for fee abstraction configuration
     echo "$pool_id" > ./pool_id.txt
-    
+
     return 0
 }
 
 # Add validator to whitelisted fee token setters
 add_validator_to_whitelist() {
     print_step "Adding validator to whitelisted fee token setters..."
+    local params=$(./build/nuahd query txfees params --output json 2>/dev/null || echo '{}')
+    if echo "$params" | jq -e --arg addr "$VALIDATOR_ADDR" '.whitelisted_fee_token_setters[]? | select(. == $addr)' > /dev/null 2>&1; then
+        print_status "Validator is already whitelisted for fee token configuration"
+        return 0
+    fi
 
-    # First, check current params
-    print_info "Checking current txfees parameters..."
-    execute_cmd "./build/nuahd query txfees params" "Query current txfees params" true
-
-    # Create a governance proposal to add validator to whitelist
-    # For testing purposes, we'll use a direct parameter update
-    local proposal_file="/tmp/whitelist_proposal.json"
-    cat > "$proposal_file" << EOF
-{
-    "title": "Add Validator to Fee Token Setters Whitelist",
-    "description": "This proposal adds the validator address to the whitelisted fee token setters list, allowing it to configure fee tokens for the N$ stablecoin.",
-    "changes": [
-        {
-            "subspace": "txfees",
-            "key": "WhitelistedFeeTokenSetters",
-            "value": ["$VALIDATOR_ADDR"]
-        }
-    ],
-    "deposit": "10000000unuah"
-}
-EOF
-
-    print_warning "In production, this would require a governance proposal."
-    print_info "For testing, we need to manually configure the genesis or use governance."
-    print_info "Proposal file created at: $proposal_file"
-    
-    # Clean up temporary file
-    rm -f "$proposal_file"
-    
-    print_status "Validator whitelist configuration prepared"
+    print_warning "Validator is not whitelisted. Please submit governance proposal if needed."
 }
 
 # Configure N$ for fee abstraction
@@ -463,6 +468,13 @@ configure_fee_abstraction() {
 
     print_step "Configuring N$ for fee abstraction..."
 
+    # Skip if already configured
+    local fee_tokens_result=$(./build/nuahd query txfees fee-tokens --output json 2>/dev/null)
+    if echo "$fee_tokens_result" | jq -e --arg denom "$NDOLLAR_DENOM" '.fee_tokens[]? | select(.denom == $denom)' > /dev/null 2>&1; then
+        print_info "N$ already present in fee token whitelist. Skipping configuration."
+        return 0
+    fi
+
     # First, try to get pool ID from saved file
     local POOL_ID=""
     if [[ -f "./pool_id.txt" ]]; then
@@ -472,14 +484,14 @@ configure_fee_abstraction() {
         # Fallback: query for the pool ID
         print_info "Finding pool ID for NUAH/N$ pair..."
         POOL_ID=$(./build/nuahd query poolmanager all-pools --output json 2>/dev/null | jq -r '.pools[] | select(.pool_assets[0].token.denom == "unuah" or .pool_assets[1].token.denom == "unuah") | select(.pool_assets[0].token.denom == "'$NDOLLAR_DENOM'" or .pool_assets[1].token.denom == "'$NDOLLAR_DENOM'") | .id' | head -1)
-        
+
         if [ -z "$POOL_ID" ] || [ "$POOL_ID" = "null" ]; then
             print_error "Could not find pool ID for NUAH/N$ pair"
             print_info "Please ensure the liquidity pool was created successfully"
             return 1
         fi
     fi
-    
+
     print_status "Using pool ID: $POOL_ID for fee abstraction"
 
     # Try to add N$ to fee token whitelist using set-fee-tokens command
@@ -493,12 +505,11 @@ configure_fee_abstraction() {
         -y" "Add N$ to fee token whitelist"
 
     sleep 3
-    
+
     # Check if the command was successful by querying fee tokens
     print_info "Verifying fee token configuration..."
-    local fee_tokens_result=$(./build/nuahd query txfees fee-tokens --output json 2>/dev/null)
-    
-    if echo "$fee_tokens_result" | jq -e --arg denom "$NDOLLAR_DENOM" '.fee_tokens[] | select(.denom == $denom)' > /dev/null; then
+    fee_tokens_result=$(./build/nuahd query txfees fee-tokens --output json 2>/dev/null)
+    if echo "$fee_tokens_result" | jq -e --arg denom "$NDOLLAR_DENOM" '.fee_tokens[]? | select(.denom == $denom)' > /dev/null 2>&1; then
         print_status "N$ successfully configured for fee abstraction"
     else
         print_warning "N$ fee token configuration may have failed"
@@ -605,7 +616,7 @@ main() {
     fi
     echo ""
 
-    if [[ "$TEST_MODE" != "true" ]]; then
+    if [[ "$TEST_MODE" != "true" && "$AUTO_CONFIRM" != "true" ]]; then
         read -p "Do you want to continue? (y/N): " -n 1 -r
         echo ""
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
