@@ -40,22 +40,26 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	assetstypes "github.com/osmosis-labs/osmosis/v30/x/assets/types"
 	bondingcurvetypes "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types"
+	leveragetypes "github.com/osmosis-labs/osmosis/v30/x/leverage/types"
+	stablecointypes "github.com/osmosis-labs/osmosis/v30/x/stablecoin/types"
 	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
 )
 
 // Client is a blockchain client for interacting with Cosmos SDK
 type Client struct {
-	nodeURL       string
-	conn          *grpc.ClientConn
-	msgClient     usertokentypes.MsgClient
-	bondingClient bondingcurvetypes.MsgClient
-	assetsClient  assetstypes.MsgClient
-	txClient      txservice.ServiceClient
-	authClient    authtypes.QueryClient
-	bankClient    banktypes.QueryClient
-	chainID       string
-	encCfg        EncodingConfig
-	keyring       keyring.Keyring
+	nodeURL        string
+	conn           *grpc.ClientConn
+	msgClient      usertokentypes.MsgClient
+	bondingClient  bondingcurvetypes.MsgClient
+	assetsClient   assetstypes.MsgClient
+	leverageClient   leveragetypes.MsgClient
+	stablecoinClient stablecointypes.MsgClient
+	txClient       txservice.ServiceClient
+	authClient     authtypes.QueryClient
+	bankClient     banktypes.QueryClient
+	chainID        string
+	encCfg         EncodingConfig
+	keyring        keyring.Keyring
 }
 
 // EncodingConfig wraps the encoding configuration
@@ -84,6 +88,8 @@ func NewClient(nodeURL, chainID string) (*Client, error) {
 	msgClient := usertokentypes.NewMsgClient(conn)
 	bondingClient := bondingcurvetypes.NewMsgClient(conn)
 	assetsClient := assetstypes.NewMsgClient(conn)
+	leverageClient := leveragetypes.NewMsgClient(conn)
+	stablecoinClient := stablecointypes.NewMsgClient(conn)
 	txClient := txservice.NewServiceClient(conn)
 	authClient := authtypes.NewQueryClient(conn)
 	bankClient := banktypes.NewQueryClient(conn)
@@ -99,17 +105,19 @@ func NewClient(nodeURL, chainID string) (*Client, error) {
 	kb := keyring.NewInMemory(encCfg.Codec)
 
 	return &Client{
-		nodeURL:       nodeURL,
-		conn:          conn,
-		msgClient:     msgClient,
-		bondingClient: bondingClient,
-		assetsClient:  assetsClient,
-		txClient:      txClient,
-		authClient:    authClient,
-		bankClient:    bankClient,
-		chainID:       chainID,
-		encCfg:        encCfg,
-		keyring:       kb,
+		nodeURL:          nodeURL,
+		conn:             conn,
+		msgClient:        msgClient,
+		bondingClient:    bondingClient,
+		assetsClient:     assetsClient,
+		leverageClient:   leverageClient,
+		stablecoinClient: stablecoinClient,
+		txClient:         txClient,
+		authClient:       authClient,
+		bankClient:       bankClient,
+		chainID:          chainID,
+		encCfg:           encCfg,
+		keyring:          kb,
 	}, nil
 }
 
@@ -139,6 +147,12 @@ func makeEncodingConfig() (EncodingConfig, error) {
 
 	// Register assets interfaces
 	assetstypes.RegisterInterfaces(interfaceRegistry)
+
+	// Register leverage interfaces
+	leveragetypes.RegisterInterfaces(interfaceRegistry)
+
+	// Register stablecoin interfaces
+	stablecointypes.RegisterInterfaces(interfaceRegistry)
 
 	codec := codec.NewProtoCodec(interfaceRegistry)
 	txConfig := authtx.NewTxConfig(codec, authtx.DefaultSignModes)

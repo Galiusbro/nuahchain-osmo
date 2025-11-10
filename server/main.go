@@ -16,13 +16,14 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/server/config"
 	"github.com/osmosis-labs/osmosis/v30/server/database"
 	"github.com/osmosis-labs/osmosis/v30/server/logger"
+	"github.com/osmosis-labs/osmosis/v30/server/stablecoin"
 	"github.com/osmosis-labs/osmosis/v30/server/transactions"
 	"github.com/osmosis-labs/osmosis/v30/server/usertokens"
 )
 
 func main() {
-	// Load .env file (ignore error if file doesn't exist)
-	_ = godotenv.Load()
+	// Load environment variables (support both project root and server directory .env)
+	_ = godotenv.Load(".env", "server/.env")
 
 	// Load configuration
 	cfg, err := config.Load()
@@ -102,6 +103,12 @@ func main() {
 	assets.SetService(assetService)
 	assets.SetAuthService(authService)
 	appLogger.Info("Asset service initialized")
+
+	// Initialize stablecoin service
+	stablecoinService := stablecoin.NewService(authService, blockchainCli)
+	stablecoin.SetService(stablecoinService)
+	stablecoin.SetAuthService(authService)
+	appLogger.Info("Stablecoin service initialized")
 
 	// Create HTTP router and set database health checker
 	router := api.NewRouter(appLogger)

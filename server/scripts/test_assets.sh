@@ -148,6 +148,81 @@ else
 fi
 echo ""
 
+echo "Waiting 3 seconds before margin operations..."
+sleep 3
+echo ""
+
+echo "6. Testing Margin Open (long)..."
+MARGIN_OPEN_RESPONSE=$(curl -s -X POST "$BASE_URL/api/assets/margin/open" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "symbol": "GOLD",
+    "side": "long",
+    "quote_amount": "500",
+    "leverage": "2"
+  }')
+
+echo "Response:"
+echo "$MARGIN_OPEN_RESPONSE" | jq . || echo "$MARGIN_OPEN_RESPONSE"
+echo ""
+
+POSITION_ID=$(echo "$MARGIN_OPEN_RESPONSE" | jq -r '.position_id // empty')
+
+if echo "$MARGIN_OPEN_RESPONSE" | jq -e '.success == true' >/dev/null 2>&1; then
+    echo -e "${GREEN}✓${NC} Margin open successful"
+    if [ -n "$POSITION_ID" ] && [ "$POSITION_ID" != "null" ] && [ "$POSITION_ID" != "" ]; then
+        echo "Position ID: $POSITION_ID"
+    else
+        echo -e "${YELLOW}ℹ${NC} Position ID not available in sync response (will be available after block inclusion)"
+        TX_HASH=$(echo "$MARGIN_OPEN_RESPONSE" | jq -r '.tx_hash // empty')
+        if [ -n "$TX_HASH" ] && [ "$TX_HASH" != "null" ]; then
+            echo "Transaction hash: $TX_HASH"
+            echo "You can query position details later using this tx hash"
+        fi
+    fi
+else
+    echo -e "${RED}✗${NC} Margin open failed"
+    ERROR=$(echo "$MARGIN_OPEN_RESPONSE" | jq -r '.error // empty')
+    if [ -n "$ERROR" ]; then
+        echo "Error: $ERROR"
+    fi
+fi
+echo ""
+
+if [ -n "$POSITION_ID" ] && [ "$POSITION_ID" != "null" ] && [ "$POSITION_ID" != "" ]; then
+    echo "Waiting 2 seconds before closing margin position..."
+    sleep 2
+    echo ""
+
+    echo "7. Testing Margin Close..."
+    MARGIN_CLOSE_RESPONSE=$(curl -s -X POST "$BASE_URL/api/assets/margin/close" \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer $TOKEN" \
+      -d "{\"position_id\": \"$POSITION_ID\"}")
+
+    echo "Response:"
+    echo "$MARGIN_CLOSE_RESPONSE" | jq . || echo "$MARGIN_CLOSE_RESPONSE"
+    echo ""
+
+    if echo "$MARGIN_CLOSE_RESPONSE" | jq -e '.success == true' >/dev/null 2>&1; then
+        echo -e "${GREEN}✓${NC} Margin close successful"
+        PNL=$(echo "$MARGIN_CLOSE_RESPONSE" | jq -r '.pnl // "N/A"')
+        echo "PnL: $PNL"
+    else
+        echo -e "${RED}✗${NC} Margin close failed"
+        ERROR=$(echo "$MARGIN_CLOSE_RESPONSE" | jq -r '.error // empty')
+        if [ -n "$ERROR" ]; then
+            echo "Error: $ERROR"
+        fi
+    fi
+    echo ""
+else
+    echo -e "${YELLOW}!${NC} Could not find position ID, skipping margin close"
+    echo "Note: Position may have been closed already or transaction is still pending"
+    echo ""
+fi
+
 echo "================================"
 echo -e "${GREEN}✅ Assets API testing complete!${NC}"
 

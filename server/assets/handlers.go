@@ -3,6 +3,7 @@ package assets
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/osmosis-labs/osmosis/v30/server/auth"
@@ -213,6 +214,103 @@ func HandleSellAsset(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	json.NewEncoder(w).Encode(apiResp)
+}
+
+// HandleOpenMarginPosition handles POST /api/assets/margin/open
+func HandleOpenMarginPosition(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	user, err := authenticateRequest(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	var req OpenMarginPositionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Symbol == "" || req.Side == "" || req.QuoteAmount == "" || req.Leverage == "" {
+		http.Error(w, "symbol, side, quote_amount and leverage are required", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := assetService.OpenMarginPosition(r.Context(), user.ID, req)
+	if err != nil {
+		apiResp := OpenMarginPositionResponse{Success: false, Error: err.Error()}
+		if resp != nil {
+			apiResp.TxHash = resp.TxHash
+			apiResp.PositionID = resp.PositionID
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(apiResp)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if resp.Success {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	json.NewEncoder(w).Encode(resp)
+}
+
+// HandleCloseMarginPosition handles POST /api/assets/margin/close
+func HandleCloseMarginPosition(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	user, err := authenticateRequest(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	var req CloseMarginPositionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.PositionID == "" {
+		http.Error(w, "position_id is required", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.ParseUint(req.PositionID, 10, 64)
+	if err != nil {
+		http.Error(w, "position_id must be a positive integer", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := assetService.CloseMarginPosition(r.Context(), user.ID, id)
+	if err != nil {
+		apiResp := CloseMarginPositionResponse{Success: false, Error: err.Error()}
+		if resp != nil {
+			apiResp.TxHash = resp.TxHash
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(apiResp)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if resp.Success {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	json.NewEncoder(w).Encode(resp)
 }
 
 // authenticateRequest extracts and validates the user from the Authorization header

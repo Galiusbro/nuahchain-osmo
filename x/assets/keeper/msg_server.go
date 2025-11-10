@@ -85,24 +85,23 @@ func (m msgServer) BuyAsset(goCtx context.Context, msg *types.MsgBuyAsset) (*typ
 		if !ok {
 			return nil, sdkerrors.ErrInvalidRequest.Wrap("amount_ndollar must be an integer")
 		}
-		payment = sdk.NewCoin(types.NDollarDenom, amountND)
+		// Get real NDOLLAR denom from stablecoin keeper
+		ndollarDenom := m.Keeper.GetNDollarDenom(ctx)
+		payment = sdk.NewCoin(ndollarDenom, amountND)
 		amountNDStr = msg.Amount_NDOLLAR
 	} else {
 		return nil, sdkerrors.ErrInvalidRequest.Wrap("either amount_NDOLLAR (deprecated) or denom+amount must be provided")
 	}
 
 	var baseAmountDec osmomath.Dec
-	// Check if payment is NDOLLAR (either "NDOLLAR" or factory/*/ndollar format)
-	isNDollar := payment.Denom == types.NDollarDenom || (strings.HasPrefix(payment.Denom, "factory/") && strings.HasSuffix(payment.Denom, "/ndollar"))
+	// Get real NDOLLAR denom to check if payment is in NDOLLAR
+	realNDollarDenom := m.Keeper.GetNDollarDenom(ctx)
+	// Check if payment is NDOLLAR (real denom, "NDOLLAR" alias, or factory/*/ndollar format)
+	isNDollar := payment.Denom == realNDollarDenom || payment.Denom == types.NDollarDenom || (strings.HasPrefix(payment.Denom, "factory/") && strings.HasSuffix(payment.Denom, "/ndollar"))
 
 	if isNDollar {
-		// Use old method for backward compatibility when denom is exactly "NDOLLAR"
-		if payment.Denom == types.NDollarDenom {
-			_, baseAmountDec, err = m.Keeper.BuyAsset(ctx, buyer, msg.Symbol, payment.Amount)
-		} else {
-			// Use new method for factory/*/ndollar format
-			_, baseAmountDec, err = m.Keeper.BuyAssetWithPayment(ctx, buyer, msg.Symbol, payment)
-		}
+		// Use BuyAssetWithPayment for all NDOLLAR payments
+		_, baseAmountDec, err = m.Keeper.BuyAssetWithPayment(ctx, buyer, msg.Symbol, payment)
 		if err != nil {
 			return nil, sdkerrors.ErrInvalidRequest.Wrap(err.Error())
 		}

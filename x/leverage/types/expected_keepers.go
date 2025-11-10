@@ -17,3 +17,8 @@ type BankKeeper interface {
 type OracleKeeper interface {
 	GetPrice(ctx sdk.Context, symbol string) (*oracletypes.Price, bool)
 }
+
+// StablecoinKeeper defines the expected stablecoin keeper methods.
+type StablecoinKeeper interface {
+	GetNDollarDenom(ctx sdk.Context) string
+}

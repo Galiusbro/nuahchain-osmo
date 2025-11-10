@@ -47,6 +47,40 @@ type SellAssetResponse struct {
 	Error         string `json:"error,omitempty"`
 }
 
+// OpenMarginPositionRequest represents the request to open a leveraged position
+type OpenMarginPositionRequest struct {
+	Symbol      string `json:"symbol"`       // Asset symbol
+	Side        string `json:"side"`         // long / short
+	QuoteAmount string `json:"quote_amount"` // Margin amount in micro NDOLLAR
+	Leverage    string `json:"leverage"`     // Leverage multiplier (decimal string)
+}
+
+// OpenMarginPositionResponse represents the response from opening a leveraged position
+type OpenMarginPositionResponse struct {
+	TxHash       string `json:"tx_hash"`
+	PositionID   string `json:"position_id,omitempty"`
+	BaseQuantity string `json:"base_quantity,omitempty"`
+	EntryPrice   string `json:"entry_price,omitempty"`
+	Leverage     string `json:"leverage,omitempty"`
+	Success      bool   `json:"success"`
+	Message      string `json:"message,omitempty"`
+	Error        string `json:"error,omitempty"`
+}
+
+// CloseMarginPositionRequest represents the request to close a leveraged position
+type CloseMarginPositionRequest struct {
+	PositionID string `json:"position_id"`
+}
+
+// CloseMarginPositionResponse represents the response from closing a leveraged position
+type CloseMarginPositionResponse struct {
+	TxHash  string `json:"tx_hash"`
+	Pnl     string `json:"pnl,omitempty"`
+	Success bool   `json:"success"`
+	Message string `json:"message,omitempty"`
+	Error   string `json:"error,omitempty"`
+}
+
 // AssetInfo represents information about an asset
 type AssetInfo struct {
 	Symbol string `json:"symbol"`

@@ -346,6 +346,7 @@ func (appKeepers *AppKeepers) InitNormalKeepers(
 		appKeepers.keys[leveragetypes.StoreKey],
 		appKeepers.BankKeeper,
 		appKeepers.OracleKeeper,
+		appKeepers.StablecoinKeeper,
 	)
 	appKeepers.LeverageKeeper = &leverageKeeper
 

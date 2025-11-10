@@ -277,6 +277,8 @@ Authorization: Bearer <token>
 
 Asset endpoints integrate with the Cosmos `x/assets` module. All operations fetch live prices from the Yahoo Finance v8 API. Symbols are passed verbatim from the frontend; the server normalises and, when necessary, auto-resolves common aliases via Yahoo symbol search (e.g. `GOLD` → `GC=F`, `BTC` → `BTC-USD`). No manual symbol mapping is required.
 
+In addition to spot trading, the server exposes leverage trading through the `x/leverage` module (margin positions backed by NDOLLAR collateral).
+
 Every asset endpoint requires authentication (`Authorization: Bearer <token>`).
 
 ### POST /api/assets/ensure
@@ -382,6 +384,85 @@ Content-Type: application/json
 **Notes:**
 - Detailed payout can be retrieved through `/api/tx/:hash` (event `assets.asset_sold`).
 - The sale fails if the user lacks balance or if the oracle cannot refresh the price.
+
+---
+
+### POST /api/assets/margin/open
+
+Open a leveraged (margin) position on an asset using NDOLLAR collateral.
+
+**Request:**
+```http
+POST /api/assets/margin/open
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "symbol": "GOLD",
+  "side": "long",
+  "quote_amount": "1000000",
+  "leverage": "2"
+}
+```
+
+**Request Body:**
+- `symbol` (string, required): Asset symbol.
+- `side` (string, required): Either `long` or `short` (case-insensitive).
+- `quote_amount` (string, required): Margin supplied in micro NDOLLAR.
+- `leverage` (string, required): Desired leverage multiplier expressed as a decimal string (e.g., `2`, `3.5`).
+
+**Response (200 OK):**
+```json
+{
+  "tx_hash": "894a0d0e...",
+  "position_id": "7",
+  "base_quantity": "0.15",
+  "entry_price": "2000.50",
+  "leverage": "2",
+  "success": true,
+  "message": "Margin position opening initiated"
+}
+```
+
+**Notes:**
+- The module automatically borrows/repays against NDOLLAR; ensure the wallet holds sufficient NDOLLAR for the quoted margin.
+- Position metadata (ID, base quantity, entry price) is extracted from the synchronous response when available.
+- Transactions are recorded in the `transactions` table under `ASSET_MARGIN_OPEN`.
+
+---
+
+### POST /api/assets/margin/close
+
+Close an existing leveraged position, realising PnL.
+
+**Request:**
+```http
+POST /api/assets/margin/close
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "position_id": "7"
+}
+```
+
+**Request Body:**
+- `position_id` (string, required): ID returned when the position was opened.
+
+**Response (200 OK):**
+```json
+{
+  "tx_hash": "51f7b7c1...",
+  "pnl": "-12500",
+  "success": true,
+  "message": "Margin position closure initiated"
+}
+```
+
+**Notes:**
+- Positive `pnl` indicates profit in micro NDOLLAR, negative indicates loss.
+- The transaction is logged as `ASSET_MARGIN_CLOSE` in the `transactions` table for auditing.
+- If the position is already liquidated or not found, the chain will return an error which is surfaced to the client and persisted with status `FAILED`.
 
 ---
 

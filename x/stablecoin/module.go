@@ -38,7 +38,9 @@ func (AppModuleBasic) Name() string { return types.ModuleName }
 
 func (AppModuleBasic) RegisterLegacyAminoCodec(_ *codec.LegacyAmino) {}
 
-func (AppModuleBasic) RegisterInterfaces(_ cdctypes.InterfaceRegistry) {}
+func (AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
+	types.RegisterInterfaces(reg)
+}
 
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(types.DefaultGenesis())
@@ -79,6 +81,7 @@ func (AppModule) IsAppModule()        {}
 func (AppModule) IsOnePerModuleType() {}
 
 func (am AppModule) RegisterServices(cfg module.Configurator) {
+	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
 	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQueryServer(am.keeper))
 }
 

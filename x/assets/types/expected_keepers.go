@@ -41,4 +41,5 @@ type StablecoinKeeper interface {
 	RecordMint(ctx sdk.Context, amount sdkmath.Int) error
 	RecordBurn(ctx sdk.Context, amount sdkmath.Int) error
 	GetStats(ctx sdk.Context) stablecointypes.Stats
+	GetNDollarDenom(ctx sdk.Context) string
 }

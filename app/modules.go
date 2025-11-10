@@ -189,7 +189,7 @@ var moduleAccountPermissions = map[string][]string{
 	treasurytypes.ModuleName:                 nil,
 	exchangetypes.ModuleName:                 {authtypes.Minter, authtypes.Burner},
 	assetstypes.ModuleName:                   {authtypes.Minter, authtypes.Burner},
-	stablecointypes.ModuleName:               nil,
+	stablecointypes.ModuleName:               {authtypes.Minter, authtypes.Burner},
 	risktypes.ModuleName:                     nil,
 	collateraltypes.ModuleName:               nil,
 	leveragetypes.ModuleName:                 nil,

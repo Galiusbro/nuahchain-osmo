@@ -38,6 +38,11 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey, bankKeeper t
 	}
 }
 
+// GetNDollarDenom returns the actual NDOLLAR denom from stablecoin keeper.
+func (k Keeper) GetNDollarDenom(ctx sdk.Context) string {
+	return k.stableKeeper.GetNDollarDenom(ctx)
+}
+
 // Logger returns a module-scoped logger.
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", "x/"+types.ModuleName)
@@ -160,7 +165,8 @@ func (k Keeper) BuyAsset(ctx sdk.Context, buyer sdk.AccAddress, symbol string, a
 
 	assetDenom := types.AssetDenom(symbol)
 	assetCoin := sdk.NewCoin(assetDenom, assetCoinAmount)
-	fullPayment := sdk.NewCoin(types.NDollarDenom, amountND)
+	ndollarDenom := k.GetNDollarDenom(ctx)
+	fullPayment := sdk.NewCoin(ndollarDenom, amountND)
 
 	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, buyer, types.ModuleName, sdk.NewCoins(fullPayment)); err != nil {
 		return sdk.Coin{}, osmomath.Dec{}, err
@@ -175,16 +181,14 @@ func (k Keeper) BuyAsset(ctx sdk.Context, buyer sdk.AccAddress, symbol string, a
 	}
 
 	if feeInt.IsPositive() {
-		// BuyAsset uses types.NDollarDenom (old format)
-		feeCoin := sdk.NewCoin(types.NDollarDenom, feeInt)
+		feeCoin := sdk.NewCoin(ndollarDenom, feeInt)
 		if err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, feetypes.ModuleName, sdk.NewCoins(feeCoin)); err != nil {
 			return sdk.Coin{}, osmomath.Dec{}, err
 		}
 	}
 
 	if netNDInt.IsPositive() {
-		// BuyAsset uses types.NDollarDenom (old format)
-		netCoin := sdk.NewCoin(types.NDollarDenom, netNDInt)
+		netCoin := sdk.NewCoin(ndollarDenom, netNDInt)
 		if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(netCoin)); err != nil {
 			return sdk.Coin{}, osmomath.Dec{}, err
 		}
@@ -206,13 +210,15 @@ func (k Keeper) BuyAssetWithPayment(ctx sdk.Context, buyer sdk.AccAddress, symbo
 
 	var amountND sdkmath.Int
 	var ndollarDenom string // Store the actual NDOLLAR denom format used
+	// Get the real NDOLLAR denom from stablecoin keeper
+	realNDollarDenom := k.GetNDollarDenom(ctx)
 
 	// If payment is in unuah, mint equivalent NDOLLAR (1:1 conversion)
 	if payment.Denom == "unuah" {
 		// Mint NDOLLAR equivalent to unuah amount (1:1)
 		amountND = payment.Amount
-		// Use types.NDollarDenom for minting (bank will handle resolution)
-		ndollarDenom = types.NDollarDenom
+		// Use real NDOLLAR denom from stablecoin keeper
+		ndollarDenom = realNDollarDenom
 		ndollarPayment := sdk.NewCoin(ndollarDenom, amountND)
 
 		// Send unuah from buyer to module
@@ -224,7 +230,7 @@ func (k Keeper) BuyAssetWithPayment(ctx sdk.Context, buyer sdk.AccAddress, symbo
 		if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(ndollarPayment)); err != nil {
 			return sdk.Coin{}, osmomath.Dec{}, fmt.Errorf("failed to mint NDOLLAR from unuah: %w", err)
 		}
-	} else if payment.Denom == types.NDollarDenom || (strings.HasPrefix(payment.Denom, "factory/") && strings.HasSuffix(payment.Denom, "/ndollar")) {
+	} else if payment.Denom == realNDollarDenom || payment.Denom == types.NDollarDenom || (strings.HasPrefix(payment.Denom, "factory/") && strings.HasSuffix(payment.Denom, "/ndollar")) {
 		// Payment is already in NDOLLAR (either "NDOLLAR" alias or full factory/*/ndollar format), use directly
 		amountND = payment.Amount
 		// IMPORTANT: Save the actual denom format used (factory/.../ndollar or "NDOLLAR")
@@ -321,6 +327,16 @@ func (k Keeper) getPrice(ctx sdk.Context, symbol string) (*oracletypes.Price, er
 		return nil, fmt.Errorf("symbol cannot be empty")
 	}
 
+	// First try to get existing price from store
+	price, found := k.oracleKeeper.GetPrice(ctx, clean)
+	if found && price != nil {
+		// Validate that price value is not empty/zero
+		if price.Value != "" && price.Value != "0" && price.Value != "0.0" && price.Value != "0.00" {
+			return price, nil
+		}
+	}
+
+	// If price not found or invalid, try to fetch fresh price from API
 	price, err := k.oracleKeeper.EnsureFreshPrice(ctx, clean)
 	if err != nil {
 		return nil, fmt.Errorf("unable to fetch fresh price for %s: %w", clean, err)
@@ -389,19 +405,20 @@ func (k Keeper) SellAsset(ctx sdk.Context, seller sdk.AccAddress, symbol string,
 		return sdk.Coin{}, sdkmath.Int{}, fmt.Errorf("payout too small after fees")
 	}
 
-	totalCoin := sdk.NewCoin(types.NDollarDenom, payoutInt)
+	ndollarDenom := k.GetNDollarDenom(ctx)
+	totalCoin := sdk.NewCoin(ndollarDenom, payoutInt)
 	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(totalCoin)); err != nil {
 		return sdk.Coin{}, sdkmath.Int{}, err
 	}
 
 	if feeInt.IsPositive() {
-		feeCoin := sdk.NewCoin(types.NDollarDenom, feeInt)
+		feeCoin := sdk.NewCoin(ndollarDenom, feeInt)
 		if err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, feetypes.ModuleName, sdk.NewCoins(feeCoin)); err != nil {
 			return sdk.Coin{}, sdkmath.Int{}, err
 		}
 	}
 
-	netCoin := sdk.NewCoin(types.NDollarDenom, netInt)
+	netCoin := sdk.NewCoin(ndollarDenom, netInt)
 	if netInt.IsPositive() {
 		if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, seller, sdk.NewCoins(netCoin)); err != nil {
 			return sdk.Coin{}, sdkmath.Int{}, err

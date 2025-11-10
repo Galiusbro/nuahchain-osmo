@@ -15,21 +15,31 @@ import (
 
 // Keeper manages leverage positions.
 type Keeper struct {
-	cdc          codec.BinaryCodec
-	storeKey     storetypes.StoreKey
-	bankKeeper   types.BankKeeper
-	oracleKeeper types.OracleKeeper
+	cdc              codec.BinaryCodec
+	storeKey         storetypes.StoreKey
+	bankKeeper       types.BankKeeper
+	oracleKeeper     types.OracleKeeper
+	stablecoinKeeper types.StablecoinKeeper
 }
 
 // NewKeeper constructs a new keeper.
-func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey, bankKeeper types.BankKeeper, oracleKeeper types.OracleKeeper) Keeper {
+func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey, bankKeeper types.BankKeeper, oracleKeeper types.OracleKeeper, stablecoinKeeper types.StablecoinKeeper) Keeper {
 	if bankKeeper == nil {
 		panic("bank keeper cannot be nil")
 	}
 	if oracleKeeper == nil {
 		panic("oracle keeper cannot be nil")
 	}
-	return Keeper{cdc: cdc, storeKey: storeKey, bankKeeper: bankKeeper, oracleKeeper: oracleKeeper}
+	if stablecoinKeeper == nil {
+		panic("stablecoin keeper cannot be nil")
+	}
+	return Keeper{
+		cdc:              cdc,
+		storeKey:         storeKey,
+		bankKeeper:       bankKeeper,
+		oracleKeeper:     oracleKeeper,
+		stablecoinKeeper: stablecoinKeeper,
+	}
 }
 
 // OpenPosition records a new leveraged position.
@@ -47,7 +57,9 @@ func (k Keeper) OpenPosition(ctx sdk.Context, msg *types.MsgOpenPosition) (*type
 		return nil, fmt.Errorf("quote must be positive")
 	}
 
-	quoteCoin := sdk.NewCoin(types.NDollarDenom, amount)
+	// Get real NDOLLAR denom from stablecoin keeper
+	ndollarDenom := k.stablecoinKeeper.GetNDollarDenom(ctx)
+	quoteCoin := sdk.NewCoin(ndollarDenom, amount)
 
 	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, owner, types.ModuleName, sdk.NewCoins(quoteCoin)); err != nil {
 		return nil, err
@@ -105,7 +117,9 @@ func (k Keeper) ClosePosition(ctx sdk.Context, msg *types.MsgClosePosition) (str
 	owner, _ := sdk.AccAddressFromBech32(msg.Owner)
 	quoteCoin, foundQuote := k.getQuoteAmount(ctx, msg.Id)
 	if !foundQuote {
-		quoteCoin = sdk.NewCoin(types.NDollarDenom, sdkmath.ZeroInt())
+		// Get real NDOLLAR denom from stablecoin keeper
+		ndollarDenom := k.stablecoinKeeper.GetNDollarDenom(ctx)
+		quoteCoin = sdk.NewCoin(ndollarDenom, sdkmath.ZeroInt())
 	}
 
 	k.deletePosition(ctx, owner, msg.Id)
@@ -171,7 +185,9 @@ func (k Keeper) getQuoteAmount(ctx sdk.Context, id uint64) (sdk.Coin, bool) {
 	if !ok {
 		panic("invalid stored quote amount")
 	}
-	return sdk.NewCoin(types.NDollarDenom, amount), true
+	// Get real NDOLLAR denom from stablecoin keeper
+	ndollarDenom := k.stablecoinKeeper.GetNDollarDenom(ctx)
+	return sdk.NewCoin(ndollarDenom, amount), true
 }
 
 func (k Keeper) nextPositionID(ctx sdk.Context) uint64 {

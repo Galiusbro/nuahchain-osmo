@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	abciv1beta1 "cosmossdk.io/api/cosmos/base/abci/v1beta1"
 	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"
 	txservice "cosmossdk.io/api/cosmos/tx/v1beta1"
 	sdkmath "cosmossdk.io/math"
@@ -147,7 +148,7 @@ func (c *Client) SellToCurveWithKey(ctx context.Context, req SellToCurveRequest,
 }
 
 // signAndBroadcastTx is a helper method to sign and broadcast transactions
-func (c *Client) signAndBroadcastTx(ctx context.Context, address string, privKey *secp256k1.PrivKey, pubKey cryptotypes.PubKey, msg sdk.Msg) (string, *txservice.GetTxResponse, error) {
+func (c *Client) signAndBroadcastTx(ctx context.Context, address string, privKey *secp256k1.PrivKey, pubKey cryptotypes.PubKey, msg sdk.Msg) (string, *abciv1beta1.TxResponse, error) {
 	// Get account info
 	accountResp, err := c.authClient.Account(ctx, &authtypes.QueryAccountRequest{
 		Address: address,
@@ -264,9 +265,9 @@ func (c *Client) signAndBroadcastTx(ctx context.Context, address string, privKey
 		} else {
 			errorMsg = "transaction failed"
 		}
-		return txHash, nil, fmt.Errorf("transaction failed with code %d: %s", txResponse.Code, errorMsg)
+		return txHash, txResponse, fmt.Errorf("transaction failed with code %d: %s", txResponse.Code, errorMsg)
 	}
 
 	// Return successful response (we don't query the tx again, just return the sync response)
-	return txHash, nil, nil
+	return txHash, txResponse, nil
 }

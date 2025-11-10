@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package osmosis.stablecoin.v1;
+
+import "cosmos/msg/v1/msg.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v30/x/stablecoin/types";
+
+service Msg {
+  rpc BuyNDollar(MsgBuyNDollar) returns (MsgBuyNDollarResponse) {
+    option (google.api.http).post = "/osmosis/stablecoin/v1/buy-ndollar";
+  }
+  rpc SellNDollar(MsgSellNDollar) returns (MsgSellNDollarResponse) {
+    option (google.api.http).post = "/osmosis/stablecoin/v1/sell-ndollar";
+  }
+}
+
+message MsgBuyNDollar {
+  option (cosmos.msg.v1.signer) = "buyer";
+  string buyer = 1;
+  string amount = 2; // amount of unuah to convert to NDOLLAR (1:1)
+}
+
+message MsgBuyNDollarResponse {
+  string ndollar_amount = 1; // amount of NDOLLAR minted
+  string ndollar_denom = 2; // actual NDOLLAR denom (factory/.../ndollar)
+}
+
+message MsgSellNDollar {
+  option (cosmos.msg.v1.signer) = "seller";
+  string seller = 1;
+  string amount = 2; // amount of NDOLLAR to convert back to unuah (1:1)
+}
+
+message MsgSellNDollarResponse {
+  string unuah_amount = 1; // amount of unuah received
+}

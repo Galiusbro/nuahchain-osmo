@@ -16,6 +16,8 @@ const (
 	OperationTypeAssetEnsure = "ASSET_ENSURE" // Создание/обеспечение актива
 	OperationTypeAssetBuy    = "ASSET_BUY"    // Покупка актива
 	OperationTypeAssetSell   = "ASSET_SELL"   // Продажа актива
+	OperationTypeAssetMarginOpen  = "ASSET_MARGIN_OPEN"  // Открытие маржинальной позиции
+	OperationTypeAssetMarginClose = "ASSET_MARGIN_CLOSE" // Закрытие маржинальной позиции
 )
 
 // Статусы транзакций
@@ -115,4 +117,32 @@ func AssetSellData(symbol, baseAmount, payoutNDOLLAR string) map[string]interfac
 		"base_amount":    baseAmount,
 		"payout_ndollar": payoutNDOLLAR,
 	}
+}
+
+// AssetMarginOpenData создает данные для операции открытия маржинальной позиции
+func AssetMarginOpenData(symbol, side, quoteAmount, leverage string, positionID uint64, baseQuantity, entryPrice string) map[string]interface{} {
+	data := map[string]interface{}{
+		"symbol":        symbol,
+		"side":          side,
+		"quote_amount":  quoteAmount,
+		"leverage":      leverage,
+		"base_quantity": baseQuantity,
+		"entry_price":   entryPrice,
+	}
+	if positionID != 0 {
+		data["position_id"] = positionID
+	}
+	return data
+}
+
+// AssetMarginCloseData создает данные для операции закрытия маржинальной позиции
+func AssetMarginCloseData(positionID uint64, pnl string) map[string]interface{} {
+	data := map[string]interface{}{}
+	if positionID != 0 {
+		data["position_id"] = positionID
+	}
+	if pnl != "" {
+		data["pnl"] = pnl
+	}
+	return data
 }

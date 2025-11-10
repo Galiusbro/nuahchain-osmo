@@ -41,6 +41,30 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey, bankKeeper t
 	}
 }
 
+// GetNDollarDenom returns the actual NDOLLAR denom by searching through bank metadata.
+// It looks for a denom with "NDOLLAR" as display name or alias.
+// Returns the base denom (factory/.../ndollar format) if found, otherwise returns types.NDollarDenom as fallback.
+func (k Keeper) GetNDollarDenom(ctx sdk.Context) string {
+	// Try to find NDOLLAR metadata by iterating through all denom metadata
+	metadata := k.bankKeeper.GetAllDenomMetaData(ctx)
+	for _, meta := range metadata {
+		// Check if this is NDOLLAR by looking at display name or symbol
+		if meta.Display == "ndollar" || meta.Symbol == "NDOLLAR" || meta.Display == "NDOLLAR" {
+			return meta.Base
+		}
+		// Also check aliases
+		for _, unit := range meta.DenomUnits {
+			for _, alias := range unit.Aliases {
+				if alias == "NDOLLAR" || alias == "ndollar" {
+					return meta.Base
+				}
+			}
+		}
+	}
+	// Fallback to constant if not found (for backward compatibility)
+	return types.NDollarDenom
+}
+
 // RecordMint increases the total minted counter.
 func (k Keeper) RecordMint(ctx sdk.Context, amount sdkmath.Int) error {
 	if amount.IsNegative() {
@@ -114,7 +138,8 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 
 func (k Keeper) getReserveBalance(ctx sdk.Context) sdkmath.Int {
 	addr := authtypes.NewModuleAddress(feetypes.ModuleName)
-	coin := k.bankKeeper.GetBalance(ctx, addr, types.NDollarDenom)
+	ndollarDenom := k.GetNDollarDenom(ctx)
+	coin := k.bankKeeper.GetBalance(ctx, addr, ndollarDenom)
 	return coin.Amount
 }
 
@@ -202,4 +227,84 @@ func parseInt(str string) sdkmath.Int {
 		panic("invalid integer string")
 	}
 	return val
+}
+
+// BuyNDollar converts unuah to NDOLLAR at 1:1 ratio
+// Returns the NDOLLAR denom and the amount minted
+func (k Keeper) BuyNDollar(ctx sdk.Context, buyer sdk.AccAddress, unuahAmount sdkmath.Int) (string, sdkmath.Int, error) {
+	if unuahAmount.IsNil() || !unuahAmount.IsPositive() {
+		return "", sdkmath.Int{}, fmt.Errorf("unuah amount must be positive")
+	}
+
+	// Get the real NDOLLAR denom
+	ndollarDenom := k.GetNDollarDenom(ctx)
+	if ndollarDenom == "" {
+		return "", sdkmath.Int{}, fmt.Errorf("NDOLLAR denom not found")
+	}
+
+	// Create coins
+	unuahCoin := sdk.NewCoin("unuah", unuahAmount)
+	ndollarCoin := sdk.NewCoin(ndollarDenom, unuahAmount) // 1:1 conversion
+
+	// Transfer unuah from buyer to module
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, buyer, types.ModuleName, sdk.NewCoins(unuahCoin)); err != nil {
+		return "", sdkmath.Int{}, fmt.Errorf("failed to send unuah: %w", err)
+	}
+
+	// Mint NDOLLAR to module
+	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(ndollarCoin)); err != nil {
+		return "", sdkmath.Int{}, fmt.Errorf("failed to mint NDOLLAR: %w", err)
+	}
+
+	// Send NDOLLAR from module to buyer
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, buyer, sdk.NewCoins(ndollarCoin)); err != nil {
+		return "", sdkmath.Int{}, fmt.Errorf("failed to send NDOLLAR: %w", err)
+	}
+
+	// Record the mint in statistics
+	if err := k.RecordMint(ctx, unuahAmount); err != nil {
+		return "", sdkmath.Int{}, fmt.Errorf("failed to record mint: %w", err)
+	}
+
+	return ndollarDenom, unuahAmount, nil
+}
+
+// SellNDollar converts NDOLLAR back to unuah at 1:1 ratio
+// Returns the unuah amount received
+func (k Keeper) SellNDollar(ctx sdk.Context, seller sdk.AccAddress, ndollarAmount sdkmath.Int) (sdkmath.Int, error) {
+	if ndollarAmount.IsNil() || !ndollarAmount.IsPositive() {
+		return sdkmath.Int{}, fmt.Errorf("ndollar amount must be positive")
+	}
+
+	// Get the real NDOLLAR denom
+	ndollarDenom := k.GetNDollarDenom(ctx)
+	if ndollarDenom == "" {
+		return sdkmath.Int{}, fmt.Errorf("NDOLLAR denom not found")
+	}
+
+	// Create coins
+	ndollarCoin := sdk.NewCoin(ndollarDenom, ndollarAmount)
+	unuahCoin := sdk.NewCoin("unuah", ndollarAmount) // 1:1 conversion
+
+	// Transfer NDOLLAR from seller to module
+	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, seller, types.ModuleName, sdk.NewCoins(ndollarCoin)); err != nil {
+		return sdkmath.Int{}, fmt.Errorf("failed to send NDOLLAR: %w", err)
+	}
+
+	// Burn NDOLLAR from module
+	if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(ndollarCoin)); err != nil {
+		return sdkmath.Int{}, fmt.Errorf("failed to burn NDOLLAR: %w", err)
+	}
+
+	// Send unuah from module to seller
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, seller, sdk.NewCoins(unuahCoin)); err != nil {
+		return sdkmath.Int{}, fmt.Errorf("failed to send unuah: %w", err)
+	}
+
+	// Record the burn in statistics
+	if err := k.RecordBurn(ctx, ndollarAmount); err != nil {
+		return sdkmath.Int{}, fmt.Errorf("failed to record burn: %w", err)
+	}
+
+	return ndollarAmount, nil
 }

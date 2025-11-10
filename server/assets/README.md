@@ -7,6 +7,7 @@ This module provides functionality for trading assets from the `x/assets` blockc
 - **Ensure Asset**: Create or ensure an asset exists on the blockchain
 - **Buy Asset**: Purchase assets using payment denoms (NDOLLAR, unuah, or factory denoms)
 - **Sell Asset**: Sell assets and receive NDOLLAR in return
+- **Margin Trading**: Open and close leveraged positions via the `x/leverage` module
 
 ## API Endpoints
 
@@ -80,6 +81,51 @@ Sell an asset and receive NDOLLAR.
   "payout_ndollar": "1000000",
   "success": true,
   "message": "Asset sale initiated"
+}
+```
+
+### POST /api/assets/margin/open
+
+Open a leveraged (margin) position on an underlying asset.
+
+**Request:**
+```json
+{
+  "symbol": "GOLD",
+  "side": "long",
+  "quote_amount": "1000000",
+  "leverage": "3"
+}
+```
+
+**Response:**
+```json
+{
+  "tx_hash": "ABC123...",
+  "position_id": "42",
+  "success": true,
+  "message": "Margin position opening initiated"
+}
+```
+
+### POST /api/assets/margin/close
+
+Close an existing leveraged position by its on-chain identifier.
+
+**Request:**
+```json
+{
+  "position_id": "42"
+}
+```
+
+**Response:**
+```json
+{
+  "tx_hash": "DEF456...",
+  "pnl": "-25000",
+  "success": true,
+  "message": "Margin position closure initiated"
 }
 ```
 
