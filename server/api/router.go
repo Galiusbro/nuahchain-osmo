@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/osmosis-labs/osmosis/v30/server/assets"
+	"github.com/osmosis-labs/osmosis/v30/server/exchange"
 	"github.com/osmosis-labs/osmosis/v30/server/logger"
+	"github.com/osmosis-labs/osmosis/v30/server/monitor"
 	"github.com/osmosis-labs/osmosis/v30/server/stablecoin"
 	"github.com/osmosis-labs/osmosis/v30/server/usertokens"
 )
@@ -41,8 +43,16 @@ func NewRouter(appLogger *logger.Logger) http.Handler {
 	mux.HandleFunc("/api/stablecoin/buy-ndollar", stablecoin.HandleBuyNDollar)
 	mux.HandleFunc("/api/stablecoin/sell-ndollar", stablecoin.HandleSellNDollar)
 
+	// Exchange endpoints (require authentication)
+	mux.HandleFunc("/api/exchange/tokens", exchange.HandleExchangeTokens)
+
 	// Transaction status endpoint (public, works for any transaction)
 	mux.HandleFunc("/api/tx/", usertokens.HandleGetTxStatus)
+
+	// Admin monitoring endpoints
+	mux.HandleFunc("/api/admin/transactions", monitor.HandleGetRecentTransactions)
+	mux.HandleFunc("/api/admin/transactions/ws", monitor.HandleWebSocket)
+	mux.HandleFunc("/api/admin/stats", monitor.HandleGetStats)
 
 	// Wrap with logging middleware
 	return logger.HTTPMiddleware(appLogger)(mux)

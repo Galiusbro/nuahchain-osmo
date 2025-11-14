@@ -105,6 +105,7 @@ import (
 	concentratedliquiditytypes "github.com/osmosis-labs/osmosis/v30/x/concentrated-liquidity/types"
 	cwpoolmodule "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/module"
 	cosmwasmpooltypes "github.com/osmosis-labs/osmosis/v30/x/cosmwasmpool/types"
+	exchange "github.com/osmosis-labs/osmosis/v30/x/exchange"
 	fees "github.com/osmosis-labs/osmosis/v30/x/fees"
 	feetypes "github.com/osmosis-labs/osmosis/v30/x/fees/types"
 	freeaccount "github.com/osmosis-labs/osmosis/v30/x/freeaccount"
@@ -279,6 +280,7 @@ func appModules(
 		treasury.NewAppModule(appCodec, *app.TreasuryKeeper),
 		claims.NewAppModule(appCodec, *app.ClaimsKeeper),
 		usdoracle.NewAppModule(appCodec, *app.USDOracleKeeper),
+		exchange.NewAppModule(appCodec, *app.ExchangeKeeper, app.AccountKeeper, app.BankKeeper),
 		pegkeeper.NewAppModule(appCodec, *app.PegKeeperKeeper),
 	}
 }
@@ -390,6 +392,7 @@ func OrderInitGenesis(allModuleNames []string) []string {
 		risktypes.ModuleName,
 		stablecointypes.ModuleName,
 		treasurytypes.ModuleName,
+		exchangetypes.ModuleName,
 		claimstypes.ModuleName,
 		oracletypes.ModuleName,
 		assetstypes.ModuleName,

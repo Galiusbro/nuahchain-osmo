@@ -311,7 +311,7 @@ func (r *Repository) GetUserTransactionsByType(userID int64, operationType strin
 }
 
 // UpdateTransactionByTxHash обновляет транзакцию по хешу (удобно для обновления статуса после проверки в блокчейне)
-func (r *Repository) UpdateTransactionByTxHash(txHash string, status string, operationData map[string]interface{}, errorMessage *string) error {
+func (r *Repository) UpdateTransactionByTxHash(txHash string, status TransactionStatus, operationData map[string]interface{}, errorMessage *string) error {
 	var operationDataJSON []byte
 	var err error
 
@@ -344,4 +344,69 @@ func (r *Repository) UpdateTransactionByTxHash(txHash string, status string, ope
 	}
 
 	return err
+}
+
+// ListPendingTransactions возвращает все транзакции со статусом PENDING (можно ограничить количеством)
+func (r *Repository) ListPendingTransactions(limit int) ([]*Transaction, error) {
+	query := `
+		SELECT
+			id,
+			user_id,
+			operation_type,
+			tx_hash,
+			status,
+			operation_data,
+			error_message,
+			created_at,
+			updated_at
+		FROM transactions
+		WHERE status = $1
+		ORDER BY created_at ASC`
+
+	args := []interface{}{StatusPending}
+	if limit > 0 {
+		query += ` LIMIT $2`
+		args = append(args, limit)
+	}
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []*Transaction
+	for rows.Next() {
+		var (
+			tx                = &Transaction{}
+			operationDataJSON []byte
+			errorMessage      sql.NullString
+		)
+
+		if err := rows.Scan(
+			&tx.ID,
+			&tx.UserID,
+			&tx.OperationType,
+			&tx.TxHash,
+			&tx.Status,
+			&operationDataJSON,
+			&errorMessage,
+			&tx.CreatedAt,
+			&tx.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(operationDataJSON, &tx.OperationData); err != nil {
+			return nil, err
+		}
+
+		if errorMessage.Valid {
+			tx.ErrorMessage = &errorMessage.String
+		}
+
+		result = append(result, tx)
+	}
+
+	return result, rows.Err()
 }

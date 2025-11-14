@@ -6,7 +6,19 @@ import (
 	"strings"
 
 	"github.com/osmosis-labs/osmosis/v30/server/auth"
+	"github.com/osmosis-labs/osmosis/v30/server/transactions"
 )
+
+func httpStatusFromTransaction(status string) int {
+	switch status {
+	case string(transactions.StatusSuccess):
+		return http.StatusOK
+	case string(transactions.StatusFailed):
+		return http.StatusInternalServerError
+	default:
+		return http.StatusAccepted
+	}
+}
 
 // authenticateRequest validates JWT token and returns user
 func authenticateRequest(r *http.Request) (*auth.User, error) {
@@ -53,16 +65,22 @@ func HandleBuyNDollar(w http.ResponseWriter, r *http.Request) {
 
 	// Execute operation
 	resp, err := globalService.BuyNDollar(r.Context(), user.ID, req.Amount)
-	if err != nil {
-		// Return error response with details
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK) // Still 200 to allow client to see error details
-		json.NewEncoder(w).Encode(resp)
+	if resp == nil {
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			http.Error(w, "unknown error", http.StatusInternalServerError)
+		}
 		return
 	}
 
-	// Return success response
+	status := httpStatusFromTransaction(resp.Status)
+	if err != nil && status == http.StatusAccepted {
+		status = http.StatusInternalServerError
+	}
+
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(resp)
 }
 
@@ -95,15 +113,21 @@ func HandleSellNDollar(w http.ResponseWriter, r *http.Request) {
 
 	// Execute operation
 	resp, err := globalService.SellNDollar(r.Context(), user.ID, req.Amount)
-	if err != nil {
-		// Return error response with details
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK) // Still 200 to allow client to see error details
-		json.NewEncoder(w).Encode(resp)
+	if resp == nil {
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			http.Error(w, "unknown error", http.StatusInternalServerError)
+		}
 		return
 	}
 
-	// Return success response
+	statusCode := httpStatusFromTransaction(resp.Status)
+	if err != nil && statusCode == http.StatusAccepted {
+		statusCode = http.StatusInternalServerError
+	}
+
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(resp)
 }

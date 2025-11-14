@@ -14,7 +14,7 @@ type CreateTokenRequest struct {
 type CreateTokenResponse struct {
 	Denom   string `json:"denom"`
 	TxHash  string `json:"tx_hash"`
-	Success bool   `json:"success"`
+	Status  string `json:"status"`
 	Message string `json:"message,omitempty"`
 	Error   string `json:"error,omitempty"`
 }
@@ -32,7 +32,7 @@ type BuyTokenResponse struct {
 	TxHash    string `json:"tx_hash"`
 	TokensOut string `json:"tokens_out,omitempty"` // Actual tokens received
 	PricePaid string `json:"price_paid,omitempty"` // Price paid per token
-	Success   bool   `json:"success"`
+	Status    string `json:"status"`
 	Message   string `json:"message,omitempty"`
 	Error     string `json:"error,omitempty"`
 }
@@ -50,7 +50,7 @@ type SellTokenResponse struct {
 	TxHash        string `json:"tx_hash"`
 	PaymentOut    string `json:"payment_out,omitempty"`    // Actual payment received
 	PriceReceived string `json:"price_received,omitempty"` // Price received per token
-	Success       bool   `json:"success"`
+	Status        string `json:"status"`
 	Message       string `json:"message,omitempty"`
 	Error         string `json:"error,omitempty"`
 }

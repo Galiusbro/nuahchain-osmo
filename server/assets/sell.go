@@ -2,6 +2,7 @@ package assets
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/osmosis-labs/osmosis/v30/server/blockchain"
 	"github.com/osmosis-labs/osmosis/v30/server/transactions"
@@ -13,8 +14,8 @@ func (s *Service) SellAsset(ctx context.Context, userID int64, req SellAssetRequ
 	wallet, privKeyBytes, err := s.GetUserWallet(ctx, userID)
 	if err != nil {
 		return &SellAssetResponse{
-			Success: false,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			Error:  err.Error(),
 		}, err
 	}
 
@@ -27,50 +28,38 @@ func (s *Service) SellAsset(ctx context.Context, userID int64, req SellAssetRequ
 
 	// Execute sell transaction
 	resp, err := s.blockchainCli.SellAssetWithKey(ctx, sellReq, privKeyBytes)
-
-	// Записываем транзакцию в БД
-	status := transactions.StatusPending
-	var errorMsg *string
-	if err != nil || !resp.Success {
-		status = transactions.StatusFailed
-		if err != nil {
-			msg := err.Error()
-			errorMsg = &msg
-		} else if resp.Error != "" {
-			errorMsg = &resp.Error
-		}
-	}
-
-	// Записываем только если есть tx_hash (транзакция была отправлена)
-	if resp.TxHash != "" {
-		_, createErr := s.transactionsRepo.CreateTransaction(transactions.CreateTransactionRequest{
-			UserID:        userID,
-			OperationType: transactions.OperationTypeAssetSell,
-			TxHash:        resp.TxHash,
-			Status:        status,
-			OperationData: transactions.AssetSellData(req.Symbol, req.BaseAmount, resp.PayoutNDOLLAR),
-			ErrorMessage:  errorMsg,
-		})
-
-		// Если запись в БД не удалась, логируем но не прерываем выполнение
-		if createErr != nil {
-			// В продакшене здесь можно добавить логирование
-			_ = createErr
-		}
-	}
-
 	if err != nil {
+		errMsg := err.Error()
+		if resp != nil && resp.Error != "" {
+			errMsg = resp.Error
+		}
 		return &SellAssetResponse{
-			Success: false,
-			TxHash:  resp.TxHash,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  errMsg,
+		}, fmt.Errorf(errMsg)
+	}
+
+	if resp == nil || resp.TxHash == "" {
+		msg := "transaction hash not returned"
+		return &SellAssetResponse{
+			Status: string(transactions.StatusFailed),
+			Error:  msg,
+		}, fmt.Errorf(msg)
+	}
+
+	if err := s.recordPendingTransaction(userID, transactions.OperationTypeAssetSell, resp.TxHash, transactions.AssetSellData(req.Symbol, req.BaseAmount, resp.PayoutNDOLLAR)); err != nil {
+		return &SellAssetResponse{
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  fmt.Sprintf("failed to persist transaction: %v", err),
 		}, err
 	}
 
 	return &SellAssetResponse{
 		TxHash:        resp.TxHash,
 		PayoutNDOLLAR: resp.PayoutNDOLLAR,
-		Success:       resp.Success,
-		Error:         resp.Error,
+		Status:        string(transactions.StatusPending),
+		Message:       "Asset sale broadcast, awaiting confirmation",
 	}, nil
 }

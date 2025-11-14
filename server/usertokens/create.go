@@ -2,6 +2,7 @@ package usertokens
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/osmosis-labs/osmosis/v30/server/blockchain"
 	"github.com/osmosis-labs/osmosis/v30/server/transactions"
@@ -13,8 +14,8 @@ func (s *Service) CreateToken(ctx context.Context, userID int64, req CreateToken
 	wallet, privKeyBytes, err := s.GetUserWallet(ctx, userID)
 	if err != nil {
 		return &CreateTokenResponse{
-			Success: false,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			Error:  err.Error(),
 		}, err
 	}
 
@@ -29,49 +30,38 @@ func (s *Service) CreateToken(ctx context.Context, userID int64, req CreateToken
 
 	// Create token on blockchain
 	resp, err := s.blockchainCli.CreateTokenWithKey(ctx, createReq, privKeyBytes)
-
-	// Записываем транзакцию в БД
-	status := transactions.StatusPending
-	var errorMsg *string
-	if err != nil || !resp.Success {
-		status = transactions.StatusFailed
-		if err != nil {
-			msg := err.Error()
-			errorMsg = &msg
-		} else if resp.Error != "" {
-			errorMsg = &resp.Error
-		}
-	}
-
-	// Записываем только если есть tx_hash (транзакция была отправлена)
-	if resp.TxHash != "" {
-		_, createErr := s.transactionsRepo.CreateTransaction(transactions.CreateTransactionRequest{
-			UserID:        userID,
-			OperationType: transactions.OperationTypeTokenCreate,
-			TxHash:        resp.TxHash,
-			Status:        status,
-			OperationData: transactions.TokenCreateData(resp.Denom, req.Name, req.Symbol, req.Image, req.Description),
-			ErrorMessage:  errorMsg,
-		})
-
-		// Если запись в БД не удалась, логируем но не прерываем выполнение
-		if createErr != nil {
-			// В продакшене здесь можно добавить логирование
-			_ = createErr
-		}
-	}
-
 	if err != nil {
+		errMsg := err.Error()
+		if resp != nil && resp.Error != "" {
+			errMsg = resp.Error
+		}
 		return &CreateTokenResponse{
-			Success: false,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  errMsg,
+		}, fmt.Errorf(errMsg)
+	}
+
+	if resp.TxHash == "" {
+		msg := "transaction hash not returned"
+		return &CreateTokenResponse{
+			Status: string(transactions.StatusFailed),
+			Error:  msg,
+		}, fmt.Errorf(msg)
+	}
+
+	if err := s.recordPendingTransaction(userID, transactions.OperationTypeTokenCreate, resp.TxHash, transactions.TokenCreateData(resp.Denom, req.Name, req.Symbol, req.Image, req.Description)); err != nil {
+		return &CreateTokenResponse{
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  fmt.Sprintf("failed to persist transaction: %v", err),
 		}, err
 	}
 
 	return &CreateTokenResponse{
 		Denom:   resp.Denom,
 		TxHash:  resp.TxHash,
-		Success: resp.Success,
-		Error:   resp.Error,
+		Status:  string(transactions.StatusPending),
+		Message: "Token creation broadcast, awaiting confirmation",
 	}, nil
 }

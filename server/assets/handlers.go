@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/osmosis-labs/osmosis/v30/server/auth"
+	"github.com/osmosis-labs/osmosis/v30/server/transactions"
 )
 
 var (
@@ -15,6 +16,17 @@ var (
 	// authService holds the auth service instance (set during initialization)
 	authService *auth.Service
 )
+
+func httpStatusFromTransaction(status string) int {
+	switch status {
+	case string(transactions.StatusSuccess):
+		return http.StatusOK
+	case string(transactions.StatusFailed):
+		return http.StatusInternalServerError
+	default:
+		return http.StatusAccepted
+	}
+}
 
 // SetService sets the asset service instance
 func SetService(service *Service) {
@@ -55,35 +67,19 @@ func HandleEnsureAsset(w http.ResponseWriter, r *http.Request) {
 
 	// Ensure asset
 	resp, err := assetService.EnsureAsset(r.Context(), user.ID, req)
-	if err != nil {
-		apiResp := EnsureAssetResponse{
-			Success: false,
-			Error:   err.Error(),
-		}
-		if resp != nil {
-			apiResp.TxHash = resp.TxHash
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(apiResp)
+	if resp == nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Return response
-	apiResp := EnsureAssetResponse{
-		TxHash:  resp.TxHash,
-		Success: resp.Success,
-		Message: "Asset ensure initiated",
-		Error:   resp.Error,
+	statusCode := httpStatusFromTransaction(resp.Status)
+	if err != nil && statusCode == http.StatusAccepted {
+		statusCode = http.StatusInternalServerError
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if resp.Success {
-		w.WriteHeader(http.StatusOK)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	json.NewEncoder(w).Encode(apiResp)
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(resp)
 }
 
 // HandleBuyAsset handles POST /api/assets/buy
@@ -119,36 +115,19 @@ func HandleBuyAsset(w http.ResponseWriter, r *http.Request) {
 
 	// Buy asset
 	resp, err := assetService.BuyAsset(r.Context(), user.ID, req)
-	if err != nil {
-		apiResp := BuyAssetResponse{
-			Success: false,
-			Error:   err.Error(),
-		}
-		if resp != nil {
-			apiResp.TxHash = resp.TxHash
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(apiResp)
+	if resp == nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Return response
-	apiResp := BuyAssetResponse{
-		TxHash:     resp.TxHash,
-		BaseAmount: resp.BaseAmount,
-		Success:    resp.Success,
-		Message:    "Asset purchase initiated",
-		Error:      resp.Error,
+	statusCode := httpStatusFromTransaction(resp.Status)
+	if err != nil && statusCode == http.StatusAccepted {
+		statusCode = http.StatusInternalServerError
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if resp.Success {
-		w.WriteHeader(http.StatusOK)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	json.NewEncoder(w).Encode(apiResp)
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(resp)
 }
 
 // HandleSellAsset handles POST /api/assets/sell
@@ -184,36 +163,19 @@ func HandleSellAsset(w http.ResponseWriter, r *http.Request) {
 
 	// Sell asset
 	resp, err := assetService.SellAsset(r.Context(), user.ID, req)
-	if err != nil {
-		apiResp := SellAssetResponse{
-			Success: false,
-			Error:   err.Error(),
-		}
-		if resp != nil {
-			apiResp.TxHash = resp.TxHash
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(apiResp)
+	if resp == nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Return response
-	apiResp := SellAssetResponse{
-		TxHash:        resp.TxHash,
-		PayoutNDOLLAR: resp.PayoutNDOLLAR,
-		Success:       resp.Success,
-		Message:       "Asset sale initiated",
-		Error:         resp.Error,
+	statusCode := httpStatusFromTransaction(resp.Status)
+	if err != nil && statusCode == http.StatusAccepted {
+		statusCode = http.StatusInternalServerError
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if resp.Success {
-		w.WriteHeader(http.StatusOK)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	json.NewEncoder(w).Encode(apiResp)
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(resp)
 }
 
 // HandleOpenMarginPosition handles POST /api/assets/margin/open
@@ -241,24 +203,18 @@ func HandleOpenMarginPosition(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp, err := assetService.OpenMarginPosition(r.Context(), user.ID, req)
-	if err != nil {
-		apiResp := OpenMarginPositionResponse{Success: false, Error: err.Error()}
-		if resp != nil {
-			apiResp.TxHash = resp.TxHash
-			apiResp.PositionID = resp.PositionID
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(apiResp)
+	if resp == nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if resp.Success {
-		w.WriteHeader(http.StatusOK)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
+	statusCode := httpStatusFromTransaction(resp.Status)
+	if err != nil && statusCode == http.StatusAccepted {
+		statusCode = http.StatusInternalServerError
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(resp)
 }
 
@@ -293,23 +249,18 @@ func HandleCloseMarginPosition(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp, err := assetService.CloseMarginPosition(r.Context(), user.ID, id)
-	if err != nil {
-		apiResp := CloseMarginPositionResponse{Success: false, Error: err.Error()}
-		if resp != nil {
-			apiResp.TxHash = resp.TxHash
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(apiResp)
+	if resp == nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if resp.Success {
-		w.WriteHeader(http.StatusOK)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
+	statusCode := httpStatusFromTransaction(resp.Status)
+	if err != nil && statusCode == http.StatusAccepted {
+		statusCode = http.StatusInternalServerError
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(resp)
 }
 

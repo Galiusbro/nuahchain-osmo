@@ -15,9 +15,12 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/server/blockchain"
 	"github.com/osmosis-labs/osmosis/v30/server/config"
 	"github.com/osmosis-labs/osmosis/v30/server/database"
+	"github.com/osmosis-labs/osmosis/v30/server/exchange"
 	"github.com/osmosis-labs/osmosis/v30/server/logger"
+	"github.com/osmosis-labs/osmosis/v30/server/monitor"
 	"github.com/osmosis-labs/osmosis/v30/server/stablecoin"
 	"github.com/osmosis-labs/osmosis/v30/server/transactions"
+	transactionstracker "github.com/osmosis-labs/osmosis/v30/server/transactions/tracker"
 	"github.com/osmosis-labs/osmosis/v30/server/usertokens"
 )
 
@@ -92,23 +95,79 @@ func main() {
 	defer blockchainCli.Close()
 	appLogger.Info("Blockchain client connected successfully")
 
+	// Initialize WebSocket client if enabled
+	var wsClient *blockchain.WebSocketClient
+	if cfg.Blockchain.WebSocketEnabled {
+		wsClient = blockchain.NewWebSocketClient(
+			cfg.Blockchain.WebSocketURL,
+			blockchain.WebSocketConfig{
+				ReconnectInterval: cfg.Blockchain.ReconnectInterval,
+				Timeout:           cfg.Blockchain.WebSocketTimeout,
+			},
+		)
+
+		// Connect WebSocket
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := wsClient.Connect(ctx); err != nil {
+			appLogger.WithError(err).Warn("Failed to connect WebSocket, using polling only")
+			wsClient = nil
+		} else {
+			appLogger.Info("WebSocket client connected successfully")
+			defer wsClient.Close()
+		}
+	}
+
+	trackerCfg := transactionstracker.Config{
+		PollInterval:     3 * time.Second,
+		MaxAttempts:      30,
+		InitialBatchSize: 0,
+		UseWebSocket:     wsClient != nil,
+		WebSocketClient:  wsClient,
+	}
+	txTracker := transactionstracker.New(appLogger, transactionsRepo, blockchainCli, trackerCfg)
+	if err := txTracker.Start(context.Background()); err != nil {
+		appLogger.WithError(err).Warn("Failed to start transaction tracker")
+	}
+
 	// Initialize user token service
-	userTokenService := usertokens.NewService(authRepo, blockchainCli, transactionsRepo)
+	userTokenService := usertokens.NewService(authRepo, blockchainCli, transactionsRepo, txTracker)
 	usertokens.SetService(userTokenService)
 	usertokens.SetAuthService(authService)
 	appLogger.Info("User token service initialized")
 
 	// Initialize asset service
-	assetService := assets.NewService(authRepo, blockchainCli, transactionsRepo)
+	assetService := assets.NewService(authRepo, blockchainCli, transactionsRepo, txTracker)
 	assets.SetService(assetService)
 	assets.SetAuthService(authService)
 	appLogger.Info("Asset service initialized")
 
 	// Initialize stablecoin service
-	stablecoinService := stablecoin.NewService(authService, blockchainCli)
+	stablecoinService := stablecoin.NewService(authService, blockchainCli, transactionsRepo, txTracker)
 	stablecoin.SetService(stablecoinService)
 	stablecoin.SetAuthService(authService)
 	appLogger.Info("Stablecoin service initialized")
+
+	// Initialize exchange service
+	exchangeService := exchange.NewService(blockchainCli, authService, transactionsRepo, txTracker)
+	exchange.SetService(exchangeService)
+	exchange.SetAuthService(authService)
+	appLogger.Info("Exchange service initialized")
+
+	// Initialize blockchain monitor for admin panel
+	var monitorService *monitor.Service
+	if wsClient != nil {
+		blockchainMonitor := blockchain.NewBlockchainMonitor(wsClient)
+		monitorRepo := monitor.NewRepository(db.DB)
+		monitorService = monitor.NewService(blockchainMonitor, blockchainCli, monitorRepo, appLogger)
+		if err := monitorService.Start(context.Background()); err != nil {
+			appLogger.WithError(err).Warn("Failed to start blockchain monitor")
+		} else {
+			appLogger.Info("Blockchain monitor started")
+			defer monitorService.Stop()
+		}
+		monitor.SetService(monitorService)
+	}
 
 	// Create HTTP router and set database health checker
 	router := api.NewRouter(appLogger)
@@ -144,6 +203,10 @@ func main() {
 
 	if err := srv.Shutdown(ctx); err != nil {
 		appLogger.WithError(err).Fatal("Server forced to shutdown")
+	}
+
+	if txTracker != nil {
+		txTracker.Stop(ctx)
 	}
 
 	appLogger.Info("Server exited")

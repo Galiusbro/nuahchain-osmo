@@ -10,7 +10,7 @@ type EnsureAssetRequest struct {
 // EnsureAssetResponse represents the response from ensuring an asset
 type EnsureAssetResponse struct {
 	TxHash  string `json:"tx_hash"`
-	Success bool   `json:"success"`
+	Status  string `json:"status"`
 	Message string `json:"message,omitempty"`
 	Error   string `json:"error,omitempty"`
 }
@@ -27,7 +27,7 @@ type BuyAssetRequest struct {
 type BuyAssetResponse struct {
 	TxHash     string `json:"tx_hash"`
 	BaseAmount string `json:"base_amount,omitempty"` // Amount of asset received
-	Success    bool   `json:"success"`
+	Status     string `json:"status"`
 	Message    string `json:"message,omitempty"`
 	Error      string `json:"error,omitempty"`
 }
@@ -42,7 +42,7 @@ type SellAssetRequest struct {
 type SellAssetResponse struct {
 	TxHash        string `json:"tx_hash"`
 	PayoutNDOLLAR string `json:"payout_ndollar,omitempty"` // Amount of NDOLLAR received
-	Success       bool   `json:"success"`
+	Status        string `json:"status"`
 	Message       string `json:"message,omitempty"`
 	Error         string `json:"error,omitempty"`
 }
@@ -62,7 +62,7 @@ type OpenMarginPositionResponse struct {
 	BaseQuantity string `json:"base_quantity,omitempty"`
 	EntryPrice   string `json:"entry_price,omitempty"`
 	Leverage     string `json:"leverage,omitempty"`
-	Success      bool   `json:"success"`
+	Status       string `json:"status"`
 	Message      string `json:"message,omitempty"`
 	Error        string `json:"error,omitempty"`
 }
@@ -76,7 +76,7 @@ type CloseMarginPositionRequest struct {
 type CloseMarginPositionResponse struct {
 	TxHash  string `json:"tx_hash"`
 	Pnl     string `json:"pnl,omitempty"`
-	Success bool   `json:"success"`
+	Status  string `json:"status"`
 	Message string `json:"message,omitempty"`
 	Error   string `json:"error,omitempty"`
 }

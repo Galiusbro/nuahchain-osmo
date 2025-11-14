@@ -6,6 +6,7 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v30/server/auth"
 	"github.com/osmosis-labs/osmosis/v30/server/blockchain"
+	"github.com/osmosis-labs/osmosis/v30/server/transactions"
 )
 
 // BuyNDollar converts unuah to NDOLLAR at 1:1 ratio
@@ -31,17 +32,41 @@ func (s *Service) BuyNDollar(ctx context.Context, userID int64, amount string) (
 
 	resp, err := s.blockchainCli.BuyNDollarWithKey(ctx, privKeyHex, req)
 	if err != nil {
+		errMsg := err.Error()
+		if resp != nil && resp.Error != "" {
+			errMsg = resp.Error
+		}
 		return &BuyNDollarResponse{
-			Success: false,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  errMsg,
+		}, fmt.Errorf(errMsg)
+	}
+
+	if resp == nil || resp.TxHash == "" {
+		msg := "transaction hash not returned"
+		return &BuyNDollarResponse{
+			Status: string(transactions.StatusFailed),
+			Error:  msg,
+		}, fmt.Errorf(msg)
+	}
+
+	if err := s.recordPendingTransaction(userID, transactions.OperationTypeStablecoinBuy, resp.TxHash, map[string]interface{}{
+		"amount":         amount,
+		"ndollar_amount": resp.NDollarAmount,
+		"ndollar_denom":  resp.NDollarDenom,
+	}); err != nil {
+		return &BuyNDollarResponse{
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  fmt.Sprintf("failed to persist transaction: %v", err),
 		}, err
 	}
 
 	return &BuyNDollarResponse{
-		Success:       resp.Success,
+		Status:        string(transactions.StatusPending),
 		TxHash:        resp.TxHash,
 		NDollarAmount: resp.NDollarAmount,
 		NDollarDenom:  resp.NDollarDenom,
-		Error:         resp.Error,
 	}, nil
 }

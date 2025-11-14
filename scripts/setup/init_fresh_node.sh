@@ -169,6 +169,39 @@ jq '.consensus_params.block.time_iota_ms = "1000"' $GENESIS_FILE > /tmp/genesis_
 # Setting up tokenfactory parameters
 jq '.app_state.tokenfactory.params.denom_creation_fee = [{"denom": "unuah", "amount": "1000000"}]' $GENESIS_FILE > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json $GENESIS_FILE
 
+# Setting up x/usdoracle with GALBRO test token
+print_info "Setting up x/usdoracle with GALBRO test token..."
+GALBRO_DENOM="factory/${VALIDATOR_ADDR}/galbro"
+jq --arg denom "$GALBRO_DENOM" '
+  .app_state.usdoracle.params.supported_tokens = [
+    {
+      "denom": $denom,
+      "symbol": "GALBRO",
+      "name": "GALBRO Test Token",
+      "decimals": 6,
+      "enabled": true,
+      "min_update_frequency": "60",
+      "max_price_deviation": "0.050000000000000000",
+      "external_ids": {}
+    }
+  ]
+' $GENESIS_FILE > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json $GENESIS_FILE
+
+# Setting up x/exchange with GALBRO test token
+print_info "Setting up x/exchange with GALBRO test token..."
+jq --arg denom "$GALBRO_DENOM" '
+  .app_state.exchange.params.supported_tokens = [$denom]
+' $GENESIS_FILE > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json $GENESIS_FILE
+
+# Set initial USD price in x/usdoracle for GALBRO (1.00 USD)
+print_info "Setting initial GALBRO price to 1.00 USD in genesis..."
+jq '.app_state.usdoracle.current_price = {
+  "price": "1.000000000000000000",
+  "source": "genesis",
+  "timestamp": "0001-01-01T00:00:00Z",
+  "block_height": "0"
+}' $GENESIS_FILE > /tmp/genesis_temp.json && mv /tmp/genesis_temp.json $GENESIS_FILE
+
 print_status "Genesis parameters configured"
 
 # Checking configuration

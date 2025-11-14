@@ -7,7 +7,7 @@ type BuyNDollarRequest struct {
 
 // BuyNDollarResponse represents the response after buying NDOLLAR
 type BuyNDollarResponse struct {
-	Success       bool   `json:"success"`
+	Status        string `json:"status"`
 	TxHash        string `json:"tx_hash"`
 	NDollarAmount string `json:"ndollar_amount"` // Amount of NDOLLAR received
 	NDollarDenom  string `json:"ndollar_denom"`  // Actual NDOLLAR denom (factory/.../ndollar)
@@ -21,9 +21,8 @@ type SellNDollarRequest struct {
 
 // SellNDollarResponse represents the response after selling NDOLLAR
 type SellNDollarResponse struct {
-	Success     bool   `json:"success"`
+	Status      string `json:"status"`
 	TxHash      string `json:"tx_hash"`
 	UnuahAmount string `json:"unuah_amount"` // Amount of unuah received
 	Error       string `json:"error,omitempty"`
 }
-

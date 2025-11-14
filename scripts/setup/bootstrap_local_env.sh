@@ -253,6 +253,81 @@ mv "$tmpfile" "$GENESIS_FILE"
 
 print_step "Embedding Ndollar token into genesis"
 AUTO_CONFIRM=true GENESIS_MODE=true KEYRING_BACKEND="$KEYRING_BACKEND" \
+    CHAIN_ID="$CHAIN_ID" ./scripts/setup/setup_ndollar.sh
+
+print_step "Creating GALBRO test token for Exchange module"
+# GALBRO will be created at runtime, not in genesis, since it needs tokenfactory
+# This will be done after the node starts
+
+# Define function to setup GALBRO after node starts
+setup_galbro_poststart() {
+    local VALIDATOR_KEY="$1"
+    local KEYRING_BACKEND="$2"
+    local CHAIN_ID="$3"
+
+    print_step "Creating GALBRO test token"
+
+    # Get validator address
+    local VALIDATOR_ADDR=$("$NUAHD_BIN" keys show "$VALIDATOR_KEY" -a --keyring-backend "$KEYRING_BACKEND")
+    local GALBRO_DENOM="factory/${VALIDATOR_ADDR}/galbro"
+    local GALBRO_AMOUNT="1000000000000" # 1,000,000 GALBRO
+    local TEST_USER_AMOUNT="50000000000"  # 50,000 GALBRO
+
+    # Create denom
+    "$NUAHD_BIN" tx tokenfactory create-denom galbro \
+        --from "$VALIDATOR_KEY" \
+        --chain-id "$CHAIN_ID" \
+        --keyring-backend "$KEYRING_BACKEND" \
+        --gas 2000000 \
+        --fees 20000unuah \
+        -y >/dev/null 2>&1 || true
+
+    sleep 3
+
+    # Mint tokens
+    "$NUAHD_BIN" tx tokenfactory mint "${GALBRO_AMOUNT}${GALBRO_DENOM}" "$VALIDATOR_ADDR" \
+        --from "$VALIDATOR_KEY" \
+        --chain-id "$CHAIN_ID" \
+        --keyring-backend "$KEYRING_BACKEND" \
+        --gas 300000 \
+        --fees 3000unuah \
+        -y >/dev/null 2>&1
+
+    sleep 3
+
+    # Distribute to Alice
+    local ALICE_ADDR=$("$NUAHD_BIN" keys show alice -a --keyring-backend "$KEYRING_BACKEND" 2>/dev/null || echo "")
+    if [ -n "$ALICE_ADDR" ]; then
+        "$NUAHD_BIN" tx bank send "$VALIDATOR_KEY" "$ALICE_ADDR" "${TEST_USER_AMOUNT}${GALBRO_DENOM}" \
+            --chain-id "$CHAIN_ID" \
+            --keyring-backend "$KEYRING_BACKEND" \
+            --gas 200000 \
+            --fees 2000unuah \
+            -y >/dev/null 2>&1
+        sleep 2
+    fi
+
+    # Distribute to test user (Garold)
+    local GAROLD_ADDR="nuah10us33fwsvajr57pgjxw638xzqjsfntqxk6yw56"
+    "$NUAHD_BIN" tx bank send "$VALIDATOR_KEY" "$GAROLD_ADDR" "${TEST_USER_AMOUNT}${GALBRO_DENOM}" \
+        --chain-id "$CHAIN_ID" \
+        --keyring-backend "$KEYRING_BACKEND" \
+        --gas 200000 \
+        --fees 2000unuah \
+        -y >/dev/null 2>&1
+
+    sleep 2
+
+    # Set fixed price for GALBRO in blockchain storage
+    # Price = 1.00 USD (stored as "1.000000000000000000" with 18 decimals)
+    # This will be picked up by x/usdoracle for Exchange module
+    print_status "GALBRO test token created and distributed"
+    print_info "GALBRO denom: $GALBRO_DENOM"
+    print_info "Price: 1.00 USD (fixed)"
+}
+
+print_step "Embedding Ndollar token into genesis (continued)"
+AUTO_CONFIRM=true GENESIS_MODE=true KEYRING_BACKEND="$KEYRING_BACKEND" \
     ./scripts/setup/setup_ndollar.sh
 print_status "Ndollar genesis configuration complete"
 
@@ -292,6 +367,12 @@ print_step "Configuring Ndollar runtime components"
 AUTO_CONFIRM=true CHAIN_ID="$CHAIN_ID" KEYRING_BACKEND="$KEYRING_BACKEND" \
     ./scripts/setup/setup_ndollar.sh
 print_status "Ndollar runtime configuration complete"
+
+############################################################
+# Setup GALBRO test token for Exchange module
+############################################################
+
+setup_galbro_poststart "validator" "$KEYRING_BACKEND" "$CHAIN_ID"
 
 ############################################################
 # Prepare server configuration and database

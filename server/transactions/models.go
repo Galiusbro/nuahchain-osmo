@@ -13,18 +13,32 @@ const (
 
 // Операции с активами
 const (
-	OperationTypeAssetEnsure = "ASSET_ENSURE" // Создание/обеспечение актива
-	OperationTypeAssetBuy    = "ASSET_BUY"    // Покупка актива
-	OperationTypeAssetSell   = "ASSET_SELL"   // Продажа актива
+	OperationTypeAssetEnsure      = "ASSET_ENSURE"       // Создание/обеспечение актива
+	OperationTypeAssetBuy         = "ASSET_BUY"          // Покупка актива
+	OperationTypeAssetSell        = "ASSET_SELL"         // Продажа актива
 	OperationTypeAssetMarginOpen  = "ASSET_MARGIN_OPEN"  // Открытие маржинальной позиции
 	OperationTypeAssetMarginClose = "ASSET_MARGIN_CLOSE" // Закрытие маржинальной позиции
 )
 
+// Операции с обменом (exchange)
+const (
+	OperationTypeExchange = "EXCHANGE" // Обмен криптовалюты на unuah через x/exchange модуль
+)
+
+// Операции со стейблкоином
+const (
+	OperationTypeStablecoinBuy  = "STABLECOIN_BUY"
+	OperationTypeStablecoinSell = "STABLECOIN_SELL"
+)
+
+// TransactionStatus represents the status of a transaction
+type TransactionStatus string
+
 // Статусы транзакций
 const (
-	StatusPending = "PENDING" // Транзакция отправлена, ожидает подтверждения
-	StatusSuccess = "SUCCESS" // Транзакция успешно выполнена
-	StatusFailed  = "FAILED"  // Транзакция не удалась
+	StatusPending TransactionStatus = "PENDING" // Транзакция отправлена, ожидает подтверждения
+	StatusSuccess TransactionStatus = "SUCCESS" // Транзакция успешно выполнена
+	StatusFailed  TransactionStatus = "FAILED"  // Транзакция не удалась
 )
 
 // Transaction представляет запись о транзакции в БД
@@ -33,7 +47,7 @@ type Transaction struct {
 	UserID        int64                  `json:"user_id"`
 	OperationType string                 `json:"operation_type"`          // Тип операции (TOKEN_CREATE, TOKEN_BUY и т.д.)
 	TxHash        string                 `json:"tx_hash"`                 // Хеш транзакции в блокчейне
-	Status        string                 `json:"status"`                  // Статус (PENDING, SUCCESS, FAILED)
+	Status        TransactionStatus      `json:"status"`                  // Статус (PENDING, SUCCESS, FAILED)
 	OperationData map[string]interface{} `json:"operation_data"`          // Данные операции (JSON)
 	ErrorMessage  *string                `json:"error_message,omitempty"` // Сообщение об ошибке
 	CreatedAt     time.Time              `json:"created_at"`
@@ -45,7 +59,7 @@ type CreateTransactionRequest struct {
 	UserID        int64                  `json:"user_id"`
 	OperationType string                 `json:"operation_type"`
 	TxHash        string                 `json:"tx_hash"`
-	Status        string                 `json:"status"`
+	Status        TransactionStatus      `json:"status"`
 	OperationData map[string]interface{} `json:"operation_data"`
 	ErrorMessage  *string                `json:"error_message,omitempty"`
 }

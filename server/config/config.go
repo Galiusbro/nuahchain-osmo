@@ -101,6 +101,21 @@ type BlockchainConfig struct {
 
 	// Chain ID
 	ChainID string `yaml:"chain_id"`
+
+	// RPC URL for REST/WebSocket (default: localhost:26657)
+	RPCURL string `yaml:"rpc_url"`
+
+	// WebSocket URL (default: ws://localhost:26657/websocket)
+	WebSocketURL string `yaml:"websocket_url"`
+
+	// Enable WebSocket for transaction tracking
+	WebSocketEnabled bool `yaml:"websocket_enabled"`
+
+	// Reconnect interval for WebSocket
+	ReconnectInterval time.Duration `yaml:"reconnect_interval"`
+
+	// Timeout for WebSocket operations
+	WebSocketTimeout time.Duration `yaml:"websocket_timeout"`
 }
 
 // Load loads and returns the server configuration
@@ -137,8 +152,13 @@ func Load() (*Config, error) {
 			RefreshExpiry: 7 * 24 * time.Hour,
 		},
 		Blockchain: BlockchainConfig{
-			NodeURL: getEnv("BLOCKCHAIN_NODE_URL", "localhost:9090"),
-			ChainID: getEnv("BLOCKCHAIN_CHAIN_ID", "nuahchain"),
+			NodeURL:           getEnv("BLOCKCHAIN_NODE_URL", "localhost:9090"),
+			ChainID:           getEnv("BLOCKCHAIN_CHAIN_ID", "nuahchain"),
+			RPCURL:            getEnv("BLOCKCHAIN_RPC_URL", "localhost:26657"),
+			WebSocketURL:      getEnv("BLOCKCHAIN_WEBSOCKET_URL", "ws://localhost:26657/websocket"),
+			WebSocketEnabled:  getEnvBool("BLOCKCHAIN_WEBSOCKET_ENABLED", true),
+			ReconnectInterval: parseDuration(getEnv("BLOCKCHAIN_WEBSOCKET_RECONNECT_INTERVAL", "5s"), 5*time.Second),
+			WebSocketTimeout:  parseDuration(getEnv("BLOCKCHAIN_WEBSOCKET_TIMEOUT", "30s"), 30*time.Second),
 		},
 	}
 
@@ -254,6 +274,18 @@ func getEnvBool(key string, defaultValue bool) bool {
 		return value == "true" || value == "1" || value == "yes"
 	}
 	return defaultValue
+}
+
+// parseDuration parses a duration string or returns a default value
+func parseDuration(value string, defaultValue time.Duration) time.Duration {
+	if value == "" {
+		return defaultValue
+	}
+	d, err := time.ParseDuration(value)
+	if err != nil {
+		return defaultValue
+	}
+	return d
 }
 
 // Validate validates blockchain configuration

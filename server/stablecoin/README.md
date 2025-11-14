@@ -2,7 +2,7 @@
 
 ## Overview
 
-The stablecoin module provides endpoints for converting between `unuah` and `NDOLLAR` at a 1:1 ratio. This module handles the lifecycle of the NDOLLAR stablecoin, including minting and burning operations.
+The stablecoin module provides endpoints for converting between `unuah` and `NDOLLAR` at a 1:1 ratio. This module handles the lifecycle of the NDOLLAR stablecoin, including minting and burning operations. Endpoints broadcast Cosmos transactions synchronously but return immediately with `status: "PENDING"`; a background tracker later updates the final result (`SUCCESS` / `FAILED`).
 
 ## File Structure
 
@@ -31,16 +31,18 @@ Converts `unuah` to `NDOLLAR` at 1:1 ratio.
 }
 ```
 
-**Response (Success):**
+**Response (202 Accepted):**
 ```json
 {
-  "success": true,
   "tx_hash": "ABC123...",
-  "ndollar_amount": "1000000",
-  "ndollar_denom": "factory/nuah1.../ndollar",
+  "status": "PENDING",
+  "ndollar_amount": "",
+  "ndollar_denom": "",
   "error": ""
 }
 ```
+
+**Tracker Resolution:** Once the transaction is included in a block the tracker fills `ndollar_amount`/`ndollar_denom` and sets `status` to `SUCCESS` or `FAILED`. Inspect `/api/tx/<tx_hash>` for on-chain events.
 
 **Response (Failure):**
 ```json
@@ -74,15 +76,17 @@ Converts `NDOLLAR` back to `unuah` at 1:1 ratio.
 }
 ```
 
-**Response (Success):**
+**Response (202 Accepted):**
 ```json
 {
-  "success": true,
   "tx_hash": "ABC123...",
-  "unuah_amount": "1000000",
+  "status": "PENDING",
+  "unuah_amount": "",
   "error": ""
 }
 ```
+
+**Tracker Resolution:** Final redeemed amount appears after confirmation; failed burns surface as `status = FAILED` with `error` populated.
 
 **Response (Failure):**
 ```json
@@ -150,9 +154,9 @@ curl -X POST http://localhost:8080/api/stablecoin/sell-ndollar \
 ## Error Handling
 
 - **Invalid Amount:** Returns 400 Bad Request
-- **Insufficient Balance:** Returns blockchain error in response
 - **Authentication Failed:** Returns 401 Unauthorized
-- **Transaction Failures:** Captured in response with `success: false`
+- **Transaction Broadcast Issues:** Immediate HTTP 500 with `status = FAILED`
+- **On-chain Failures:** Tracker sets the stored transaction to `FAILED`; `/api/tx/<tx_hash>` exposes the detailed raw log
 
 ## Related Endpoints
 

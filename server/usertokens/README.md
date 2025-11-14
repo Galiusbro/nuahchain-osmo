@@ -19,17 +19,22 @@ usertokens/
 ### Models (`models.go`)
 Содержит структуры данных для запросов и ответов API:
 - `CreateTokenRequest` - запрос на создание токена
-- `CreateTokenResponse` - ответ при создании токена
+- `CreateTokenResponse` - ответ при создании токена (включает `Status`, `TxHash`, `Message`)
 - `BuyTokenRequest` - запрос на покупку токена из bonding curve
-- `BuyTokenResponse` - ответ при покупке токена
+- `BuyTokenResponse` - ответ при покупке токена (возвращает `Status`, `TxHash`, `TokensOut`, `Message`)
 - `SellTokenRequest` - запрос на продажу токена в bonding curve
-- `SellTokenResponse` - ответ при продаже токена
+- `SellTokenResponse` - ответ при продаже токена (`Status`, `TxHash`, `PaymentOut`, `Message`)
 - `TokenInfo` - информация о токене
 
 ### Service (`service.go`)
 Основной сервис, предоставляющий:
-- `NewService()` - создание экземпляра сервиса
+- `NewService()` - создание экземпляра сервиса (с репозиторием транзакций и трекером)
 - `GetUserWallet()` - получение и расшифровка кошелька пользователя
+- Методы `CreateToken/BuyToken/SellToken`, которые:
+  - Шифруют/расшифровывают приватный ключ
+  - Отправляют транзакцию через blockchain client
+  - Сохраняют запись в таблице `transactions` со статусом `PENDING`
+  - Передают `tx_hash` в фонового трекера для последующего обновления
 
 ### Handlers (`handlers.go`)
 HTTP обработчики для маршрутов:
@@ -55,14 +60,21 @@ type NewOperationRequest struct {
 }
 
 type NewOperationResponse struct {
-    Success bool   `json:"success"`
-    TxHash  string `json:"tx_hash"`
+    Status string `json:"status"`
+    TxHash string `json:"tx_hash"`
+    Message string `json:"message,omitempty"`
 }
 ```
 
 2. **Создайте файл операции** (например, `new_operation.go`):
 ```go
 package usertokens
+
+type NewOperationResponse struct {
+    Status string `json:"status"`
+    TxHash string `json:"tx_hash"`
+    Message string `json:"message,omitempty"`
+}
 
 func (s *Service) NewOperation(ctx context.Context, userID int64, req NewOperationRequest) (*NewOperationResponse, error) {
     // Получаем кошелек пользователя
@@ -71,12 +83,23 @@ func (s *Service) NewOperation(ctx context.Context, userID int64, req NewOperati
         return nil, err
     }
 
+    _ = wallet // используем кошелек при формировании сообщения
+
     // Выполняем операцию через blockchain client
-    // ...
+    txHash, err := s.blockchainCli.SomeOperation(ctx, fmt.Sprintf("%x", privKeyBytes), req)
+    if err != nil {
+        return &NewOperationResponse{Status: transactions.StatusFailed, TxHash: txHash, Message: err.Error()}, err
+    }
+
+    // Записываем транзакцию и ставим в очередь трекера
+    if err := s.recordPendingTransaction(userID, "CUSTOM_OPERATION", txHash, map[string]interface{}{"payload": req}); err != nil {
+        return &NewOperationResponse{Status: transactions.StatusFailed, TxHash: txHash, Message: err.Error()}, err
+    }
 
     return &NewOperationResponse{
-        Success: true,
+        Status:  string(transactions.StatusPending),
         TxHash:  txHash,
+        Message: "Operation broadcast, awaiting confirmation",
     }, nil
 }
 ```
@@ -113,4 +136,8 @@ mux.HandleFunc("/api/tokens/new-operation", usertokens.HandleNewOperation)
 
 - `server/auth` - для аутентификации и работы с кошельками
 - `server/blockchain` - для взаимодействия с блокчейном
+- `server/transactions` - для записи и последующего обновления статусов (`PENDING` → `SUCCESS/FAILED`)
+- `server/transactions/tracker` - фоновый трекер, который дергает `GetTx` и обновляет строки в БД
+
+Финальные статусы и события можно получать через `GET /api/tx/<tx_hash>` или соответствующие сервисные методы.
 

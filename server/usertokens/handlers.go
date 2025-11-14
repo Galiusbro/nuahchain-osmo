@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/osmosis-labs/osmosis/v30/server/auth"
+	"github.com/osmosis-labs/osmosis/v30/server/transactions"
 )
 
 var (
@@ -58,33 +59,23 @@ func HandleCreateToken(w http.ResponseWriter, r *http.Request) {
 
 	// Create token
 	resp, err := tokenService.CreateToken(r.Context(), user.ID, req)
-	if err != nil {
-		apiResp := CreateTokenResponse{
-			Success: false,
-			Error:   err.Error(),
+	if resp == nil {
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			http.Error(w, "unknown error", http.StatusInternalServerError)
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(apiResp)
 		return
 	}
 
-	// Return response
-	apiResp := CreateTokenResponse{
-		Denom:   resp.Denom,
-		TxHash:  resp.TxHash,
-		Success: resp.Success,
-		Message: "Token creation initiated",
-		Error:   resp.Error,
+	statusCode := httpStatusFromTransaction(resp.Status)
+	if err != nil && statusCode == http.StatusAccepted {
+		statusCode = http.StatusInternalServerError
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if resp.Success {
-		w.WriteHeader(http.StatusCreated)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	json.NewEncoder(w).Encode(apiResp)
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(resp)
 }
 
 // HandleBuyToken handles POST /api/tokens/buy
@@ -120,35 +111,23 @@ func HandleBuyToken(w http.ResponseWriter, r *http.Request) {
 
 	// Buy token
 	resp, err := tokenService.BuyToken(r.Context(), user.ID, req)
-	if err != nil {
-		apiResp := BuyTokenResponse{
-			Success: false,
-			TxHash:  resp.TxHash,
-			Error:   err.Error(),
+	if resp == nil {
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			http.Error(w, "unknown error", http.StatusInternalServerError)
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(apiResp)
 		return
 	}
 
-	// Return response
-	apiResp := BuyTokenResponse{
-		TxHash:    resp.TxHash,
-		TokensOut: resp.TokensOut,
-		PricePaid: resp.PricePaid,
-		Success:   resp.Success,
-		Message:   "Token purchase initiated",
-		Error:     resp.Error,
+	status := httpStatusFromTransaction(resp.Status)
+	if err != nil && status == http.StatusAccepted {
+		status = http.StatusInternalServerError
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if resp.Success {
-		w.WriteHeader(http.StatusOK)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	json.NewEncoder(w).Encode(apiResp)
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(resp)
 }
 
 // HandleSellToken handles POST /api/tokens/sell
@@ -184,35 +163,23 @@ func HandleSellToken(w http.ResponseWriter, r *http.Request) {
 
 	// Sell token
 	resp, err := tokenService.SellToken(r.Context(), user.ID, req)
-	if err != nil {
-		apiResp := SellTokenResponse{
-			Success: false,
-			TxHash:  resp.TxHash,
-			Error:   err.Error(),
+	if resp == nil {
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			http.Error(w, "unknown error", http.StatusInternalServerError)
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(apiResp)
 		return
 	}
 
-	// Return response
-	apiResp := SellTokenResponse{
-		TxHash:        resp.TxHash,
-		PaymentOut:    resp.PaymentOut,
-		PriceReceived: resp.PriceReceived,
-		Success:       resp.Success,
-		Message:       "Token sale initiated",
-		Error:         resp.Error,
+	statusCode := httpStatusFromTransaction(resp.Status)
+	if err != nil && statusCode == http.StatusAccepted {
+		statusCode = http.StatusInternalServerError
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if resp.Success {
-		w.WriteHeader(http.StatusOK)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	json.NewEncoder(w).Encode(apiResp)
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(resp)
 }
 
 // authenticateRequest extracts and validates the user from the Authorization header
@@ -278,4 +245,15 @@ func HandleGetTxStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
+}
+
+func httpStatusFromTransaction(status string) int {
+	switch status {
+	case string(transactions.StatusSuccess):
+		return http.StatusOK
+	case string(transactions.StatusFailed):
+		return http.StatusInternalServerError
+	default:
+		return http.StatusAccepted
+	}
 }

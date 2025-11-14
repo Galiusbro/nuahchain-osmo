@@ -114,6 +114,7 @@ import (
 	appparams "github.com/osmosis-labs/osmosis/v30/app/params"
 
 	bondingcurvetypes "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types"
+	exchangetypes "github.com/osmosis-labs/osmosis/v30/x/exchange/types"
 	minttypes "github.com/osmosis-labs/osmosis/v30/x/mint/types"
 	protorevtypes "github.com/osmosis-labs/osmosis/v30/x/protorev/types"
 	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
@@ -496,6 +497,7 @@ func NewNUAHApp(
 	// ensure usertoken message types are registered prior to service wiring
 	usertokentypes.RegisterInterfaces(app.interfaceRegistry)
 	bondingcurvetypes.RegisterInterfaces(app.interfaceRegistry)
+	exchangetypes.RegisterInterfaces(app.interfaceRegistry)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the

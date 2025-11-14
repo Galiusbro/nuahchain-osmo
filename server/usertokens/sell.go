@@ -14,8 +14,8 @@ func (s *Service) SellToken(ctx context.Context, userID int64, req SellTokenRequ
 	wallet, privKeyBytes, err := s.GetUserWallet(ctx, userID)
 	if err != nil {
 		return &SellTokenResponse{
-			Success: false,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			Error:  err.Error(),
 		}, err
 	}
 
@@ -25,8 +25,8 @@ func (s *Service) SellToken(ctx context.Context, userID int64, req SellTokenRequ
 		selectedDenom, err := s.blockchainCli.SelectPaymentDenom(ctx, wallet.Address, "")
 		if err != nil {
 			return &SellTokenResponse{
-				Success: false,
-				Error:   fmt.Sprintf("failed to select payment denom: %v", err),
+				Status: string(transactions.StatusFailed),
+				Error:  fmt.Sprintf("failed to select payment denom: %v", err),
 			}, err
 		}
 		paymentDenom = selectedDenom
@@ -43,43 +43,36 @@ func (s *Service) SellToken(ctx context.Context, userID int64, req SellTokenRequ
 
 	// Execute sell transaction
 	resp, err := s.blockchainCli.SellToCurveWithKey(ctx, sellReq, privKeyBytes)
-
-	// Записываем транзакцию в БД
-	status := transactions.StatusPending
-	var errorMsg *string
-	if err != nil || !resp.Success {
-		status = transactions.StatusFailed
-		if err != nil {
-			msg := err.Error()
-			errorMsg = &msg
-		} else if resp.Error != "" {
-			errorMsg = &resp.Error
-		}
-	}
-
-	// Записываем только если есть tx_hash (транзакция была отправлена)
-	if resp.TxHash != "" {
-		_, createErr := s.transactionsRepo.CreateTransaction(transactions.CreateTransactionRequest{
-			UserID:        userID,
-			OperationType: transactions.OperationTypeTokenSell,
-			TxHash:        resp.TxHash,
-			Status:        status,
-			OperationData: transactions.TokenSellData(req.Denom, req.TokenAmount, paymentDenom, resp.PaymentOut, resp.PriceReceived),
-			ErrorMessage:  errorMsg,
-		})
-
-		// Если запись в БД не удалась, логируем но не прерываем выполнение
-		if createErr != nil {
-			// В продакшене здесь можно добавить логирование
-			_ = createErr
-		}
-	}
-
 	if err != nil {
+		errMsg := err.Error()
+		if resp != nil && resp.Error != "" {
+			errMsg = resp.Error
+		}
 		return &SellTokenResponse{
-			Success: false,
-			TxHash:  resp.TxHash,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  errMsg,
+		}, fmt.Errorf(errMsg)
+	}
+
+	if resp == nil || resp.TxHash == "" {
+		msg := "transaction hash not returned"
+		return &SellTokenResponse{
+			Status: string(transactions.StatusFailed),
+			Error:  msg,
+		}, fmt.Errorf(msg)
+	}
+
+	if err := s.recordPendingTransaction(
+		userID,
+		transactions.OperationTypeTokenSell,
+		resp.TxHash,
+		transactions.TokenSellData(req.Denom, req.TokenAmount, paymentDenom, resp.PaymentOut, resp.PriceReceived),
+	); err != nil {
+		return &SellTokenResponse{
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  fmt.Sprintf("failed to persist transaction: %v", err),
 		}, err
 	}
 
@@ -87,7 +80,7 @@ func (s *Service) SellToken(ctx context.Context, userID int64, req SellTokenRequ
 		TxHash:        resp.TxHash,
 		PaymentOut:    resp.PaymentOut,
 		PriceReceived: resp.PriceReceived,
-		Success:       resp.Success,
-		Error:         resp.Error,
+		Status:        string(transactions.StatusPending),
+		Message:       "Token sale broadcast, awaiting confirmation",
 	}, nil
 }

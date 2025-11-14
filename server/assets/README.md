@@ -9,6 +9,8 @@ This module provides functionality for trading assets from the `x/assets` blockc
 - **Sell Asset**: Sell assets and receive NDOLLAR in return
 - **Margin Trading**: Open and close leveraged positions via the `x/leverage` module
 
+All endpoints broadcast Cosmos transactions synchronously but now return immediately with `status: "PENDING"` and the `tx_hash`. A background tracker resolves final outcomes (`SUCCESS` / `FAILED`).
+
 ## API Endpoints
 
 ### POST /api/assets/ensure
@@ -26,8 +28,8 @@ Ensure an asset exists, creating it if necessary.
 ```json
 {
   "tx_hash": "ABC123...",
-  "success": true,
-  "message": "Asset ensure initiated"
+  "status": "PENDING",
+  "message": "Asset ensure broadcast, awaiting confirmation"
 }
 ```
 
@@ -56,9 +58,9 @@ Buy an asset using payment denom.
 ```json
 {
   "tx_hash": "ABC123...",
-  "base_amount": "0.5",
-  "success": true,
-  "message": "Asset purchase initiated"
+  "status": "PENDING",
+  "base_amount": "",
+  "message": "Asset purchase broadcast, awaiting confirmation"
 }
 ```
 
@@ -78,9 +80,9 @@ Sell an asset and receive NDOLLAR.
 ```json
 {
   "tx_hash": "ABC123...",
-  "payout_ndollar": "1000000",
-  "success": true,
-  "message": "Asset sale initiated"
+  "status": "PENDING",
+  "payout_ndollar": "",
+  "message": "Asset sale broadcast, awaiting confirmation"
 }
 ```
 
@@ -102,9 +104,9 @@ Open a leveraged (margin) position on an underlying asset.
 ```json
 {
   "tx_hash": "ABC123...",
-  "position_id": "42",
-  "success": true,
-  "message": "Margin position opening initiated"
+  "status": "PENDING",
+  "position_id": "",
+  "message": "Margin position opening broadcast, awaiting confirmation"
 }
 ```
 
@@ -123,9 +125,9 @@ Close an existing leveraged position by its on-chain identifier.
 ```json
 {
   "tx_hash": "DEF456...",
-  "pnl": "-25000",
-  "success": true,
-  "message": "Margin position closure initiated"
+  "status": "PENDING",
+  "pnl": "",
+  "message": "Margin position closure broadcast, awaiting confirmation"
 }
 ```
 
@@ -158,5 +160,8 @@ When buying assets, if `denom` is not provided, the system automatically selects
 The module uses the `blockchain.Client` to:
 - Sign transactions with user's private key
 - Broadcast transactions to the blockchain
-- Extract transaction results and events
+- Record the transaction as `PENDING` in the database and enqueue it for background tracking
+- Update application state once the tracker resolves the final status
+
+For confirmed results, clients should query `GET /api/tx/<tx_hash>` or the transactions API (if exposed) to retrieve events and final status.
 

@@ -27,6 +27,27 @@ Content-Type: application/json
 
 All responses are in JSON format. Success responses include relevant data, while error responses include an error message.
 
+### Transaction Status Lifecycle
+
+Most state-changing endpoints (assets, user tokens, stablecoin, exchange) initiate on-chain transactions via `BroadcastTxSync`. The HTTP response is **pessimistic**—it returns immediately with:
+
+- `tx_hash`: the Cosmos transaction hash
+- `status`: one of
+  - `PENDING` – transaction submitted, waiting for block inclusion
+  - `SUCCESS` – transaction confirmed on-chain (typically returned by background polling)
+  - `FAILED` – transaction rejected on-chain (code ≠ 0, insufficient funds, etc.)
+- Optional contextual fields (e.g. `message`, `unuah_out`)
+
+HTTP status codes follow this state: `202 Accepted` for `PENDING`, `200 OK` for `SUCCESS`, `500 Internal Server Error` for `FAILED`.
+
+A background tracker polls Tendermint/gRPC and updates the server-side database once the final status is known. Clients should poll the dedicated endpoint:
+
+```
+GET /api/tx/<tx_hash>
+```
+
+The response mirrors on-chain data (code, raw log, events). Scripts/clients can use this to wait for completion, update UI, or surface errors.
+
 ---
 
 ## Health Check Endpoints
@@ -299,18 +320,19 @@ Content-Type: application/json
 **Request Body:**
 - `symbol` (string, required): Asset symbol as typed by the user.
 
-**Response (200 OK):**
+**Response (202 Accepted):**
 ```json
 {
-  "tx_hash": "952a20f9f5b50ce1bbde925af17975f70b6f6d4d6cb90597d394347cd82fb374",
-  "success": true,
-  "message": "Asset ensure initiated"
+  "tx_hash": "812ddfd2cdec3f0ec14e92adcf5082d66afe648509eeefe0a8baea1d4fde8fca",
+  "status": "PENDING",
+  "message": "Asset ensure transaction broadcast, awaiting confirmation"
 }
 ```
 
 **Notes:**
 - Re-ensuring an existing asset is idempotent and still returns a transaction hash.
-- All operations are recorded in the `transactions` table for later audit.
+- The operation is logged to the `transactions` table with `status = PENDING`, then updated by the tracker once finalized.
+- Call `GET /api/tx/<tx_hash>` to obtain on-chain success/failure details (event `assets.asset_created`).
 
 ---
 
@@ -337,18 +359,20 @@ Content-Type: application/json
 - `amount` (string, optional): Payment amount (base units). Required when `denom` is provided.
 - `amount_ndollar` (string, optional): Deprecated legacy field; still supported for backwards compatibility.
 
-**Response (200 OK):**
+**Response (202 Accepted):**
 ```json
 {
-  "tx_hash": "3a2da984a4a381ca732a910d2b7e1468947d38437584f1a747fd228b546ff80f",
-  "success": true,
-  "message": "Asset purchase initiated"
+  "tx_hash": "ebcfe2c4ee86b2bb88c33765c9f157b8918dced029b93100fef650251e736392",
+  "status": "PENDING",
+  "base_amount": "",
+  "message": "Asset purchase broadcast, awaiting confirmation"
 }
 ```
 
 **Notes:**
-- The synchronous response does not include the final `base_amount`. Use `/api/tx/:hash` to inspect events (`assets.asset_bought`) once the transaction is finalised.
+- `base_amount` will be populated once the tracker resolves the transaction; inspect `/api/tx/<tx_hash>` for `assets.asset_bought` events.
 - When paying with `unuah` the module mints and burns NDOLLAR internally.
+- Database entry moves from `PENDING` → `SUCCESS`/`FAILED` automatically.
 
 ---
 
@@ -372,18 +396,19 @@ Content-Type: application/json
 - `symbol` (string, required): Asset symbol.
 - `base_amount` (string, required): Amount of asset to sell (human-readable units, e.g. `0.1`). The backend converts to micro units internally.
 
-**Response (200 OK):**
+**Response (202 Accepted):**
 ```json
 {
-  "tx_hash": "a1fd3b388b138f96c6f565eebe9b853268cfba8a42b27a02243d9adf683afdf1",
-  "success": true,
-  "message": "Asset sale initiated"
+  "tx_hash": "b379c8c73fe72d6833bc03dca16e1b0aa7097544bcd6aa1a40ec505e28759a74",
+  "status": "PENDING",
+  "payout_ndollar": "",
+  "message": "Asset sale broadcast, awaiting confirmation"
 }
 ```
 
 **Notes:**
-- Detailed payout can be retrieved through `/api/tx/:hash` (event `assets.asset_sold`).
-- The sale fails if the user lacks balance or if the oracle cannot refresh the price.
+- Detailed payout appears in `/api/tx/<tx_hash>` (event `assets.asset_sold`).
+- Failures (e.g. insufficient asset balance) are surfaced as `status = FAILED` once the tracker resolves the transaction.
 
 ---
 
@@ -411,23 +436,23 @@ Content-Type: application/json
 - `quote_amount` (string, required): Margin supplied in micro NDOLLAR.
 - `leverage` (string, required): Desired leverage multiplier expressed as a decimal string (e.g., `2`, `3.5`).
 
-**Response (200 OK):**
+**Response (202 Accepted):**
 ```json
 {
-  "tx_hash": "894a0d0e...",
-  "position_id": "7",
-  "base_quantity": "0.15",
-  "entry_price": "2000.50",
-  "leverage": "2",
-  "success": true,
-  "message": "Margin position opening initiated"
+  "tx_hash": "426913ce0daed179d57d3c8b3ff73907e7757841e0d1b9db412bebaf0d2af905",
+  "status": "PENDING",
+  "position_id": "",
+  "base_quantity": "",
+  "entry_price": "",
+  "leverage": "1.0",
+  "message": "Margin position opening broadcast, awaiting confirmation"
 }
 ```
 
 **Notes:**
-- The module automatically borrows/repays against NDOLLAR; ensure the wallet holds sufficient NDOLLAR for the quoted margin.
-- Position metadata (ID, base quantity, entry price) is extracted from the synchronous response when available.
-- Transactions are recorded in the `transactions` table under `ASSET_MARGIN_OPEN`.
+- Ensure the wallet holds sufficient NDOLLAR for the quoted margin; the module borrows/repays automatically.
+- Position metadata (ID, base quantity, entry price) becomes available once the tracker resolves the transaction; fetch `/api/tx/<tx_hash>` (event `leverage.position_opened`).
+- Transactions are recorded in the `transactions` table under `ASSET_MARGIN_OPEN` and transition from `PENDING` to `SUCCESS`/`FAILED` automatically.
 
 ---
 
@@ -449,20 +474,19 @@ Content-Type: application/json
 **Request Body:**
 - `position_id` (string, required): ID returned when the position was opened.
 
-**Response (200 OK):**
+**Response (202 Accepted):**
 ```json
 {
-  "tx_hash": "51f7b7c1...",
-  "pnl": "-12500",
-  "success": true,
-  "message": "Margin position closure initiated"
+  "tx_hash": "92a5fea273f064184fc8ccb5be223a9d14ec89adc9cdccec7b7ec9a930941969",
+  "status": "PENDING",
+  "pnl": "",
+  "message": "Margin position closure broadcast, awaiting confirmation"
 }
 ```
 
 **Notes:**
-- Positive `pnl` indicates profit in micro NDOLLAR, negative indicates loss.
-- The transaction is logged as `ASSET_MARGIN_CLOSE` in the `transactions` table for auditing.
-- If the position is already liquidated or not found, the chain will return an error which is surfaced to the client and persisted with status `FAILED`.
+- After confirmation the tracker enriches the DB record; fetch `/api/tx/<tx_hash>` for final PnL and events (`leverage.position_closed`).
+- Database entry transitions from `PENDING` to `SUCCESS`/`FAILED` automatically based on on-chain result.
 
 ---
 
@@ -470,6 +494,77 @@ Content-Type: application/json
 - Live prices are fetched via Yahoo Finance v8. If a direct request yields HTTP 404/400 or empty data, the backend automatically performs a Yahoo symbol search and retries with the best candidate.
 - If no valid price is found after fallback the transaction fails (e.g. `failed to fetch price from API: HTTP error: 404`). The error is saved to the `transactions` table (`status: failed`).
 - Symbols are sanitised but otherwise unaltered, allowing the frontend to send arbitrary tickers.
+
+---
+
+## Stablecoin Endpoints
+
+These endpoints interact with the `x/stablecoin` module to swap between `unuah` and NDOLLAR at a 1:1 rate. Both require authentication.
+
+### POST /api/stablecoin/buy-ndollar
+
+Convert `unuah` into NDOLLAR.
+
+**Request:**
+```http
+POST /api/stablecoin/buy-ndollar
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "amount": "1000000"
+}
+```
+
+**Request Body:**
+- `amount` (string, required): Amount of `unuah` to convert (base units).
+
+**Response (202 Accepted):**
+```json
+{
+  "tx_hash": "cab0fdb536e06fb0773cfe55a8633b60bd015106fb296cf02c62dc7e9abfccb2",
+  "status": "PENDING",
+  "ndollar_amount": "",
+  "ndollar_denom": "",
+  "error": ""
+}
+```
+
+**Notes:**
+- The tracker fills `ndollar_amount`/`ndollar_denom` once the transaction confirms (see `/api/tx/<tx_hash>` event `buy_ndollar`).
+- Insufficient balances or module constraints will produce `status = FAILED` with `error` populated.
+
+### POST /api/stablecoin/sell-ndollar
+
+Convert NDOLLAR back into `unuah`.
+
+**Request:**
+```http
+POST /api/stablecoin/sell-ndollar
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "amount": "500000"
+}
+```
+
+**Request Body:**
+- `amount` (string, required): Amount of NDOLLAR to burn (base units).
+
+**Response (202 Accepted):**
+```json
+{
+  "tx_hash": "92a5fea273f064184fc8ccb5be223a9d14ec89adc9cdccec7b7ec9a930941969",
+  "status": "PENDING",
+  "unuah_amount": "",
+  "error": ""
+}
+```
+
+**Notes:**
+- Final redeemed amount appears in `/api/tx/<tx_hash>` (event `sell_ndollar`).
+- Background tracker updates the corresponding row in `transactions` (operation type `STABLECOIN_SELL`).
 
 ---
 
@@ -503,20 +598,20 @@ Content-Type: application/json
 - `image` (string, optional): URL to token image
 - `description` (string, optional): Token description
 
-**Response (201 Created):**
+**Response (202 Accepted):**
 ```json
 {
-  "denom": "factory/nuah1x9nc3nse2skvtdqxutrfk3pg6rtckd3qskvc5n/mtk",
-  "tx_hash": "f4b6ea890e56d0f96b066c0ce77230b284ada899b6724d8612b955290d58d676",
-  "success": true,
-  "message": "Token creation initiated"
+  "denom": "factory/nuah10us33fwsvajr57pgjxw638xzqjsfntqxk6yw56/test",
+  "tx_hash": "0a6bc0af332d6e4adbe000523b48128fffb994098357a1d5926034222c0097c3",
+  "status": "PENDING",
+  "message": "Token creation broadcast, awaiting confirmation"
 }
 ```
 
 **Response Fields:**
 - `denom` (string): Token denomination (used for trading)
 - `tx_hash` (string): Blockchain transaction hash
-- `success` (boolean): Whether the transaction was initiated successfully
+- `status` (string): `PENDING`, `SUCCESS`, or `FAILED`
 - `message` (string): Status message
 - `error` (string, optional): Error message if transaction failed
 
@@ -525,12 +620,14 @@ Content-Type: application/json
 - `401 Unauthorized`: Missing or invalid token
 - `500 Internal Server Error`: Transaction failed or server error
 
-**Note:** Token creation mints tokens and distributes them according to configured percentages:
-- 30% to bonding curve wallet (for trading)
-- 10% to platform wallet
-- 10% to referral wallet
-- 40% to AI CEO wallet
-- 10% remaining (if applicable)
+**Notes:**
+- The transaction record is created with `status = PENDING` and updated automatically; inspect `/api/tx/<tx_hash>` for final state and detailed events (`usertoken.token_created`).
+- Token creation mints tokens and distributes them according to configured percentages:
+  - 30% to bonding curve wallet (for trading)
+  - 10% to platform wallet
+  - 10% to referral wallet
+  - 40% to AI CEO wallet
+  - 10% remaining (if applicable)
 
 ---
 
@@ -560,34 +657,20 @@ Content-Type: application/json
 - `payment_denom` (string, optional): Payment currency (`unuah` or `undollar`). If not provided, system auto-selects based on user balance (prefers `undollar`, falls back to `unuah`)
 - `min_tokens_out` (string, optional): Minimum tokens to receive (slippage protection)
 
-**Response (200 OK):**
+**Response (202 Accepted):**
 ```json
 {
-  "tx_hash": "4700a4a49d5afc46caca6526bd377a3e88955c5c95f54069d7763c3cfe46b0eb",
-  "tokens_out": "24491346",
-  "price_paid": "10000000",
-  "success": true,
-  "message": "Token purchase initiated"
+  "tx_hash": "35c78d5bfcb488013c7fcb0ba7706167d84fff4d0524763561426bfee0801114",
+  "status": "PENDING",
+  "tokens_out": "",
+  "price_paid": "",
+  "message": "Token purchase broadcast, awaiting confirmation"
 }
 ```
 
-**Response Fields:**
-- `tx_hash` (string): Blockchain transaction hash
-- `tokens_out` (string, optional): Actual tokens received (in base units)
-- `price_paid` (string, optional): Total price paid
-- `success` (boolean): Whether the transaction was initiated successfully
-- `message` (string): Status message
-- `error` (string, optional): Error message if transaction failed
-
-**Error Responses:**
-- `400 Bad Request`: Missing required fields
-- `401 Unauthorized`: Missing or invalid token
-- `500 Internal Server Error`: Transaction failed or server error
-
-**Note:**
-- Amounts are specified in base units (e.g., `10000000` = 10 tokens if display exponent is 6)
-- The system automatically selects payment denomination if not specified
-- Transaction is initiated asynchronously; check `tx_hash` status on blockchain
+**Notes:**
+- Once the transaction lands on-chain, the tracker fills `tokens_out`/`price_paid` and flips `status` to `SUCCESS`/`FAILED` in the database.
+- Use `/api/tx/<tx_hash>` to inspect bonding curve events for exact fills.
 
 ---
 
@@ -617,16 +700,20 @@ Content-Type: application/json
 - `payment_denom` (string, optional): Payment currency to receive (`unuah` or `undollar`). If not provided, system auto-selects based on user balance (prefers `undollar`, falls back to `unuah`)
 - `min_payment_out` (string, optional): Minimum payment to receive (slippage protection)
 
-**Response (200 OK):**
+**Response (202 Accepted):**
 ```json
 {
-  "tx_hash": "3041d3feda2795e35d7fa131ae29839127440323927d79465375b1f329d41df4",
-  "payment_out": "3652495",
-  "price_received": "3652495",
-  "success": true,
-  "message": "Token sale initiated"
+  "tx_hash": "edb4ae45b9b3fde9b9aae9990701bb0368d1374c8b43aa4a23357b735ede27f8",
+  "status": "PENDING",
+  "payment_out": "",
+  "price_received": "",
+  "message": "Token sale broadcast, awaiting confirmation"
 }
 ```
+
+**Notes:**
+- Final payout metrics are visible after confirmation via `/api/tx/<tx_hash>` (event `usertoken.token_sold`).
+- Database status transitions automatically; clients should treat immediate responses as intent acknowledgements.
 
 **Response Fields:**
 - `tx_hash` (string): Blockchain transaction hash
@@ -648,221 +735,28 @@ Content-Type: application/json
 
 ---
 
-## Transaction Status Endpoint
+## Exchange Endpoints
 
-### GET /api/tx/:hash
+The Exchange module allows users to exchange supported cryptocurrencies (ETH, BTC, USDC, USDT, ATOM, OSMO, SOL) for unuah using real-time price feeds from the USD Oracle.
 
-Get the status of any transaction by its hash. This endpoint queries the blockchain directly using REST API and provides full transaction details including logs and events.
+### POST /api/exchange/tokens
 
-**Authentication:** Not required (public endpoint)
+Exchange supported tokens for unuah.
+
+**Authentication:** Required
 
 **Request:**
 ```http
-GET /api/tx/4700a4a49d5afc46caca6526bd377a3e88955c5c95f54069d7763c3cfe46b0eb
+POST /api/exchange/tokens
+Content-Type: application/json
+Authorization: Bearer <token>
 ```
 
-**URL Parameters:**
-- `hash` (string, required): Transaction hash (hex string, 64 characters, can be in any case)
-
-**Response (200 OK) - Transaction Found (Success):**
+**Request Body:**
 ```json
 {
-  "tx_hash": "4700a4a49d5afc46caca6526bd377a3e88955c5c95f54069d7763c3cfe46b0eb",
-  "found": true,
-  "success": true,
-  "code": 0,
-  "codespace": "",
-  "height": 45297,
-  "gas_used": 227350,
-  "gas_wanted": 500000,
-  "log": "",
-  "events": [
-    {
-      "type": "transfer",
-      "attributes": {
-        "recipient": "nuah1x9nc3nse2skvtdqxutrfk3pg6rtckd3qskvc5n",
-        "sender": "nuah1fx6f78mh5pa7qq9xkttemu3gx49r9pnvq8nwpd",
-        "amount": "200000000unuah"
-      }
-    }
-  ]
+  "token_denom": "uusdc",
+  "amount": "100000000",
+  "min_output": "95000000"
 }
 ```
-
-**Response (200 OK) - Transaction Failed:**
-```json
-{
-  "tx_hash": "4700a4a49d5afc46caca6526bd377a3e88955c5c95f54069d7763c3cfe46b0eb",
-  "found": true,
-  "success": false,
-  "code": 5,
-  "codespace": "sdk",
-  "height": 45297,
-  "gas_used": 130091,
-  "gas_wanted": 500000,
-  "log": "failed to execute message; message index: 0: insufficient funds",
-  "error": "failed to execute message; message index: 0: insufficient funds",
-  "timestamp": "2025-11-05T23:35:25Z"
-}
-```
-
-**Response (200 OK) - Transaction Not Found:**
-```json
-{
-  "tx_hash": "4700a4a49d5afc46caca6526bd377a3e88955c5c95f54069d7763c3cfe46b0eb",
-  "found": false,
-  "success": false,
-  "error": "transaction not found"
-}
-```
-
-**Response Fields:**
-- `tx_hash` (string): Transaction hash (normalized to lowercase)
-- `found` (boolean): Whether the transaction was found on the blockchain
-- `success` (boolean): Whether the transaction succeeded. This checks both `code == 0` AND logs for error messages (even if code is 0, errors in logs will mark success as false)
-- `code` (int, optional): Transaction result code (0 = success, non-zero = error)
-- `codespace` (string, optional): Error codespace
-- `height` (int64, optional): Block height where transaction was included
-- `gas_used` (int64, optional): Gas actually used
-- `gas_wanted` (int64, optional): Gas requested
-- `log` (string, optional): Full transaction log (may contain error details even if code is 0)
-- `error` (string, optional): Error message if transaction failed
-- `events` (array, optional): Array of transaction events with type and attributes
-
-**Error Responses:**
-- `400 Bad Request`: Invalid transaction hash format
-
-**Important Notes:**
-- **Works for any transaction type**: This endpoint queries the blockchain directly and works for all transaction types (bank transfers, token operations, staking, governance, etc.)
-- **Full log inspection**: Even if `code` is 0, the endpoint checks logs for error messages (like "insufficient funds", "invalid", etc.) and sets `success: false` if errors are found
-- **REST API**: Uses blockchain REST API (`http://localhost:26657/tx`) for complete transaction information, including all events and logs
-- Transaction hash must be a valid 64-character hexadecimal string
-- If transaction is not yet included in a block, `found` will be `false`
-- Hash can be in any case (upper, lower, or mixed) - it will be normalized to lowercase
-- Use this endpoint to check transaction status after any blockchain operation
-
----
-
-## Error Handling
-
-All endpoints may return standard HTTP error codes:
-
-- `400 Bad Request`: Invalid request parameters or missing required fields
-- `401 Unauthorized`: Missing or invalid authentication token
-- `405 Method Not Allowed`: Wrong HTTP method used
-- `500 Internal Server Error`: Server error or blockchain transaction failure
-
-Error responses include an error message in the response body or in the `error` field of the JSON response.
-
----
-
-## Token Amounts and Units
-
-### Base Units vs Display Units
-
-All amounts in API requests and responses are specified in **base units** (exponent 0).
-
-For display purposes, tokens typically have a display exponent of 6:
-- Base unit: `10000000` = Display unit: `10` tokens
-- Base unit: `5000000` = Display unit: `5` tokens
-- Base unit: `1000000` = Display unit: `1` token
-
-### Payment Denominations
-
-Supported payment denominations:
-- `unuah`: Base currency (default)
-- `undollar`: Alternative payment currency
-
-If `payment_denom` is not specified in buy/sell requests, the system automatically selects based on user balance:
-1. First tries `undollar` if balance is sufficient
-2. Falls back to `unuah` if `undollar` is insufficient or unavailable
-
----
-
-## Example Workflow
-
-### 1. Register a new user
-```bash
-curl -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@example.com",
-    "password": "secure_password"
-  }'
-```
-
-### 2. Login to get token
-```bash
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@example.com",
-    "password": "secure_password"
-  }'
-```
-
-### 3. Create a token
-```bash
-curl -X POST http://localhost:8080/api/tokens/create \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <token>" \
-  -d '{
-    "name": "My Token",
-    "symbol": "MTK",
-    "description": "My first token"
-  }'
-```
-
-### 4. Buy tokens
-```bash
-curl -X POST http://localhost:8080/api/tokens/buy \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <token>" \
-  -d '{
-    "denom": "factory/nuah1x9nc3nse2skvtdqxutrfk3pg6rtckd3qskvc5n/mtk",
-    "payment_amount": "10000000"
-  }'
-```
-
-### 5. Sell tokens
-```bash
-curl -X POST http://localhost:8080/api/tokens/sell \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <token>" \
-  -d '{
-    "denom": "factory/nuah1x9nc3nse2skvtdqxutrfk3pg6rtckd3qskvc5n/mtk",
-    "token_amount": "5000000"
-  }'
-```
-
-### 6. Check transaction status (works for any transaction)
-```bash
-curl -X GET http://localhost:8080/api/tx/4700a4a49d5afc46caca6526bd377a3e88955c5c95f54069d7763c3cfe46b0eb
-```
-
----
-
-## Notes for Frontend Developers
-
-1. **Token Storage**: Store the JWT token securely (e.g., in localStorage or secure cookies) after login/registration.
-
-2. **Token Expiration**: JWT tokens expire after a set period. Handle token expiration by prompting users to re-login.
-
-3. **Transaction Status**: After initiating a transaction, use the `tx_hash` to query the blockchain for transaction status. The API returns immediately with the transaction hash, but the transaction may take a few seconds to be included in a block.
-
-4. **Error Handling**: Always check the `success` field in responses. Even if HTTP status is 200, `success: false` indicates the transaction failed.
-
-5. **Amount Formatting**: Convert between base units and display units for user-friendly display:
-   - To display: `displayAmount = baseAmount / 1000000`
-   - To submit: `baseAmount = displayAmount * 1000000`
-
-6. **Async Operations**: Token creation, buying, and selling are asynchronous operations. The API returns immediately with a transaction hash. Poll the blockchain or wait a few seconds before checking balances.
-
-7. **Payment Denom Selection**: If you don't specify `payment_denom`, the system will automatically select the best available option. You can check user balances first to suggest the preferred denomination.
-
----
-
-## Support
-
-For issues or questions, please refer to the project documentation or contact the development team.
-

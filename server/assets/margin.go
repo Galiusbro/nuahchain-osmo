@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/osmosis-labs/osmosis/v30/server/blockchain"
 	"github.com/osmosis-labs/osmosis/v30/server/transactions"
@@ -17,8 +16,8 @@ func (s *Service) OpenMarginPosition(ctx context.Context, userID int64, req Open
 	wallet, privKeyBytes, err := s.GetUserWallet(ctx, userID)
 	if err != nil {
 		return &OpenMarginPositionResponse{
-			Success: false,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			Error:  err.Error(),
 		}, err
 	}
 
@@ -36,18 +35,21 @@ func (s *Service) OpenMarginPosition(ctx context.Context, userID int64, req Open
 		resp = &blockchain.OpenLeveragePositionResponse{}
 	}
 
-	status := transactions.StatusPending
-	var errorMsg *string
-	if err != nil || (resp != nil && !resp.Success) {
-		status = transactions.StatusFailed
-		msg := err
-		if msg == nil && resp != nil && resp.Error != "" {
-			msg = fmt.Errorf(resp.Error)
-		}
-		if msg != nil {
-			s := msg.Error()
-			errorMsg = &s
-		}
+	if err != nil {
+		errMsg := err.Error()
+		return &OpenMarginPositionResponse{
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  errMsg,
+		}, fmt.Errorf(errMsg)
+	}
+
+	if resp.TxHash == "" {
+		msg := "transaction hash not returned"
+		return &OpenMarginPositionResponse{
+			Status: string(transactions.StatusFailed),
+			Error:  msg,
+		}, fmt.Errorf(msg)
 	}
 
 	effectiveLeverage := resp.Leverage
@@ -55,61 +57,25 @@ func (s *Service) OpenMarginPosition(ctx context.Context, userID int64, req Open
 		effectiveLeverage = req.Leverage
 	}
 
-	if resp.TxHash != "" {
-		side := strings.ToUpper(strings.TrimSpace(req.Side))
-		tx, createErr := s.transactionsRepo.CreateTransaction(transactions.CreateTransactionRequest{
-			UserID:        userID,
-			OperationType: transactions.OperationTypeAssetMarginOpen,
-			TxHash:        resp.TxHash,
-			Status:        status,
-			OperationData: transactions.AssetMarginOpenData(
-				req.Symbol,
-				side,
-				req.QuoteAmount,
-				effectiveLeverage,
-				resp.PositionID,
-				resp.BaseQuantity,
-				resp.EntryPrice,
-			),
-			ErrorMessage: errorMsg,
-		})
-		if createErr != nil {
-			// TODO: add structured logging
-			_ = createErr
-		} else if tx != nil && resp.Success {
-			// Update status to SUCCESS after successful execution
-			// Wait a bit for transaction to be included in block
-			txHash := resp.TxHash
-			go func() {
-				time.Sleep(5 * time.Second)
-				// Create new context for background goroutine
-				bgCtx := context.Background()
-				txStatus, err := s.blockchainCli.GetTxStatus(bgCtx, txHash)
-				if err == nil && txStatus != nil && txStatus.Success {
-					_ = s.transactionsRepo.UpdateTransactionByTxHash(
-						txHash,
-						transactions.StatusSuccess,
-						nil,
-						nil,
-					)
-				} else if txStatus != nil && !txStatus.Success {
-					errorMsg := txStatus.Error
-					_ = s.transactionsRepo.UpdateTransactionByTxHash(
-						txHash,
-						transactions.StatusFailed,
-						nil,
-						&errorMsg,
-					)
-				}
-			}()
-		}
-	}
-
-	if err != nil {
+	side := strings.ToUpper(strings.TrimSpace(req.Side))
+	if err := s.recordPendingTransaction(
+		userID,
+		transactions.OperationTypeAssetMarginOpen,
+		resp.TxHash,
+		transactions.AssetMarginOpenData(
+			req.Symbol,
+			side,
+			req.QuoteAmount,
+			effectiveLeverage,
+			resp.PositionID,
+			resp.BaseQuantity,
+			resp.EntryPrice,
+		),
+	); err != nil {
 		return &OpenMarginPositionResponse{
-			TxHash:  resp.TxHash,
-			Success: false,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  fmt.Sprintf("failed to persist transaction: %v", err),
 		}, err
 	}
 
@@ -124,9 +90,8 @@ func (s *Service) OpenMarginPosition(ctx context.Context, userID int64, req Open
 		BaseQuantity: resp.BaseQuantity,
 		EntryPrice:   resp.EntryPrice,
 		Leverage:     effectiveLeverage,
-		Success:      resp.Success,
-		Message:      "Margin position opening initiated",
-		Error:        resp.Error,
+		Status:       string(transactions.StatusPending),
+		Message:      "Margin position opening broadcast, awaiting confirmation",
 	}, nil
 }
 
@@ -136,8 +101,8 @@ func (s *Service) CloseMarginPosition(ctx context.Context, userID int64, positio
 	wallet, privKeyBytes, err := s.GetUserWallet(ctx, userID)
 	if err != nil {
 		return &CloseMarginPositionResponse{
-			Success: false,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			Error:  err.Error(),
 		}, err
 	}
 
@@ -151,73 +116,40 @@ func (s *Service) CloseMarginPosition(ctx context.Context, userID int64, positio
 		resp = &blockchain.CloseLeveragePositionResponse{}
 	}
 
-	status := transactions.StatusPending
-	var errorMsg *string
-	if err != nil || (resp != nil && !resp.Success) {
-		status = transactions.StatusFailed
-		msg := err
-		if msg == nil && resp != nil && resp.Error != "" {
-			msg = fmt.Errorf(resp.Error)
-		}
-		if msg != nil {
-			s := msg.Error()
-			errorMsg = &s
-		}
-	}
-
-	if resp.TxHash != "" {
-		tx, createErr := s.transactionsRepo.CreateTransaction(transactions.CreateTransactionRequest{
-			UserID:        userID,
-			OperationType: transactions.OperationTypeAssetMarginClose,
-			TxHash:        resp.TxHash,
-			Status:        status,
-			OperationData: transactions.AssetMarginCloseData(positionID, resp.Pnl),
-			ErrorMessage:  errorMsg,
-		})
-		if createErr != nil {
-			// TODO: add structured logging
-			_ = createErr
-		} else if tx != nil && resp.Success {
-			// Update status to SUCCESS after successful execution
-			txHash := resp.TxHash
-			go func() {
-				time.Sleep(5 * time.Second)
-				// Create new context for background goroutine
-				bgCtx := context.Background()
-				txStatus, err := s.blockchainCli.GetTxStatus(bgCtx, txHash)
-				if err == nil && txStatus != nil && txStatus.Success {
-					_ = s.transactionsRepo.UpdateTransactionByTxHash(
-						txHash,
-						transactions.StatusSuccess,
-						nil,
-						nil,
-					)
-				} else if txStatus != nil && !txStatus.Success {
-					errorMsg := txStatus.Error
-					_ = s.transactionsRepo.UpdateTransactionByTxHash(
-						txHash,
-						transactions.StatusFailed,
-						nil,
-						&errorMsg,
-					)
-				}
-			}()
-		}
-	}
-
 	if err != nil {
+		errMsg := err.Error()
 		return &CloseMarginPositionResponse{
-			TxHash:  resp.TxHash,
-			Success: false,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  errMsg,
+		}, fmt.Errorf(errMsg)
+	}
+
+	if resp.TxHash == "" {
+		msg := "transaction hash not returned"
+		return &CloseMarginPositionResponse{
+			Status: string(transactions.StatusFailed),
+			Error:  msg,
+		}, fmt.Errorf(msg)
+	}
+
+	if err := s.recordPendingTransaction(
+		userID,
+		transactions.OperationTypeAssetMarginClose,
+		resp.TxHash,
+		transactions.AssetMarginCloseData(positionID, resp.Pnl),
+	); err != nil {
+		return &CloseMarginPositionResponse{
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  fmt.Sprintf("failed to persist transaction: %v", err),
 		}, err
 	}
 
 	return &CloseMarginPositionResponse{
 		TxHash:  resp.TxHash,
 		Pnl:     resp.Pnl,
-		Success: resp.Success,
-		Message: "Margin position closure initiated",
-		Error:   resp.Error,
+		Status:  string(transactions.StatusPending),
+		Message: "Margin position closure broadcast, awaiting confirmation",
 	}, nil
 }

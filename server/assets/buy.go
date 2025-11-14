@@ -14,8 +14,8 @@ func (s *Service) BuyAsset(ctx context.Context, userID int64, req BuyAssetReques
 	wallet, privKeyBytes, err := s.GetUserWallet(ctx, userID)
 	if err != nil {
 		return &BuyAssetResponse{
-			Success: false,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			Error:  err.Error(),
 		}, err
 	}
 
@@ -25,8 +25,8 @@ func (s *Service) BuyAsset(ctx context.Context, userID int64, req BuyAssetReques
 		selectedDenom, err := s.blockchainCli.SelectPaymentDenom(ctx, wallet.Address, "")
 		if err != nil {
 			return &BuyAssetResponse{
-				Success: false,
-				Error:   fmt.Sprintf("failed to select payment denom: %v", err),
+				Status: string(transactions.StatusFailed),
+				Error:  fmt.Sprintf("failed to select payment denom: %v", err),
 			}, err
 		}
 		paymentDenom = selectedDenom
@@ -53,50 +53,38 @@ func (s *Service) BuyAsset(ctx context.Context, userID int64, req BuyAssetReques
 
 	// Execute buy transaction
 	resp, err := s.blockchainCli.BuyAssetWithKey(ctx, buyReq, privKeyBytes)
-
-	// Записываем транзакцию в БД
-	status := transactions.StatusPending
-	var errorMsg *string
-	if err != nil || !resp.Success {
-		status = transactions.StatusFailed
-		if err != nil {
-			msg := err.Error()
-			errorMsg = &msg
-		} else if resp.Error != "" {
-			errorMsg = &resp.Error
-		}
-	}
-
-	// Записываем только если есть tx_hash (транзакция была отправлена)
-	if resp.TxHash != "" {
-		_, createErr := s.transactionsRepo.CreateTransaction(transactions.CreateTransactionRequest{
-			UserID:        userID,
-			OperationType: transactions.OperationTypeAssetBuy,
-			TxHash:        resp.TxHash,
-			Status:        status,
-			OperationData: transactions.AssetBuyData(req.Symbol, paymentDenom, paymentAmount, resp.BaseAmount),
-			ErrorMessage:  errorMsg,
-		})
-
-		// Если запись в БД не удалась, логируем но не прерываем выполнение
-		if createErr != nil {
-			// В продакшене здесь можно добавить логирование
-			_ = createErr
-		}
-	}
-
 	if err != nil {
+		errMsg := err.Error()
+		if resp != nil && resp.Error != "" {
+			errMsg = resp.Error
+		}
 		return &BuyAssetResponse{
-			Success: false,
-			TxHash:  resp.TxHash,
-			Error:   err.Error(),
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  errMsg,
+		}, fmt.Errorf(errMsg)
+	}
+
+	if resp == nil || resp.TxHash == "" {
+		msg := "transaction hash not returned"
+		return &BuyAssetResponse{
+			Status: string(transactions.StatusFailed),
+			Error:  msg,
+		}, fmt.Errorf(msg)
+	}
+
+	if err := s.recordPendingTransaction(userID, transactions.OperationTypeAssetBuy, resp.TxHash, transactions.AssetBuyData(req.Symbol, paymentDenom, paymentAmount, resp.BaseAmount)); err != nil {
+		return &BuyAssetResponse{
+			Status: string(transactions.StatusFailed),
+			TxHash: resp.TxHash,
+			Error:  fmt.Sprintf("failed to persist transaction: %v", err),
 		}, err
 	}
 
 	return &BuyAssetResponse{
 		TxHash:     resp.TxHash,
 		BaseAmount: resp.BaseAmount,
-		Success:    resp.Success,
-		Error:      resp.Error,
+		Status:     string(transactions.StatusPending),
+		Message:    "Asset purchase broadcast, awaiting confirmation",
 	}, nil
 }

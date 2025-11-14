@@ -429,9 +429,9 @@ func extractDenomFromEvents(events []*abcitypes.Event) string {
 				for _, attr := range event.GetAttributes() {
 					if attr.GetKey() == "denom" {
 						return attr.GetValue()
-					}
 				}
 			}
+		}
 		}
 
 		// Check for token factory events
