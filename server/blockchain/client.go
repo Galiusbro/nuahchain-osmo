@@ -49,14 +49,15 @@ import (
 type Client struct {
 	nodeURL        string
 	conn           *grpc.ClientConn
-	msgClient      usertokentypes.MsgClient
-	bondingClient  bondingcurvetypes.MsgClient
-	assetsClient   assetstypes.MsgClient
-	leverageClient   leveragetypes.MsgClient
-	stablecoinClient stablecointypes.MsgClient
-	txClient       txservice.ServiceClient
-	authClient     authtypes.QueryClient
-	bankClient     banktypes.QueryClient
+	msgClient          usertokentypes.MsgClient
+	bondingClient       bondingcurvetypes.MsgClient
+	BondingQueryClient  bondingcurvetypes.QueryClient
+	assetsClient        assetstypes.MsgClient
+	leverageClient    leveragetypes.MsgClient
+	stablecoinClient  stablecointypes.MsgClient
+	txClient          txservice.ServiceClient
+	authClient        authtypes.QueryClient
+	bankClient        banktypes.QueryClient
 	chainID        string
 	encCfg         EncodingConfig
 	keyring        keyring.Keyring
@@ -87,6 +88,7 @@ func NewClient(nodeURL, chainID string) (*Client, error) {
 	// Create clients
 	msgClient := usertokentypes.NewMsgClient(conn)
 	bondingClient := bondingcurvetypes.NewMsgClient(conn)
+	BondingQueryClient := bondingcurvetypes.NewQueryClient(conn)
 	assetsClient := assetstypes.NewMsgClient(conn)
 	leverageClient := leveragetypes.NewMsgClient(conn)
 	stablecoinClient := stablecointypes.NewMsgClient(conn)
@@ -105,16 +107,17 @@ func NewClient(nodeURL, chainID string) (*Client, error) {
 	kb := keyring.NewInMemory(encCfg.Codec)
 
 	return &Client{
-		nodeURL:          nodeURL,
-		conn:             conn,
-		msgClient:        msgClient,
-		bondingClient:    bondingClient,
-		assetsClient:     assetsClient,
-		leverageClient:   leverageClient,
-		stablecoinClient: stablecoinClient,
-		txClient:         txClient,
-		authClient:       authClient,
-		bankClient:       bankClient,
+		nodeURL:           nodeURL,
+		conn:              conn,
+		msgClient:         msgClient,
+		bondingClient:     bondingClient,
+		BondingQueryClient: BondingQueryClient,
+		assetsClient:      assetsClient,
+		leverageClient:    leverageClient,
+		stablecoinClient:  stablecoinClient,
+		txClient:          txClient,
+		authClient:        authClient,
+		bankClient:        bankClient,
 		chainID:          chainID,
 		encCfg:           encCfg,
 		keyring:          kb,
@@ -545,6 +548,20 @@ func (c *Client) GetBalance(ctx context.Context, address string, denom string) (
 	}
 
 	return resp.Balance.Amount, nil
+}
+
+// GetAllBalances queries all balances for an address
+func (c *Client) GetAllBalances(ctx context.Context, address string) (sdk.Coins, error) {
+	req := &banktypes.QueryAllBalancesRequest{
+		Address: address,
+	}
+
+	resp, err := c.bankClient.AllBalances(ctx, req)
+	if err != nil {
+		return sdk.Coins{}, err
+	}
+
+	return resp.Balances, nil
 }
 
 // SelectPaymentDenom selects the appropriate payment denom based on user's balance

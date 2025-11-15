@@ -11,6 +11,7 @@ type User struct {
 	Username         *string    `json:"username,omitempty"`
 	TelegramID       *int64     `json:"telegram_id,omitempty"`
 	TelegramUsername *string    `json:"telegram_username,omitempty"`
+	ImageURL         *string    `json:"image_url,omitempty"`
 	CreatedAt        time.Time  `json:"created_at"`
 	UpdatedAt        time.Time  `json:"updated_at"`
 	LastLoginAt      *time.Time `json:"last_login_at,omitempty"`

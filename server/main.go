@@ -17,10 +17,13 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/server/database"
 	"github.com/osmosis-labs/osmosis/v30/server/exchange"
 	"github.com/osmosis-labs/osmosis/v30/server/logger"
+	"github.com/osmosis-labs/osmosis/v30/server/marketplace"
 	"github.com/osmosis-labs/osmosis/v30/server/monitor"
 	"github.com/osmosis-labs/osmosis/v30/server/stablecoin"
+	"github.com/osmosis-labs/osmosis/v30/server/tokens"
 	"github.com/osmosis-labs/osmosis/v30/server/transactions"
 	transactionstracker "github.com/osmosis-labs/osmosis/v30/server/transactions/tracker"
+	"github.com/osmosis-labs/osmosis/v30/server/users"
 	"github.com/osmosis-labs/osmosis/v30/server/usertokens"
 )
 
@@ -130,8 +133,11 @@ func main() {
 		appLogger.WithError(err).Warn("Failed to start transaction tracker")
 	}
 
+	// Initialize tokens repository
+	tokensRepo := tokens.NewRepository(db.DB)
+
 	// Initialize user token service
-	userTokenService := usertokens.NewService(authRepo, blockchainCli, transactionsRepo, txTracker)
+	userTokenService := usertokens.NewService(authRepo, blockchainCli, transactionsRepo, tokensRepo, txTracker)
 	usertokens.SetService(userTokenService)
 	usertokens.SetAuthService(authService)
 	appLogger.Info("User token service initialized")
@@ -168,6 +174,16 @@ func main() {
 		}
 		monitor.SetService(monitorService)
 	}
+
+	// Initialize user profile service
+	userService := users.NewService(authService, authRepo, blockchainCli, transactionsRepo, tokensRepo, "./uploads/images")
+	users.SetService(userService)
+	appLogger.Info("User profile service initialized")
+
+	// Initialize marketplace service
+	marketplaceService := marketplace.NewService(blockchainCli, tokensRepo)
+	marketplace.SetService(marketplaceService)
+	appLogger.Info("Marketplace service initialized")
 
 	// Create HTTP router and set database health checker
 	router := api.NewRouter(appLogger)

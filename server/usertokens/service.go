@@ -6,6 +6,7 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v30/server/auth"
 	"github.com/osmosis-labs/osmosis/v30/server/blockchain"
+	"github.com/osmosis-labs/osmosis/v30/server/tokens"
 	"github.com/osmosis-labs/osmosis/v30/server/transactions"
 	transactionstracker "github.com/osmosis-labs/osmosis/v30/server/transactions/tracker"
 )
@@ -15,15 +16,17 @@ type Service struct {
 	authRepo         *auth.Repository
 	blockchainCli    *blockchain.Client
 	transactionsRepo *transactions.Repository
+	tokensRepo       *tokens.Repository
 	txTracker        *transactionstracker.Tracker
 }
 
 // NewService creates a new user token service
-func NewService(authRepo *auth.Repository, blockchainCli *blockchain.Client, transactionsRepo *transactions.Repository, txTracker *transactionstracker.Tracker) *Service {
+func NewService(authRepo *auth.Repository, blockchainCli *blockchain.Client, transactionsRepo *transactions.Repository, tokensRepo *tokens.Repository, txTracker *transactionstracker.Tracker) *Service {
 	return &Service{
 		authRepo:         authRepo,
 		blockchainCli:    blockchainCli,
 		transactionsRepo: transactionsRepo,
+		tokensRepo:       tokensRepo,
 		txTracker:        txTracker,
 	}
 }
