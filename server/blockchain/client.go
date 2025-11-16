@@ -40,6 +40,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	assetstypes "github.com/osmosis-labs/osmosis/v30/x/assets/types"
 	bondingcurvetypes "github.com/osmosis-labs/osmosis/v30/x/bondingcurve/types"
+	exchangetypes "github.com/osmosis-labs/osmosis/v30/x/exchange/types"
 	leveragetypes "github.com/osmosis-labs/osmosis/v30/x/leverage/types"
 	stablecointypes "github.com/osmosis-labs/osmosis/v30/x/stablecoin/types"
 	usertokentypes "github.com/osmosis-labs/osmosis/v30/x/usertoken/types"
@@ -53,11 +54,12 @@ type Client struct {
 	bondingClient       bondingcurvetypes.MsgClient
 	BondingQueryClient  bondingcurvetypes.QueryClient
 	assetsClient        assetstypes.MsgClient
-	leverageClient    leveragetypes.MsgClient
-	stablecoinClient  stablecointypes.MsgClient
-	txClient          txservice.ServiceClient
-	authClient        authtypes.QueryClient
-	bankClient        banktypes.QueryClient
+	leverageClient      leveragetypes.MsgClient
+	stablecoinClient    stablecointypes.MsgClient
+	ExchangeQueryClient exchangetypes.QueryClient
+	txClient            txservice.ServiceClient
+	authClient          authtypes.QueryClient
+	bankClient          banktypes.QueryClient
 	chainID        string
 	encCfg         EncodingConfig
 	keyring        keyring.Keyring
@@ -92,6 +94,7 @@ func NewClient(nodeURL, chainID string) (*Client, error) {
 	assetsClient := assetstypes.NewMsgClient(conn)
 	leverageClient := leveragetypes.NewMsgClient(conn)
 	stablecoinClient := stablecointypes.NewMsgClient(conn)
+	ExchangeQueryClient := exchangetypes.NewQueryClient(conn)
 	txClient := txservice.NewServiceClient(conn)
 	authClient := authtypes.NewQueryClient(conn)
 	bankClient := banktypes.NewQueryClient(conn)
@@ -107,17 +110,18 @@ func NewClient(nodeURL, chainID string) (*Client, error) {
 	kb := keyring.NewInMemory(encCfg.Codec)
 
 	return &Client{
-		nodeURL:           nodeURL,
-		conn:              conn,
-		msgClient:         msgClient,
-		bondingClient:     bondingClient,
-		BondingQueryClient: BondingQueryClient,
-		assetsClient:      assetsClient,
-		leverageClient:    leverageClient,
-		stablecoinClient:  stablecoinClient,
-		txClient:          txClient,
-		authClient:        authClient,
-		bankClient:        bankClient,
+		nodeURL:            nodeURL,
+		conn:               conn,
+		msgClient:          msgClient,
+		bondingClient:      bondingClient,
+		BondingQueryClient:  BondingQueryClient,
+		assetsClient:       assetsClient,
+		leverageClient:     leverageClient,
+		stablecoinClient:   stablecoinClient,
+		ExchangeQueryClient: ExchangeQueryClient,
+		txClient:           txClient,
+		authClient:         authClient,
+		bankClient:         bankClient,
 		chainID:          chainID,
 		encCfg:           encCfg,
 		keyring:          kb,

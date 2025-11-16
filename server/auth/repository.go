@@ -440,3 +440,105 @@ func (r *Repository) InvalidateUserPasswordResetTokens(userID int64) error {
 	`, userID)
 	return err
 }
+
+// GetActiveUsers gets users who logged in within the specified duration
+func (r *Repository) GetActiveUsers(withinDuration time.Duration) ([]*User, error) {
+	since := time.Now().Add(-withinDuration)
+	rows, err := r.db.Query(`
+		SELECT id, email, username, telegram_id, telegram_username, image_url,
+			created_at, updated_at, last_login_at, is_active
+		FROM users
+		WHERE last_login_at >= $1 AND is_active = TRUE
+		ORDER BY last_login_at DESC
+	`, since)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*User
+	for rows.Next() {
+		user := &User{}
+		var email, username, telegramUsername, imageURL sql.NullString
+		var telegramID sql.NullInt64
+
+		err := rows.Scan(
+			&user.ID, &email, &username, &telegramID, &telegramUsername, &imageURL,
+			&user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt, &user.IsActive,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if email.Valid {
+			user.Email = &email.String
+		}
+		if username.Valid {
+			user.Username = &username.String
+		}
+		if telegramID.Valid {
+			user.TelegramID = &telegramID.Int64
+		}
+		if telegramUsername.Valid {
+			user.TelegramUsername = &telegramUsername.String
+		}
+		if imageURL.Valid {
+			user.ImageURL = &imageURL.String
+		}
+
+		users = append(users, user)
+	}
+
+	return users, rows.Err()
+}
+
+// GetAllUsersWithWallets gets all users who have wallets
+func (r *Repository) GetAllUsersWithWallets() ([]*User, error) {
+	rows, err := r.db.Query(`
+		SELECT DISTINCT u.id, u.email, u.username, u.telegram_id, u.telegram_username, u.image_url,
+			u.created_at, u.updated_at, u.last_login_at, u.is_active
+		FROM users u
+		INNER JOIN wallets w ON w.user_id = u.id
+		WHERE u.is_active = TRUE
+		ORDER BY u.id
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*User
+	for rows.Next() {
+		user := &User{}
+		var email, username, telegramUsername, imageURL sql.NullString
+		var telegramID sql.NullInt64
+
+		err := rows.Scan(
+			&user.ID, &email, &username, &telegramID, &telegramUsername, &imageURL,
+			&user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt, &user.IsActive,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if email.Valid {
+			user.Email = &email.String
+		}
+		if username.Valid {
+			user.Username = &username.String
+		}
+		if telegramID.Valid {
+			user.TelegramID = &telegramID.Int64
+		}
+		if telegramUsername.Valid {
+			user.TelegramUsername = &telegramUsername.String
+		}
+		if imageURL.Valid {
+			user.ImageURL = &imageURL.String
+		}
+
+		users = append(users, user)
+	}
+
+	return users, rows.Err()
+}

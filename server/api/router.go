@@ -4,13 +4,15 @@ import (
 	"net/http"
 
 	"github.com/osmosis-labs/osmosis/v30/server/assets"
+	"github.com/osmosis-labs/osmosis/v30/server/balances"
 	"github.com/osmosis-labs/osmosis/v30/server/exchange"
 	"github.com/osmosis-labs/osmosis/v30/server/logger"
 	"github.com/osmosis-labs/osmosis/v30/server/marketplace"
 	"github.com/osmosis-labs/osmosis/v30/server/monitor"
+	"github.com/osmosis-labs/osmosis/v30/server/quotes"
 	"github.com/osmosis-labs/osmosis/v30/server/stablecoin"
-	"github.com/osmosis-labs/osmosis/v30/server/usertokens"
 	"github.com/osmosis-labs/osmosis/v30/server/users"
+	"github.com/osmosis-labs/osmosis/v30/server/usertokens"
 )
 
 // NewRouter creates and returns a new HTTP router with all routes configured
@@ -42,6 +44,13 @@ func NewRouter(appLogger *logger.Logger) http.Handler {
 	mux.HandleFunc("/api/users/me/upload-image", users.HandleUploadUserImage)
 	mux.HandleFunc("/api/users/username", users.HandleUpdateUsername)
 
+	// Balance endpoints (require authentication)
+	mux.HandleFunc("/api/users/balances-db", balances.HandleGetUserBalancesFromDB)
+	mux.HandleFunc("/api/users/balances", balances.HandleGetUserBalancesFromBlockchain)
+	mux.HandleFunc("/api/users/balances/sync", balances.HandleSyncUserBalances)
+	mux.HandleFunc("/api/users/balances/history", balances.HandleGetBalanceHistory)
+	mux.HandleFunc("/api/users/balances/ws", balances.HandleBalanceWebSocket)
+
 	// Serve uploaded images statically
 	mux.HandleFunc("/uploads/images/", users.ServeUploadedImages)
 
@@ -54,6 +63,11 @@ func NewRouter(appLogger *logger.Logger) http.Handler {
 	mux.HandleFunc("/api/tokens/market", marketplace.HandleGetMarketplace)
 	mux.HandleFunc("/api/tokens/search", marketplace.HandleSearchTokens)
 	mux.HandleFunc("/api/tokens/", marketplace.HandleGetTokenDetails) // Must be after /market and /search
+
+	// Quote endpoints (public)
+	mux.HandleFunc("/api/quote/trade", quotes.HandleGetTradeQuote)
+	mux.HandleFunc("/api/quote/swap", quotes.HandleGetSwapQuote)
+	mux.HandleFunc("/api/quote/supported-tokens", quotes.HandleGetSupportedTokens)
 
 	// Asset endpoints (require authentication)
 	mux.HandleFunc("/api/assets/ensure", assets.HandleEnsureAsset)

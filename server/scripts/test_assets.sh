@@ -142,6 +142,13 @@ echo -e "${GREEN}✓${NC} Authentication successful"
 echo "Token: ${TOKEN:0:20}..."
 echo ""
 
+# Test 2.5: Check initial balances
+echo "2.5. Checking initial balances..."
+INITIAL_BALANCES=$(curl -s -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/users/balances-db")
+INITIAL_COUNT=$(echo "$INITIAL_BALANCES" | jq -r '.count // 0')
+echo "Initial balances in DB: $INITIAL_COUNT"
+echo ""
+
 # Test 3: Ensure Asset
 echo "3. Testing Ensure Asset..."
 ENSURE_RESPONSE=$(curl -s -X POST "$BASE_URL/api/assets/ensure" \
@@ -165,6 +172,19 @@ if [ -n "$TX_HASH" ] && [ "$TX_HASH" != "null" ]; then
 
     # Monitor transaction tracking
     monitor_transaction "$TX_HASH" "ensure"
+
+    # Wait for balance indexer to process
+    echo -e "${CYAN}⏳ Waiting for balance indexer to process transaction...${NC}"
+    sleep 5
+
+    # Check if balances were updated
+    UPDATED_BALANCES=$(curl -s -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/users/balances-db")
+    UPDATED_COUNT=$(echo "$UPDATED_BALANCES" | jq -r '.count // 0')
+    if [ "$UPDATED_COUNT" -ge "$INITIAL_COUNT" ]; then
+        echo -e "${GREEN}✓${NC} Balance indexer updated balances (count: $INITIAL_COUNT -> $UPDATED_COUNT)"
+    else
+        echo -e "${YELLOW}⚠${NC} Balance indexer may not have processed yet"
+    fi
 else
     echo -e "${RED}✗${NC} Asset ensure failed"
     ERROR=$(echo "$ENSURE_RESPONSE" | jq -r '.error_msg // .error // empty')
@@ -329,6 +349,140 @@ else
     echo "Note: Position may have been closed already or transaction is still pending"
     echo ""
 fi
+
+# Test 8: Check Balances
+echo "8. Testing Balance Endpoints..."
+echo ""
+
+echo "8.1. Getting balances from database..."
+BALANCES_DB=$(curl -s -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/users/balances-db")
+echo "$BALANCES_DB" | jq . || echo "$BALANCES_DB"
+DB_COUNT=$(echo "$BALANCES_DB" | jq -r '.count // 0')
+if [ "$DB_COUNT" -gt 0 ]; then
+    echo -e "${GREEN}✓${NC} Found $DB_COUNT balances in database"
+else
+    echo -e "${YELLOW}⚠${NC} No balances in database (may need sync)"
+fi
+echo ""
+
+echo "8.2. Getting balances from blockchain..."
+BALANCES_BC=$(curl -s -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/users/balances")
+echo "$BALANCES_BC" | jq . || echo "$BALANCES_BC"
+BC_COUNT=$(echo "$BALANCES_BC" | jq -r '.count // 0')
+if [ "$BC_COUNT" -gt 0 ]; then
+    echo -e "${GREEN}✓${NC} Found $BC_COUNT balances from blockchain"
+else
+    echo -e "${RED}✗${NC} No balances found from blockchain"
+fi
+echo ""
+
+echo "8.3. Syncing balances..."
+SYNC_RESPONSE=$(curl -s -X POST -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/users/balances/sync")
+echo "$SYNC_RESPONSE" | jq . || echo "$SYNC_RESPONSE"
+if echo "$SYNC_RESPONSE" | jq -e '.message' > /dev/null 2>&1; then
+    echo -e "${GREEN}✓${NC} Balance sync completed"
+else
+    echo -e "${YELLOW}⚠${NC} Balance sync response unclear"
+fi
+echo ""
+
+echo "8.4. Getting balance history..."
+HISTORY=$(curl -s -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/users/balances/history?limit=10")
+echo "$HISTORY" | jq . || echo "$HISTORY"
+HISTORY_COUNT=$(echo "$HISTORY" | jq -r '.count // 0')
+if [ "$HISTORY_COUNT" -gt 0 ]; then
+    echo -e "${GREEN}✓${NC} Found $HISTORY_COUNT balance history entries"
+else
+    echo -e "${YELLOW}⚠${NC} No balance history yet"
+fi
+echo ""
+
+echo "8.5. Testing balance filter (specific denom)..."
+if [ "$BC_COUNT" -gt 0 ]; then
+    FIRST_DENOM=$(echo "$BALANCES_BC" | jq -r '.balances[0].denom // empty')
+    if [ -n "$FIRST_DENOM" ] && [ "$FIRST_DENOM" != "null" ]; then
+        FILTERED=$(curl -s -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/users/balances-db?denom=$FIRST_DENOM")
+        FILTERED_COUNT=$(echo "$FILTERED" | jq -r '.count // 0')
+        if [ "$FILTERED_COUNT" -eq 1 ]; then
+            echo -e "${GREEN}✓${NC} Balance filter works (found 1 balance for $FIRST_DENOM)"
+        else
+            echo -e "${YELLOW}⚠${NC} Balance filter returned $FILTERED_COUNT results (expected 1)"
+        fi
+    fi
+fi
+echo ""
+
+echo "8.6. Testing Balance Indexer (real-time updates)..."
+echo -e "${CYAN}📊 Checking if balance indexer is processing transactions...${NC}"
+if [ -f "$SERVER_LOG" ]; then
+    INDEXER_STARTED=$(grep -c "Balance indexer started" "$SERVER_LOG" 2>/dev/null | head -1 | tr -d '\n' | awk '{print $1}' || echo "0")
+    INDEXER_PROCESSING=$(grep -c "Balance indexer processEvents started" "$SERVER_LOG" 2>/dev/null | head -1 | tr -d '\n' | awk '{print $1}' || echo "0")
+    BALANCE_UPDATES=$(grep -c "balance_update" "$SERVER_LOG" 2>/dev/null | head -1 | tr -d '\n' | awk '{print $1}' || echo "0")
+
+    INDEXER_STARTED_COUNT=${INDEXER_STARTED:-0}
+    INDEXER_PROCESSING_COUNT=${INDEXER_PROCESSING:-0}
+    BALANCE_UPDATES_COUNT=${BALANCE_UPDATES:-0}
+
+    if [ "$INDEXER_STARTED_COUNT" -gt 0 ]; then
+        echo -e "${GREEN}✓${NC} Balance indexer is running"
+    else
+        echo -e "${YELLOW}⚠${NC} Balance indexer may not be running"
+    fi
+
+    if [ "$INDEXER_PROCESSING_COUNT" -gt 0 ]; then
+        echo -e "${GREEN}✓${NC} Balance indexer is processing events"
+    fi
+
+    if [ "$BALANCE_UPDATES_COUNT" -gt 0 ]; then
+        echo -e "${GREEN}✓${NC} Balance updates detected in logs ($BALANCE_UPDATES_COUNT)"
+    else
+        echo -e "${YELLOW}ℹ${NC} No balance updates in logs yet (may need transactions)"
+    fi
+else
+    echo -e "${YELLOW}⚠${NC} Server log not available"
+fi
+echo ""
+
+echo "8.7. Testing Periodic Sync Service..."
+echo -e "${CYAN}📊 Checking if balance sync service is running...${NC}"
+if [ -f "$SERVER_LOG" ]; then
+    SYNC_STARTED=$(grep -c "Balance sync service started" "$SERVER_LOG" 2>/dev/null | head -1 | tr -d '\n' | awk '{print $1}' || echo "0")
+    SYNC_BATCH=$(grep -c "Starting balance sync batch" "$SERVER_LOG" 2>/dev/null | head -1 | tr -d '\n' | awk '{print $1}' || echo "0")
+    SYNC_COMPLETED=$(grep -c "Balance sync batch completed" "$SERVER_LOG" 2>/dev/null | head -1 | tr -d '\n' | awk '{print $1}' || echo "0")
+
+    SYNC_STARTED_COUNT=${SYNC_STARTED:-0}
+    SYNC_BATCH_COUNT=${SYNC_BATCH:-0}
+    SYNC_COMPLETED_COUNT=${SYNC_COMPLETED:-0}
+
+    if [ "$SYNC_STARTED_COUNT" -gt 0 ]; then
+        echo -e "${GREEN}✓${NC} Balance sync service is running"
+    else
+        echo -e "${YELLOW}⚠${NC} Balance sync service may not be running"
+    fi
+
+    if [ "$SYNC_BATCH_COUNT" -gt 0 ]; then
+        echo -e "${GREEN}✓${NC} Sync batches executed: $SYNC_BATCH_COUNT"
+    fi
+
+    if [ "$SYNC_COMPLETED_COUNT" -gt 0 ]; then
+        echo -e "${GREEN}✓${NC} Sync batches completed: $SYNC_COMPLETED_COUNT"
+    fi
+else
+    echo -e "${YELLOW}⚠${NC} Server log not available"
+fi
+echo ""
+
+echo "8.8. Testing WebSocket Endpoint..."
+echo -e "${CYAN}📡 Checking WebSocket endpoint availability...${NC}"
+WS_TEST=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/users/balances/ws" 2>/dev/null)
+if [ "$WS_TEST" = "400" ] || [ "$WS_TEST" = "426" ] || [ "$WS_TEST" = "101" ]; then
+    echo -e "${GREEN}✓${NC} WebSocket endpoint is accessible (HTTP $WS_TEST - expected for non-WebSocket request)"
+    echo -e "${CYAN}ℹ${NC} To test WebSocket connection, use:"
+    echo "   wscat -c \"ws://localhost:8080/api/users/balances/ws\" -H \"Authorization: Bearer $TOKEN\""
+else
+    echo -e "${YELLOW}⚠${NC} Unexpected response code: $WS_TEST"
+fi
+echo ""
 
 echo "================================"
 echo -e "${GREEN}✅ Assets API testing complete!${NC}"

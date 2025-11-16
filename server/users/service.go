@@ -314,6 +314,66 @@ func (s *Service) GetUserTokens(userID int64) ([]UserToken, error) {
 	return userTokens, nil
 }
 
+// GetUserBalances gets all balances for the user from blockchain
+// If denom is provided, returns only that balance (or empty if not found)
+func (s *Service) GetUserBalances(userID int64, denomFilter string) ([]BalanceWithMetadata, error) {
+	// Get wallet
+	wallet, err := s.authService.GetUserWallet(userID)
+	if err != nil {
+		return []BalanceWithMetadata{}, nil // Return empty list if no wallet
+	}
+
+	// Get balances from blockchain
+	var balances []BalanceWithMetadata
+	var denoms []string
+	if s.blockchainCli != nil {
+		ctx := context.Background()
+		coins, err := s.blockchainCli.GetAllBalances(ctx, wallet.Address)
+		if err != nil {
+			return []BalanceWithMetadata{}, fmt.Errorf("failed to get balances: %w", err)
+		}
+
+		// Filter balances
+		for _, coin := range coins {
+			// Skip zero balances
+			if coin.Amount.IsZero() {
+				continue
+			}
+
+			// Apply denom filter if provided
+			if denomFilter != "" && coin.Denom != denomFilter {
+				continue
+			}
+
+			denoms = append(denoms, coin.Denom)
+			balances = append(balances, BalanceWithMetadata{
+				Denom:  coin.Denom,
+				Amount: coin.Amount.String(),
+			})
+		}
+	}
+
+	// Get token metadata from database if available
+	if s.tokensRepo != nil && len(denoms) > 0 {
+		tokenMetadataMap, err := s.tokensRepo.GetTokensByDenoms(denoms)
+		if err == nil {
+			// Enrich balances with metadata
+			for i := range balances {
+				if metadata, found := tokenMetadataMap[balances[i].Denom]; found {
+					balances[i].Name = metadata.Name
+					balances[i].Symbol = metadata.Symbol
+					if metadata.Image != nil {
+						balances[i].Image = *metadata.Image
+					}
+					balances[i].Decimals = metadata.Decimals
+				}
+			}
+		}
+	}
+
+	return balances, nil
+}
+
 // UserToken represents a token owned by the user
 type UserToken struct {
 	Denom     string `json:"denom"`
@@ -322,6 +382,16 @@ type UserToken struct {
 	Symbol    string `json:"symbol,omitempty"`
 	Image     string `json:"image,omitempty"`
 	Decimals  int    `json:"decimals,omitempty"`
+}
+
+// BalanceWithMetadata represents a balance with optional token metadata
+type BalanceWithMetadata struct {
+	Denom    string `json:"denom"`
+	Amount   string `json:"amount"`
+	Name     string `json:"name,omitempty"`
+	Symbol   string `json:"symbol,omitempty"`
+	Image    string `json:"image,omitempty"`
+	Decimals int    `json:"decimals,omitempty"`
 }
 
 // UserProfile represents extended user profile information

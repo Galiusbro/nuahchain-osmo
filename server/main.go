@@ -12,6 +12,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/server/api"
 	"github.com/osmosis-labs/osmosis/v30/server/assets"
 	"github.com/osmosis-labs/osmosis/v30/server/auth"
+	"github.com/osmosis-labs/osmosis/v30/server/balances"
 	"github.com/osmosis-labs/osmosis/v30/server/blockchain"
 	"github.com/osmosis-labs/osmosis/v30/server/config"
 	"github.com/osmosis-labs/osmosis/v30/server/database"
@@ -19,6 +20,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v30/server/logger"
 	"github.com/osmosis-labs/osmosis/v30/server/marketplace"
 	"github.com/osmosis-labs/osmosis/v30/server/monitor"
+	"github.com/osmosis-labs/osmosis/v30/server/quotes"
 	"github.com/osmosis-labs/osmosis/v30/server/stablecoin"
 	"github.com/osmosis-labs/osmosis/v30/server/tokens"
 	"github.com/osmosis-labs/osmosis/v30/server/transactions"
@@ -162,8 +164,9 @@ func main() {
 
 	// Initialize blockchain monitor for admin panel
 	var monitorService *monitor.Service
+	var blockchainMonitor *blockchain.BlockchainMonitor
 	if wsClient != nil {
-		blockchainMonitor := blockchain.NewBlockchainMonitor(wsClient)
+		blockchainMonitor = blockchain.NewBlockchainMonitor(wsClient)
 		monitorRepo := monitor.NewRepository(db.DB)
 		monitorService = monitor.NewService(blockchainMonitor, blockchainCli, monitorRepo, appLogger)
 		if err := monitorService.Start(context.Background()); err != nil {
@@ -175,6 +178,38 @@ func main() {
 		monitor.SetService(monitorService)
 	}
 
+	// Initialize balances repository and indexer
+	balancesRepo := balances.NewRepository(db.DB)
+	appLogger.Info("Balances repository initialized")
+
+	// Initialize balance indexer if WebSocket is available
+	var balanceIndexer *balances.Indexer
+	if blockchainMonitor != nil {
+		balanceIndexer = balances.NewIndexer(blockchainMonitor, balancesRepo, appLogger)
+		if err := balanceIndexer.Start(context.Background()); err != nil {
+			appLogger.WithError(err).Warn("Failed to start balance indexer")
+		} else {
+			appLogger.Info("Balance indexer started")
+		}
+	}
+
+	// Initialize balances service
+	balancesService := balances.NewService(balancesRepo, blockchainCli, balanceIndexer)
+	balances.SetService(balancesService)
+	balances.SetAuthService(authService)
+	if balanceIndexer != nil {
+		balances.SetIndexerForWS(balanceIndexer)
+		balances.SetAuthServiceForWS(authService)
+	}
+	appLogger.Info("Balances service initialized")
+
+	// Initialize balance sync service
+	if blockchainCli != nil {
+		syncService := balances.NewSyncService(balancesService, authRepo, appLogger)
+		syncService.Start(context.Background())
+		appLogger.Info("Balance sync service started")
+	}
+
 	// Initialize user profile service
 	userService := users.NewService(authService, authRepo, blockchainCli, transactionsRepo, tokensRepo, "./uploads/images")
 	users.SetService(userService)
@@ -184,6 +219,11 @@ func main() {
 	marketplaceService := marketplace.NewService(blockchainCli, tokensRepo)
 	marketplace.SetService(marketplaceService)
 	appLogger.Info("Marketplace service initialized")
+
+	// Initialize quotes service
+	quotesService := quotes.NewService(blockchainCli)
+	quotes.SetService(quotesService)
+	appLogger.Info("Quotes service initialized")
 
 	// Create HTTP router and set database health checker
 	router := api.NewRouter(appLogger)

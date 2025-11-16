@@ -340,3 +340,61 @@ func HandleGetUserTokens(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// HandleGetUserBalances handles GET /api/users/balances-db - get user balances from blockchain
+func HandleGetUserBalances(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if globalUserService == nil {
+		http.Error(w, "User service not configured", http.StatusInternalServerError)
+		return
+	}
+
+	// Extract token from Authorization header
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		http.Error(w, "Authorization header required", http.StatusUnauthorized)
+		return
+	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+		return
+	}
+
+	token := parts[1]
+
+	// Validate token and get user
+	user, err := globalUserService.authService.ValidateToken(token)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	// Get optional denom filter from query parameter
+	denomFilter := r.URL.Query().Get("tokenMint")
+	if denomFilter == "" {
+		// Also check "denom" parameter for compatibility
+		denomFilter = r.URL.Query().Get("denom")
+	}
+
+	// Get user balances
+	balances, err := globalUserService.GetUserBalances(user.ID, denomFilter)
+	if err != nil {
+		http.Error(w, "Failed to get balances: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]interface{}{
+		"balances": balances,
+		"count":    len(balances),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
