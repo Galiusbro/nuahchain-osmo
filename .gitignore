@@ -269,3 +269,7 @@ docs/protocol/book
 
 # Release folder
 dist/
+
+# Server binaries
+server/bin/server
+server/server
