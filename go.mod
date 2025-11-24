@@ -45,7 +45,7 @@ require (
 	github.com/osmosis-labs/osmosis/osmomath v0.0.18
 	github.com/osmosis-labs/osmosis/osmoutils v0.0.18
 	github.com/osmosis-labs/osmosis/x/epochs v0.0.14
-	github.com/osmosis-labs/osmosis/x/ibc-hooks v0.0.20
+	github.com/osmosis-labs/osmosis/x/ibc-hooks v0.0.21
 	github.com/pkg/errors v0.9.1
 	github.com/rakyll/statik v0.1.7
 	github.com/skip-mev/block-sdk/v2 v2.1.6
