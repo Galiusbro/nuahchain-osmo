@@ -153,7 +153,7 @@ func (s *Service) GetTradeQuote(ctx context.Context, req TradeQuoteRequest) (*Tr
 	} else if req.Operation == "sell" {
 		// Calculate payment out for given token amount
 		outputAmount = bondingcurvetypes.IntegrateSellAmount(tokensSold, inputAmount, params)
-		
+
 		// Account for protocol fee
 		if params.ProtocolFeeRateDec().IsPositive() {
 			feeRate := params.ProtocolFeeRateDec()
