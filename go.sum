@@ -967,8 +967,8 @@ github.com/osmosis-labs/osmosis/osmomath v0.0.18 h1:dI61iVkjRauIRfm8X/R50ZWQdhHe
 github.com/osmosis-labs/osmosis/osmomath v0.0.18/go.mod h1:KCEAU7L8zFsm8BCrMkerV6KgxL0vJIWlKVcl1rSKFSA=
 github.com/osmosis-labs/osmosis/osmoutils v0.0.18 h1:Sw6kCRZd6zj4VXt1/IMgIcoC1o7PnjVl77M9+RfdWy0=
 github.com/osmosis-labs/osmosis/osmoutils v0.0.18/go.mod h1:X/KEd+zZ8T09lgwqudFn3tfzruHaAAquxdgELXiOJfk=
-github.com/osmosis-labs/osmosis/x/epochs v0.0.14 h1:bDpp7I4zsnSO8K3m16lbmuLSeE4M9QOaDSr9OdauHmU=
-github.com/osmosis-labs/osmosis/x/epochs v0.0.14/go.mod h1:urP0CGiY5PQq0sqjzCcF+rk58TCPv+ci0PjsIpbqa90=
+github.com/osmosis-labs/osmosis/x/epochs v0.0.15 h1:nOrtQyaEblpyBGV0gQhH70YL2ipprbuHtY90d92f/yg=
+github.com/osmosis-labs/osmosis/x/epochs v0.0.15/go.mod h1:urP0CGiY5PQq0sqjzCcF+rk58TCPv+ci0PjsIpbqa90=
 github.com/osmosis-labs/osmosis/x/ibc-hooks v0.0.20 h1:MKTi1RZ+vTj0cdR+ci/ZTjVOB7YDJbtGaHZt5sf6Iak=
 github.com/osmosis-labs/osmosis/x/ibc-hooks v0.0.20/go.mod h1:CV6JTLQ08xFhP9fsd5u+Y93yMR6034kIbnTQcY7xXMY=
 github.com/pact-foundation/pact-go v1.0.4/go.mod h1:uExwJY4kCzNPcHRj+hCR/HBbOOIwwtUjcrb0b5/5kLM=

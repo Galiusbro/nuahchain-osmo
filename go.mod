@@ -44,7 +44,7 @@ require (
 	github.com/osmosis-labs/go-mutesting v0.0.0-20221208041716-b43bcd97b3b3
 	github.com/osmosis-labs/osmosis/osmomath v0.0.18
 	github.com/osmosis-labs/osmosis/osmoutils v0.0.18
-	github.com/osmosis-labs/osmosis/x/epochs v0.0.14
+	github.com/osmosis-labs/osmosis/x/epochs v0.0.15
 	github.com/osmosis-labs/osmosis/x/ibc-hooks v0.0.20
 	github.com/pkg/errors v0.9.1
 	github.com/rakyll/statik v0.1.7
