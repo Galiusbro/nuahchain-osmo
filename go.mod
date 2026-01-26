@@ -43,7 +43,7 @@ require (
 	github.com/ory/dockertest/v3 v3.11.0
 	github.com/osmosis-labs/go-mutesting v0.0.0-20221208041716-b43bcd97b3b3
 	github.com/osmosis-labs/osmosis/osmomath v0.0.18
-	github.com/osmosis-labs/osmosis/osmoutils v0.0.18
+	github.com/osmosis-labs/osmosis/osmoutils v0.0.19
 	github.com/osmosis-labs/osmosis/x/epochs v0.0.14
 	github.com/osmosis-labs/osmosis/x/ibc-hooks v0.0.20
 	github.com/pkg/errors v0.9.1
@@ -135,7 +135,7 @@ require (
 	github.com/goware/urlx v0.3.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-getter v1.7.5 // indirect
+	github.com/hashicorp/go-getter v1.7.9 // indirect
 	github.com/hashicorp/go-hclog v1.5.0 // indirect
 	github.com/hashicorp/go-plugin v1.6.0 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
