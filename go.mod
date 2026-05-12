@@ -7,10 +7,10 @@ require (
 	cosmossdk.io/api v0.9.2
 	cosmossdk.io/client/v2 v2.0.0-beta.6
 	cosmossdk.io/core v0.12.1-0.20240725072823-6a2d039e1212
-	cosmossdk.io/errors v1.0.1
+	cosmossdk.io/errors v1.0.2
 	cosmossdk.io/log v1.6.0
 	cosmossdk.io/math v1.5.3
-	cosmossdk.io/store v1.1.1
+	cosmossdk.io/store v1.1.2
 	cosmossdk.io/tools/confix v0.1.2
 	cosmossdk.io/x/circuit v0.1.1
 	cosmossdk.io/x/evidence v0.1.1
@@ -19,7 +19,7 @@ require (
 	github.com/CosmWasm/wasmd v0.53.3
 	github.com/CosmWasm/wasmvm/v2 v2.2.4
 	github.com/Masterminds/semver v1.5.0
-	github.com/cometbft/cometbft v0.38.13
+	github.com/cometbft/cometbft v0.38.17
 	github.com/cometbft/cometbft-db v0.14.1
 	github.com/cosmos/cosmos-db v1.1.1
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
@@ -32,7 +32,7 @@ require (
 	github.com/cosmos/ibc-go/modules/light-clients/08-wasm v0.4.2-0.20240730185033-ccd4dc278e72
 	github.com/cosmos/ibc-go/v8 v8.7.0
 	github.com/cosmos/rosetta v0.50.12
-	github.com/golang/mock v1.6.0
+	github.com/golang/mock v1.7.0-rc.1
 	github.com/golang/protobuf v1.5.4
 	github.com/gorilla/mux v1.8.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
@@ -61,7 +61,7 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.36.0
 	go.opentelemetry.io/otel/sdk v1.36.0
 	go.uber.org/multierr v1.11.0
-	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
+	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394
 	google.golang.org/genproto/googleapis/api v0.0.0-20250519155744-55703ea1f237
 	google.golang.org/grpc v1.72.2
 	google.golang.org/protobuf v1.36.7
@@ -85,7 +85,7 @@ require (
 	cosmossdk.io/x/feegrant v0.1.1 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/DataDog/datadog-go v3.2.0+incompatible // indirect
-	github.com/DataDog/zstd v1.5.5 // indirect
+	github.com/DataDog/zstd v1.5.6 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.26.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.50.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.50.0 // indirect
@@ -136,8 +136,8 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-getter v1.7.5 // indirect
-	github.com/hashicorp/go-hclog v1.5.0 // indirect
-	github.com/hashicorp/go-plugin v1.6.0 // indirect
+	github.com/hashicorp/go-hclog v1.6.3 // indirect
+	github.com/hashicorp/go-plugin v1.6.3 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
@@ -156,6 +156,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20230904125328-1f23a7beb09a // indirect
 	github.com/oklog/run v1.1.0 // indirect
+	github.com/onsi/gomega v1.34.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
@@ -184,8 +185,8 @@ require (
 	google.golang.org/api v0.227.0 // indirect
 	google.golang.org/genproto v0.0.0-20250303144028-a0af3efb3deb // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250519155744-55703ea1f237 // indirect
-	gotest.tools/v3 v3.5.1 // indirect
-	pgregory.net/rapid v1.1.0 // indirect
+	gotest.tools/v3 v3.5.2 // indirect
+	pgregory.net/rapid v1.2.0 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 
